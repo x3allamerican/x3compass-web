@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ============ X3 COMPASS · DESIGN TOKENS (locked) ============ */
+:root {
+  --cream:        #FCF8F3;
+  --cream-2:      #F7F1E8;
+  --paper:        #FFFFFF;
+  --navy:         #0A1A3C;
+  --navy-2:       #001830;
+  --navy-3:       #1E2E5A;
+  --red:          #DC2626;
+  --red-deep:     #B91C1C;
+  --gold:         #FFC72C;
+  --ink-soft:     #475569;
+  --ink-muted:    #6B7280;
+  --hairline:     #E5E0D8;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-2: var(--cream-2);
+  --color-paper: var(--paper);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-navy-3: var(--navy-3);
+  --color-red: var(--red);
+  --color-red-deep: var(--red-deep);
+  --color-gold: var(--gold);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-hairline: var(--hairline);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream);
+  color: var(--navy);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* Italic emphasis serif — for "every card you collect" style words */
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.section-tick {
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+.section-tick span {
+  display: block;
+  width: 28px;
+  height: 3px;
+}
+.section-tick span:first-child { background: var(--red); }
+.section-tick span:last-child { background: var(--navy); }
+
+.sparkle-wash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(600px 400px at 20% 20%, rgba(220, 38, 38, 0.06), transparent 60%),
+    radial-gradient(500px 300px at 85% 70%, rgba(255, 199, 44, 0.10), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.btn-red {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  background: var(--red);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+  text-decoration: none;
+}
+.btn-red:hover { background: var(--red-deep); transform: translateY(-1px); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 999px;
+  border: 1px solid var(--navy);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  text-decoration: none;
+}
+.btn-outline:hover { background: var(--navy); color: white; }
+
+.card-hairline {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 22px;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.18s ease;
+}
+.card-hairline:hover {
+  transform: translateY(-2px);
+  border-color: var(--red);
+  box-shadow: 0 14px 32px rgba(15, 30, 56, 0.06);
+}
+
+/* Pricing card "Most Popular" ribbon */
+.popular-ribbon {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+/* Dark navy hero strip pattern */
+.navy-strip {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.navy-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(800px 500px at 15% 100%, rgba(220, 38, 38, 0.16), transparent 60%),
+    radial-gradient(700px 400px at 90% 0%, rgba(255, 199, 44, 0.18), transparent 60%);
+  pointer-events: none;
+}
+.navy-strip > * { position: relative; z-index: 1; }
