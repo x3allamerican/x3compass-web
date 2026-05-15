@@ -1,19 +1,151 @@
-import StubPage from "@/components/StubPage";
+import Link from "next/link";
+import AppShell from "@/components/AppShell";
 
-export default function Page() {
+type Stage = "Invited" | "Consent signed" | "In-progress" | "Clear" | "Consider" | "Adverse-action sent";
+
+const SCREENINGS = [
+  { id: "CK-7821", driver: "Emma Park",        initials: "EP", package: "Driver Basic Plus",      ordered: "2026-05-06", days: 3,  stage: "Clear"                as Stage, cost: "$59" },
+  { id: "CK-7819", driver: "Diego Ramirez",    initials: "DR", package: "Driver Basic Plus",      ordered: "2026-04-12", days: 2,  stage: "Clear"                as Stage, cost: "$59" },
+  { id: "CK-7818", driver: "Alex Carter",      initials: "AC", package: "Driver Basic + Hazmat",  ordered: "2026-02-18", days: 5,  stage: "Clear"                as Stage, cost: "$94" },
+  { id: "CK-7823", driver: "Brian Howell",     initials: "BH", package: "Driver Basic Plus",      ordered: "2026-05-12", days: 0,  stage: "In-progress"          as Stage, cost: "$59" },
+  { id: "CK-7822", driver: "Tina Suarez",      initials: "TS", package: "Driver Basic Plus",      ordered: "2026-05-09", days: 4,  stage: "Consider"             as Stage, cost: "$59" },
+  { id: "CK-7824", driver: "Carlos Vega",      initials: "CV", package: "Driver Basic Plus",      ordered: "2026-05-13", days: 0,  stage: "Invited"              as Stage, cost: "$59" },
+  { id: "CK-7820", driver: "Rachel Kim",       initials: "RK", package: "Driver Basic Plus",      ordered: "2026-04-22", days: 7,  stage: "Adverse-action sent"   as Stage, cost: "$59" },
+];
+
+const STAGE_PILL: Record<Stage, string> = {
+  Invited:               "bg-slate-500/15 text-slate-300 border border-slate-500/30",
+  "Consent signed":      "bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30",
+  "In-progress":         "bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30",
+  Clear:                 "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  Consider:              "bg-amber-500/15 text-amber-300 border border-amber-500/30",
+  "Adverse-action sent": "bg-rose-500/15 text-rose-300 border border-rose-500/30",
+};
+
+const PACKAGES = [
+  { code: "DBP",     name: "Driver Basic Plus",        price: "$59",  includes: "County + national criminal · MVR · SSN trace · sex-offender registry" },
+  { code: "DBP-HM",  name: "Driver Basic + Hazmat",    price: "$94",  includes: "DBP + 7-year federal criminal · TWIC equivalent screening" },
+  { code: "DBP-CDL", name: "Driver Basic + PSP",       price: "$84",  includes: "DBP + FMCSA Pre-Employment Screening Program report" },
+  { code: "DBP-INTL",name: "International Driver Basic",price: "$129", includes: "DBP + global watchlist · international ID verification" },
+];
+
+const AVATAR_GRAD: Record<string, string> = {
+  EP: "linear-gradient(135deg, #EF4444, #8B5CF6)",
+  DR: "linear-gradient(135deg, #10B981, #22D3EE)",
+  AC: "linear-gradient(135deg, #FBBF24, #10B981)",
+  BH: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+  TS: "linear-gradient(135deg, #8B5CF6, #EC4899)",
+  CV: "linear-gradient(135deg, #FBBF24, #EF4444)",
+  RK: "linear-gradient(135deg, #06B6D4, #3B82F6)",
+};
+
+export default function BackgroundPage() {
   return (
-    <StubPage
-      title="Background Tracker"
-      crumbs="COMPLIANCE TRACKERS · BACKGROUND CHECKS"
-      cfr="FCRA · § 391.21"
-      icon="🛡"
-      desc="Pre-employment background checks via Checkr. Criminal, MVR, prior-employer verification, drug screen — all in one workflow with FCRA-compliant timing."
-      features={[
-        { name: "Driver basic plus", detail: "Standard fleet package: county + national criminal, MVR, SSN trace, sex-offender." },
-        { name: "PSP report integration", detail: "FMCSA Pre-Employment Screening Program report ordered + analyzed for hire decisions." },
-        { name: "Adverse action engine", detail: "Pre-adverse letter, 5-day clock, final adverse letter — all generated on the driver's timeline." },
-        { name: "Cost passthrough", detail: "Per-package pricing rolled into your monthly invoice. No separate Checkr account needed." },
-      ]}
-    />
+    <AppShell
+      title="Background Checks"
+      crumbs="BACKGROUND TRACKER · FCRA · § 391.21"
+      actions={
+        <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
+          style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+        >
+          + Order new screening
+        </Link>
+      }
+    >
+      <div className="px-6 py-8 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[
+            { l: "Screenings · YTD",  v: "18",  c: "#22D3EE" },
+            { l: "In-progress",        v: "2",   c: "#22D3EE" },
+            { l: "Clear",              v: "14",  c: "#10B981" },
+            { l: "Consider",           v: "1",   c: "#FBBF24" },
+            { l: "Avg turnaround",     v: "3.2d", c: "#22D3EE" },
+          ].map((s, i) => (
+            <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
+              <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-white/65 mb-1">{s.l}</div>
+              <div className="text-[26px] font-black leading-none" style={{ color: s.c }}>{s.v}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Package selector */}
+        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
+          <div className="px-5 py-4 border-b border-[#1E3556]">
+            <h3 className="text-[16px] font-extrabold text-white">Order a screening · Checkr-powered</h3>
+            <p className="text-[13px] text-white/65 mt-0.5">Per-package pricing rolled into your monthly invoice. No separate Checkr account required.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#1E3556]">
+            {PACKAGES.map((p) => (
+              <div key={p.code} className="p-5 hover:bg-[#22D3EE]/5 transition-colors">
+                <div className="text-white font-extrabold text-[15px] mb-1">{p.name}</div>
+                <div className="text-[26px] font-black text-[#22D3EE] mb-2">{p.price}</div>
+                <p className="text-[12.5px] text-white/65 leading-relaxed mb-3 min-h-[3em]">{p.includes}</p>
+                <button className="w-full px-3 py-2 rounded-full text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">
+                  Order this package
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Screening tracker */}
+        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
+          <div className="px-5 py-4 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-[16px] font-extrabold text-white">Recent screenings</h3>
+            <span className="text-[12px] font-mono text-[#22D3EE]/80">FCRA-compliant · driver-managed consent</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[14px]">
+              <thead className="bg-[#0F1C32]/60">
+                <tr className="text-left text-[11px] tracking-[.14em] uppercase font-extrabold text-white/60">
+                  <th className="py-3 px-4">Screening #</th>
+                  <th className="py-3 px-3">Driver / Applicant</th>
+                  <th className="py-3 px-3">Package</th>
+                  <th className="py-3 px-3">Ordered</th>
+                  <th className="py-3 px-3 text-center">Days</th>
+                  <th className="py-3 px-3">Stage</th>
+                  <th className="py-3 px-3">Cost</th>
+                  <th className="py-3 px-4"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1E3556]">
+                {SCREENINGS.map((s) => (
+                  <tr key={s.id} className="hover:bg-[#22D3EE]/5 transition-colors">
+                    <td className="py-3 px-4 font-mono text-white/85 text-[13px]">{s.id}</td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full grid place-items-center font-bold text-[11px] text-[#0A1929] flex-shrink-0"
+                          style={{ background: AVATAR_GRAD[s.initials] }}
+                        >
+                          {s.initials}
+                        </div>
+                        <span className="text-white font-semibold">{s.driver}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-white/85 text-[13px]">{s.package}</td>
+                    <td className="py-3 px-3 text-white/90">{s.ordered}</td>
+                    <td className="py-3 px-3 text-center text-white/80 tabular-nums">{s.days}</td>
+                    <td className="py-3 px-3">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${STAGE_PILL[s.stage]}`}>
+                        {s.stage}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-white/85 tabular-nums">{s.cost}</td>
+                    <td className="py-3 px-4 text-right">
+                      <Link href="#" className="text-[13px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Open →</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3 border-t border-[#1E3556] flex items-center justify-between text-[13px] text-white/65">
+            <span>7 screenings shown · 18 YTD · 11 historical archived</span>
+            <span>Adverse-action FCRA flow handled automatically (5-day clock)</span>
+          </div>
+        </div>
+      </div>
+    </AppShell>
   );
 }
