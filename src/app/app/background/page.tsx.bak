@@ -67,8 +67,8 @@ export default function BackgroundPage() {
             { name: "Sterling Trucking", blurb: "DAC + employment + MVR bundled", badge: "API key", status: "live", cost: "$89-$149/screening" },
             { name: "HireRight", blurb: "DAC report + drug + medical", badge: "API key", status: "live", cost: "$95-$165/screening" },
             { name: "ProDriverCheck", blurb: "PSP + DAC + MVR + criminal", badge: "API key", status: "live", cost: "$75-$135/screening" },
-            { name: "FMCSA PSP", blurb: "Free crash/inspection history via FMCSA", status: "manual-pull", cost: "$10/pull · self-pay to FMCSA" },
-            { name: "Foley", blurb: "Driver background packages", status: "manual-pull", cost: "$45-$95/screening" },
+            { name: "FMCSA PSP", blurb: "Free crash/inspection history via FMCSA", badge: "manual-pull", status: "manual-pull", cost: "$10/pull · self-pay to FMCSA" },
+            { name: "Foley", blurb: "Driver background packages", badge: "manual-pull", status: "manual-pull", cost: "$45-$95/screening" },
           ]}
           csvTemplate={{
             name: "x3-compass-background-template.csv",

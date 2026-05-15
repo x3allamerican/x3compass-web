@@ -87,7 +87,7 @@ export default function TrainingPage() {
             { name: "Infinit-i Workforce", blurb: "LMS sync · 200+ DOT courses · ELDT-registered TPR", badge: "Recommended", status: "live", cost: "$12/driver/mo" },
             { name: "JJ Keller Training", blurb: "Course library + completion sync", badge: "API key", status: "live", cost: "$15/driver/mo" },
             { name: "CarriersEdge", blurb: "DOT-focused LMS + scorecards", badge: "OAuth", status: "live", cost: "$10/driver/mo" },
-            { name: "Smith System", blurb: "Defensive driving online", status: "manual-pull", cost: "Per-course" },
+            { name: "Smith System", blurb: "Defensive driving online", badge: "manual-pull", status: "manual-pull", cost: "Per-course" },
             { name: "Luma Brighter Learning", blurb: "ELDT theory + behind-the-wheel", badge: "API key", status: "live", cost: "$8/driver/mo" },
             { name: "Compass Skills Library", blurb: "100 X3-authored skill briefings · free", badge: "Recommended", status: "live", cost: "Included" },
           ]}

@@ -87,7 +87,7 @@ export default function InspectionsPage() {
             { name: "J.J. Keller eRODS", blurb: "Inspection import + DataQ filing", badge: "API key", status: "live", cost: "$15/inspection" },
             { name: "Motive Inspections", blurb: "Driver-side roadside inspection capture", badge: "OAuth", status: "live", cost: "Included" },
             { name: "Samsara Compliance", blurb: "Inspection record sync from driver app", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Vigillo / DOT.com", blurb: "CSA score + inspection analysis", status: "manual-pull", cost: "$25/mo" },
+            { name: "Vigillo / DOT.com", blurb: "CSA score + inspection analysis", badge: "manual-pull", status: "manual-pull", cost: "$25/mo" },
             { name: "Manual paper-form upload", blurb: "Photo of paper inspection · OCR'd", badge: "Recommended", status: "live", cost: "Included" },
           ]}
           csvTemplate={{

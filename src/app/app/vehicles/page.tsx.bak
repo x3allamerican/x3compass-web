@@ -77,7 +77,7 @@ export default function VehiclesPage() {
             { name: "Geotab", blurb: "Fleet roster + diagnostics", badge: "API key", status: "live", cost: "Included" },
             { name: "Fleetio", blurb: "PM schedule + fleet inventory", badge: "OAuth", status: "live", cost: "Included" },
             { name: "Whip Around", blurb: "DVIR + roster sync", badge: "API key", status: "live", cost: "Included" },
-            { name: "RTA Fleet Management", blurb: "Full maintenance management sync", status: "manual-pull", cost: "$0.25/vehicle/mo" },
+            { name: "RTA Fleet Management", blurb: "Full maintenance management sync", badge: "manual-pull", status: "manual-pull", cost: "$0.25/vehicle/mo" },
           ]}
           csvTemplate={{
             name: "x3-compass-vehicles-template.csv",

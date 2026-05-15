@@ -90,8 +90,8 @@ export default function DriversPage() {
             { name: "Drive My Way", blurb: "ATS export · daily roster sync", badge: "API key", status: "live", cost: "Included" },
             { name: "Gusto", blurb: "HR system roster sync · DOT-tagged employees only", badge: "OAuth", status: "live", cost: "Included" },
             { name: "Rippling", blurb: "HR system roster sync", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Paycom", blurb: "Payroll roster export", status: "manual-pull", cost: "$0.10/driver/mo" },
-            { name: "ADP RUN", blurb: "Daily roster sync", status: "manual-pull", cost: "$0.10/driver/mo" },
+            { name: "Paycom", blurb: "Payroll roster export", badge: "manual-pull", status: "manual-pull", cost: "$0.10/driver/mo" },
+            { name: "ADP RUN", blurb: "Daily roster sync", badge: "manual-pull", status: "manual-pull", cost: "$0.10/driver/mo" },
           ]}
           csvTemplate={{
             name: "x3-compass-drivers-template.csv",

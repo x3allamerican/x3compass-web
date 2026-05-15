@@ -124,7 +124,7 @@ export default function DQFilesPage() {
           vendors={[
             { name: "Tenstreet", blurb: "Pulls full DQ file from candidate intake", badge: "Recommended", status: "live", cost: "Included" },
             { name: "Foley Carrier Services", blurb: "DQ file management · annual reviews", badge: "API key", status: "live", cost: "$8/driver/mo" },
-            { name: "JJ Keller Encompass", blurb: "DQ files + medical card tracking", status: "manual-pull", cost: "$12/driver/mo" },
+            { name: "JJ Keller Encompass", blurb: "DQ files + medical card tracking", badge: "manual-pull", status: "manual-pull", cost: "$12/driver/mo" },
             { name: "DocuSign", blurb: "eSign-completed forms route to DQ file", badge: "OAuth", status: "live", cost: "Included" },
             { name: "Drive My Way", blurb: "ATS-to-DQ doc transfer", badge: "API key", status: "live", cost: "Included" },
             { name: "Upload PDFs to X3", blurb: "Drag-and-drop · OCR + auto-classify", badge: "Recommended", status: "live", cost: "Included" },

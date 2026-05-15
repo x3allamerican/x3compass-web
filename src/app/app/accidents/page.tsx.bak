@@ -66,7 +66,7 @@ export default function AccidentsPage() {
             { name: "Samsara AI Dashcam", blurb: "Crash event auto-logged + footage attached", badge: "OAuth", status: "live", cost: "Included" },
             { name: "Lytx DriveCam", blurb: "Event-based capture + reporting", badge: "API key", status: "live", cost: "Included" },
             { name: "SmartDrive (now Lytx)", blurb: "Event capture + coaching workflow", badge: "API key", status: "live", cost: "Included" },
-            { name: "Insurance carrier API", blurb: "Sentry, Progressive, GreatWest — claim sync", status: "manual-pull", cost: "Per carrier" },
+            { name: "Insurance carrier API", blurb: "Sentry, Progressive, GreatWest — claim sync", badge: "manual-pull", status: "manual-pull", cost: "Per carrier" },
             { name: "State crash report upload", blurb: "Upload state DPS report PDF · OCR'd", badge: "Recommended", status: "live", cost: "Included" },
           ]}
           csvTemplate={{

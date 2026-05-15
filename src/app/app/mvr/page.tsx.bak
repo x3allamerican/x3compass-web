@@ -84,10 +84,10 @@ export default function MVRPage() {
           vendors={[
             { name: "SambaSafety", blurb: "Continuous MVR monitoring · 50-state coverage", badge: "Recommended", status: "live", cost: "$4.95/driver/mo" },
             { name: "Foley Carrier Services", blurb: "Annual + 6-month MVR pulls · packaged", badge: "API key", status: "live", cost: "$8/driver/mo" },
-            { name: "JJ Keller MVR Service", blurb: "Annual MVR + monitoring", status: "manual-pull", cost: "$6.50/driver/mo" },
+            { name: "JJ Keller MVR Service", blurb: "Annual MVR + monitoring", badge: "manual-pull", status: "manual-pull", cost: "$6.50/driver/mo" },
             { name: "HireRight DAC", blurb: "MVR + employment-history bundled", badge: "API key", status: "live", cost: "$12/driver/mo" },
             { name: "Driver iQ", blurb: "MVR + DataQ history", badge: "API key", status: "live", cost: "$7/driver/mo" },
-            { name: "Direct state DMV portals", blurb: "Per-pull pricing · varies by state", status: "manual-pull", cost: "$3-25/pull" },
+            { name: "Direct state DMV portals", blurb: "Per-pull pricing · varies by state", badge: "manual-pull", status: "manual-pull", cost: "$3-25/pull" },
           ]}
           csvTemplate={{
             name: "x3-compass-mvr-template.csv",

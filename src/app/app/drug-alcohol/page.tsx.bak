@@ -80,7 +80,7 @@ export default function DrugAlcoholPage() {
             { name: "LabCorp", blurb: "Direct lab feed · MRO via partner", badge: "API key", status: "live", cost: "Per-test pricing" },
             { name: "eScreen (Alere)", blurb: "Random selection + collection site network", badge: "OAuth", status: "live", cost: "Per-test pricing" },
             { name: "FormFox", blurb: "Multi-lab clearinghouse with auto-MRO", badge: "API key", status: "live", cost: "Per-test pricing" },
-            { name: "USDOT Compliance", blurb: "Consortium random pool + reporting", status: "manual-pull", cost: "$8/driver/mo" },
+            { name: "USDOT Compliance", blurb: "Consortium random pool + reporting", badge: "manual-pull", status: "manual-pull", cost: "$8/driver/mo" },
           ]}
           csvTemplate={{
             name: "x3-compass-drug-alcohol-template.csv",
