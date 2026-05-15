@@ -30,14 +30,15 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
             <Link href="/#skills" className="hover:text-white">Skills</Link>
             <Link href="/#pricing" className="hover:text-white">Pricing</Link>
             <Link href="/hazmat" className="hover:text-white">Hazmat</Link>
+            <Link href="/faq" className="hover:text-white">FAQ</Link>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/app" className="text-[14px] font-semibold text-white/65 hover:text-white hidden sm:block">
+            <Link href="/signin" className="text-[14px] font-semibold text-white/65 hover:text-white hidden sm:block">
               Sign in
             </Link>
             <Link
-              href="/app"
+              href="/signup"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
               style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
             >
@@ -79,7 +80,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="text-white text-[12px] font-bold tracking-widest uppercase mb-3">Resources</h4>
               <ul className="space-y-2 text-[14px]">
-                <li><Link href="/#faqs" className="hover:text-white">FAQ</Link></li>
+                <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
                 <li><Link href="/#how" className="hover:text-white">How it works</Link></li>
                 <li>
                   <a href="https://github.com/x3fleetsafety/skills" target="_blank" rel="noopener" className="hover:text-white">
