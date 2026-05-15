@@ -2,13 +2,23 @@ import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 import BrainGrid from "@/components/BrainGrid";
 import SkillsExplorer from "@/components/SkillsExplorer";
+import DashboardPreview from "@/components/DashboardPreview";
+import HazmatPreview from "@/components/HazmatPreview";
 
 const PRICING = [
   {
     tier: "DIY", subtitle: "Compass AI",
     headline: "$25", unit: "per driver / mo",
     desc: "You drive the dashboard. AI does most of the work.",
-    bullets: ["All 12 brains, all 300 skills", "CSV import + manual entry", "Daily compliance digest", "One-click audit export", "Unlimited team seats", "Up to 100 drivers"],
+    bullets: [
+      "All 12 brains, all 300 skills",
+      "★ Vendor integrations included — Motive, Samsara, Geotab, Tenstreet, Quest, Checkr, WEX, SambaSafety + more",
+      "CSV import + manual entry on every tracker",
+      "Daily compliance digest",
+      "One-click audit export",
+      "Unlimited team seats",
+      "Up to 100 drivers",
+    ],
     cta: "Start free trial",
     popular: false,
   },
@@ -16,7 +26,15 @@ const PRICING = [
     tier: "DFY", subtitle: "Compass Concierge",
     headline: "$50", unit: "per driver / mo",
     desc: "We drive the dashboard for you.",
-    bullets: ["Everything in DIY", "Dedicated X3 safety advisor", "Live monitoring + intervention", "Quarterly compliance review calls", "Audit prep support", "Up to 100 drivers"],
+    bullets: [
+      "Everything in DIY",
+      "★ We set up your vendor integrations (Motive, Samsara, Quest, Checkr…)",
+      "Dedicated X3 safety advisor",
+      "Live monitoring + intervention",
+      "Quarterly compliance review calls",
+      "Audit prep support",
+      "Up to 100 drivers",
+    ],
     cta: "Start free trial",
     popular: true,
   },
@@ -24,17 +42,25 @@ const PRICING = [
     tier: "Enterprise", subtitle: "For 100+ trucks",
     headline: "Call us", unit: "custom pricing",
     desc: "For fleets over 100 trucks.",
-    bullets: ["Everything in DFY", "White-label partner dashboard", "SSO + dedicated advisor team", "Custom CFR skills", "Volume pricing"],
+    bullets: [
+      "Everything in DFY",
+      "★ Custom vendor integrations we build for you",
+      "White-label partner dashboard",
+      "SSO + dedicated advisor team",
+      "Custom CFR skills",
+      "Volume pricing",
+    ],
     cta: "Talk to sales",
     popular: false,
   },
 ];
 
 const STEPS = [
-  { n: 1, title: "Sign up & import drivers",       desc: "Import via CSV (we provide the template) or add drivers one at a time. We auto-seed every § 391 DQ slot." },
-  { n: 2, title: "Upload what you have",            desc: "Drop in med certs, CDL copies, prior-employer inquiries, Clearinghouse queries. Missing slots light up red." },
-  { n: 3, title: "Log events as they happen",       desc: "Roadside inspection this morning? Random D&A Tuesday? Two-minute entries thread into CSA and the audit picture automatically." },
-  { n: 4, title: "Read the morning digest",         desc: "7am email tells you what expires in the next 30 days. Handle today's items. Tomorrow you do it again. That's it." },
+  { n: 1, title: "Integrate your vendors (optional)", desc: "Already use Motive, Samsara, Tenstreet, Quest, Checkr, WEX, SambaSafety? One-click OAuth pulls your data in real-time. No vendor? CSV import + manual entry work just as well — no integration required." },
+  { n: 2, title: "Sign up & import drivers",         desc: "Import via CSV (we provide the template) or add drivers one at a time. We auto-seed every § 391 DQ slot." },
+  { n: 3, title: "Upload what you have",              desc: "Drop in med certs, CDL copies, prior-employer inquiries, Clearinghouse queries. Missing slots light up red." },
+  { n: 4, title: "Log events as they happen",         desc: "Roadside inspection this morning? Random D&A Tuesday? Two-minute entries thread into CSA and the audit picture automatically." },
+  { n: 5, title: "Read the morning digest",           desc: "7am email tells you what expires in the next 30 days. Handle today's items. Tomorrow you do it again. That's it." },
 ];
 
 const cardDark = "bg-[#15233D] border border-[#1E3556] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
@@ -117,18 +143,27 @@ export default function Home() {
         {/* 02 · DASHBOARD */}
         <section className="bg-[#091525] border-y border-[#1E3556] py-24">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="text-center mb-10">
               <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">02 · THE DASHBOARD</div>
-              <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
+              <h2 className="font-extrabold tracking-tight text-white mb-3 leading-[1.1] text-[28px] sm:text-[34px] md:text-[40px] lg:text-[44px] whitespace-normal lg:whitespace-nowrap">
                 The screen you live in.{" "}
                 <span className="serif-italic" style={{ color: "#22D3EE" }}>Every signal, one page.</span>
               </h2>
-              <p className="text-[17px] text-white/65 mb-8">
+              <p className="text-[17px] text-white/65 max-w-3xl mx-auto mb-8">
                 Sidebar of drivers. KPI strip up top. CSA BASICs, expirations, inspections — all on one screen. Your AI Safety Director sits in the lower right and tells you exactly what to do next.
               </p>
+            </div>
+
+            {/* The actual screenshot-style preview */}
+            <div className="max-w-5xl mx-auto mb-8">
+              <DashboardPreview />
+            </div>
+
+            <div className="text-center">
               <Link href="/app" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]" style={ctaCyan}>
                 Open the live dashboard →
               </Link>
+              <div className="mt-3 text-[12px] text-white/45">Free trial · no card required · see your real fleet on this screen in under 10 minutes</div>
             </div>
           </div>
         </section>
@@ -148,9 +183,19 @@ export default function Home() {
             Every skill is a published, version-controlled prompt. <strong className="text-white">Click any skill to see a real CFR-cited sample answer</strong> — no signup needed for the preview.
           </p>
           <SkillsExplorer />
-          <div className="text-center mt-10 text-[14px] text-white/55">
-            18 of 300 published skills shown above. The full library unlocks inside Compass —{" "}
-            <Link href="/signup" className="text-[#22D3EE] font-bold">Start your 7-day free trial →</Link>
+          <div className="text-center mt-10 space-y-4">
+            <div>
+              <Link
+                href="/skills"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-white border border-[#22D3EE]/50 hover:bg-[#22D3EE]/10 hover:border-[#22D3EE]"
+              >
+                ★ Browse all 300 skills · filter & search →
+              </Link>
+            </div>
+            <div className="text-[13px] text-white/55">
+              The full library unlocks inside Compass —{" "}
+              <Link href="/signup" className="text-[#22D3EE] font-bold">Start your 7-day free trial →</Link>
+            </div>
           </div>
         </section>
 
@@ -162,20 +207,31 @@ export default function Home() {
                 "radial-gradient(700px 400px at 15% 100%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(700px 400px at 90% 0%, rgba(139, 92, 246, 0.16), transparent 60%)",
             }}
           />
-          <div className="max-w-7xl mx-auto px-6 text-center relative">
-            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
-              04 · HAZMAT CENTER
+          <div className="max-w-7xl mx-auto px-6 relative">
+            <div className="text-center mb-10">
+              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+                04 · HAZMAT CENTER
+              </div>
+              <h2 className="text-[36px] sm:text-[44px] lg:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
+                100 hazmat skills.{" "}
+                <span className="serif-italic" style={{ color: "#22D3EE" }}>One Placard Wizard.</span>
+              </h2>
+              <p className="text-[17px] text-white/65 max-w-2xl mx-auto mb-8">
+                Class 1 explosives through Class 9 miscellaneous. Plus security plans, segregation, and the TSA-H clock.
+              </p>
             </div>
-            <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
-              100 hazmat skills.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>One Placard Wizard.</span>
-            </h2>
-            <p className="text-[17px] text-white/65 max-w-2xl mx-auto mb-8">
-              Class 1 explosives through Class 9 miscellaneous. Plus security plans, segregation, and the TSA-H clock.
-            </p>
-            <Link href="/hazmat" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]" style={ctaCyan}>
-              Open the Hazmat Center →
-            </Link>
+
+            {/* The actual hazmat tool preview */}
+            <div className="max-w-5xl mx-auto mb-8">
+              <HazmatPreview />
+            </div>
+
+            <div className="text-center">
+              <Link href="/hazmat" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]" style={ctaCyan}>
+                Open the Hazmat Center →
+              </Link>
+              <div className="mt-3 text-[12px] text-white/45">$99/mo add-on · works with any Compass tier · 7-day trial includes hazmat</div>
+            </div>
           </div>
         </section>
 
@@ -190,9 +246,9 @@ export default function Home() {
             Live in the next <span className="serif-italic" style={{ color: "#22D3EE" }}>lunch break.</span>
           </h2>
           <p className="text-[17px] text-white/65 max-w-2xl mb-12">
-            Import drivers, upload what you have, log events as they happen, read the morning digest. That&apos;s the whole job.
+            Connect what you already have, import what you don&apos;t, log events as they happen, read the morning digest. That&apos;s the whole job.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {STEPS.map((s) => (
               <div key={s.n} className={`${cardDark} p-6`}>
                 <div
@@ -202,9 +258,28 @@ export default function Home() {
                   {s.n}
                 </div>
                 <h3 className="text-[16px] font-bold text-white mb-2">{s.title}</h3>
-                <p className="text-[14px] text-white/65 leading-relaxed">{s.desc}</p>
+                <p className="text-[13.5px] text-white/65 leading-relaxed">{s.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* Honest callout: what we DON'T do */}
+          <div
+            className="mt-10 rounded-2xl border p-5 flex items-start gap-4"
+            style={{
+              background: "linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(15, 28, 50, 0.5))",
+              borderColor: "rgba(251, 191, 36, 0.30)",
+            }}
+          >
+            <div className="text-[22px] flex-shrink-0">ⓘ</div>
+            <div className="flex-1">
+              <div className="text-white font-extrabold text-[14px] mb-1.5">
+                Honest call-out: we do <span className="text-amber-300">not</span> have a direct real-time relay to your CSA scores.
+              </div>
+              <div className="text-[13px] text-white/75 leading-relaxed">
+                FMCSA publishes CSA / SMS data <strong className="text-white">monthly</strong> via SAFER — that&apos;s the only public source, and there is no live API anyone can use. Compass auto-pulls your SAFER snapshot every time FMCSA refreshes (~the 15th of each month) and shows you the delta. If a vendor claims real-time CSA data, they&apos;re reading the same monthly SAFER feed you can.
+              </div>
+            </div>
           </div>
         </section>
 
