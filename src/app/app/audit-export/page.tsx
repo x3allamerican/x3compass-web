@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 
 const SECTIONS = [
   { key: "drivers",   label: "Driver Qualification Files", cfr: "§ 391.51",     count: "72 drivers · 864 docs",         size: "184 MB", on: true },
@@ -26,6 +27,26 @@ export default function AuditExportPage() {
   return (
     <AppShell title="Audit Export" crumbs="ADVANCED · ONE-CLICK DOT BUNDLE">
       <div className="px-6 py-8 max-w-6xl mx-auto space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="FMCSA Audit Procedures"
+          what="One-click audit packet — every document FMCSA expects during a Compliance Review or Safety Audit, organized by topic and ready to hand to the auditor."
+          who="Every carrier expecting an FMCSA visit (Compliance Review, Off-Site Investigation, or new-entrant Safety Audit). Also useful for insurance underwriting reviews and proactive mock audits."
+          howTo={[
+            { n: 1, title: "Click 'Generate Audit Packet'", detail: "Compass compiles everything: driver lists, DQ files (PDF per driver), HOS records (RODS by date), vehicle records, D&A history, accident register, insurance, operating authority." },
+            { n: 2, title: "Choose your date range + scope", detail: "Past 12 months (typical Compliance Review scope), past 6 months (Off-Site), or past 24 months (deep dive). Specific driver/vehicle samples or full fleet." },
+            { n: 3, title: "Download the ZIP — properly named + indexed", detail: "All PDFs with consistent naming (yyyymmdd-type-driver/vehicle). Index file explaining the structure. Audit-ready." },
+            { n: 4, title: "Or share via secure link to the auditor", detail: "FMCSA accepts electronic submission. Generate a time-limited link the auditor can download from — no email size limits." },
+          ]}
+          weeklyHabits={["Generate a mock audit packet monthly — confirm everything you'd need is producible quickly", "Address any gaps Compass flags during packet generation"]}
+          auditTraps={["Missing prior-employer inquiry responses — Compass flags these before the packet ships", "Expired medical certificates included as 'current' — Compass cross-references dates", "Disorganized PDFs that auditors can't navigate easily — Compass standardizes the structure"]}
+          askCompassLinks={[
+            { label: "I just got a Compliance Review notice — what now?", query: "Compliance Review notice" },
+            { label: "Audit document production best practices", query: "Audit document production best practices" },
+            { label: "New-entrant safety audit preparation", query: "New entrant safety audit preparation" },
+          ]}
+        />
+
         {/* Hero */}
         <div
           className="rounded-2xl p-8 relative overflow-hidden border border-[#22D3EE]/30"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type Sev = "severe" | "moderate" | "minor";
@@ -55,6 +56,22 @@ export default function AccidentsPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 390.5 + § 390.15"
+          what="DOT-recordable crash register + investigation workflow. Tracks fatalities, injuries, tow-away events with full incident report, dashcam footage, preventability determination."
+          who="Every motor carrier. Crash recording starts day one — § 390.15 requires a register, retained 1 year + 3 years archive (4 years total)."
+          howTo={[
+            { n: 1, title: "Connect telematics with crash detection (Motive, Samsara, Lytx)", detail: "Crash events auto-flag the moment they happen via g-force triggers. Footage from before/during/after attaches automatically. Compass starts the investigation workflow." },
+            { n: 2, title: "Or upload the police report + state crash report", detail: "Most states issue a crash report (CR-3, CR-2, etc.). Upload the PDF — Compass OCRs the report and pre-fills the accident register entry." },
+            { n: 3, title: "Or log the accident manually with the wizard", detail: "+ Log accident — walks you through § 390.5 trigger questions (fatality? injury away from scene? tow-away?), determines DOT-recordable status, and creates the accident register entry." },
+            { n: 4, title: "Investigate + determine preventability", detail: "Within 30 days of a crash, complete the investigation: driver interview, witness statements, dashcam review, ELD analysis. Compass walks through it. Then file for the FMCSA Crash Preventability Determination Program if applicable." },
+          ]}
+          weeklyHabits={["Review open investigations and move them toward closure within 30 days", "File FMCSA Crash Preventability Determination Program applications for eligible non-preventable crashes"]}
+          auditTraps={["Crash not in your register (forgot to add) — § 390.15 violation", "Crash misclassified (declared non-recordable when it actually meets § 390.5 trigger)", "Investigation incomplete or undocumented (no driver interview, no witness statements)"]}
+          askCompassLinks={[{ label: "First 24 hours after a crash — what do I do?", query: "First 24 hours after a crash" }, { label: "Crash investigation best practices", query: "Crash investigation best practices" }, { label: "Non-recordable crash — should I still document?", query: "Non-recordable crash documentation" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="DOT-recordable accidents"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 
 const TEAM = [
   { initials: "JK", name: "Joshua Kovarik",   email: "joshua@x3compass.com",  role: "Owner",      lastSeen: "Active now" },
@@ -39,6 +40,23 @@ export default function SettingsPage() {
   return (
     <AppShell title="Settings" crumbs="ACCOUNT · WORKSPACE & TEAM">
       <div className="px-6 py-8 max-w-6xl mx-auto space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="Carrier configuration · no specific CFR"
+          what="Your carrier identity, billing, notification preferences, integrations, team seats, and Compass behavior settings."
+          who="Carrier admins. Most settings are one-time setup; you'll come back occasionally to add a new integration or adjust notification rules."
+          howTo={[
+            { n: 1, title: "Fill out carrier profile", detail: "Carrier name, DOT#, MC#, operating authority, fleet size, primary terminal address. Used in audit packets and all generated documents." },
+            { n: 2, title: "Connect integrations", detail: "Centralized view of every vendor integration — ELDs, fuel cards, MVR services, drug-testing labs, payroll. OAuth or API-key flow per integration." },
+            { n: 3, title: "Configure notifications", detail: "Per-event rules: who gets notified when (CSA score change, expiration warnings, OOS events, positive D&A tests). Email + SMS routing." },
+            { n: 4, title: "Invite your team", detail: "Add safety director, dispatcher, fleet manager roles. Each has different access — safety has DQF + D&A; dispatcher has HOS; etc." },
+          ]}
+          askCompassLinks={[
+            { label: "How do I add a team member?", query: "How do I add a team member" },
+            { label: "Which integrations should I connect first?", query: "Which integrations should I connect first" },
+          ]}
+        />
+
         {/* TABS */}
         <div className="flex gap-1 p-1 rounded-lg bg-[#15233D] border border-[#1E3556] w-fit">
           {["Carrier profile", "Team", "Notifications", "API & Integrations", "Billing"].map((t, i) => (

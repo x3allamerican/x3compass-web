@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type Stage = "Invited" | "Consent signed" | "In-progress" | "Clear" | "Consider" | "Adverse-action sent";
@@ -54,6 +55,22 @@ export default function BackgroundPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="FCRA (15 U.S.C. § 1681) + § 391.23"
+          what="Pre-employment background screening: PSP, criminal, employment history, MVR bundling. FCRA-compliant disclosure + adverse-action workflow built in."
+          who="Every motor carrier hiring CDL drivers. PSP (FMCSA Pre-Employment Screening) is free for the carrier (driver pays $10). Full DOT packages run $59-$129."
+          howTo={[
+            { n: 1, title: "Use the live Checkr integration (already wired up)", detail: "Order a Driver Basic Plus package — Compass routes the candidate to Checkr's FCRA-compliant disclosure flow, candidate signs consent, results return automatically. Adjudication (clear / consider / adverse-action) happens in Compass." },
+            { n: 2, title: "Or order Sterling, HireRight, ProDriverCheck, or Foley", detail: "Same packaged DOT screenings via different vendors — pricing varies. Compass routes the order, returns results, and runs the same adjudication workflow." },
+            { n: 3, title: "Or import a result from an external vendor", detail: "Upload the candidate's PSP, MVR, criminal report PDF — Compass logs it as part of the candidate's record. Useful for one-off cases or self-pay drivers." },
+            { n: 4, title: "Run the FCRA adverse-action workflow if needed", detail: "If a report comes back with hits and you're not hiring → pre-adverse notice (5-day wait) → final adverse action. Compass drafts both letters with proper FCRA citations — required by § 1681m + Syed v. M-I LLC." },
+          ]}
+          weeklyHabits={["Review pending screenings — candidates whose consent has been signed but report hasn't returned", "Check Clearinghouse status on every candidate before final hiring decision"]}
+          auditTraps={["Initial FCRA disclosure not standalone — Syed v. M-I LLC (9th Cir. 2017) — bundling with the application = willful violation", "Adverse action without pre-adverse notice — § 1681m + 5-day wait period", "PSP not used for hiring (recommended best practice, especially with safety-sensitive applicants)"]}
+          askCompassLinks={[{ label: "How do I write the FCRA denial letter?", query: "How do I write the FCRA denial letter" }, { label: "Using FMCSA PSP for pre-employment screening", query: "Using FMCSA PSP for pre-employment screening" }, { label: "EEOC compliance in driver hiring", query: "EEOC compliance in driver hiring" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Background screening"

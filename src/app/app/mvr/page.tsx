@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type MVRStatus = "current" | "due" | "overdue" | "monitoring";
@@ -73,6 +74,22 @@ export default function MVRPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 391.25 + § 391.27"
+          what="Annual MVR pull + review for every CDL driver, with optional continuous monitoring for real-time conviction alerts. Tracks license class, points, violations, and disqualification risk."
+          who="Every motor carrier — § 391.25 requires an MVR review for every driver within 12 months of hire and every 12 months thereafter. Continuous monitoring is optional but recommended for high-risk fleets."
+          howTo={[
+            { n: 1, title: "Connect SambaSafety (continuous monitoring — preferred)", detail: "$4.95/driver/month gets you real-time alerts the moment a conviction posts to the state MVR. Compass routes the alert to your safety director for review + action." },
+            { n: 2, title: "Or use Foley / JJ Keller / Driver iQ", detail: "Bundle MVR + DQF management. Annual pulls automated. Slightly less responsive than SambaSafety for new convictions." },
+            { n: 3, title: "Or upload MVRs you've already pulled", detail: "State DMV-issued MVR PDF — Compass OCRs the document, extracts violations + class + endorsements, and updates the driver's record." },
+            { n: 4, title: "Manually log annual driver's certificate of violations", detail: "Per § 391.27, every driver must annually certify their violations. The form is in the DQ Files module — once signed, Compass cross-references against the MVR to flag discrepancies." },
+          ]}
+          weeklyHabits={["Review continuous-monitoring alerts from past 7 days — driver convictions, license suspensions, endorsement losses", "Run the annual review for drivers whose review is coming due in next 30 days"]}
+          auditTraps={["Annual review not done within 12 months of last review — § 391.25 — exact dates matter", "Driver's certificate of violations missing — § 391.27", "Multi-state CDL driver — MVR pulled from wrong state or only one state", "Disqualified driver still on roster (CDL suspended in state DMV but driver still showing active)"]}
+          askCompassLinks={[{ label: "Continuous MVR monitoring vs annual pull", query: "Continuous MVR monitoring vs annual pull" }, { label: "What violations disqualify a driver? (§ 391.15)", query: "What violations disqualify a driver" }, { label: "Multi-state CDL driver — what MVR do I pull?", query: "Multi-state CDL driver MVR" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Motor Vehicle Records"

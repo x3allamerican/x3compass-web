@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type ClockState = "driving" | "on-duty" | "off-duty" | "sleeper" | "violation";
@@ -126,6 +127,23 @@ export default function HOSPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR Part 395"
+          what="Track every driver's 14-hour duty window, 11-hour drive limit, 30-minute break, and 70-hour cycle — live from your ELD, CSV, or paper logs."
+          who="Every motor carrier with drivers operating CMVs in interstate commerce. Even owner-operators driving solo need RODS or short-haul time records. Short-haul-exempt drivers (returning to base within 14 hours, ≤150 air-mile radius) keep simpler time records but still need them."
+          howTo={[
+            { n: 1, title: "Connect your ELD (the fast path)", detail: "Hit Connect → Motive / Samsara / Geotab / Omnitracs / EROAD. OAuth + sync takes ~3 min. RODS auto-pull every 60 seconds. This is what most fleets do." },
+            { n: 2, title: "Or import CSV from any registered ELD", detail: "Download the X3 HOS RODS template, export from your ELD into matching columns, drag and drop. Compass parses dates, duty statuses, locations, and links them to your drivers automatically." },
+            { n: 3, title: "Or enter paper logs manually", detail: "Use the + Add log entry button (Option C). Best for short-haul-exempt drivers or rare paper-log days during ELD malfunction (max 8 days per § 395.34)." },
+            { n: 4, title: "Review the live driver clocks dashboard", detail: "Every driver shows three progress bars: 14-hour duty window, 11-hour drive, 70-hour cycle. Red = violation risk in next 60 minutes. Yellow = approaching limit. Green = clean." },
+            { n: 5, title: "Respond to Compass nudges", detail: "When a driver hits 13.5 of 14 hours, Compass auto-pings their ELD with a stop-now alert and surfaces the situation in the dashboard so you can call them too." },
+          ]}
+          weeklyHabits={["Monday: review last week's near-violations (>13h duty days) and coach drivers who showed pattern", "Friday: confirm all unassigned driving time is assigned (under § 395.32 — required within 8 days)", "Monthly: pull the HOS BASIC trend from the CSA module and look for inspections that contributed"]}
+          auditTraps={["Unassigned driving time over 8 days old — auditors flag this as missing recordkeeping", "Driver edits without annotation reason codes — the audit trail shows them anyway", "Personal conveyance time logged during dispatch-assigned routes (per § 395.8 guidance — positioning is on-duty)", "ELD malfunction not paper-backed for the malfunction days"]}
+          askCompassLinks={[{ label: "Walk me through the 14-hour rule (§ 395.3)", query: "Walk me through the 14-hour rule" }, { label: "When does the 16-hour exception apply? (§ 395.1(o))", query: "When does the 16-hour exception apply?" }, { label: "Explain the 7/3 split-sleeper berth (§ 395.1(g))", query: "Explain the 7/3 split-sleeper berth" }, { label: "My ELD says malfunction — what now? (§ 395.34)", query: "My ELD says malfunction what now" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Hours of Service"

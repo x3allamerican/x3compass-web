@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 
 const SERVICE_ITEMS = [
   { icon: "🎲", title: "Run quarterly random selection",         status: "✓ Completed Apr 12 · 18 drivers selected", action: "View selection" },
@@ -41,6 +42,21 @@ export default function DAConciergePage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR Part 382 + 49 CFR Part 40"
+          what="Done-for-you D&A program management — X3 safety advisor handles your random pool, Clearinghouse reporting, MRO coordination, and incident response."
+          who="DFY-tier customers who want a human handling their D&A program. Best for carriers with 5-100 trucks who don't want a dedicated safety director."
+          howTo={[
+            { n: 1, title: "Meet your X3 safety advisor", detail: "DFY customers get a dedicated advisor (Brad Reynolds — 22 years FMCSA). They take over the random pool, Clearinghouse, and MRO communications." },
+            { n: 2, title: "Forward all D&A communications to your advisor", detail: "Lab results, MRO reports, refusals, positive notifications — all routed to your advisor. They handle the workflow and you get a summary." },
+            { n: 3, title: "Review the advisor's activity log weekly", detail: "Compass D&A Concierge shows every action taken on your behalf: random selections sent, lab orders placed, MRO consultations completed." },
+          ]}
+          weeklyHabits={["Review the advisor's weekly summary — what tests ran, what came back, what's pending", "Approve any non-routine decisions the advisor flags (e.g., refusal escalations)"]}
+          auditTraps={["Advisor's recommendations not implemented — carrier still responsible if you ignore the advisor", "Test results not reaching the advisor (e.g., still going to a generic inbox)"]}
+          askCompassLinks={[{ label: "What does the X3 safety advisor handle for me?", query: "What does the X3 safety advisor handle" }, { label: "DFY vs DIY — what's the difference?", query: "DFY vs DIY tier differences" }]}
+        />
+
         {/* Advisor card */}
         <div className="rounded-2xl p-6 border border-[#22D3EE]/30 flex items-center gap-6 flex-wrap"
           style={{ background: "linear-gradient(135deg, rgba(34, 211, 238, 0.10), rgba(15, 28, 50, 0.6))" }}

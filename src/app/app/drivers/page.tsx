@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type DriverStatus = "clean" | "warn" | "expired";
@@ -78,6 +79,22 @@ export default function DriversPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 391.51"
+          what="Your roster of every driver, with CDL status, qualifications, license expiration, and a one-glance compliance health score per driver."
+          who="Every motor carrier — this is the spine of your DQF program. New entrants must build it during the first 90 days of operation. Established carriers should maintain it continuously."
+          howTo={[
+            { n: 1, title: "Sync from your ATS / HR (Tenstreet, Gusto, Rippling)", detail: "If you already manage applicants in Tenstreet or payroll in Gusto, OAuth pulls the driver roster automatically. Daily sync keeps it current as you onboard/terminate." },
+            { n: 2, title: "Or upload your driver list CSV", detail: "Use the X3 drivers template: name, CDL #, CDL state, class, expiration, hire date, status. Compass cross-checks each driver against MVR + Clearinghouse + DQF presence." },
+            { n: 3, title: "Or add drivers one at a time", detail: "+ Add driver — useful when you bring on a single new hire or run a small fleet of 1-5. Same data, same compliance score." },
+            { n: 4, title: "Each driver becomes a profile", detail: "Click any driver to see their DQF status (which of the 12 § 391.51 documents are present), MVR history, training completions, recent inspections, and any open compliance flags." },
+          ]}
+          weeklyHabits={["Review drivers flagged 'action needed' — those have an expiring CDL, medical, or annual review within 30 days", "Confirm all new hires from the past week have a complete pre-employment workflow (PSP query, prior-employer inquiry, MVR, drug test)"]}
+          auditTraps={["Drivers in your CRM/payroll that don't have a DQF — auditors compare your roster against your DQ files", "Drivers showing as active but with an expired medical card — § 391.45 violation if they drove", "Terminated drivers whose records were destroyed too early (3-year retention after termination per § 391.51)"]}
+          askCompassLinks={[{ label: "What's required in a DQF? (§ 391.51)", query: "What's required in a DQF" }, { label: "Personnel file vs DQ file — what goes where?", query: "Personnel file vs DQ file what goes where" }, { label: "Re-up DQF for returning driver after 18 months", query: "Returning driver DQF re-qualification" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Drivers"

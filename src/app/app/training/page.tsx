@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type CourseStatus = "current" | "due" | "overdue" | "missing";
@@ -76,6 +77,22 @@ export default function TrainingPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR Part 380 + § 391.11"
+          what="Training completions per driver — ELDT (first-time CDL), defensive driving, supervisor reasonable-suspicion, hazmat refresher, and any carrier-specific curriculum."
+          who="Every motor carrier. ELDT is mandatory for first-time CDL applicants after 2/7/2022. Hazmat carriers need annual security awareness. Supervisors need RS training before they can make reasonable-suspicion calls."
+          howTo={[
+            { n: 1, title: "Connect your LMS (Infinit-i, JJ Keller Encompass, CarriersEdge)", detail: "OAuth pulls completion data per driver, per course, with timestamps and certificate URLs. Real-time sync as drivers finish courses." },
+            { n: 2, title: "Or upload training completion CSV", detail: "Template: driver, course code, course name, completion date, certificate URL, expiration. Works for any LMS that lets you export — or manual training (Smith System certified instructor)." },
+            { n: 3, title: "Or log training events manually", detail: "+ Add training record — useful for in-house toolbox talks, post-accident coaching, supervisor 2-hour RS training (§ 382.603), and one-off events." },
+            { n: 4, title: "Verify ELDT for new CDL holders", detail: "Drivers with first CDL after 2/7/2022 need ELDT (theory + behind-the-wheel) from a TPR-registered provider. Compass checks the provider's TPR number against FMCSA's registry." },
+          ]}
+          weeklyHabits={["Confirm new hires have completed orientation training", "Review drivers with annual refresher coming due in next 30 days"]}
+          auditTraps={["ELDT certificate missing for a driver with first CDL after 2/7/2022 — automatic finding", "Supervisor reasonable-suspicion training undocumented — they can't legally make RS calls", "Hazmat security awareness training missing or older than 12 months for hazmat-endorsed drivers"]}
+          askCompassLinks={[{ label: "Is annual refresher training required?", query: "Annual driver refresher training requirements" }, { label: "ELDT — who needs it and what counts?", query: "ELDT entry-level driver training requirements" }, { label: "Supervisor 2-hour reasonable-suspicion course documentation", query: "Supervisor reasonable suspicion training documentation" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Training"

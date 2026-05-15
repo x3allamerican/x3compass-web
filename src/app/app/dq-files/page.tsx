@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type DocStatus = "complete" | "missing" | "expiring" | "expired";
@@ -115,6 +116,22 @@ export default function DQFilesPage() {
 
         {/* DOC GRID */}
         <div className="px-6 py-6 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 391.51"
+          what="The 12 § 391.51 documents per driver, with green/yellow/red status on each slot. The single most-audited area in motor-carrier compliance."
+          who="Every motor carrier with CDL drivers. New entrants must have complete DQFs within 30 days of hiring each driver. Compliance reviews start here."
+          howTo={[
+            { n: 1, title: "Connect Tenstreet / DocuSign / Drive My Way", detail: "If you already process driver applicants through Tenstreet, the application + signed forms route directly to the DQF. DocuSign-signed forms (medical, road test) auto-attach to the right slot." },
+            { n: 2, title: "Or upload your existing PDFs", detail: "Drag and drop scanned med certs, CDLs, prior-employer letters, road test certificates. Compass OCRs each document, classifies it (e.g., 'medical certificate'), and routes it to the correct slot." },
+            { n: 3, title: "Or add documents to slots one at a time", detail: "Click any of the 12 slots → upload that specific document. Useful when you're remediating an existing fleet's DQFs slot by slot." },
+            { n: 4, title: "Watch the compliance score per driver", detail: "Each driver shows a percentage — 12/12 slots green = 100%. Auditors typically sample 10-15 drivers; you want 100% on every one of those." },
+          ]}
+          weeklyHabits={["Review drivers with red/yellow slots (expired or missing) — fix them this week", "Run the DQF audit-self-assessment report monthly — surfaces patterns across the whole fleet"]}
+          auditTraps={["Prior-employer inquiries missing 30-day response documentation — § 391.23(c)(2) requires you document the attempt", "Annual driver's certificate of violations missing — § 391.27 — drivers often forget this one", "Medical examiner verification missing the National Registry number — § 391.51(b)(7)", "Road test or equivalent missing for drivers hired before § 391.31 was widely understood"]}
+          askCompassLinks={[{ label: "What's missing from this DQF? (§ 391.51)", query: "What's missing from this DQF" }, { label: "DQF audit self-assessment workflow", query: "DQF audit self-assessment workflow" }, { label: "When can I accept a prior employer's pre-employment test?", query: "Pre-employment test prior employer acceptance" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Driver Qualification Files"

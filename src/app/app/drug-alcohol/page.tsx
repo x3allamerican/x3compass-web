@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type TestType = "Pre-employment" | "Random" | "Post-accident" | "Reasonable suspicion" | "Return-to-duty" | "Follow-up";
@@ -66,6 +67,22 @@ export default function DrugAlcoholPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR Part 382"
+          what="Your D&A program: pre-employment, random pool, post-accident triggers, Clearinghouse queries, return-to-duty workflow, and follow-up testing."
+          who="Every motor carrier with CDL drivers — Part 382 applies even to owner-operators (they join a Consortium/TPA pool). Random testing rates are 50% drugs / 10% alcohol annually."
+          howTo={[
+            { n: 1, title: "Connect your testing provider (Quest, LabCorp, Health Street, eScreen)", detail: "OAuth/API pulls every test result automatically — collection date, panel, MRO determination, final result. Clearinghouse reporting happens within the required 1 business day." },
+            { n: 2, title: "Or upload test results CSV", detail: "Template: test ID, driver, date, type (pre-employment / random / post-accident / RS / RTD / follow-up), panel, MRO, result. Useful if your TPA gives you results monthly via email." },
+            { n: 3, title: "Or enter results one at a time", detail: "+ Add test result — for small fleets, occasional standalone tests, or post-accident wizard runs." },
+            { n: 4, title: "Run the post-accident wizard when needed", detail: "After any crash, the Post-Accident button walks you through the 3 § 382.303 triggers (fatality, injury+citation, tow-away+citation) and tells you whether tests are required + deadlines (alcohol 8h, drugs 32h)." },
+          ]}
+          weeklyHabits={["Check your random rate YTD — Compass shows current % vs the 50% / 10% targets", "Review Clearinghouse limited queries — annually for every driver", "Verify Clearinghouse 1-day reporting on any positives/refusals/RTD from the past week"]}
+          auditTraps={["Random testing rate below 50% drugs or 10% alcohol — counted at year-end against driver-pool average", "Pre-employment test missing for a driver who started safety-sensitive functions", "Clearinghouse query missing for a new hire (must be a Full query before safety-sensitive work)", "Limited query not run annually for every existing driver"]}
+          askCompassLinks={[{ label: "What's my random rate this year? (Part 382)", query: "What's my random rate this year" }, { label: "When is a full Clearinghouse query required?", query: "When is a full Clearinghouse query required" }, { label: "Driver had a crash — do I test? (§ 382.303)", query: "Driver had a crash post-accident testing" }, { label: "Refusal vs diluted result — what's a refusal?", query: "Refusal vs diluted result" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Drug & Alcohol"

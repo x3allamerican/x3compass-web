@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type Status = "active" | "pm-due" | "oos" | "annual-due";
@@ -64,6 +65,22 @@ export default function VehiclesPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 390.21 + Part 396"
+          what="Your fleet inventory + preventive-maintenance schedule. Every truck and trailer with VIN, plate, registration, annual inspection, and PM trigger mileage."
+          who="Every motor carrier — vehicle records are required from day one. Annual DOT inspections (§ 396.17) are mandatory regardless of mileage. PM scheduling avoids cascading violations."
+          howTo={[
+            { n: 1, title: "Connect telematics (Motive, Samsara, Geotab, Fleetio)", detail: "OAuth pulls your fleet roster + live odometer per VIN. PM triggers fire automatically when a vehicle hits the mileage threshold you set." },
+            { n: 2, title: "Or upload your fleet CSV", detail: "Template columns: unit #, VIN, year/make/model, GVWR, plate, plate state, current odometer. Compass auto-classifies each vehicle and starts the annual-inspection clock." },
+            { n: 3, title: "Or add vehicles individually", detail: "+ Add vehicle — useful for occasional acquisitions or small fleets. Manual odometer updates work too if you don't have telematics." },
+            { n: 4, title: "Set your PM intervals once", detail: "Industry standard: A-service every 15K, B-service every 45K, C-service every 90K, annual DOT inspection (§ 396.17) every 12 months. Compass tracks per-VIN." },
+          ]}
+          weeklyHabits={["Friday: review vehicles whose annual inspection (§ 396.17) is due in next 30 days", "Review DVIR-with-defects entries from past week — confirm repairs were completed before re-dispatch"]}
+          auditTraps={["Missing annual inspection certificates — auditors will ask for one per vehicle, retained 14 months", "Inspector qualification records missing — § 396.19 requires you keep the inspector's qualifications on file", "PM schedule on paper but not followed — auditors want to see a written program AND evidence of execution"]}
+          askCompassLinks={[{ label: "Build me a § 396 PM schedule", query: "Build me a 396 PM schedule" }, { label: "What's checked in the annual DOT inspection?", query: "What's checked in the annual DOT inspection" }, { label: "Are DVIRs required if no defects?", query: "Are DVIRs required if no defects" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Vehicles"

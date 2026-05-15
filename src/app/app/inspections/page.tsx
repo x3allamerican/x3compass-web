@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
 type Status = "clean" | "violations" | "OOS" | "contestable" | "disputed" | "won";
@@ -74,6 +75,22 @@ export default function InspectionsPage() {
       }
     >
       <div className="px-6 py-8 space-y-6">
+        {/* HOW THIS PAGE WORKS */}
+        <PageGuide
+          cfr="49 CFR § 396.9 + Part 385 Subpart D"
+          what="Every roadside inspection (Level I-VI) against your fleet, with violations classified into the right CSA BASIC, OOS designations, and DataQ-eligibility analysis."
+          who="Every motor carrier — inspections happen whether you log them or not, so you might as well track them and contest the ones that are wrong."
+          howTo={[
+            { n: 1, title: "Auto-pull from FMCSA SAFER (automatic every 6 hours)", detail: "SAFER's public inspection feed is pulled automatically — your inspection history flows in within a few hours of FMCSA recording it. No vendor needed." },
+            { n: 2, title: "Connect Motive / Samsara for in-cab capture", detail: "Drivers can photograph inspection reports in the cab; Compass auto-imports + cross-references with SAFER when the inspection appears later." },
+            { n: 3, title: "Or upload paper inspection reports", detail: "Drag and drop the paper report PDF — Compass OCRs it, classifies violations into BASICs, and computes the CSA score contribution." },
+            { n: 4, title: "Run the DataQ analysis on every inspection", detail: "Compass evaluates each inspection against 8 contestability patterns (identity errors, officer documentation errors, wrong CFR cite, etc.) and shows you which ones are worth filing DataQ challenges on." },
+          ]}
+          weeklyHabits={["Review the past week's inspections — confirm violations are categorized correctly", "File DataQ challenges on inspections marked high-win-rate by Compass"]}
+          auditTraps={["OOS violation followed by re-dispatch before correction — major finding", "Inspection not in your records but appearing in SAFER (you're not tracking what's happening to your drivers)", "DataQ-eligible violations sitting on your CSA without being challenged"]}
+          askCompassLinks={[{ label: "Is this inspection contestable? (DataQ analysis)", query: "Is this inspection contestable" }, { label: "Out-of-service violation — what do I do now?", query: "Out of service violation response" }, { label: "Roadside inspection levels — I, II, III explained", query: "Roadside inspection levels explained" }]}
+        />
+
         {/* DATA SOURCE */}
         <DataSourceCard
           trackerLabel="Roadside inspections"
