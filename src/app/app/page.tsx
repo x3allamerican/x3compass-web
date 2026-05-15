@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const KPIS = [
-  { label: "CSA percentile",       value: "57th",   trend: "↓ 12", trendNeg: true,  spark: "0,28 20,24 40,26 60,20 80,22 100,18 120,14 140,16 160,12 180,10 200,8",  stroke: "#DC2626" },
-  { label: "Clean inspection rate", value: "89%",    trend: "↑ 4",  trendNeg: false, spark: "0,22 20,24 40,18 60,20 80,16 100,14 120,12 140,14 160,10 180,8 200,6",  stroke: "#0A1A3C" },
-  { label: "DataQ wins · YTD",      value: "$18.4k", trend: "↑ $2.1k", trendNeg: false, spark: "0,32 20,30 40,28 60,24 80,22 100,18 120,14 140,16 160,12 180,8 200,4",  stroke: "#FFC72C" },
-  { label: "Audit readiness",       value: "94%",    trend: "↑ 6",  trendNeg: false, spark: "0,30 20,28 40,24 60,22 80,18 100,16 120,12 140,10 160,8 180,6 200,4",   stroke: "#0A1A3C" },
+  { label: "CSA percentile",       value: "57th",   trend: "↓ 12",   trendNeg: true,  spark: "0,28 20,24 40,26 60,20 80,22 100,18 120,14 140,16 160,12 180,10 200,8",  stroke: "#22D3EE" },
+  { label: "Clean inspection rate", value: "89%",    trend: "↑ 4",    trendNeg: false, spark: "0,22 20,24 40,18 60,20 80,16 100,14 120,12 140,14 160,10 180,8 200,6",   stroke: "#22D3EE" },
+  { label: "DataQ wins · YTD",      value: "$18.4k", trend: "↑ $2.1k", trendNeg: false, spark: "0,32 20,30 40,28 60,24 80,22 100,18 120,14 140,16 160,12 180,8 200,4",   stroke: "#22D3EE" },
+  { label: "Audit readiness",       value: "94%",    trend: "↑ 6",    trendNeg: false, spark: "0,30 20,28 40,24 60,22 80,18 100,16 120,12 140,10 160,8 180,6 200,4",    stroke: "#22D3EE" },
 ];
 
 const ACTIONS = [
@@ -55,13 +55,13 @@ const ACTIONS = [
 ];
 
 const BASICS = [
-  { name: "Unsafe driving",     value: 42, status: "ok" },
-  { name: "HOS compliance",     value: 78, status: "warn" },
-  { name: "Driver fitness",     value: 31, status: "ok" },
-  { name: "Controlled subs",    value: 18, status: "ok" },
-  { name: "Vehicle maint",      value: 64, status: "warn" },
-  { name: "Hazmat compliance",  value: 22, status: "ok" },
-  { name: "Crash indicator",    value: 55, status: "warn" },
+  { name: "Unsafe driving",     value: 42 },
+  { name: "HOS compliance",     value: 78 },
+  { name: "Driver fitness",     value: 31 },
+  { name: "Controlled subs",    value: 18 },
+  { name: "Vehicle maint",      value: 64 },
+  { name: "Hazmat compliance",  value: 22 },
+  { name: "Crash indicator",    value: 55 },
 ];
 
 const EXPIR = [
@@ -73,37 +73,59 @@ const EXPIR = [
 ];
 
 const pillColor = (c: string) => {
-  if (c === "red")   return "bg-[color:var(--red)]/15 text-[color:var(--red)]";
-  if (c === "amber") return "bg-[#FEF3C7] text-[#B45309]";
-  if (c === "green") return "bg-[#DCFCE7] text-[#166534]";
-  return "bg-gray-100 text-gray-700";
+  if (c === "red")   return "bg-rose-500/15 text-rose-300 border border-rose-500/30";
+  if (c === "amber") return "bg-amber-500/15 text-amber-300 border border-amber-500/30";
+  if (c === "green") return "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
+  return "bg-slate-500/15 text-slate-300";
 };
 
 const basicColor = (v: number) => {
-  if (v < 50)  return "#166534";
-  if (v < 75)  return "#B45309";
-  return "#B91C1C";
+  if (v < 50)  return "#22D3EE";
+  if (v < 75)  return "#FBBF24";
+  return "#F87171";
 };
 
 export default function Dashboard() {
   return (
-    <div className="bg-[color:var(--cream)] min-h-screen">
+    <div className="bg-[#0A1929] min-h-screen text-white">
       {/* DARK WELCOME STRIP */}
-      <section className="navy-strip">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      <section className="relative overflow-hidden border-b border-[#1E3556]">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(900px 500px at 20% 0%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 90% 100%, rgba(6, 182, 212, 0.14), transparent 60%)",
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-6 py-14 relative">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
               <h1 className="text-[36px] sm:text-[48px] font-extrabold text-white leading-tight tracking-tight">
                 Welcome,{" "}
-                <span className="serif-italic text-[color:var(--red)]">Joshua.</span>
+                <span className="serif-italic" style={{ color: "#22D3EE" }}>
+                  Joshua.
+                </span>
               </h1>
-              <p className="text-white/75 text-[15px] mt-2">
-                Your fleet&apos;s compliance brain. Apex Logistics LLC · DOT #8001247 · 72 drivers · 67 power units · DIY plan.
+              <p className="text-white/70 text-[15px] mt-2">
+                Your fleet&apos;s compliance brain · Apex Logistics LLC · DOT #8001247 · 72 drivers · 67 power units ·{" "}
+                <span className="text-[#22D3EE] font-semibold">DIY plan</span>
               </p>
             </div>
             <div className="flex gap-3 flex-wrap">
-              <Link href="#" className="btn-red bg-[color:var(--red)]">★ Ask Compass →</Link>
-              <a href="#actions" className="btn-outline bg-transparent border-white text-white hover:bg-white hover:text-[color:var(--navy)]">
+              <Link
+                href="#"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-[15px] text-[#0A1929]"
+                style={{
+                  background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                  boxShadow: "0 8px 24px rgba(34, 211, 238, 0.35)",
+                }}
+              >
+                ★ Ask Compass →
+              </Link>
+              <a
+                href="#actions"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-[15px] text-white border border-white/25 hover:bg-white/5"
+              >
                 See what needs you today ↓
               </a>
             </div>
@@ -111,21 +133,35 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+      <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
         {/* KPI ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {KPIS.map((k, i) => (
-            <div key={i} className="bg-[color:var(--paper)] rounded-2xl p-5 border border-[color:var(--hairline)]">
-              <div className="text-[11px] tracking-[.14em] uppercase font-bold text-[color:var(--red)] mb-2">
+            <div
+              key={i}
+              className="rounded-2xl p-5 border border-[#1E3556] relative overflow-hidden"
+              style={{
+                background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)",
+                boxShadow: "0 1px 0 rgba(34, 211, 238, 0.08) inset, 0 12px 32px rgba(0,0,0,0.35)",
+              }}
+            >
+              <div className="text-[11px] tracking-[.14em] uppercase font-bold text-[#22D3EE] mb-2">
                 {k.label}
               </div>
-              <div className="flex items-baseline gap-2">
-                <div className="text-[34px] font-black text-[color:var(--navy)] leading-none">{k.value}</div>
-                <div className={`text-[13px] font-bold ${k.trendNeg ? "text-[color:var(--red)]" : "text-[#166534]"}`}>
+              <div className="flex items-baseline gap-2 mb-2">
+                <div className="text-[34px] font-black text-white leading-none">{k.value}</div>
+                <div className={`text-[13px] font-bold ${k.trendNeg ? "text-rose-400" : "text-emerald-400"}`}>
                   {k.trend}
                 </div>
               </div>
-              <svg viewBox="0 0 200 38" className="w-full h-10 mt-3" preserveAspectRatio="none">
+              <svg viewBox="0 0 200 38" className="w-full h-10" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <polyline fill={`url(#grad-${i})`} stroke="none" points={`${k.spark} 200,38 0,38`} />
                 <polyline fill="none" stroke={k.stroke} strokeWidth="2" points={k.spark} />
               </svg>
             </div>
@@ -133,64 +169,111 @@ export default function Dashboard() {
         </div>
 
         {/* COMPASS AGENT MESSAGE */}
-        <div className="bg-[color:var(--paper)] border border-[color:var(--red)]/30 rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-[color:var(--red)]/5 rounded-full blur-2xl" />
+        <div
+          className="rounded-2xl p-6 relative overflow-hidden border"
+          style={{
+            background: "linear-gradient(135deg, #15233D 0%, #0F1C32 100%)",
+            borderColor: "rgba(34, 211, 238, 0.35)",
+          }}
+        >
+          <div
+            className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 70%)" }}
+          />
           <div className="flex gap-4 items-start relative">
-            <div className="w-10 h-10 rounded-full bg-[color:var(--navy)] text-[color:var(--gold)] grid place-items-center font-black text-[18px] flex-shrink-0">
+            <div
+              className="w-11 h-11 rounded-full grid place-items-center font-black text-[20px] flex-shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                color: "#0A1929",
+                boxShadow: "0 0 20px rgba(34, 211, 238, 0.4)",
+              }}
+            >
               ∞
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-extrabold text-[color:var(--navy)]">Compass</span>
-                <span className="text-[12px] text-[color:var(--ink-muted)]">· your AI Safety Director · last scan 2 min ago</span>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span className="font-extrabold text-white">Compass</span>
+                <span className="text-[12px] text-white/50">· your AI Safety Director · last scan 2 min ago</span>
               </div>
-              <p className="text-[15px] text-[color:var(--navy)] leading-relaxed mb-4">
-                Your <strong>HOS BASIC</strong> just spiked from 64 to 78. Three roadside violations on{" "}
-                <strong>Ricardo Torres</strong> in the last 14 days look contestable — two have time-of-day errors and one cites the wrong CFR. DataQ win probability:{" "}
-                <strong className="text-[color:var(--red)]">72%</strong>. Want me to draft them?
+              <p className="text-[15px] text-white/90 leading-relaxed mb-4">
+                Your <strong className="text-[#22D3EE]">HOS BASIC</strong> just spiked from 64 to 78. Three roadside violations on{" "}
+                <strong className="text-white">Ricardo Torres</strong> in the last 14 days look contestable — two have time-of-day errors and one cites the wrong CFR. DataQ win probability:{" "}
+                <strong className="text-[#22D3EE]">72%</strong>. Want me to draft them?
               </p>
               <div className="flex gap-2 flex-wrap">
-                <Link href="#" className="btn-red text-[13px] py-2 px-4">Draft DataQ disputes →</Link>
-                <Link href="#" className="btn-outline text-[13px] py-2 px-4">Ask something else</Link>
-                <button className="text-[13px] py-2 px-4 text-[color:var(--ink-muted)] hover:text-[color:var(--navy)]">
-                  Dismiss
-                </button>
+                <Link
+                  href="#"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
+                  style={{
+                    background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                    boxShadow: "0 4px 12px rgba(34, 211, 238, 0.35)",
+                  }}
+                >
+                  Draft DataQ disputes →
+                </Link>
+                <Link
+                  href="#"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-white border border-white/20 hover:bg-white/5"
+                >
+                  Ask something else
+                </Link>
+                <button className="text-[13px] py-2 px-4 text-white/60 hover:text-white">Dismiss</button>
               </div>
             </div>
           </div>
         </div>
 
         {/* TWO-PANEL: CSA + EXPIRATIONS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="bg-[color:var(--paper)] border border-[color:var(--hairline)] rounded-2xl p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div
+            className="rounded-2xl p-6 border border-[#1E3556]"
+            style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+          >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-[16px] font-extrabold text-[color:var(--navy)]">CSA BASIC scores</h3>
-              <span className="text-[11px] font-mono text-[color:var(--red)] bg-[color:var(--red)]/10 px-2 py-1 rounded-full">Part 385</span>
+              <h3 className="text-[15px] font-extrabold text-white">CSA BASIC scores</h3>
+              <span className="text-[10px] font-mono text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full">
+                Part 385
+              </span>
             </div>
             <div className="space-y-3">
               {BASICS.map((b) => (
                 <div key={b.name} className="grid grid-cols-[120px_1fr_36px] gap-3 items-center">
-                  <div className="text-[13px] font-semibold text-[color:var(--navy)]">{b.name}</div>
-                  <div className="h-2 rounded-full bg-[color:var(--hairline)] overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${b.value}%`, background: basicColor(b.value) }} />
+                  <div className="text-[13px] font-semibold text-white/85">{b.name}</div>
+                  <div className="h-2 rounded-full bg-[#1E3556] overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${b.value}%`,
+                        background: basicColor(b.value),
+                        boxShadow: `0 0 10px ${basicColor(b.value)}80`,
+                      }}
+                    />
                   </div>
-                  <div className="text-[13px] font-bold text-[color:var(--navy)] text-right">{b.value}</div>
+                  <div className="text-[13px] font-bold text-white text-right">{b.value}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-[color:var(--paper)] border border-[color:var(--hairline)] rounded-2xl p-6">
+          <div
+            className="rounded-2xl p-6 border border-[#1E3556]"
+            style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+          >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-[16px] font-extrabold text-[color:var(--navy)]">Expirations · next 30 days</h3>
-              <span className="text-[11px] font-mono text-[color:var(--red)] bg-[color:var(--red)]/10 px-2 py-1 rounded-full">§ 391</span>
+              <h3 className="text-[15px] font-extrabold text-white">Expirations · next 30 days</h3>
+              <span className="text-[10px] font-mono text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full">
+                § 391
+              </span>
             </div>
-            <div className="divide-y divide-[color:var(--hairline)]">
+            <div className="divide-y divide-[#1E3556]">
               {EXPIR.map((e, i) => (
                 <div key={i} className="py-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[14px] font-bold text-[color:var(--navy)]">{e.who}</div>
-                    <div className="text-[12px] text-[color:var(--ink-muted)] font-mono">{e.what} · {e.cfr}</div>
+                    <div className="text-[14px] font-bold text-white">{e.who}</div>
+                    <div className="text-[12px] text-white/45 font-mono">
+                      {e.what} · {e.cfr}
+                    </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${pillColor(e.color)}`}>
                     {e.pill}
@@ -203,37 +286,44 @@ export default function Dashboard() {
 
         {/* ACTION ITEMS */}
         <div id="actions">
-          <div className="flex items-baseline justify-between mb-6">
+          <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2">
             <div>
-              <div className="eyebrow mb-1">01 · ACTION ITEMS · WHAT NEEDS YOU TODAY</div>
-              <h2 className="text-[24px] font-extrabold text-[color:var(--navy)]">
-                Eight things waiting on you.
-              </h2>
+              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-1">
+                01 · ACTION ITEMS · WHAT NEEDS YOU TODAY
+              </div>
+              <h2 className="text-[22px] font-extrabold text-white">Eight things waiting on you.</h2>
             </div>
-            <div className="text-[12px] text-[color:var(--ink-muted)]">Generated 2:38 PM</div>
+            <div className="text-[12px] text-white/45">Generated 2:38 PM</div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {ACTIONS.map((a, i) => (
-              <div key={i} className="bg-[color:var(--paper)] border border-[color:var(--hairline)] rounded-2xl p-5 flex flex-col">
+              <div
+                key={i}
+                className="rounded-2xl p-5 border border-[#1E3556] flex flex-col"
+                style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+              >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[18px]">{a.icon}</span>
-                  <h3 className="text-[13px] font-extrabold tracking-wide uppercase text-[color:var(--navy)]">{a.title}</h3>
+                  <h3 className="text-[12px] font-extrabold tracking-wide uppercase text-white">{a.title}</h3>
                 </div>
-                <div className="text-[11px] font-mono text-[color:var(--ink-muted)] mb-4">{a.cfr}</div>
-                <div className="divide-y divide-[color:var(--hairline)] flex-1">
+                <div className="text-[11px] font-mono text-[#22D3EE]/70 mb-4">{a.cfr}</div>
+                <div className="divide-y divide-[#1E3556] flex-1">
                   {a.items.map((it, j) => (
                     <div key={j} className="py-2.5 flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="text-[13px] font-bold text-[color:var(--navy)] truncate">{it.l}</div>
-                        <div className="text-[11px] text-[color:var(--ink-muted)]">{it.meta}</div>
+                        <div className="text-[13px] font-bold text-white truncate">{it.l}</div>
+                        <div className="text-[11px] text-white/50">{it.meta}</div>
                       </div>
-                      <span className="text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded bg-[#FEF3C7] text-[#B45309] whitespace-nowrap">
+                      <span className="text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap">
                         {it.pill}
                       </span>
                     </div>
                   ))}
                 </div>
-                <Link href="#" className="text-[13px] font-bold text-[color:var(--red)] mt-4 pt-4 border-t border-[color:var(--hairline)]">
+                <Link
+                  href="#"
+                  className="text-[13px] font-bold text-[#22D3EE] mt-4 pt-4 border-t border-[#1E3556] hover:text-[#67E8F9]"
+                >
                   {a.foot}
                 </Link>
               </div>
@@ -245,7 +335,11 @@ export default function Dashboard() {
       {/* FLOATING COMPASS BUBBLE */}
       <Link
         href="#"
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[color:var(--navy)] text-[color:var(--gold)] grid place-items-center font-black text-[22px] shadow-2xl border-2 border-[color:var(--gold)] z-40"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[#0A1929]"
+        style={{
+          background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+          boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)",
+        }}
         aria-label="Ask Compass"
       >
         ∞
