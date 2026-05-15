@@ -110,7 +110,7 @@ export default function SkillsCatalogPage() {
               <span className="serif-italic" style={{ color: "#22D3EE" }}>One library.</span>
             </h1>
             <p className="text-[16px] text-white/65 max-w-3xl mb-8">
-              Every Compass skill is a published, version-controlled prompt with the actual CFR section it answers from. {totalPublished} live today · {totalComing} on the roadmap.{" "}
+              Every Compass skill is a published, version-controlled prompt with the actual CFR section it answers from. All {totalPublished} live now in {catBuckets.length} categories.{" "}
               <a
                 href="https://github.com/x3fleetsafety/skills"
                 target="_blank"
@@ -125,9 +125,9 @@ export default function SkillsCatalogPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
                 { l: "Published skills", v: totalPublished, c: "#22D3EE" },
-                { l: "Coming Q3 2026", v: totalComing, c: "#FBBF24" },
                 { l: "Categories", v: catBuckets.length, c: "#A78BFA" },
-                { l: "CFR coverage", v: "Parts 380–399 + Part 172–180", c: "#10B981", small: true },
+                { l: "Apache 2.0 licensed", v: "Open source", c: "#10B981", small: true },
+                { l: "CFR coverage", v: "Parts 380–399 + Part 172–180", c: "#FBBF24", small: true },
               ].map((s, i) => (
                 <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
                   <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/50 mb-1">{s.l}</div>
@@ -155,20 +155,22 @@ export default function SkillsCatalogPage() {
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
             </div>
 
-            {/* Status pill */}
-            <div className="flex items-center gap-1 rounded-full border border-[#1E3556] p-1 bg-[#0F1C32]">
-              {(["all", "published", "coming-soon"] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setStatusFilter(opt)}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
-                    statusFilter === opt ? "text-[#0A1929] bg-[#22D3EE]" : "text-white/65 hover:text-white"
-                  }`}
-                >
-                  {opt === "all" ? "All" : opt === "published" ? `Live · ${totalPublished}` : `Roadmap · ${totalComing}`}
-                </button>
-              ))}
-            </div>
+            {/* Status pill — only shown when there are coming-soon entries */}
+            {totalComing > 0 && (
+              <div className="flex items-center gap-1 rounded-full border border-[#1E3556] p-1 bg-[#0F1C32]">
+                {(["all", "published", "coming-soon"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setStatusFilter(opt)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+                      statusFilter === opt ? "text-[#0A1929] bg-[#22D3EE]" : "text-white/65 hover:text-white"
+                    }`}
+                  >
+                    {opt === "all" ? "All" : opt === "published" ? `Live · ${totalPublished}` : `Roadmap · ${totalComing}`}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="text-[11px] text-white/55 font-mono">
               Showing <strong className="text-white">{filtered.length}</strong> of {SKILLS.length}
