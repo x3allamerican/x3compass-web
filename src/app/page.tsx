@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteShell from "@/components/SiteShell";
 
 const BRAINS = [
   { icon: "📁", title: "DQ Files Brain",        cfr: "49 CFR § 391.51",       desc: "All 12 driver-qualification documents per driver — application, MVR, med cert, road test, ELDT, Clearinghouse query. Missing slots glow red." },
@@ -72,6 +73,7 @@ const STEPS = [
 
 export default function Home() {
   return (
+    <SiteShell>
     <div className="bg-[color:var(--cream)]">
       {/* HERO */}
       <section className="relative sparkle-wash overflow-hidden">
@@ -320,5 +322,6 @@ export default function Home() {
         </div>
       </section>
     </div>
+    </SiteShell>
   );
 }

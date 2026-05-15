@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteShell from "@/components/SiteShell";
 
 const PLACARDS = [
   { src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Late_1970s_Flammable_truck-trailer_placard.jpg/1280px-Late_1970s_Flammable_truck-trailer_placard.jpg", lbl: "Class 3 · Flammable" },
@@ -35,6 +36,7 @@ const HAZMAT_SKILLS = [
 
 export default function Hazmat() {
   return (
+    <SiteShell>
     <div className="bg-[color:var(--cream)]">
       {/* HERO */}
       <section className="relative sparkle-wash overflow-hidden">
@@ -201,5 +203,6 @@ export default function Hazmat() {
         </div>
       </section>
     </div>
+    </SiteShell>
   );
 }
