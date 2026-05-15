@@ -2,40 +2,45 @@ import Link from "next/link";
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[color:var(--cream)]">
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[color:var(--cream)]/85 border-b border-[color:var(--hairline)]">
+    <div className="min-h-screen flex flex-col bg-[#0A1929] text-white">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#0A1929]/85 border-b border-[#1E3556]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 grid place-items-center bg-[color:var(--red)] text-white font-black text-base rounded-md">
+            <div
+              className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[#0A1929]"
+              style={{
+                background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
+              }}
+            >
               X3
             </div>
             <div className="leading-tight">
-              <div className="text-[color:var(--navy)] font-extrabold text-[15px] tracking-tight">
-                X3 COMPASS
-              </div>
-              <div className="text-[10px] tracking-[.18em] text-[color:var(--red)] font-bold uppercase">
+              <div className="text-white font-extrabold text-[15px] tracking-tight">X3 COMPASS</div>
+              <div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">
                 AI Safety Director
               </div>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-[14px] font-semibold text-[color:var(--ink-soft)]">
-            <Link href="/" className="hover:text-[color:var(--navy)]">Home</Link>
-            <Link href="/#services" className="hover:text-[color:var(--navy)]">Services</Link>
-            <Link href="/app" className="hover:text-[color:var(--navy)]">App</Link>
-            <Link href="/#skills" className="hover:text-[color:var(--navy)]">Skills</Link>
-            <Link href="/#pricing" className="hover:text-[color:var(--navy)]">Pricing</Link>
-            <Link href="/hazmat" className="hover:text-[color:var(--navy)]">Hazmat</Link>
+          <nav className="hidden md:flex items-center gap-8 text-[14px] font-semibold text-white/65">
+            <Link href="/" className="hover:text-white">Home</Link>
+            <Link href="/#services" className="hover:text-white">Services</Link>
+            <Link href="/app" className="hover:text-white">App</Link>
+            <Link href="/#skills" className="hover:text-white">Skills</Link>
+            <Link href="/#pricing" className="hover:text-white">Pricing</Link>
+            <Link href="/hazmat" className="hover:text-white">Hazmat</Link>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/app"
-              className="text-[14px] font-semibold text-[color:var(--ink-soft)] hover:text-[color:var(--navy)] hidden sm:block"
-            >
+            <Link href="/app" className="text-[14px] font-semibold text-white/65 hover:text-white hidden sm:block">
               Sign in
             </Link>
-            <Link href="/app" className="btn-red text-[14px] py-2 px-4">
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
+              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+            >
               ★ Start free →
             </Link>
           </div>
@@ -44,17 +49,20 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-[color:var(--navy)] text-white/70 px-6 py-12">
+      <footer className="bg-[#091525] border-t border-[#1E3556] text-white/65 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 grid place-items-center bg-[color:var(--red)] text-white font-black text-base rounded-md">
+                <div
+                  className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[#0A1929]"
+                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                >
                   X3
                 </div>
                 <div className="text-white font-extrabold tracking-tight">X3 COMPASS</div>
               </div>
-              <p className="text-[13px] text-white/60 max-w-xs">
+              <p className="text-[13px] text-white/55 max-w-xs">
                 The AI Safety Director for motor carriers running 1–100 power units. CFR-grounded answers, audit-ready files, daily compliance digest.
               </p>
             </div>
@@ -90,7 +98,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               </ul>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-6 flex flex-wrap justify-between gap-3 text-[12px] text-white/50">
+          <div className="border-t border-[#1E3556] pt-6 flex flex-wrap justify-between gap-3 text-[12px] text-white/45">
             <span>© 2026 X3 Fleet Safety LLC. All rights reserved.</span>
             <span>Built for fleets too small for a full-time Safety Director.</span>
           </div>
