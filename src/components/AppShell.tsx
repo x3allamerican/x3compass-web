@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
 
 type NavItem = { href: string; label: string; icon: string };
@@ -53,6 +54,47 @@ export default function AppShell({
   actions?: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Client-side auth gate — every /app/* page requires login.
+  // Unauthenticated visitors are bounced to /signup with a return URL.
+  useEffect(() => {
+    const loggedIn = typeof window !== "undefined" && window.localStorage.getItem("x3-session") === "true";
+    if (!loggedIn) {
+      const here = pathname && pathname !== "/" ? `?return_to=${encodeURIComponent(pathname)}` : "";
+      router.replace(`/signup${here}`);
+      return;
+    }
+    setAuthChecked(true);
+  }, [pathname, router]);
+
+  // Show a clean loading state until we've verified the session, so the unauthenticated
+  // visitor never sees a flash of the protected UI.
+  if (!authChecked) {
+    return (
+      <div className="bg-[#0A1929] min-h-screen text-white flex flex-col">
+        <TopNav />
+        <div className="flex-1 grid place-items-center">
+          <div className="text-center px-6">
+            <div
+              className="w-14 h-14 rounded-full grid place-items-center text-[#0A1929] font-black text-[22px] mx-auto mb-4"
+              style={{
+                background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                boxShadow: "0 0 0 6px rgba(34, 211, 238, 0.12)",
+              }}
+            >
+              ∞
+            </div>
+            <div className="text-[14px] text-white/70 font-semibold mb-2">Checking your session…</div>
+            <div className="text-[12px] text-white/45">
+              If this takes more than a moment, you&apos;ll be redirected to sign up.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#0A1929] min-h-screen text-white flex flex-col">

@@ -1,27 +1,7 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 import BrainGrid from "@/components/BrainGrid";
-
-const SKILLS = [
-  { cat: "dqf",       cfr: "§ 391.51",    name: "Driver Qualification File", q: "What's missing from this DQF?" },
-  { cat: "dqf",       cfr: "§ 391.41",    name: "Medical Certification",     q: "Driver's med card expired — can he drive?" },
-  { cat: "dqf",       cfr: "FCRA",        name: "Adverse Action Prep",       q: "How do I write the FCRA denial letter?" },
-  { cat: "hos",       cfr: "Part 395",    name: "Hours of Service",          q: "Walk me through the 14-hour rule" },
-  { cat: "hos",       cfr: "§ 395.20",    name: "ELD Compliance",            q: "My ELD says malfunction — what now?" },
-  { cat: "hos",       cfr: "§ 395.1(g)",  name: "Split-Sleeper Berth",       q: "Explain the 7/3 split" },
-  { cat: "da",        cfr: "Part 382",    name: "Drug & Alcohol Testing",    q: "What's my random rate this year?" },
-  { cat: "da",        cfr: "§ 382.701",   name: "Clearinghouse Queries",     q: "When is a full query required?" },
-  { cat: "da",        cfr: "§ 382.303",   name: "Post-Accident Testing",     q: "Driver had a crash. Now what?" },
-  { cat: "csa",       cfr: "Part 385",    name: "CSA / BASIC Scoring",       q: "Why did my HOS BASIC spike?" },
-  { cat: "csa",       cfr: "Part 386",    name: "DataQ Disputes ⭐",         q: "Is this inspection contestable?" },
-  { cat: "csa",       cfr: "§ 385.6",     name: "Intervention Thresholds",   q: "What triggers a CR notice?" },
-  { cat: "vehicles",  cfr: "Part 396",    name: "Maintenance Program",       q: "Build me a 396 PM schedule" },
-  { cat: "vehicles",  cfr: "§ 396.17",    name: "Annual DOT Inspection",     q: "What's checked in the annual?" },
-  { cat: "vehicles",  cfr: "§ 396.11",    name: "DVIR Records",              q: "Are DVIRs required if no defects?" },
-  { cat: "hazmat",    cfr: "Part 172",    name: "Hazmat Placarding",         q: "4,000 lbs of UN1203 — placards?" },
-  { cat: "hazmat",    cfr: "§ 177.848",   name: "Segregation Tables",        q: "Class 3 + Class 8 together?" },
-  { cat: "hazmat",    cfr: "49 CFR 1572", name: "TSA H Endorsement",         q: "How long is H valid?" },
-];
+import SkillsExplorer from "@/components/SkillsExplorer";
 
 const PRICING = [
   {
@@ -165,23 +145,12 @@ export default function Home() {
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Get a CFR-cited answer.</span>
           </h2>
           <p className="text-[17px] text-white/65 max-w-2xl mb-12">
-            Every skill is a published, version-controlled prompt. Click a chip to start a conversation with the brain that owns it.
+            Every skill is a published, version-controlled prompt. <strong className="text-white">Click any skill to see a real CFR-cited sample answer</strong> — no signup needed for the preview.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SKILLS.map((s, i) => (
-              <Link key={i} href="/app/ask" className={`${cardDark} relative pr-10 block p-5`}>
-                <div className="inline-block text-[10px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-2">
-                  {s.cfr}
-                </div>
-                <div className="text-[15px] font-bold text-white mb-1">{s.name}</div>
-                <div className="text-[13px] italic text-white/55">&ldquo;{s.q}&rdquo;</div>
-                <div className="absolute right-5 top-5 text-[#22D3EE] font-bold">→</div>
-              </Link>
-            ))}
-          </div>
+          <SkillsExplorer />
           <div className="text-center mt-10 text-[14px] text-white/55">
-            Want the full list?{" "}
-            <Link href="/app/ask" className="text-[#22D3EE] font-bold">Browse all 300 skills →</Link>
+            18 of 300 published skills shown above. The full library unlocks inside Compass —{" "}
+            <Link href="/signup" className="text-[#22D3EE] font-bold">Start your 7-day free trial →</Link>
           </div>
         </section>
 

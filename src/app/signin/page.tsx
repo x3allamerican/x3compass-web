@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense } from "react";
 
-export default function SignIn() {
+function SignInInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const returnTo = params?.get("return_to") || "/app";
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (typeof window !== "undefined") {
       localStorage.setItem("x3-session", "true");
     }
-    router.push("/app");
+    // Only allow internal redirects (paths starting with /)
+    router.push(returnTo.startsWith("/") ? returnTo : "/app");
   }
 
   return (
@@ -110,5 +113,13 @@ export default function SignIn() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A1929]" />}>
+      <SignInInner />
+    </Suspense>
   );
 }
