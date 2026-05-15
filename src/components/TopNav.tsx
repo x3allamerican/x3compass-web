@@ -31,7 +31,7 @@ export default function TopNav() {
 
   const linkClass = (href: string) =>
     `hover:text-white transition-colors ${
-      activeLink(href) ? "text-white" : "text-white/65"
+      activeLink(href) ? "text-white" : "text-white/85"
     }`;
 
   return (
@@ -55,7 +55,7 @@ export default function TopNav() {
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-[14px] font-semibold">
+        <nav className="hidden md:flex items-center gap-7 text-[15px] font-semibold">
           <Link href="/" className={linkClass("/")}>Home</Link>
           <Link href="/#services" className={linkClass("/#services")}>Services</Link>
           {loggedIn && (
@@ -79,7 +79,7 @@ export default function TopNav() {
               </Link>
               <button
                 onClick={signOut}
-                className="text-[14px] font-semibold text-white/65 hover:text-white"
+                className="text-[15px] font-semibold text-white/85 hover:text-white"
               >
                 Sign out
               </button>
@@ -88,7 +88,7 @@ export default function TopNav() {
             <>
               <Link
                 href="/signin"
-                className="text-[14px] font-semibold text-white/65 hover:text-white hidden sm:block"
+                className="text-[15px] font-semibold text-white/85 hover:text-white hidden sm:block"
               >
                 Sign in
               </Link>
