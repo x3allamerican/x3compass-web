@@ -1,20 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
-
-const BRAINS = [
-  { icon: "📁", title: "DQ Files Brain",        cfr: "49 CFR § 391.51",        desc: "All 12 driver-qualification documents per driver — application, MVR, med cert, road test, ELDT, Clearinghouse query. Missing slots glow red." },
-  { icon: "🧪", title: "Drug & Alcohol Brain",  cfr: "49 CFR Part 382",        desc: "Pre-employment, random, post-accident, RTD. Random-rate progress bars vs § 382.305. Clearinghouse queries on the calendar." },
-  { icon: "🪪", title: "MVR Brain",             cfr: "49 CFR § 391.25",        desc: "Annual MVR review log per driver, per state. Overdue drivers surface automatically. Continuous-monitoring upgrade in one click." },
-  { icon: "🎓", title: "Training Brain",        cfr: "49 CFR Part 380",        desc: "ELDT theory + BTW with TPR registry flag, supervisor D&A, defensive driving, pre-trip, cargo, hazmat. Expiry tracking on every course." },
-  { icon: "🚛", title: "Vehicles & PM Brain",   cfr: "49 CFR § 396.3 / 396.17", desc: "Power-unit inventory, annual DOT inspection tracker, PM schedule. VIN, plate, GVWR, OOS flags — and a 396 PM template generator on demand." },
-  { icon: "🚨", title: "Incidents Brain",       cfr: "49 CFR § 390.15",        desc: "DOT-recordable crash register with 3-year retention. Severity, preventability, post-accident test triggers. Audit-ready by export." },
-  { icon: "🔎", title: "Inspections Brain",     cfr: "49 CFR § 396.9",         desc: "Roadside inspections + internal DVIRs. Level I–VI tracked. Clean-inspection rate surfaced live with DataQ dispute suggestions." },
-  { icon: "📊", title: "CSA · DataQ Brain",     cfr: "49 CFR Part 385",        desc: "Live SMS percentile by BASIC. DataQ dispute drafter for contestable violations. 21 win-pattern templates. Avg win: $300." },
-  { icon: "⚠️", title: "Hazmat Brain",          cfr: "49 CFR Part 172",        desc: "Placarding wizard, segregation tables, TSA H-endorsement clock, shipping-paper validator. 100 hazmat-only skills." },
-  { icon: "⚖️", title: "Legal · Litigation",    cfr: "FMCSR + Tort",           desc: "Subpoena response checklist, litigation-hold protocol, retention map, adverse-action letter with FCRA-compliant timing." },
-  { icon: "💰", title: "Finance · IFTA Brain",  cfr: "IFTA · § 367 UCR",       desc: "Cost-per-mile modeling, IFTA quarterly filing, UCR registration windows, fuel-tax reconciliation across all jurisdictions." },
-  { icon: "📧", title: "Daily Digest Brain",    cfr: "Branded email",          desc: "7am every morning: expiring DQ docs, CDLs, med certs, PM-due vehicles. Never start the day wondering what's about to blow up." },
-];
+import BrainGrid from "@/components/BrainGrid";
 
 const SKILLS = [
   { cat: "dqf",       cfr: "§ 391.51",    name: "Driver Qualification File", q: "What's missing from this DQF?" },
@@ -143,21 +129,9 @@ export default function Home() {
             Twelve brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
           </h2>
           <p className="text-[17px] text-white/65 max-w-2xl mb-12">
-            Each brain is built around the actual regulation — not a generic vault that forces you to learn a new filing system. Tap a card to converse with the brain that owns it.
+            Each brain is built around the actual regulation — not a generic vault that forces you to learn a new filing system. Sign in to open any brain directly in the app.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {BRAINS.map((b, i) => (
-              <Link key={i} href="/app" className={`${cardDark} block p-6`}>
-                <div className="text-[28px] mb-3">{b.icon}</div>
-                <h3 className="text-[18px] font-bold text-white mb-2">{b.title}</h3>
-                <div className="inline-block text-[11px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-3">
-                  {b.cfr}
-                </div>
-                <p className="text-[14px] text-white/65 leading-relaxed">{b.desc}</p>
-                <div className="mt-4 text-[13px] font-bold text-[#22D3EE]">Open {b.title.replace(" Brain", "")} →</div>
-              </Link>
-            ))}
-          </div>
+          <BrainGrid />
         </section>
 
         {/* 02 · DASHBOARD */}

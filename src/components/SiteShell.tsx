@@ -1,53 +1,10 @@
 import Link from "next/link";
+import TopNav from "@/components/TopNav";
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#0A1929] text-white">
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#0A1929]/85 border-b border-[#1E3556]">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div
-              className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[#0A1929]"
-              style={{
-                background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-                boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
-              }}
-            >
-              X3
-            </div>
-            <div className="leading-tight">
-              <div className="text-white font-extrabold text-[15px] tracking-tight">X3 COMPASS</div>
-              <div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">
-                AI Safety Director
-              </div>
-            </div>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8 text-[14px] font-semibold text-white/65">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <Link href="/#services" className="hover:text-white">Services</Link>
-            <Link href="/app" className="hover:text-white">App</Link>
-            <Link href="/#skills" className="hover:text-white">Skills</Link>
-            <Link href="/#pricing" className="hover:text-white">Pricing</Link>
-            <Link href="/hazmat" className="hover:text-white">Hazmat</Link>
-            <Link href="/faq" className="hover:text-white">FAQ</Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link href="/signin" className="text-[14px] font-semibold text-white/65 hover:text-white hidden sm:block">
-              Sign in
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-            >
-              ★ Start free →
-            </Link>
-          </div>
-        </div>
-      </header>
-
+      <TopNav />
       <main className="flex-1">{children}</main>
 
       <footer className="bg-[#091525] border-t border-[#1E3556] text-white/65 px-6 py-12">

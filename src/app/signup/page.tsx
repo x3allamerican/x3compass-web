@@ -1,6 +1,20 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent } from "react";
 
 export default function SignUp() {
+  const router = useRouter();
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("x3-session", "true");
+    }
+    router.push("/app");
+  }
+
   return (
     <div className="min-h-screen bg-[#0A1929] text-white grid place-items-center px-6 py-12 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none"
@@ -53,7 +67,7 @@ export default function SignUp() {
           <h1 className="text-[22px] font-extrabold text-white mb-1">Start your 7-day trial.</h1>
           <p className="text-[14px] text-white/65 mb-6">No card. All 12 brains, all 300 skills, plus Hazmat.</p>
 
-          <form action="/app" method="get" className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
               <label htmlFor="company" className="block text-[13px] font-bold text-white mb-1.5">Company name</label>
               <input id="company" type="text" name="company" placeholder="Acme Trucking LLC"
