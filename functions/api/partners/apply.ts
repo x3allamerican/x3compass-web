@@ -116,6 +116,37 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     emailError = err instanceof Error ? err.message : "unknown email error";
   }
 
+  // === Send auto-acknowledgment to applicant (best-effort) ===
+  let ackOk = false;
+  let ackId: string | null = null;
+  let ackError: string | null = null;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ctx.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Joshua Kovarik <joshua@x3compass.com>",
+        to: [submission.email],
+        reply_to: "joshua@x3compass.com",
+        subject: `Got your Compass Partner application — I'll be in touch within 1 business day`,
+        html: renderAckHtml(submission),
+        text: renderAckText(submission),
+      }),
+    });
+    const j = await r.json() as { id?: string; message?: string };
+    if (r.ok && j.id) {
+      ackOk = true;
+      ackId = j.id;
+    } else {
+      ackError = j.message || `Resend HTTP ${r.status}`;
+    }
+  } catch (err: unknown) {
+    ackError = err instanceof Error ? err.message : "unknown ack-email error";
+  }
+
   // === Write to Supabase (best-effort) ===
   let supabaseOk = false;
   let supabaseError: string | null = null;
@@ -165,10 +196,80 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, emailSent: emailOk, dbWritten: supabaseOk }),
+    JSON.stringify({ ok: true, emailSent: emailOk, dbWritten: supabaseOk, ackSent: ackOk, ackId, ackError }),
     { status: 200, headers: { "Content-Type": "application/json", ...cors } }
   );
 };
+
+// === Customer-facing auto-acknowledgment ===
+function renderAckHtml(s: Submission): string {
+  const esc = (v?: string) =>
+    (v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const first = (s.name || "").split(" ")[0] || "there";
+  return `<!doctype html>
+<html><body style="font-family: system-ui, -apple-system, sans-serif; max-width: 620px; margin: 0 auto; padding: 24px; color: #0A1929; line-height: 1.55;">
+<div style="background: linear-gradient(135deg, #22D3EE, #06B6D4); color: #0A1929; padding: 22px 26px; border-radius: 12px; margin-bottom: 22px;">
+  <div style="font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7;">COMPASS PARTNER PROGRAM</div>
+  <h1 style="margin: 6px 0 0 0; font-size: 22px;">Got your application, ${esc(first)}.</h1>
+</div>
+
+<p style="font-size: 15px;">Hi ${esc(first)},</p>
+
+<p style="font-size: 15px;">Thanks for applying to the X3 Compass Partner program. Your application is in front of me — Joshua, founder of X3 Fleet Safety. I review every application personally; nothing is auto-decisioned.</p>
+
+<p style="font-size: 15px;"><strong>What happens next:</strong></p>
+
+<ul style="font-size: 15px; padding-left: 20px;">
+  <li><strong>Within 1 business day,</strong> you'll hear back from me at <a href="mailto:joshua@x3compass.com">joshua@x3compass.com</a> with one of three things: (a) a Calendly link for a 20-minute discovery call, (b) a few clarifying questions, or (c) a "not the right fit right now" note with feedback you can use.</li>
+  <li>If we move forward: we share our Reseller Agreement + Mutual NDA, you read them with your own counsel if you want, and we sign within 7–10 days.</li>
+  <li>Onboarding goal: <strong>your first carrier live on Compass within 60 days</strong>. If we miss that, your first three months are free.</li>
+</ul>
+
+<p style="font-size: 15px;"><strong>While you wait, here's what you can read:</strong></p>
+
+<ul style="font-size: 15px; padding-left: 20px;">
+  <li><a href="https://x3compass.com/partners">Partner Program one-pager</a> (the public version of what I'll cover on the call)</li>
+  <li><a href="https://github.com/x3fleetsafety/skills">Our open-source FMCSA skills library</a> (100 published, 200 more in the pipeline — use them with your clients with zero obligation)</li>
+  <li>Reseller Agreement + Mutual NDA — I'll share these privately once we confirm fit, since they're not yet public</li>
+</ul>
+
+<p style="font-size: 15px;">Talk soon.</p>
+
+<p style="font-size: 15px; margin-bottom: 4px;">— Joshua Kovarik</p>
+<p style="font-size: 13px; color: #555; margin-top: 0;">Founder, X3 Fleet Safety LLC<br>
+<a href="mailto:joshua@x3compass.com">joshua@x3compass.com</a> · <a href="https://x3compass.com">x3compass.com</a></p>
+
+<p style="font-size: 11px; color: #888; margin-top: 30px; padding-top: 16px; border-top: 1px solid #ddd;">
+  This is a transactional acknowledgment, not a marketing email. You'll only get further emails from me as part of the application process. — X3 Fleet Safety LLC, 16526 Apple Tree Trail, Tomball, TX 77377.
+</p>
+</body></html>`;
+}
+
+function renderAckText(s: Submission): string {
+  const first = (s.name || "").split(" ")[0] || "there";
+  return `Hi ${first},
+
+Thanks for applying to the X3 Compass Partner program. Your application is in front of me — Joshua, founder of X3 Fleet Safety. I review every application personally.
+
+What happens next:
+- Within 1 business day, you'll hear from me at joshua@x3compass.com with either a Calendly link for a 20-min discovery call, a couple of clarifying questions, or a "not the right fit right now" note with feedback.
+- If we move forward, we share our Reseller Agreement + Mutual NDA, you review with your own counsel if you want, and we sign within 7-10 days.
+- Onboarding goal: your first carrier live on Compass within 60 days. If we miss that, your first three months are free.
+
+In the meantime:
+- Partner one-pager: https://x3compass.com/partners
+- Open-source FMCSA skills: https://github.com/x3fleetsafety/skills
+
+Talk soon.
+
+— Joshua Kovarik
+Founder, X3 Fleet Safety LLC
+joshua@x3compass.com · x3compass.com
+
+---
+This is a transactional acknowledgment, not a marketing email.
+X3 Fleet Safety LLC, 16526 Apple Tree Trail, Tomball, TX 77377.`;
+}
 
 export const onRequestOptions: PagesFunction = async () => {
   return new Response(null, {
