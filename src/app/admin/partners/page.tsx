@@ -28,7 +28,7 @@ type AppRow = {
 };
 
 const STATUSES = [
-  "unreviewed",
+  "new",
   "contacted",
   "meeting_set",
   "signed",
@@ -37,7 +37,8 @@ const STATUSES = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  unreviewed: "#FACC15",
+  new: "#FACC15",
+  unreviewed: "#FACC15", // legacy alias
   contacted: "#22D3EE",
   meeting_set: "#A78BFA",
   signed: "#34D399",
