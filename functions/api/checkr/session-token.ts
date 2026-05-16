@@ -62,9 +62,14 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     body = {};
   }
 
+  // Default to all scopes so any embed on the page works with one token
+  // (Embeds POST without body, so we can't easily get per-embed scope from request)
+  const queryScopes = url.searchParams.get("scopes");
   const scopes = Array.isArray(body.scopes) && body.scopes.length > 0
     ? body.scopes.filter((s) => typeof s === "string")
-    : ["order"];
+    : queryScopes
+      ? queryScopes.split(",").map((s) => s.trim()).filter(Boolean)
+      : ["order", "reports", "disclosure"];
 
   const env = ctx.env.CHECKR_ENV === "live" ? "live" : "staging";
   const apiKey =
