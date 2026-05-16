@@ -8,11 +8,37 @@ const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxSh
 
 export default function PartnerApplyPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // In production, this POSTs to a backend or 3rd-party form service (e.g., Formspree, Resend, Notion API)
-    setSubmitted(true);
+    setError(null);
+    setSubmitting(true);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const payload: Record<string, string> = {};
+    fd.forEach((v, k) => {
+      if (typeof v === "string") payload[k] = v;
+    });
+
+    try {
+      const res = await fetch("/api/partners/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const j = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !j.ok) {
+        throw new Error(j.error || `Server error (HTTP ${res.status})`);
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Submission failed");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -168,15 +194,23 @@ export default function PartnerApplyPage() {
 
             {/* Acknowledge */}
             <div className="rounded-xl p-4 border border-[#22D3EE]/30 bg-[#22D3EE]/5 text-[12.5px] text-white/80 leading-relaxed">
-              <strong className="text-white">Before submitting:</strong> Compass Partner is a paid B2B program ($499/mo base + $10/driver wholesale once activated). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
+              <strong className="text-white">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor — no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
             </div>
+
+            {error && (
+              <div className="rounded-xl p-4 border border-rose-500/40 bg-rose-500/10 text-[13px] text-rose-200">
+                <strong className="text-white">Submission failed:</strong> {error}<br />
+                Try again, or email <a href="mailto:partners@x3compass.com" className="underline">partners@x3compass.com</a> directly.
+              </div>
+            )}
 
             <button
               type="submit"
-              className="w-full px-6 py-4 rounded-full font-bold text-[16px] text-[#0A1929]"
+              disabled={submitting}
+              className="w-full px-6 py-4 rounded-full font-bold text-[16px] text-[#0A1929] disabled:opacity-60 disabled:cursor-not-allowed"
               style={ctaCyan}
             >
-              ★ Submit Partner application →
+              {submitting ? "Submitting…" : "★ Submit Partner application →"}
             </button>
 
             <div className="text-center text-[12px] text-white/45">

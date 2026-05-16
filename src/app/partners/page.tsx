@@ -6,7 +6,7 @@ const COMPONENTS = [
     desc: "Your logo, your domain, your colors. Carrier clients log into your platform — never see X3 Compass branding. Powered by Compass behind the scenes.",
     retail: "~$3,500 custom build" },
   { n: "02", title: "Unlimited carrier client seats", badge: "NO CAPS",
-    desc: "$499/mo base + $10/driver wholesale. Add 1 carrier or 200 — same flat base. Charge your carriers retail ($25-50/driver), pocket the spread.",
+    desc: "30% of whatever you charge your carriers, $10/driver floor. Add 1 carrier or 200 — same simple split. You set retail; you keep 60-70%.",
     retail: "Competitors charge $99-200/seat" },
   { n: "03", title: "Done-for-you consultant website", badge: "DEPLOY IN 1 DAY",
     desc: "Polished one-page website with your photo, bio, services. Lead capture + Calendly built in. Most safety consultants have no site or a 2008-era one — yours is live tomorrow.",
@@ -43,7 +43,7 @@ const COMPONENTS = [
 const FAQ = [
   {
     q: "What does Compass Partner cost?",
-    a: "$499/month flat base + $10/driver/month wholesale across all your carrier clients. No carrier-count cap, no driver cap, no minimums. You charge your carriers retail (typical: $25-50/driver/mo) and keep the spread.",
+    a: "30% of whatever you charge your carriers, with a $10/driver/month floor. No base subscription, no carrier-count cap, no minimums. You set retail (typical: $25-50/driver) and keep 60-70% on every driver. Example: you charge a carrier $50/driver — X3 takes $15, you keep $35.",
   },
   {
     q: "Who is Compass Partner for?",
@@ -66,8 +66,8 @@ const FAQ = [
     a: "First 90 days month-to-month (you can leave anytime). After that, annual commitment with monthly billing.",
   },
   {
-    q: "Do you offer revenue share / referral fees?",
-    a: "Not in the standard Partner program — Partners profit from the spread between wholesale ($10/driver) and retail ($25-50/driver) they charge their own carriers. We do have a separate Referral program for non-consulting referrals; ask in your interview.",
+    q: "Do you offer referral bonuses?",
+    a: "Yes — refer another safety consultant who becomes an approved Partner AND closes their first paying carrier, and you earn $500 cash OR 2 months of fee waiver (your choice), capped at 5 referrals per year. We don't run a multi-level / sub-partner program — every Partner contracts directly with X3.",
   },
   {
     q: "What's the approval process?",
@@ -112,7 +112,7 @@ export default function PartnersPage() {
                 </Link>
               </div>
               <div className="text-[12px] tracking-[.18em] uppercase font-bold text-white/45">
-                $499/MO BASE · $10/DRIVER WHOLESALE · NO CAPS · WHITE-LABELED · 90-DAY MONTH-TO-MONTH START
+                30% OF RETAIL · $10/DRIVER FLOOR · NO BASE FEE · NO CAPS · 90-DAY MONTH-TO-MONTH START
               </div>
             </div>
           </div>
@@ -122,8 +122,8 @@ export default function PartnersPage() {
         <section className="border-y border-[#1E3556] bg-[#091525]">
           <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: "$499", desc: "Monthly base · unlimited carrier accounts · all 12 components included" },
-              { n: "$10", desc: "Per-driver wholesale across your carrier book — 60% margin retail" },
+              { n: "30%", desc: "Of whatever you charge your carriers — you keep 60-70% on every driver" },
+              { n: "$10", desc: "Per-driver floor — protects X3 economics on low-retail-tier carriers" },
               { n: "60 days", desc: "From sign-up to your first paying carrier (median across beta Partners)" },
             ].map((s, i) => (
               <div key={i} className="text-center md:text-left">
@@ -176,7 +176,7 @@ export default function PartnersPage() {
               <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
             </h2>
             <p className="text-[17px] text-white/65 max-w-3xl mb-12">
-              Each component, valued at retail what an independent consultant would pay to acquire it separately — combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for $499/mo base.
+              Each component, valued at retail what an independent consultant would pay to acquire it separately — combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for a single 30% revenue share (no base fee, no minimum, no caps).
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {COMPONENTS.map((c) => (
@@ -219,13 +219,13 @@ export default function PartnersPage() {
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Carriers signed by Month 12</td><td className="py-2 text-right font-bold text-white">4</td></tr>
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Average drivers per carrier</td><td className="py-2 text-right font-bold text-white">22</td></tr>
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Total drivers under management</td><td className="py-2 text-right font-bold text-white">88</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (you bill carriers)</td><td className="py-2 text-right font-bold text-[#22D3EE]">~$52K</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 cost</td><td className="py-2 text-right text-rose-300">-$16.5K</td></tr>
-                  <tr><td className="py-2 text-white font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-300">~$35.5K</td></tr>
+                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$52,800</td></tr>
+                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$15,840</td></tr>
+                  <tr><td className="py-2 text-white font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-300">~$36,960</td></tr>
                 </tbody>
               </table>
               <p className="text-[12px] text-white/55 italic leading-relaxed">
-                Math: 88 drivers × $50/driver/mo retail × 12 months = $52,800. Less ($499/mo base × 12) + (88 × $10 × 12) = $5,988 + $10,560 = $16,548 in X3 fees.
+                Math: 88 drivers × $50/driver/mo × 12 = $52,800. X3 fee = 30% × $52,800 = $15,840 (floor of $10,560 doesn&apos;t apply at $50 retail).
               </p>
             </div>
             <div className={`${cardDark} p-6 border-[#22D3EE]/60`}>
@@ -236,9 +236,9 @@ export default function PartnersPage() {
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Carriers under management</td><td className="py-2 text-right font-bold text-white">15</td></tr>
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Average drivers per carrier</td><td className="py-2 text-right font-bold text-white">25</td></tr>
                   <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Total drivers under management</td><td className="py-2 text-right font-bold text-white">375</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (you bill carriers)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$225K</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 cost</td><td className="py-2 text-right text-rose-300">-$51K</td></tr>
-                  <tr><td className="py-2 text-white font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-300">~$174K</td></tr>
+                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$225,000</td></tr>
+                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$67,500</td></tr>
+                  <tr><td className="py-2 text-white font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-300">~$157,500</td></tr>
                 </tbody>
               </table>
               <p className="text-[12px] text-white/55 italic leading-relaxed">
