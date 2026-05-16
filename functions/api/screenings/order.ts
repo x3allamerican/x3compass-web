@@ -216,6 +216,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         },
         body: JSON.stringify({
           vendor: "checkr",
+          service: `checkr_${body.package}`, // satisfy NOT NULL in shared schema
           checkr_env: env,
           carrier_id: body.carrier_id || null,
           driver_id: body.driver_id || null,
@@ -228,6 +229,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
           work_city: body.work_location.city || null,
           status: "invited",
           invitation_url: invite.invitation_url || null,
+          vendor_portal_url: invite.invitation_url || null,
           ordered_at: new Date().toISOString(),
         }),
       });
