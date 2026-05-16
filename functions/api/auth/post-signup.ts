@@ -12,56 +12,96 @@ const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const token = bearerFromRequest(ctx.request);
-  const user = await verifySupabaseJwt(ctx.env, token);
-  if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
+  // Master try/catch — guarantees JSON response even if something unexpected throws.
+  try {
+    const token = bearerFromRequest(ctx.request);
+    const user = await verifySupabaseJwt(ctx.env, token);
+    if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
 
-  let body: { carrier_name?: string; usdot_number?: string; plan?: string };
-  try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
+    let body: { carrier_name?: string; usdot_number?: string; plan?: string };
+    try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
-  const carrierName = (body.carrier_name || "").trim();
-  if (!carrierName) return json({ ok: false, error: "carrier_name required" }, 400);
-  const plan = (body.plan || "diy").toLowerCase();
-  const usdot = (body.usdot_number || "").trim() || null;
-  const supa = supaFetch(ctx.env);
+    const carrierName = (body.carrier_name || "").trim();
+    if (!carrierName) return json({ ok: false, error: "carrier_name required" }, 400);
+    const plan = (body.plan || "diy").toLowerCase();
+    const usdot = (body.usdot_number || "").trim() || null;
+    const supa = supaFetch(ctx.env);
 
-  const existing = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id)`)) as Array<{ carrier_id: string; compass_carriers?: { id: string; name: string; stripe_customer_id: string | null } }>;
-  if (existing.length > 0) return json({ ok: true, carrier_id: existing[0].carrier_id, already_existed: true });
+    // Idempotency — if user already linked to a carrier, return that carrier
+    const existing = (await supa.select(
+      "compass_carrier_users",
+      `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id)`
+    )) as Array<{ carrier_id: string; compass_carriers?: { id: string; name: string; stripe_customer_id: string | null } }>;
+    if (existing.length > 0) return json({ ok: true, carrier_id: existing[0].carrier_id, already_existed: true });
 
-  const carrierRows = (await supa.insert("compass_carriers", {
-    name: carrierName, usdot_number: usdot,
-    service_tier: plan === "dfy" ? "dfy" : plan === "enterprise" ? "enterprise" : "diy",
-    primary_contact_email: user.email || null,
-    subscription_status: "trialing",
-    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  })) as Array<{ id: string; name: string }>;
-  const carrier = carrierRows[0];
-  await supa.insert("compass_carrier_users", { carrier_id: carrier.id, user_id: user.id, role: "owner" }, "minimal");
+    // Create carrier
+    const carrierRows = (await supa.insert("compass_carriers", {
+      name: carrierName,
+      usdot_number: usdot,
+      service_tier: plan === "dfy" ? "dfy" : plan === "enterprise" ? "enterprise" : "diy",
+      primary_contact_email: user.email || null,
+      subscription_status: "trialing",
+      trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    })) as Array<{ id: string; name: string }>;
+    const carrier = carrierRows[0];
 
-  let stripeCustomerId: string | null = null;
-  if (ctx.env.STRIPE_SECRET_KEY) {
+    // Link user to carrier as owner
     try {
-      const r = await fetch("https://api.stripe.com/v1/customers", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ email: user.email || "", name: carrierName, "metadata[carrier_id]": carrier.id, "metadata[plan]": plan, "metadata[usdot_number]": usdot || "" }).toString(),
-      });
-      if (r.ok) {
-        const c = (await r.json()) as { id?: string };
-        stripeCustomerId = c.id || null;
-        if (stripeCustomerId) await supa.update("compass_carriers", `id=eq.${carrier.id}`, { stripe_customer_id: stripeCustomerId });
-      } else { console.error("[post-signup] Stripe customer create failed:", r.status); }
-    } catch (err) { console.error("[post-signup] Stripe error:", err); }
-  }
+      await supa.insert("compass_carrier_users", { carrier_id: carrier.id, user_id: user.id, role: "owner" }, "minimal");
+    } catch (err) {
+      console.error("[post-signup] carrier_users insert failed:", err);
+    }
 
-  if (ctx.env.RESEND_API_KEY && user.email) {
-    const site = ctx.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
-    const tpl = welcomeEmail(carrierName, null, site);
-    try { await sendEmail(ctx.env, { to: user.email, subject: tpl.subject, html: tpl.html, text: tpl.text }); }
-    catch (err) { console.error("[post-signup] welcome email failed:", err); }
-  }
+    // Stripe customer create (best-effort)
+    let stripeCustomerId: string | null = null;
+    if (ctx.env.STRIPE_SECRET_KEY) {
+      try {
+        const r = await fetch("https://api.stripe.com/v1/customers", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            email: user.email || "", name: carrierName,
+            "metadata[carrier_id]": carrier.id,
+            "metadata[plan]": plan,
+            "metadata[usdot_number]": usdot || "",
+          }).toString(),
+        });
+        if (r.ok) {
+          const c = (await r.json()) as { id?: string };
+          stripeCustomerId = c.id || null;
+          if (stripeCustomerId) {
+            try { await supa.update("compass_carriers", `id=eq.${carrier.id}`, { stripe_customer_id: stripeCustomerId }); }
+            catch (err) { console.error("[post-signup] carriers update failed:", err); }
+          }
+        } else {
+          console.error("[post-signup] Stripe customer create failed:", r.status, await r.text());
+        }
+      } catch (err) {
+        console.error("[post-signup] Stripe error:", err);
+      }
+    }
 
-  return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan });
+    // Welcome email (best-effort, fire-and-forget so it cannot break the response)
+    if (ctx.env.RESEND_API_KEY && user.email) {
+      const site = ctx.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
+      try {
+        const tpl = welcomeEmail(carrierName, null, site);
+        // ctx.waitUntil lets the email send continue after we return — avoids blocking + avoids
+        // any throw from sendEmail propagating into our response path
+        const p = sendEmail(ctx.env, { to: user.email, subject: tpl.subject, html: tpl.html, text: tpl.text })
+          .catch((err) => console.error("[post-signup] welcome email failed:", err));
+        ctx.waitUntil(p);
+      } catch (err) {
+        console.error("[post-signup] welcome email template failed:", err);
+      }
+    }
+
+    return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan });
+  } catch (err) {
+    console.error("[post-signup] unexpected error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    return json({ ok: false, error: "Server error", detail: msg }, 500);
+  }
 };
 
 export const onRequestOptions: PagesFunction = async () =>
