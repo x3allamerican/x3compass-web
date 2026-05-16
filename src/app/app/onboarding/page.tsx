@@ -38,7 +38,7 @@ export default function OnboardingPage() {
     try {
       if (!carrier) throw new Error("No carrier — refresh and try again");
       const sb = getSupabase();
-      const { error } = await sb.from("carriers").update({
+      const { error } = await sb.from("compass_carriers").update({
         name: carrierName.trim(),
         usdot_number: usdot.trim() || null,
         power_units_count: powerUnits ? Number(powerUnits) : null,
@@ -55,7 +55,7 @@ export default function OnboardingPage() {
       if (!carrier) throw new Error("No carrier");
       if (!driverFirst.trim() && !driverLast.trim()) { setStep(3); return; }
       const sb = getSupabase();
-      const { error } = await sb.from("drivers").insert({
+      const { error } = await sb.from("compass_drivers").insert({
         carrier_id: carrier.id, first_name: driverFirst.trim(), last_name: driverLast.trim() || "—",
         email: driverEmail.trim() || null, cdl_state: driverCdlState.trim() || null, cdl_number: driverCdlNumber.trim() || null,
         status: "pending_hire",

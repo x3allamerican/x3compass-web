@@ -19,11 +19,11 @@ export function useUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setState({ user: null, carrier: null, loading: false, error: null }); return; }
     const { data: rows, error } = await supabase
-      .from("carrier_users")
-      .select("carrier_id, role, carriers!inner(id, name, usdot_number, service_tier, hazmat_addon, subscription_status, trial_ends_at)")
+      .from("compass_carrier_users")
+      .select("carrier_id, role, compass_carriers!inner(id, name, usdot_number, service_tier, hazmat_addon, subscription_status, trial_ends_at)")
       .eq("user_id", user.id).limit(1);
     if (error) { setState({ user, carrier: null, loading: false, error: error.message }); return; }
-    const carrier = (rows?.[0] as unknown as { carriers: CarrierRow } | undefined)?.carriers || null;
+    const carrier = (rows?.[0] as unknown as { compass_carriers: CarrierRow } | undefined)?.compass_carriers || null;
     setState({ user, carrier, loading: false, error: null });
   }, []);
 

@@ -14,9 +14,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
 
   const supa = supaFetch(ctx.env);
-  const rows = (await supa.select("carrier_users", `user_id=eq.${user.id}&select=carriers(id,stripe_customer_id)`)) as Array<{ carriers: { id: string; stripe_customer_id: string | null } }>;
+  const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=compass_carriers(id,stripe_customer_id)`)) as Array<{ compass_carriers: { id: string; stripe_customer_id: string | null } }>;
   if (rows.length === 0) return json({ ok: false, error: "No carrier for user" }, 400);
-  const customer = rows[0].carriers?.stripe_customer_id;
+  const customer = rows[0].compass_carriers?.stripe_customer_id;
   if (!customer) return json({ ok: false, error: "No Stripe customer yet — start a checkout first" }, 400);
 
   const site = ctx.env.NEXT_PUBLIC_SITE_URL || new URL(ctx.request.url).origin;

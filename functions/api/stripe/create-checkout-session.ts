@@ -27,9 +27,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (plan === "dfy" && !ctx.env.STRIPE_PRICE_DFY_DRIVER) return json({ ok: false, error: "DFY price not configured" }, 500);
 
   const supa = supaFetch(ctx.env);
-  const rows = (await supa.select("carrier_users", `user_id=eq.${user.id}&select=carrier_id,carriers(id,name,stripe_customer_id,trial_ends_at)`)) as Array<{ carrier_id: string; carriers: { id: string; name: string; stripe_customer_id: string | null; trial_ends_at: string | null } }>;
+  const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id,trial_ends_at)`)) as Array<{ carrier_id: string; compass_carriers: { id: string; name: string; stripe_customer_id: string | null; trial_ends_at: string | null } }>;
   if (rows.length === 0) return json({ ok: false, error: "No carrier for user" }, 400);
-  const carrier = rows[0].carriers;
+  const carrier = rows[0].compass_carriers;
 
   const site = ctx.env.NEXT_PUBLIC_SITE_URL || new URL(ctx.request.url).origin;
   const successPath = body.success_path || "/app/settings/billing?checkout=success";

@@ -40,7 +40,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try { event = JSON.parse(rawBody) as StripeEvent; } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
   const supa = supaFetch(ctx.env);
-  try { await supa.insert("stripe_events", { id: event.id, type: event.type, payload: event }, "minimal"); }
+  try { await supa.insert("compass_stripe_events", { id: event.id, type: event.type, payload: event }, "minimal"); }
   catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("409") || msg.includes("duplicate")) return json({ ok: true, duplicate: true });
@@ -54,7 +54,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         const customer = sess.customer as string;
         const subscription = sess.subscription as string;
         if (carrierId && customer && subscription) {
-          await supa.update("carriers", `id=eq.${carrierId}`, { stripe_customer_id: customer, stripe_subscription_id: subscription, subscription_status: "active" });
+          await supa.update("compass_carriers", `id=eq.${carrierId}`, { stripe_customer_id: customer, stripe_subscription_id: subscription, subscription_status: "active" });
         }
         break;
       }
@@ -70,15 +70,15 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         const query = carrierMeta ? `id=eq.${carrierMeta}` : `stripe_subscription_id=eq.${subId}`;
         const updates: Record<string, unknown> = { subscription_status: status, current_period_end: currentPeriodEnd, stripe_subscription_id: subId };
         if (planMeta) updates.service_tier = planMeta;
-        await supa.update("carriers", query, updates);
+        await supa.update("compass_carriers", query, updates);
         break;
       }
       case "invoice.payment_failed": {
         const inv = event.data.object;
         const customer = inv.customer as string;
-        await supa.update("carriers", `stripe_customer_id=eq.${customer}`, { subscription_status: "past_due" });
+        await supa.update("compass_carriers", `stripe_customer_id=eq.${customer}`, { subscription_status: "past_due" });
         if (ctx.env.RESEND_API_KEY) {
-          const carriers = (await supa.select("carriers", `stripe_customer_id=eq.${customer}&select=name,primary_contact_email`)) as Array<{ name: string; primary_contact_email: string | null }>;
+          const carriers = (await supa.select("compass_carriers", `stripe_customer_id=eq.${customer}&select=name,primary_contact_email`)) as Array<{ name: string; primary_contact_email: string | null }>;
           const c = carriers[0];
           if (c?.primary_contact_email) {
             const site = ctx.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
@@ -91,11 +91,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       case "invoice.payment_succeeded": {
         const inv = event.data.object;
         const customer = inv.customer as string;
-        await supa.update("carriers", `stripe_customer_id=eq.${customer}`, { subscription_status: "active" });
+        await supa.update("compass_carriers", `stripe_customer_id=eq.${customer}`, { subscription_status: "active" });
         break;
       }
     }
-    await supa.update("stripe_events", `id=eq.${encodeURIComponent(event.id)}`, { processed_at: new Date().toISOString() });
+    await supa.update("compass_stripe_events", `id=eq.${encodeURIComponent(event.id)}`, { processed_at: new Date().toISOString() });
     return json({ ok: true });
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);

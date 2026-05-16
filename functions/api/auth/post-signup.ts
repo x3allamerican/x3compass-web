@@ -25,10 +25,10 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const usdot = (body.usdot_number || "").trim() || null;
   const supa = supaFetch(ctx.env);
 
-  const existing = (await supa.select("carrier_users", `user_id=eq.${user.id}&select=carrier_id,carriers(id,name,stripe_customer_id)`)) as Array<{ carrier_id: string; carriers?: { id: string; name: string; stripe_customer_id: string | null } }>;
+  const existing = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id)`)) as Array<{ carrier_id: string; compass_carriers?: { id: string; name: string; stripe_customer_id: string | null } }>;
   if (existing.length > 0) return json({ ok: true, carrier_id: existing[0].carrier_id, already_existed: true });
 
-  const carrierRows = (await supa.insert("carriers", {
+  const carrierRows = (await supa.insert("compass_carriers", {
     name: carrierName, usdot_number: usdot,
     service_tier: plan === "dfy" ? "dfy" : plan === "enterprise" ? "enterprise" : "diy",
     primary_contact_email: user.email || null,
@@ -36,7 +36,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   })) as Array<{ id: string; name: string }>;
   const carrier = carrierRows[0];
-  await supa.insert("carrier_users", { carrier_id: carrier.id, user_id: user.id, role: "owner" }, "minimal");
+  await supa.insert("compass_carrier_users", { carrier_id: carrier.id, user_id: user.id, role: "owner" }, "minimal");
 
   let stripeCustomerId: string | null = null;
   if (ctx.env.STRIPE_SECRET_KEY) {
@@ -49,7 +49,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       if (r.ok) {
         const c = (await r.json()) as { id?: string };
         stripeCustomerId = c.id || null;
-        if (stripeCustomerId) await supa.update("carriers", `id=eq.${carrier.id}`, { stripe_customer_id: stripeCustomerId });
+        if (stripeCustomerId) await supa.update("compass_carriers", `id=eq.${carrier.id}`, { stripe_customer_id: stripeCustomerId });
       } else { console.error("[post-signup] Stripe customer create failed:", r.status); }
     } catch (err) { console.error("[post-signup] Stripe error:", err); }
   }
