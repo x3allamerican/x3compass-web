@@ -69,7 +69,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     ? body.scopes.filter((s) => typeof s === "string")
     : queryScopes
       ? queryScopes.split(",").map((s) => s.trim()).filter(Boolean)
-      : ["order", "reports", "disclosure"];
+      : ["order", "disclosure"]; // Valid Checkr scopes (no separate 'reports' scope exists)
 
   const env = ctx.env.CHECKR_ENV === "live" ? "live" : "staging";
   const apiKey =
