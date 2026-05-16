@@ -1,25 +1,13 @@
-/**
- * Minimal type declarations for Cloudflare Pages Functions.
- *
- * This file exists because the project doesn't pull in
- * @cloudflare/workers-types as a dep. Just enough surface to satisfy
- * `next build` TypeScript checking for the handlers in functions/.
- */
-
 declare global {
-  interface EventContext<Env = Record<string, unknown>, P extends string = string, Data = Record<string, unknown>> {
+  interface EventContext<E = unknown, P extends string = string, D = unknown> {
     request: Request;
-    env: Env;
-    params: Record<P, string>;
-    data: Data;
-    next: (input?: Request | string, init?: RequestInit) => Promise<Response>;
+    env: E;
+    params: Record<P, string | string[]>;
     waitUntil: (promise: Promise<unknown>) => void;
-    passThroughOnException: () => void;
+    next: (input?: Request | string, init?: RequestInit) => Promise<Response>;
+    data: D;
   }
-
-  type PagesFunction<Env = Record<string, unknown>, P extends string = string, Data = Record<string, unknown>> = (
-    context: EventContext<Env, P, Data>
-  ) => Response | Promise<Response>;
+  type PagesFunction<E = unknown, P extends string = string, D = unknown> =
+    (context: EventContext<E, P, D>) => Response | Promise<Response>;
 }
-
 export {};

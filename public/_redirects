@@ -1,0 +1,6 @@
+/old-pricing  /pricing  301
+/plans        /pricing  301
+/start        /signup   301
+/free-trial   /signup   301
+/demo         /signup   301
+/login        /signin   301

@@ -1,125 +1,98 @@
 "use client";
-
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, Suspense } from "react";
+import { FormEvent, Suspense, useState } from "react";
+import { getSupabase } from "@/lib/supabase";
 
 function SignInInner() {
   const router = useRouter();
   const params = useSearchParams();
   const returnTo = params?.get("return_to") || "/app";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"password" | "magic">("password");
+  const [magicSent, setMagicSent] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (typeof window !== "undefined") {
-      localStorage.setItem("x3-session", "true");
-    }
-    // Only allow internal redirects (paths starting with /)
-    router.push(returnTo.startsWith("/") ? returnTo : "/app");
+  async function handlePasswordSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); setLoading(true); setError(null);
+    try {
+      const { error } = await getSupabase().auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      router.push(returnTo.startsWith("/") ? returnTo : "/app");
+    } catch (err) { setError(err instanceof Error ? err.message : "Sign-in failed"); }
+    finally { setLoading(false); }
+  }
+  async function handleMagicSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); setLoading(true); setError(null);
+    try {
+      const { error } = await getSupabase().auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?return_to=${encodeURIComponent(returnTo)}` },
+      });
+      if (error) throw error;
+      setMagicSent(true);
+    } catch (err) { setError(err instanceof Error ? err.message : "Magic-link send failed"); }
+    finally { setLoading(false); }
   }
 
   return (
     <div className="min-h-screen bg-[#0A1929] text-white grid place-items-center px-6 py-12 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(900px 600px at 20% 0%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(800px 500px at 90% 100%, rgba(139, 92, 246, 0.20), transparent 60%)",
-        }}
-      />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(900px 600px at 20% 0%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(800px 500px at 90% 100%, rgba(139, 92, 246, 0.20), transparent 60%)" }} />
       <div className="w-full max-w-md relative">
-        <Link href="/" className="text-[12px] text-white/55 hover:text-white inline-flex items-center gap-2 mb-6">
-          ← Back to home
-        </Link>
-        <div
-          className="rounded-2xl p-9 border border-[#1E3556]"
-          style={{
-            background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)",
-            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.45)",
-          }}
-        >
+        <Link href="/" className="text-[12px] text-white/55 hover:text-white inline-flex items-center gap-2 mb-6">← Back to home</Link>
+        <div className="rounded-2xl p-9 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)", boxShadow: "0 24px 60px rgba(0, 0, 0, 0.45)" }}>
           <div className="flex items-center gap-3 mb-7">
-            <div
-              className="w-11 h-11 grid place-items-center text-[#0A1929] font-black text-base rounded-lg"
-              style={{
-                background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-                boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
-              }}
-            >
-              X3
-            </div>
-            <div>
-              <div className="text-white font-extrabold text-[16px] tracking-tight">X3 COMPASS</div>
-              <div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">AI Safety Director</div>
-            </div>
+            <div className="w-11 h-11 grid place-items-center text-[#0A1929] font-black text-base rounded-lg" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>X3</div>
+            <div><div className="text-white font-extrabold text-[16px]">X3 COMPASS</div><div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">AI Safety Director</div></div>
           </div>
-
           <div className="flex gap-1 mb-6 p-1 rounded-lg bg-[#0A1929] border border-[#1E3556]">
-            <button className="flex-1 py-2.5 rounded-md font-bold text-[13px] text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-            >
-              Sign In
-            </button>
-            <Link href="/signup" className="flex-1 py-2.5 rounded-md font-bold text-[13px] text-white/65 hover:text-white text-center">
-              Sign Up
-            </Link>
-            <Link href="#" className="flex-1 py-2.5 rounded-md font-bold text-[13px] text-white/65 hover:text-white text-center">
-              Reset
-            </Link>
+            <button className="flex-1 py-2.5 rounded-md font-bold text-[13px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Sign In</button>
+            <Link href="/signup" className="flex-1 py-2.5 rounded-md font-bold text-[13px] text-white/65 hover:text-white text-center">Sign Up</Link>
           </div>
-
-          <h1 className="text-[22px] font-extrabold text-white mb-1">Welcome back.</h1>
-          <p className="text-[14px] text-white/65 mb-6">Sign in to manage your fleet.</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-[13px] font-bold text-white mb-1.5">Email</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                defaultValue="joshua@x3compass.com"
-                className="w-full bg-[#0A1929] border border-[#1E3556] rounded-lg px-4 py-3 text-[15px] text-white placeholder:text-white/40 focus:border-[#22D3EE] focus:outline-none focus:ring-2 focus:ring-[#22D3EE]/20"
-                required
-              />
+          {magicSent ? (
+            <div className="text-center py-8">
+              <div className="text-3xl mb-3">📩</div>
+              <h3 className="text-white text-lg font-bold mb-2">Check your email</h3>
+              <p className="text-white/65 text-sm">We sent a sign-in link to <strong className="text-white">{email}</strong>.</p>
             </div>
-            <div>
-              <label htmlFor="password" className="block text-[13px] font-bold text-white mb-1.5">Password</label>
-              <input
-                id="password"
-                type="password"
-                name="password"
-                defaultValue="demopass1234"
-                className="w-full bg-[#0A1929] border border-[#1E3556] rounded-lg px-4 py-3 text-[15px] text-white focus:border-[#22D3EE] focus:outline-none focus:ring-2 focus:ring-[#22D3EE]/20"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-3 rounded-lg font-bold text-[15px] text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
-            >
-              Sign In →
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-[13px] text-white/55">
-            <Link href="#" className="text-[#22D3EE] font-bold hover:text-[#67E8F9]">Forgot password?</Link>
-          </div>
-        </div>
-
-        <div className="text-center mt-6 text-[13px] text-white/55">
-          New to X3 Compass?{" "}
-          <Link href="/signup" className="text-[#22D3EE] font-bold hover:text-[#67E8F9]">Start a 7-day free trial →</Link>
+          ) : (
+            <>
+              <form onSubmit={mode === "password" ? handlePasswordSubmit : handleMagicSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[11px] tracking-[.14em] uppercase text-white/55 font-bold mb-1.5 block">Email</label>
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@yourfleet.com" className="w-full px-4 py-3 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-[14px] focus:outline-none focus:border-[#22D3EE]" />
+                </div>
+                {mode === "password" && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[11px] tracking-[.14em] uppercase text-white/55 font-bold">Password</label>
+                      <Link href="/forgot-password" className="text-[11px] text-[#22D3EE] hover:underline">Forgot?</Link>
+                    </div>
+                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-[14px] focus:outline-none focus:border-[#22D3EE]" />
+                  </div>
+                )}
+                {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+                <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-extrabold text-[14px] text-[#0A1929] disabled:opacity-60" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>
+                  {loading ? "…" : mode === "password" ? "Sign in" : "Send magic link"}
+                </button>
+              </form>
+              <div className="mt-6 text-center">
+                <button onClick={() => setMode(mode === "password" ? "magic" : "password")} className="text-[12px] text-white/55 hover:text-[#22D3EE]">
+                  {mode === "password" ? "Or sign in with a magic link →" : "← Back to password sign-in"}
+                </button>
+              </div>
+              <div className="mt-8 pt-6 border-t border-[#1E3556] text-center">
+                <p className="text-[12px] text-white/55">New to X3 Compass? <Link href="/signup" className="text-[#22D3EE] font-bold">Start your free trial →</Link></p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default function SignIn() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0A1929]" />}>
-      <SignInInner />
-    </Suspense>
-  );
+export default function SignInPage() {
+  return (<Suspense fallback={<div className="min-h-screen bg-[#0A1929]" />}><SignInInner /></Suspense>);
 }
