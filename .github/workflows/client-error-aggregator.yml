@@ -75,7 +75,7 @@ jobs:
           echo "spike_count=$SPIKES" >> "$GITHUB_OUTPUT"
           {
             echo 'spikes_json<<DELIM'
-            cat /tmp/agg.json
+            cat /tmp/agg.json; echo
             echo 'DELIM'
           } >> "$GITHUB_OUTPUT"
 

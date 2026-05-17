@@ -84,7 +84,7 @@ jobs:
           echo "fail_count=$FAIL_COUNT" >> "$GITHUB_OUTPUT"
           {
             echo 'status_json<<DELIM'
-            cat /tmp/deploy-status.json
+            cat /tmp/deploy-status.json; echo
             echo 'DELIM'
           } >> "$GITHUB_OUTPUT"
 
