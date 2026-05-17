@@ -33,7 +33,7 @@ export default function PageGuide(config: PageGuideConfig) {
 
   return (
     <div
-      className="rounded-2xl border border-[#1E3556] overflow-hidden"
+      className="rounded-2xl border border-[var(--border)] overflow-hidden"
       style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
     >
       {/* COLLAPSED HEADER (always visible) */}
@@ -43,7 +43,7 @@ export default function PageGuide(config: PageGuideConfig) {
         className="w-full flex items-start gap-3 px-5 py-4 text-left hover:bg-white/3 transition-colors"
       >
         <div
-          className="w-9 h-9 rounded-full grid place-items-center font-black text-[#0A1929] flex-shrink-0"
+          className="w-9 h-9 rounded-full grid place-items-center font-black text-[var(--bg)] flex-shrink-0"
           style={{
             background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
             boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
@@ -55,7 +55,7 @@ export default function PageGuide(config: PageGuideConfig) {
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE]/80 mb-1">
             How this page works · <span className="font-mono">{config.cfr}</span>
           </div>
-          <div className="text-white text-[14px] font-bold leading-snug">
+          <div className="text-[var(--fg)] text-[14px] font-bold leading-snug">
             {config.what}
           </div>
         </div>
@@ -66,12 +66,12 @@ export default function PageGuide(config: PageGuideConfig) {
 
       {/* EXPANDED CONTENT */}
       {open && (
-        <div className="px-5 pb-5 pt-1 border-t border-[#1E3556] grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+        <div className="px-5 pb-5 pt-1 border-t border-[var(--border)] grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
           {/* Left column — how-to steps */}
           <div className="space-y-5">
             {/* Who needs it */}
             <div>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-1.5">
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1.5">
                 Who needs this page
               </div>
               <p className="text-[13px] text-white/80 leading-relaxed">{config.who}</p>
@@ -79,21 +79,21 @@ export default function PageGuide(config: PageGuideConfig) {
 
             {/* How-to steps */}
             <div>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-3">
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-3">
                 How to get started · 3 paths
               </div>
               <ol className="space-y-3">
                 {config.howTo.map((s) => (
                   <li key={s.n} className="flex gap-3">
                     <div
-                      className="w-6 h-6 rounded-full grid place-items-center font-black text-[11px] text-[#0A1929] flex-shrink-0 mt-0.5"
+                      className="w-6 h-6 rounded-full grid place-items-center font-black text-[11px] text-[var(--bg)] flex-shrink-0 mt-0.5"
                       style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
                     >
                       {s.n}
                     </div>
                     <div className="flex-1">
-                      <div className="text-white text-[13px] font-bold mb-0.5">{s.title}</div>
-                      <div className="text-[12.5px] text-white/70 leading-relaxed">{s.detail}</div>
+                      <div className="text-[var(--fg)] text-[13px] font-bold mb-0.5">{s.title}</div>
+                      <div className="text-[12.5px] text-[var(--fg-muted)] leading-relaxed">{s.detail}</div>
                     </div>
                   </li>
                 ))}
@@ -103,7 +103,7 @@ export default function PageGuide(config: PageGuideConfig) {
             {/* Weekly habits */}
             {config.weeklyHabits && config.weeklyHabits.length > 0 && (
               <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-2">
+                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-2">
                   Once you&apos;re set up — weekly habit
                 </div>
                 <ul className="space-y-1.5">
@@ -133,7 +133,7 @@ export default function PageGuide(config: PageGuideConfig) {
                 </div>
                 <ul className="space-y-1.5">
                   {config.auditTraps.map((t, i) => (
-                    <li key={i} className="text-[12px] text-white/85 leading-relaxed pl-4 relative">
+                    <li key={i} className="text-[12px] text-[var(--fg-muted)] leading-relaxed pl-4 relative">
                       <span className="absolute left-0 top-0 text-amber-300">•</span>
                       {t}
                     </li>
@@ -152,7 +152,7 @@ export default function PageGuide(config: PageGuideConfig) {
                     <a
                       key={i}
                       href={`/app/ask?q=${encodeURIComponent(l.query)}`}
-                      className="block text-[12px] text-white/85 hover:text-white hover:bg-white/5 rounded px-2 py-1.5 leading-snug transition-colors"
+                      className="block text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-white/5 rounded px-2 py-1.5 leading-snug transition-colors"
                     >
                       <span className="text-[#22D3EE] font-bold">→</span> {l.label}
                     </a>

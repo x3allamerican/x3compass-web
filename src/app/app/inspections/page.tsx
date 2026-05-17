@@ -30,9 +30,9 @@ export default function InspectionsPage() {
 
   return (
     <AppShell crumbs="INSPECTIONS" title="Roadside Inspections"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log inspection</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log inspection</button>}>
       <div className="p-6">
-        <div className="mb-4 text-[12px] text-white/55">Track every roadside CVSA inspection (levels 1–8). Out-of-service findings feed your CSA score; DataQ disputes can be initiated from here.</div>
+        <div className="mb-4 text-[12px] text-[var(--fg-muted)]">Track every roadside CVSA inspection (levels 1–8). Out-of-service findings feed your CSA score; DataQ disputes can be initiated from here.</div>
         <TenantTable<I> rows={rows} loading={loading}
           emptyTitle="No inspections logged"
           emptyDesc="Add roadside inspections as they come in to keep your CSA scores accurate and prepare for DataQ disputes if needed."
@@ -41,7 +41,7 @@ export default function InspectionsPage() {
             { key: "level", label: "Level", render: (i) => i.level ? <Badge color="cyan">Lvl {i.level}</Badge> : <span className="text-white/35">—</span> },
             { key: "state", label: "State", hideOnMobile: true, render: (i) => i.state || <span className="text-white/35">—</span> },
             { key: "driver_id", label: "Driver", hideOnMobile: true, render: (i) => i.driver_id ? driverLabel(drivers.find(d => d.id === i.driver_id)) : <span className="text-white/35">—</span> },
-            { key: "violations", label: "Violations", render: (i) => i.violation_count ? <span className="text-white">{i.violation_count}</span> : <span className="text-white/55">0</span> },
+            { key: "violations", label: "Violations", render: (i) => i.violation_count ? <span className="text-[var(--fg)]">{i.violation_count}</span> : <span className="text-[var(--fg-muted)]">0</span> },
             { key: "oos", label: "OOS", render: (i) => (i.oos_driver || i.oos_vehicle) ? <Badge color="red">OOS</Badge> : <Badge color="green">clean</Badge> },
             { key: "report_url", label: "Report", render: (i) => i.report_url ? <a href={i.report_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
           ]}

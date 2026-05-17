@@ -32,23 +32,23 @@ export default function DQFilesPage() {
 
   return (
     <AppShell crumbs="DQ FILES" title="Driver Qualification Files"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Upload document</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Upload document</button>}>
       <div className="p-6">
         <div className="flex gap-3 mb-4">
-          <select value={filterDriver} onChange={(e)=>setFilterDriver(e.target.value)} className="px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm">
+          <select value={filterDriver} onChange={(e)=>setFilterDriver(e.target.value)} className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All drivers</option>
             {drivers.map(d => <option key={d.id} value={d.id}>{driverLabel(d)}</option>)}
           </select>
-          <div className="text-[12px] text-white/55 self-center">{filtered.length} document{filtered.length===1?"":"s"}</div>
+          <div className="text-[12px] text-[var(--fg-muted)] self-center">{filtered.length} document{filtered.length===1?"":"s"}</div>
         </div>
         <TenantTable<Doc> rows={filtered} loading={loading}
           emptyTitle={drivers.length === 0 ? "Add a driver first" : "No documents yet"}
           emptyDesc={drivers.length === 0 ? "DQ documents attach to drivers. Add a driver from the Drivers page first." : "Upload your first DQ document."}
           columns={[
-            { key: "driver", label: "Driver", render: (d) => <span className="text-white">{driverLabel(drivers.find(x => x.id === d.driver_id))}</span> },
+            { key: "driver", label: "Driver", render: (d) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(x => x.id === d.driver_id))}</span> },
             { key: "doc_type", label: "Type", render: (d) => <Badge color="cyan">{d.doc_type.replace(/_/g," ")}</Badge> },
             { key: "label", label: "Label", hideOnMobile: true, render: (d) => d.label || <span className="text-white/35">—</span> },
-            { key: "expires_on", label: "Expires", render: (d) => !d.expires_on ? <span className="text-white/35">—</span> : d.expires_on < today ? <Badge color="red">{fmtDate(d.expires_on)}</Badge> : <span className="text-white/85">{fmtDate(d.expires_on)}</span> },
+            { key: "expires_on", label: "Expires", render: (d) => !d.expires_on ? <span className="text-white/35">—</span> : d.expires_on < today ? <Badge color="red">{fmtDate(d.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(d.expires_on)}</span> },
             { key: "url", label: "File", render: (d) => d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">Open</a> : <span className="text-white/35">—</span> },
           ]}
         />

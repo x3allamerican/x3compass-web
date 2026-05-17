@@ -31,7 +31,7 @@ export default function OnboardingPage() {
   useEffect(() => { if (!loading && !user) router.replace("/signin?return_to=/app/onboarding"); }, [user, loading, router]);
   useEffect(() => { if (carrier) { setCarrierName(carrier.name); setUsdot(carrier.usdot_number || ""); } }, [carrier]);
 
-  if (loading || !user) return <div className="min-h-screen bg-[#0A1929] grid place-items-center text-white/55">Loading…</div>;
+  if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">Loading…</div>;
 
   async function saveCarrier() {
     setBusy(true); setError(null);
@@ -79,16 +79,16 @@ export default function OnboardingPage() {
   function skipToApp() { router.push("/app"); }
 
   return (
-    <div className="min-h-screen bg-[#0A1929] text-white">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold mb-2">Welcome to X3 Compass</h1>
-          <p className="text-white/55">Three quick steps and you&apos;re live.</p>
+          <p className="text-[var(--fg-muted)]">Three quick steps and you&apos;re live.</p>
         </div>
         <div className="flex justify-center gap-2 mb-10">
-          {[1,2,3].map((n) => (<div key={n} className={`h-1.5 w-20 rounded-full ${step >= n ? "bg-[#22D3EE]" : "bg-[#1E3556]"}`} />))}
+          {[1,2,3].map((n) => (<div key={n} className={`h-1.5 w-20 rounded-full ${step >= n ? "bg-[#22D3EE]" : "bg-[var(--border)]"}`} />))}
         </div>
-        <div className="rounded-2xl p-9 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
+        <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
           {step === 1 && (<>
             <h2 className="text-xl font-extrabold mb-4">1 · Confirm your company info</h2>
             <div className="space-y-4">
@@ -105,7 +105,7 @@ export default function OnboardingPage() {
           </>)}
           {step === 2 && (<>
             <h2 className="text-xl font-extrabold mb-1">2 · Add your first driver</h2>
-            <p className="text-[12px] text-white/55 mb-6">Optional — you can skip.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional — you can skip.</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="First"><input className="x3-input" value={driverFirst} onChange={(e) => setDriverFirst(e.target.value)} /></Field>
@@ -125,18 +125,18 @@ export default function OnboardingPage() {
           </>)}
           {step === 3 && (<>
             <h2 className="text-xl font-extrabold mb-1">3 · Pick your plan</h2>
-            <p className="text-[12px] text-white/55 mb-6">7-day free trial active. Card optional today.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-6">7-day free trial active. Card optional today.</p>
             <div className="space-y-3 mb-6">
               <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills — you operate it." />
               <PlanCard active={plan === "dfy"} onClick={() => setPlan("dfy")} title="DFY" price="$50" sub="/driver/mo" desc="We operate Compass for you. Concierge included." />
             </div>
             <div className="space-y-3 mb-6">
               <Field label="Number of drivers"><input className="x3-input" type="number" min={1} value={drivers} onChange={(e) => setDrivers(Math.max(1, Number(e.target.value)))} /></Field>
-              <label className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg bg-[#0A1929] border border-[#1E3556] hover:border-[#22D3EE]">
+              <label className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[#22D3EE]">
                 <input type="checkbox" checked={hazmat} onChange={(e) => setHazmat(e.target.checked)} />
                 <div className="flex-1">
                   <div className="text-sm font-bold">+ Hazmat add-on</div>
-                  <div className="text-[11px] text-white/55">Placard wizard, hazmat skills · $99/mo flat</div>
+                  <div className="text-[11px] text-[var(--fg-muted)]">Placard wizard, hazmat skills · $99/mo flat</div>
                 </div>
               </label>
             </div>
@@ -161,19 +161,19 @@ export default function OnboardingPage() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (<div><label className="text-[11px] tracking-[.14em] uppercase text-white/55 font-bold mb-1.5 block">{label}</label>{children}</div>);
+  return (<div><label className="text-[11px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1.5 block">{label}</label>{children}</div>);
 }
 function Err({ msg }: { msg: string }) {
   return <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
 }
 function PlanCard({ active, onClick, title, price, sub, desc }: { active: boolean; onClick: () => void; title: string; price: string; sub: string; desc: string }) {
   return (
-    <button onClick={onClick} className={`w-full text-left p-4 rounded-lg border ${active ? "border-[#22D3EE] bg-[#0F2438]" : "border-[#1E3556] bg-[#0A1929]"}`}>
+    <button onClick={onClick} className={`w-full text-left p-4 rounded-lg border ${active ? "border-[#22D3EE] bg-[#0F2438]" : "border-[var(--border)] bg-[var(--bg)]"}`}>
       <div className="flex items-baseline justify-between mb-1">
         <div className="font-extrabold text-base">{title}</div>
-        <div><span className="font-extrabold text-lg">{price}</span><span className="text-[12px] text-white/55">{sub}</span></div>
+        <div><span className="font-extrabold text-lg">{price}</span><span className="text-[12px] text-[var(--fg-muted)]">{sub}</span></div>
       </div>
-      <div className="text-[12px] text-white/55">{desc}</div>
+      <div className="text-[12px] text-[var(--fg-muted)]">{desc}</div>
     </button>
   );
 }

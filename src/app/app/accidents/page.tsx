@@ -30,9 +30,9 @@ export default function AccidentsPage() {
 
   return (
     <AppShell crumbs="ACCIDENTS" title="Accident Register"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log accident</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log accident</button>}>
       <div className="p-6">
-        <div className="mb-4 text-[12px] text-white/55">49 CFR § 390.15 — recordable accidents must be logged and retained for 3 years from date of accident.</div>
+        <div className="mb-4 text-[12px] text-[var(--fg-muted)]">49 CFR § 390.15 — recordable accidents must be logged and retained for 3 years from date of accident.</div>
         <TenantTable<A> rows={rows} loading={loading}
           emptyTitle="No accidents logged"
           emptyDesc="If you haven't had any in the last 3 years, leave this empty. The DOT requires only recordable accidents (fatality, injury w/ medical treatment off-scene, or tow-from-scene)."

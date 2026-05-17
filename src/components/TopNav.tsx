@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function TopNav() {
   const pathname = usePathname() ?? "/";
@@ -30,16 +31,16 @@ export default function TopNav() {
   };
 
   const linkClass = (href: string) =>
-    `hover:text-white transition-colors ${
-      activeLink(href) ? "text-white" : "text-white/85"
+    `hover:text-[var(--fg)] transition-colors ${
+      activeLink(href) ? "text-[var(--fg)]" : "text-[var(--fg-muted)]"
     }`;
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-[#0A1929]/85 border-b border-[#1E3556]">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-[var(--bg)]/85 border-b border-[var(--border)]">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
           <div
-            className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[#0A1929]"
+            className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[var(--bg)]"
             style={{
               background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
               boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
@@ -48,7 +49,7 @@ export default function TopNav() {
             X3
           </div>
           <div className="leading-tight">
-            <div className="text-white font-extrabold text-[15px] tracking-tight">X3 COMPASS</div>
+            <div className="text-[var(--fg)] font-extrabold text-[15px] tracking-tight">X3 COMPASS</div>
             <div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">
               AI Safety Director
             </div>
@@ -68,18 +69,19 @@ export default function TopNav() {
         </nav>
 
         <div className="flex items-center gap-3 flex-shrink-0">
+          <ThemeToggle />
           {loggedIn ? (
             <>
               <Link
                 href="/app"
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
+                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
                 style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
               >
                 Open app →
               </Link>
               <button
                 onClick={signOut}
-                className="text-[15px] font-semibold text-white/85 hover:text-white"
+                className="text-[15px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)]"
               >
                 Sign out
               </button>
@@ -88,13 +90,13 @@ export default function TopNav() {
             <>
               <Link
                 href="/signin"
-                className="text-[15px] font-semibold text-white/85 hover:text-white hidden sm:block"
+                className="text-[15px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)] hidden sm:block"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
                 style={{
                   background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
                   boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",

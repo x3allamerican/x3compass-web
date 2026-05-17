@@ -51,33 +51,33 @@ export default function VehiclesPage() {
 
   return (
     <AppShell crumbs="VEHICLES" title="Vehicles"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add vehicle</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add vehicle</button>}>
       <div className="p-6">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search VIN, plate, make/model…"
-            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />
-          <div className="text-[12px] text-white/55">{filtered.length} of {rows.length}</div>
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[#22D3EE]" />
+          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {rows.length}</div>
         </div>
 
         <TenantTable<Vehicle>
           rows={filtered} loading={loading}
           emptyTitle={rows.length ? "No matches" : "No vehicles yet"}
           emptyDesc={rows.length ? "Try a different search." : "Add your first power unit to start tracking inspections and maintenance."}
-          emptyAction={rows.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add first vehicle</button> : undefined}
+          emptyAction={rows.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add first vehicle</button> : undefined}
           onRowClick={(v) => setEdit(v)}
           columns={[
             { key: "vehicle", label: "Vehicle", render: (v) =>
               <div>
-                <div className="text-white font-semibold">{v.year} {v.make} {v.model}</div>
-                <div className="text-[11px] text-white/55">{v.license_plate ? `${v.license_plate_state || ""} ${v.license_plate}` : "—"}</div>
+                <div className="text-[var(--fg)] font-semibold">{v.year} {v.make} {v.model}</div>
+                <div className="text-[11px] text-[var(--fg-muted)]">{v.license_plate ? `${v.license_plate_state || ""} ${v.license_plate}` : "—"}</div>
               </div> },
-            { key: "vin", label: "VIN", hideOnMobile: true, render: (v) => v.vin ? <code className="text-[11px] text-white/85">{v.vin}</code> : <span className="text-white/35">—</span> },
+            { key: "vin", label: "VIN", hideOnMobile: true, render: (v) => v.vin ? <code className="text-[11px] text-[var(--fg-muted)]">{v.vin}</code> : <span className="text-white/35">—</span> },
             { key: "vehicle_type", label: "Type", hideOnMobile: true, render: (v) => v.vehicle_type ? <Badge color="cyan">{v.vehicle_type.replace("_"," ")}</Badge> : <span className="text-white/35">—</span> },
             { key: "next_dot_inspection_due", label: "DOT due", hideOnMobile: true, render: (v) =>
               !v.next_dot_inspection_due ? <span className="text-white/35">—</span> :
               v.next_dot_inspection_due < today ? <Badge color="red">{fmtDate(v.next_dot_inspection_due)}</Badge> :
               v.next_dot_inspection_due <= in60 ? <Badge color="amber">{fmtDate(v.next_dot_inspection_due)}</Badge> :
-              <span className="text-white/85">{fmtDate(v.next_dot_inspection_due)}</span> },
+              <span className="text-[var(--fg-muted)]">{fmtDate(v.next_dot_inspection_due)}</span> },
             { key: "status", label: "Status", render: (v) => <Badge color={STATUS_COLORS[v.status] || "gray"}>{v.status.replace("_"," ")}</Badge> },
           ]}
         />
@@ -125,10 +125,10 @@ function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_i
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
-      <div className="bg-[#0F1C32] border border-[#1E3556] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-[#1E3556] flex items-center justify-between sticky top-0 bg-[#0F1C32] z-10">
-          <h2 className="text-white font-extrabold text-lg">{vehicle ? `Edit ${vehicle.year || ""} ${vehicle.make || ""} ${vehicle.model || ""}` : "Add vehicle"}</h2>
-          <button onClick={onClose} className="text-white/55 hover:text-white text-xl">×</button>
+      <div className="bg-[#0F1C32] border border-[var(--border)] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between sticky top-0 bg-[#0F1C32] z-10">
+          <h2 className="text-[var(--fg)] font-extrabold text-lg">{vehicle ? `Edit ${vehicle.year || ""} ${vehicle.make || ""} ${vehicle.model || ""}` : "Add vehicle"}</h2>
+          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl">×</button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <Section title="Vehicle">
@@ -165,8 +165,8 @@ function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_i
           <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[#0F1C32] py-2">
             <div>{vehicle && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete vehicle</button>}</div>
             <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-white/65 hover:text-white text-sm border border-[#1E3556]">Cancel</button>
-              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : vehicle ? "Save changes" : "Add vehicle"}</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>
+              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : vehicle ? "Save changes" : "Add vehicle"}</button>
             </div>
           </div>
         </form>
@@ -180,11 +180,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-2 md:grid-cols-3 gap-3">{children}</div>; }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-white/55 font-bold mb-1">{label}</div>{children}</label>;
+  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1">{label}</div>{children}</label>;
 }
 function Input(p: { value: string; onChange: (v: string)=>void; type?: string; maxLength?: number }) {
-  return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} maxLength={p.maxLength} className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />;
+  return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} maxLength={p.maxLength} className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[#22D3EE]" />;
 }
 function Select({ value, onChange, options }: { value: string; onChange: (v: string)=>void; options: string[] }) {
-  return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")}</option>)}</select>;
+  return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")}</option>)}</select>;
 }

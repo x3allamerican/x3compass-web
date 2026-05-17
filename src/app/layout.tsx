@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["400","500","600","700","800","900"] });
@@ -47,8 +48,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }} />
+        {/* No-flash theme bootstrap — runs before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('x3-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.classList.add(t);}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
       </head>
       <body>
+        <ThemeProvider>
         {children}
         <CookieBanner />
         <Script id="x3-error-capture" strategy="afterInteractive">{`
@@ -91,6 +99,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`}
             strategy="afterInteractive" />
         )}
+      </ThemeProvider>
       </body>
     </html>
   );

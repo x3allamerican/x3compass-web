@@ -75,13 +75,13 @@ const FAQ = [
   },
 ];
 
-const cardDark = "bg-[#15233D] border border-[#1E3556] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
+const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
 const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function PartnersPage() {
   return (
     <SiteShell>
-      <div className="bg-[#0A1929] text-white">
+      <div className="bg-[var(--bg)] text-[var(--fg)]">
         {/* HERO */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none"
@@ -95,23 +95,23 @@ export default function PartnersPage() {
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
                 COMPASS PARTNER · WHITE-LABEL RESELLER PROGRAM
               </div>
-              <h1 className="font-extrabold text-white tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[64px] mb-6">
+              <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[64px] mb-6">
                 You run the carriers.
                 <br />
                 <span className="serif-italic" style={{ color: "#22D3EE" }}>We run the platform.</span>
               </h1>
-              <p className="text-[18px] text-white/75 max-w-2xl mx-auto mb-8 leading-relaxed">
+              <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
                 A white-label AI compliance platform for independent safety consultants. Your brand on the dashboard. Your carriers log into <em>your</em> tool. Powered by 300 published FMCSA skills + 12 specialized brains, sitting invisibly behind your business.
               </p>
               <div className="flex gap-3 justify-center flex-wrap mb-4">
-                <Link href="#apply" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]" style={ctaCyan}>
+                <Link href="#apply" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
                   ★ Apply to become a Partner →
                 </Link>
-                <Link href="#components" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-white border border-white/25 hover:bg-white/5">
+                <Link href="#components" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--fg)] border border-white/25 hover:bg-white/5">
                   See what&apos;s included
                 </Link>
               </div>
-              <div className="text-[12px] tracking-[.18em] uppercase font-bold text-white/45">
+              <div className="text-[12px] tracking-[.18em] uppercase font-bold text-[var(--fg-faint)]">
                 30% OF RETAIL · $10/DRIVER FLOOR · NO BASE FEE · NO CAPS · 90-DAY MONTH-TO-MONTH START
               </div>
             </div>
@@ -119,7 +119,7 @@ export default function PartnersPage() {
         </section>
 
         {/* STAT BAND */}
-        <section className="border-y border-[#1E3556] bg-[#091525]">
+        <section className="border-y border-[var(--border)] bg-[var(--bg-3)]">
           <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { n: "30%", desc: "Of whatever you charge your carriers — you keep 60-70% on every driver" },
@@ -128,7 +128,7 @@ export default function PartnersPage() {
             ].map((s, i) => (
               <div key={i} className="text-center md:text-left">
                 <div className="text-[64px] sm:text-[72px] font-black leading-none" style={{ color: "#22D3EE" }}>{s.n}</div>
-                <div className="serif-italic text-white/85 text-[17px] mt-2 leading-snug">{s.desc}</div>
+                <div className="serif-italic text-[var(--fg-muted)] text-[17px] mt-2 leading-snug">{s.desc}</div>
               </div>
             ))}
           </div>
@@ -141,11 +141,11 @@ export default function PartnersPage() {
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">01 · WHO COMPASS PARTNER IS FOR</div>
-          <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
+          <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             If you advise carriers,{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Compass becomes your stack.</span>
           </h2>
-          <p className="text-[17px] text-white/65 max-w-3xl mb-12">
+          <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
             We built Compass Partner for the consultants who already do the work — and need a platform that doesn&apos;t have a competitor&apos;s name plastered across it.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -156,26 +156,26 @@ export default function PartnersPage() {
               { t: "Insurance loss-control reps moonlighting as consultants", d: "Your day job pays the bills; consulting is the upside. Compass lets you serve 5x more side clients with less time." },
             ].map((p, i) => (
               <div key={i} className={`${cardDark} p-6`}>
-                <h3 className="text-[16px] font-extrabold text-white mb-2">{p.t}</h3>
-                <p className="text-[13.5px] text-white/65 leading-relaxed">{p.d}</p>
+                <h3 className="text-[16px] font-extrabold text-[var(--fg)] mb-2">{p.t}</h3>
+                <p className="text-[13.5px] text-[var(--fg-muted)] leading-relaxed">{p.d}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* 12 COMPONENTS */}
-        <section id="components" className="bg-[#091525] border-y border-[#1E3556] py-24">
+        <section id="components" className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-7xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
               <span className="w-7 h-[3px] bg-[#22D3EE]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">02 · WHAT&apos;S INSIDE COMPASS PARTNER</div>
-            <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
+            <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               12 components.{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
             </h2>
-            <p className="text-[17px] text-white/65 max-w-3xl mb-12">
+            <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
               Each component, valued at retail what an independent consultant would pay to acquire it separately — combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for a single 30% revenue share (no base fee, no minimum, no caps).
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -183,12 +183,12 @@ export default function PartnersPage() {
                 <div key={c.n} className={`${cardDark} p-6`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[28px] font-black" style={{ color: "#22D3EE" }}>{c.n}</div>
-                    <span className="text-[9.5px] font-extrabold tracking-wider text-[#0A1929] bg-[#22D3EE] px-2 py-1 rounded-full">{c.badge}</span>
+                    <span className="text-[9.5px] font-extrabold tracking-wider text-[var(--bg)] bg-[#22D3EE] px-2 py-1 rounded-full">{c.badge}</span>
                   </div>
-                  <h3 className="text-[17px] font-bold text-white mb-2 leading-snug">{c.title}</h3>
-                  <p className="text-[13px] text-white/65 leading-relaxed mb-3">{c.desc}</p>
-                  <div className="text-[10.5px] text-white/45 pt-3 border-t border-[#1E3556]">
-                    Retail: <span className="text-white/65">{c.retail}</span>
+                  <h3 className="text-[17px] font-bold text-[var(--fg)] mb-2 leading-snug">{c.title}</h3>
+                  <p className="text-[13px] text-[var(--fg-muted)] leading-relaxed mb-3">{c.desc}</p>
+                  <div className="text-[10.5px] text-[var(--fg-faint)] pt-3 border-t border-[var(--border)]">
+                    Retail: <span className="text-[var(--fg-muted)]">{c.retail}</span>
                   </div>
                 </div>
               ))}
@@ -203,67 +203,67 @@ export default function PartnersPage() {
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · YOUR ECONOMICS</div>
-          <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-3 leading-tight">
+          <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             The math.{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Plain and honest.</span>
           </h2>
-          <p className="text-[17px] text-white/65 max-w-3xl mb-12">
+          <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
             What a typical Year-1 vs Year-3 Partner looks like financially. No fluff.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className={`${cardDark} p-6`}>
               <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">YEAR 1 — Getting started</div>
-              <h3 className="text-[22px] font-extrabold text-white mb-4">Solo consultant · 4 carriers signed</h3>
+              <h3 className="text-[22px] font-extrabold text-[var(--fg)] mb-4">Solo consultant · 4 carriers signed</h3>
               <table className="w-full text-[13px] mb-4">
                 <tbody>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Carriers signed by Month 12</td><td className="py-2 text-right font-bold text-white">4</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Average drivers per carrier</td><td className="py-2 text-right font-bold text-white">22</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Total drivers under management</td><td className="py-2 text-right font-bold text-white">88</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$52,800</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$15,840</td></tr>
-                  <tr><td className="py-2 text-white font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-300">~$36,960</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers signed by Month 12</td><td className="py-2 text-right font-bold text-[var(--fg)]">4</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">22</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">88</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$52,800</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$15,840</td></tr>
+                  <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-300">~$36,960</td></tr>
                 </tbody>
               </table>
-              <p className="text-[12px] text-white/55 italic leading-relaxed">
+              <p className="text-[12px] text-[var(--fg-muted)] italic leading-relaxed">
                 Math: 88 drivers × $50/driver/mo × 12 = $52,800. X3 fee = 30% × $52,800 = $15,840 (floor of $10,560 doesn&apos;t apply at $50 retail).
               </p>
             </div>
             <div className={`${cardDark} p-6 border-[#22D3EE]/60`}>
               <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">YEAR 3 — Mature Partner</div>
-              <h3 className="text-[22px] font-extrabold text-white mb-4">15 carriers · 375 drivers</h3>
+              <h3 className="text-[22px] font-extrabold text-[var(--fg)] mb-4">15 carriers · 375 drivers</h3>
               <table className="w-full text-[13px] mb-4">
                 <tbody>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Carriers under management</td><td className="py-2 text-right font-bold text-white">15</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Average drivers per carrier</td><td className="py-2 text-right font-bold text-white">25</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Total drivers under management</td><td className="py-2 text-right font-bold text-white">375</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$225,000</td></tr>
-                  <tr className="border-b border-[#1E3556]"><td className="py-2 text-white/65">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$67,500</td></tr>
-                  <tr><td className="py-2 text-white font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-300">~$157,500</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">15</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">25</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">375</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$225,000</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$67,500</td></tr>
+                  <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-300">~$157,500</td></tr>
                 </tbody>
               </table>
-              <p className="text-[12px] text-white/55 italic leading-relaxed">
-                Same consultant operating without Compass Partner would invoice ~$75-150K/yr at lower-margin custom service work. Compass Partner roughly <strong className="text-white">doubles your income with less per-client effort.</strong>
+              <p className="text-[12px] text-[var(--fg-muted)] italic leading-relaxed">
+                Same consultant operating without Compass Partner would invoice ~$75-150K/yr at lower-margin custom service work. Compass Partner roughly <strong className="text-[var(--fg)]">doubles your income with less per-client effort.</strong>
               </p>
             </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section className="bg-[#091525] border-y border-[#1E3556] py-24">
+        <section className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-4xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
               <span className="w-7 h-[3px] bg-[#22D3EE]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">04 · FAQ</div>
-            <h2 className="text-[36px] sm:text-[42px] font-extrabold tracking-tight text-white mb-10 leading-tight">
+            <h2 className="text-[36px] sm:text-[42px] font-extrabold tracking-tight text-[var(--fg)] mb-10 leading-tight">
               Questions Partners ask.
             </h2>
             <div className="space-y-4">
               {FAQ.map((f, i) => (
                 <div key={i} className={`${cardDark} p-5`}>
-                  <h3 className="text-[15px] font-extrabold text-white mb-2">{f.q}</h3>
-                  <p className="text-[14px] text-white/75 leading-relaxed">{f.a}</p>
+                  <h3 className="text-[15px] font-extrabold text-[var(--fg)] mb-2">{f.q}</h3>
+                  <p className="text-[14px] text-[var(--fg-muted)] leading-relaxed">{f.a}</p>
                 </div>
               ))}
             </div>
@@ -282,21 +282,21 @@ export default function PartnersPage() {
             <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
               05 · APPLY TO BECOME A PARTNER
             </div>
-            <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-white mb-4 leading-tight">
+            <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-4 leading-tight">
               Ready to white-label{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>your safety consultancy?</span>
             </h2>
-            <p className="text-[17px] text-white/75 mb-8">
+            <p className="text-[17px] text-[var(--fg-muted)] mb-8">
               Submit your application. We&apos;ll review within 3 business days and schedule a 30-minute interview to confirm fit. Live Partner accounts typically activated within 5-10 business days of application.
             </p>
             <Link
               href="/partners/apply"
-              className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-bold text-[16px] text-[#0A1929]"
+              className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-bold text-[16px] text-[var(--bg)]"
               style={ctaCyan}
             >
               ★ Start your application →
             </Link>
-            <div className="mt-6 text-[12px] text-white/45">
+            <div className="mt-6 text-[12px] text-[var(--fg-faint)]">
               Or email <a href="mailto:partners@x3compass.com" className="text-[#22D3EE] hover:underline">partners@x3compass.com</a> with questions before applying.
             </div>
           </div>

@@ -72,14 +72,14 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-2xl p-5 border border-[#1E3556] bg-[#0F1C32] hover:border-[#22D3EE]/50 hover:bg-[#13243F] transition-colors relative pr-10 group"
+      className="text-left rounded-2xl p-5 border border-[var(--border)] bg-[#0F1C32] hover:border-[#22D3EE]/50 hover:bg-[#13243F] transition-colors relative pr-10 group"
       style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
     >
       <div className="inline-block text-[10px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-2">
         {skill.cfr}
       </div>
-      <div className="text-[15px] font-bold text-white mb-1">{skill.name}</div>
-      <div className="text-[13px] italic text-white/55">&ldquo;{skill.q}&rdquo;</div>
+      <div className="text-[15px] font-bold text-[var(--fg)] mb-1">{skill.name}</div>
+      <div className="text-[13px] italic text-[var(--fg-muted)]">&ldquo;{skill.q}&rdquo;</div>
       <div className="absolute right-5 top-5 text-[#22D3EE] font-bold group-hover:translate-x-0.5 transition-transform">→</div>
       <div className="text-[10px] text-[#22D3EE]/0 group-hover:text-[#22D3EE]/80 mt-3 font-semibold transition-colors">
         Preview sample answer ↗
@@ -97,7 +97,7 @@ function renderAnswer(answer: string) {
   const flushList = () => {
     if (listBuf.length) {
       blocks.push(
-        <ul key={`l${blocks.length}`} className="list-disc pl-5 space-y-1.5 my-2.5 text-white/85">
+        <ul key={`l${blocks.length}`} className="list-disc pl-5 space-y-1.5 my-2.5 text-[var(--fg-muted)]">
           {listBuf.map((li, i) => (
             <li key={i} dangerouslySetInnerHTML={{ __html: renderInline(li) }} />
           ))}
@@ -119,7 +119,7 @@ function renderAnswer(answer: string) {
     } else {
       flushList();
       blocks.push(
-        <p key={`p${blocks.length}`} className="text-[13.5px] text-white/85 leading-relaxed my-2" dangerouslySetInnerHTML={{ __html: renderInline(t) }} />
+        <p key={`p${blocks.length}`} className="text-[13.5px] text-[var(--fg-muted)] leading-relaxed my-2" dangerouslySetInnerHTML={{ __html: renderInline(t) }} />
       );
     }
   }
@@ -165,31 +165,31 @@ export default function SkillsExplorer() {
           onClick={() => setOpenSkill(null)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl border border-[#1E3556] my-8"
+            className="w-full max-w-2xl rounded-2xl border border-[var(--border)] my-8"
             style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="px-6 pt-6 pb-5 border-b border-[#1E3556]">
+            <div className="px-6 pt-6 pb-5 border-b border-[var(--border)]">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[11px] font-extrabold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2.5 py-1 rounded-full font-mono">
                     {openSkill.cfr}
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--fg-faint)]">
                     Live skill · sample answer
                   </span>
                 </div>
                 <button
                   onClick={() => setOpenSkill(null)}
-                  className="text-white/55 hover:text-white text-[20px] leading-none -mt-1"
+                  className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-[20px] leading-none -mt-1"
                   aria-label="Close"
                 >
                   ✕
                 </button>
               </div>
-              <h3 className="text-[22px] font-extrabold text-white mb-2">{openSkill.name}</h3>
-              <div className="rounded-lg bg-[#0A1929] border border-[#1E3556] px-4 py-3 text-[14px] text-white/75 italic">
+              <h3 className="text-[22px] font-extrabold text-[var(--fg)] mb-2">{openSkill.name}</h3>
+              <div className="rounded-lg bg-[var(--bg)] border border-[var(--border)] px-4 py-3 text-[14px] text-[var(--fg-muted)] italic">
                 &ldquo;{openSkill.q}&rdquo;
               </div>
             </div>
@@ -198,12 +198,12 @@ export default function SkillsExplorer() {
             <div className="px-6 py-5">
               <div className="flex items-center gap-2 mb-3">
                 <div
-                  className="w-7 h-7 rounded-full grid place-items-center text-[#0A1929] font-black text-[14px]"
+                  className="w-7 h-7 rounded-full grid place-items-center text-[var(--bg)] font-black text-[14px]"
                   style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
                 >
                   ∞
                 </div>
-                <div className="text-[12px] font-extrabold text-white">Compass · sample answer</div>
+                <div className="text-[12px] font-extrabold text-[var(--fg)]">Compass · sample answer</div>
               </div>
               <div className="space-y-1">
                 {renderAnswer(openSkill.a)}
@@ -211,24 +211,24 @@ export default function SkillsExplorer() {
             </div>
 
             {/* CTA footer */}
-            <div className="px-6 py-5 border-t border-[#1E3556] bg-[#0A1929]/60 rounded-b-2xl">
-              <div className="text-[13px] text-white/70 mb-3">
-                This is one of <strong className="text-white">300 published skills.</strong> Every Compass answer cites the actual CFR — and runs against your fleet&apos;s real data.
+            <div className="px-6 py-5 border-t border-[var(--border)] bg-[var(--bg)]/60 rounded-b-2xl">
+              <div className="text-[13px] text-[var(--fg-muted)] mb-3">
+                This is one of <strong className="text-[var(--fg)]">300 published skills.</strong> Every Compass answer cites the actual CFR — and runs against your fleet&apos;s real data.
               </div>
               <div className="flex flex-wrap gap-2 items-center justify-between">
-                <div className="text-[11px] text-white/45">
-                  Press <kbd className="px-1.5 py-0.5 rounded bg-[#1E3556] text-white/70 font-mono text-[10px]">Esc</kbd> to close
+                <div className="text-[11px] text-[var(--fg-faint)]">
+                  Press <kbd className="px-1.5 py-0.5 rounded bg-[var(--border)] text-[var(--fg-muted)] font-mono text-[10px]">Esc</kbd> to close
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => setOpenSkill(null)}
-                    className="text-[12.5px] font-semibold text-white/70 hover:text-white px-4 py-2 rounded-full border border-white/20 hover:bg-white/5"
+                    className="text-[12.5px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)] px-4 py-2 rounded-full border border-white/20 hover:bg-white/5"
                   >
                     Browse more skills
                   </button>
                   <Link
                     href="/signup"
-                    className="text-[12.5px] font-bold text-[#0A1929] px-5 py-2 rounded-full whitespace-nowrap"
+                    className="text-[12.5px] font-bold text-[var(--bg)] px-5 py-2 rounded-full whitespace-nowrap"
                     style={{
                       background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
                       boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",

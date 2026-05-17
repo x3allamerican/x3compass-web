@@ -8,7 +8,7 @@ export default function BackgroundRedirectPage() {
   useEffect(() => { router.replace("/app/background-checks"); }, [router]);
   return (
     <AppShell title="Background Checks">
-      <div className="p-6 text-white/55">Redirecting to Background Checks…</div>
+      <div className="p-6 text-[var(--fg-muted)]">Redirecting to Background Checks…</div>
     </AppShell>
   );
 }

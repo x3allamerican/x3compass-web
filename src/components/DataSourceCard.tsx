@@ -53,15 +53,15 @@ export default function DataSourceCard({
   if (!expanded && status !== "empty") {
     return (
       <div
-        className="rounded-xl px-4 py-3 border border-[#1E3556] flex items-center justify-between gap-3"
+        className="rounded-xl px-4 py-3 border border-[var(--border)] flex items-center justify-between gap-3"
         style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
           <div className="min-w-0">
-            <div className="text-[12px] text-white">
-              <span className="font-bold text-white">{status === "connected" ? `Connected · ${connectedVendor}` : status === "imported" ? `CSV imported · ${csvFileName ?? csvTemplate.name}` : "Manual entry"}</span>
-              <span className="text-white/55 ml-2">{recordCount} records</span>
+            <div className="text-[12px] text-[var(--fg)]">
+              <span className="font-bold text-[var(--fg)]">{status === "connected" ? `Connected · ${connectedVendor}` : status === "imported" ? `CSV imported · ${csvFileName ?? csvTemplate.name}` : "Manual entry"}</span>
+              <span className="text-[var(--fg-muted)] ml-2">{recordCount} records</span>
               {lastSync && <span className="text-white/40 ml-2">· last sync {lastSync}</span>}
             </div>
           </div>
@@ -79,36 +79,36 @@ export default function DataSourceCard({
   return (
     <>
       <div
-        className="rounded-2xl border border-[#1E3556] overflow-hidden"
+        className="rounded-2xl border border-[var(--border)] overflow-hidden"
         style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
       >
         {/* Header */}
-        <div className="px-5 pt-5 pb-4 border-b border-[#1E3556]">
+        <div className="px-5 pt-5 pb-4 border-b border-[var(--border)]">
           <div className="flex items-baseline justify-between gap-3 mb-1">
             <div>
               <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE]/80 mb-1">
                 Data source for {trackerLabel}
               </div>
-              <h3 className="text-[17px] font-extrabold text-white">How do you want to get data in here?</h3>
+              <h3 className="text-[17px] font-extrabold text-[var(--fg)]">How do you want to get data in here?</h3>
             </div>
             {status !== "empty" && (
               <button
                 onClick={() => setExpanded(false)}
-                className="text-[11px] font-semibold text-white/55 hover:text-white whitespace-nowrap"
+                className="text-[11px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)] whitespace-nowrap"
               >
                 Collapse ↑
               </button>
             )}
           </div>
           {cfr && (
-            <div className="text-[11px] text-white/55">
+            <div className="text-[11px] text-[var(--fg-muted)]">
               Backed by <span className="font-mono text-[#22D3EE]">{cfr}</span>
             </div>
           )}
         </div>
 
         {/* Tab strip */}
-        <div className="flex border-b border-[#1E3556] bg-[#0E1B30]">
+        <div className="flex border-b border-[var(--border)] bg-[#0E1B30]">
           {[
             { id: "connect" as const, label: `🔌 Option A · Connect vendor`, sub: "(preferred)" },
             { id: "csv" as const, label: "📄 Option B · Import CSV", sub: "" },
@@ -120,11 +120,11 @@ export default function DataSourceCard({
               className={`flex-1 px-4 py-3 text-[12px] font-bold transition-colors ${
                 activeTab === t.id
                   ? "text-white bg-[#22D3EE]/10 border-b-2 border-[#22D3EE]"
-                  : "text-white/55 hover:text-white border-b-2 border-transparent"
+                  : "text-[var(--fg-muted)] hover:text-white border-b-2 border-transparent"
               }`}
             >
               <div>{t.label}</div>
-              {t.sub && <div className="text-[10px] text-white/45 font-medium mt-0.5">{t.sub}</div>}
+              {t.sub && <div className="text-[10px] text-[var(--fg-faint)] font-medium mt-0.5">{t.sub}</div>}
             </button>
           ))}
         </div>
@@ -134,46 +134,46 @@ export default function DataSourceCard({
           {/* Option A — Connect */}
           {activeTab === "connect" && (
             <div className="space-y-3">
-              <div className="text-[12.5px] text-white/70 mb-3">
+              <div className="text-[12.5px] text-[var(--fg-muted)] mb-3">
                 If you already use one of these vendors, Compass pulls data in real-time. Setup takes ~3 minutes.
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {vendors.map((v) => (
                   <div
                     key={v.name}
-                    className="rounded-xl p-4 border border-[#1E3556] hover:border-[#22D3EE]/40 transition-colors"
+                    className="rounded-xl p-4 border border-[var(--border)] hover:border-[#22D3EE]/40 transition-colors"
                     style={{ background: "#0F1C32" }}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="min-w-0">
-                        <div className="text-white font-bold text-[13.5px] flex items-center gap-2 flex-wrap">
+                        <div className="text-[var(--fg)] font-bold text-[13.5px] flex items-center gap-2 flex-wrap">
                           {v.name}
                           {v.badge === "Recommended" && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold text-[#0A1929] bg-[#22D3EE]">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold text-[var(--bg)] bg-[#22D3EE]">
                               {v.badge}
                             </span>
                           )}
                           {v.badge && v.badge !== "Recommended" && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold text-white/70 border border-white/20">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold text-[var(--fg-muted)] border border-white/20">
                               {v.badge}
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-white/55 mt-0.5">{v.blurb}</div>
+                        <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">{v.blurb}</div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#1E3556]/60">
-                      <div className="text-[10.5px] text-white/45">
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]/60">
+                      <div className="text-[10.5px] text-[var(--fg-faint)]">
                         {v.cost && <span>{v.cost}</span>}
                         {v.status === "beta" && <span className="ml-2 text-amber-300">· Beta</span>}
-                        {v.status === "manual-pull" && <span className="ml-2 text-white/55">· Manual data pull</span>}
+                        {v.status === "manual-pull" && <span className="ml-2 text-[var(--fg-muted)]">· Manual data pull</span>}
                       </div>
                       <button
                         onClick={() => {
                           setStatus("connected");
                           setExpanded(false);
                         }}
-                        className="text-[11px] font-bold text-[#0A1929] px-3 py-1.5 rounded-full"
+                        className="text-[11px] font-bold text-[var(--bg)] px-3 py-1.5 rounded-full"
                         style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
                       >
                         Connect →
@@ -182,7 +182,7 @@ export default function DataSourceCard({
                   </div>
                 ))}
               </div>
-              <div className="text-[11px] text-white/45 pt-2">
+              <div className="text-[11px] text-[var(--fg-faint)] pt-2">
                 Don&apos;t see your vendor? <a href="mailto:support@x3compass.com?subject=Vendor%20request" className="text-[#22D3EE] hover:underline">Request an integration →</a>
               </div>
             </div>
@@ -191,15 +191,15 @@ export default function DataSourceCard({
           {/* Option B — CSV */}
           {activeTab === "csv" && (
             <div className="space-y-4">
-              <div className="text-[12.5px] text-white/70">
+              <div className="text-[12.5px] text-[var(--fg-muted)]">
                 No vendor? No problem. Export from your current system as CSV, upload it here, and Compass parses it into the tracker.
               </div>
 
               {/* CSV template download */}
-              <div className="rounded-xl p-4 border border-[#1E3556] flex items-center justify-between gap-3 flex-wrap" style={{ background: "#0F1C32" }}>
+              <div className="rounded-xl p-4 border border-[var(--border)] flex items-center justify-between gap-3 flex-wrap" style={{ background: "#0F1C32" }}>
                 <div className="min-w-0">
-                  <div className="text-white font-bold text-[13px] mb-1">Step 1 · Download the template</div>
-                  <div className="text-[11px] text-white/55">
+                  <div className="text-[var(--fg)] font-bold text-[13px] mb-1">Step 1 · Download the template</div>
+                  <div className="text-[11px] text-[var(--fg-muted)]">
                     Columns: <span className="font-mono text-[#22D3EE]">{csvTemplate.columns.join(", ")}</span>
                   </div>
                 </div>
@@ -215,7 +215,7 @@ export default function DataSourceCard({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="text-[12px] font-bold text-white border border-white/20 hover:bg-white/5 px-4 py-2 rounded-full whitespace-nowrap"
+                  className="text-[12px] font-bold text-[var(--fg)] border border-white/20 hover:bg-white/5 px-4 py-2 rounded-full whitespace-nowrap"
                 >
                   ⬇ Download CSV template
                 </button>
@@ -242,11 +242,11 @@ export default function DataSourceCard({
                   }}
                 />
                 <div className="text-[36px] mb-2">📤</div>
-                <div className="text-white font-bold text-[13px] mb-1">Step 2 · Drop your CSV here, or click to browse</div>
-                <div className="text-[11px] text-white/55">Up to 50 MB · all data stays in your account · processed locally first</div>
+                <div className="text-[var(--fg)] font-bold text-[13px] mb-1">Step 2 · Drop your CSV here, or click to browse</div>
+                <div className="text-[11px] text-[var(--fg-muted)]">Up to 50 MB · all data stays in your account · processed locally first</div>
               </div>
 
-              <div className="text-[11px] text-white/45">
+              <div className="text-[11px] text-[var(--fg-faint)]">
                 Compass will preview the rows, show what it parsed, and let you confirm before anything is written.
               </div>
             </div>
@@ -255,25 +255,25 @@ export default function DataSourceCard({
           {/* Option C — Manual */}
           {activeTab === "manual" && (
             <div className="space-y-4">
-              <div className="text-[12.5px] text-white/70">
+              <div className="text-[12.5px] text-[var(--fg-muted)]">
                 Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later — no data is lost.
               </div>
 
-              <div className="rounded-xl p-5 border border-[#1E3556] flex items-center justify-between gap-3" style={{ background: "#0F1C32" }}>
+              <div className="rounded-xl p-5 border border-[var(--border)] flex items-center justify-between gap-3" style={{ background: "#0F1C32" }}>
                 <div>
-                  <div className="text-white font-bold text-[13px]">Add records manually</div>
-                  <div className="text-[11px] text-white/55 mt-0.5">Best for fleets &lt; 5 drivers, or for adding one-off records.</div>
+                  <div className="text-[var(--fg)] font-bold text-[13px]">Add records manually</div>
+                  <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">Best for fleets &lt; 5 drivers, or for adding one-off records.</div>
                 </div>
                 <button
                   onClick={() => setShowManualModal(true)}
-                  className="text-[12px] font-bold text-[#0A1929] px-4 py-2 rounded-full whitespace-nowrap"
+                  className="text-[12px] font-bold text-[var(--bg)] px-4 py-2 rounded-full whitespace-nowrap"
                   style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
                 >
                   + {manualLabel}
                 </button>
               </div>
 
-              <div className="text-[11px] text-white/45">
+              <div className="text-[11px] text-[var(--fg-faint)]">
                 💡 Tip: every manual entry generates the same audit trail as integrated data. Compass timestamps, attaches your user ID, and stores it in the same schema.
               </div>
             </div>
@@ -288,33 +288,33 @@ export default function DataSourceCard({
           onClick={() => setShowManualModal(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-[#1E3556] p-6"
+            className="w-full max-w-md rounded-2xl border border-[var(--border)] p-6"
             style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-baseline justify-between mb-4">
-              <h3 className="text-white font-extrabold text-[16px]">{manualLabel}</h3>
+              <h3 className="text-[var(--fg)] font-extrabold text-[16px]">{manualLabel}</h3>
               <button
                 onClick={() => setShowManualModal(false)}
-                className="text-white/55 hover:text-white text-[18px]"
+                className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-[18px]"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
-            <p className="text-[12.5px] text-white/70 mb-4">
+            <p className="text-[12.5px] text-[var(--fg-muted)] mb-4">
               In production, this opens a form pre-mapped to the tracker schema with required fields, validation, and a save button. For the demo, this preview confirms the path exists.
             </p>
             <div className="space-y-2 mb-5">
               {csvTemplate.columns.slice(0, 4).map((col) => (
                 <div key={col}>
-                  <label className="text-[10px] tracking-[.12em] uppercase font-bold text-white/55 block mb-1">
+                  <label className="text-[10px] tracking-[.12em] uppercase font-bold text-[var(--fg-muted)] block mb-1">
                     {col}
                   </label>
                   <input
                     type="text"
                     placeholder={`Enter ${col}`}
-                    className="w-full bg-[#0F1C32] border border-[#1E3556] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
+                    className="w-full bg-[#0F1C32] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--fg)] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
                   />
                 </div>
               ))}
@@ -322,7 +322,7 @@ export default function DataSourceCard({
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowManualModal(false)}
-                className="text-[12px] font-semibold text-white/70 hover:text-white px-4 py-2 rounded-full"
+                className="text-[12px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)] px-4 py-2 rounded-full"
               >
                 Cancel
               </button>
@@ -332,7 +332,7 @@ export default function DataSourceCard({
                   setExpanded(false);
                   setShowManualModal(false);
                 }}
-                className="text-[12px] font-bold text-[#0A1929] px-5 py-2 rounded-full"
+                className="text-[12px] font-bold text-[var(--bg)] px-5 py-2 rounded-full"
                 style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
               >
                 Save record

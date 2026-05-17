@@ -40,15 +40,15 @@ function AuthCallbackInner() {
   }, [params, router]);
 
   return (
-    <div className="min-h-screen bg-[#0A1929] text-white grid place-items-center px-6">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] grid place-items-center px-6">
       <div className="text-center max-w-md">
         <div className="text-3xl mb-4">🔑</div>
         <h1 className="text-xl font-bold mb-2">{message}</h1>
-        <p className="text-[12px] text-white/55">If this takes more than a few seconds, <a href="/signin" className="text-[#22D3EE]">sign in manually</a>.</p>
+        <p className="text-[12px] text-[var(--fg-muted)]">If this takes more than a few seconds, <a href="/signin" className="text-[#22D3EE]">sign in manually</a>.</p>
       </div>
     </div>
   );
 }
 export default function AuthCallbackPage() {
-  return (<Suspense fallback={<div className="min-h-screen bg-[#0A1929]" />}><AuthCallbackInner /></Suspense>);
+  return (<Suspense fallback={<div className="min-h-screen bg-[var(--bg)]" />}><AuthCallbackInner /></Suspense>);
 }

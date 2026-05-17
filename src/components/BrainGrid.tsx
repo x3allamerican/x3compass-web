@@ -39,7 +39,7 @@ export default function BrainGrid() {
   }, []);
 
   const cardBase =
-    "bg-[#15233D] border border-[#1E3556] rounded-2xl p-6 transition-colors block";
+    "bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 transition-colors block";
   const cardInteractive = "hover:border-[#22D3EE]/40";
   const cardStatic = "cursor-default";
 
@@ -52,11 +52,11 @@ export default function BrainGrid() {
         const inner = (
           <>
             <div className="text-[28px] mb-3">{b.icon}</div>
-            <h3 className="text-[18px] font-bold text-white mb-2">{b.title}</h3>
+            <h3 className="text-[18px] font-bold text-[var(--fg)] mb-2">{b.title}</h3>
             <div className="inline-block text-[11px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-3">
               {b.cfr}
             </div>
-            <p className="text-[14px] text-white/65 leading-relaxed">{b.desc}</p>
+            <p className="text-[14px] text-[var(--fg-muted)] leading-relaxed">{b.desc}</p>
             {isLink && (
               <div className="mt-4 text-[13px] font-bold text-[#22D3EE]">
                 Open {b.shortLabel} →

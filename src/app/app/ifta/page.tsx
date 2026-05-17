@@ -25,14 +25,14 @@ export default function IftaPage() {
 
   return (
     <AppShell crumbs="IFTA" title="IFTA Filings"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ New filing</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ New filing</button>}>
       <div className="p-6">
-        <div className="mb-4 text-[12px] text-white/55">International Fuel Tax Agreement quarterly returns. Due Apr 30 (Q1), Jul 31 (Q2), Oct 31 (Q3), Jan 31 (Q4).</div>
+        <div className="mb-4 text-[12px] text-[var(--fg-muted)]">International Fuel Tax Agreement quarterly returns. Due Apr 30 (Q1), Jul 31 (Q2), Oct 31 (Q3), Jan 31 (Q4).</div>
         <TenantTable<F> rows={rows} loading={loading}
           emptyTitle="No filings yet"
           emptyDesc="Start tracking IFTA returns. Connect your ELD to auto-populate miles & gallons (coming next sprint)."
           columns={[
-            { key: "quarter", label: "Quarter", render: (f) => <span className="text-white font-semibold">{f.quarter}</span> },
+            { key: "quarter", label: "Quarter", render: (f) => <span className="text-[var(--fg)] font-semibold">{f.quarter}</span> },
             { key: "status", label: "Status", render: (f) => <Badge color={SC[f.status]||"gray"}>{f.status}</Badge> },
             { key: "filed_on", label: "Filed", render: (f) => fmtDate(f.filed_on) || <span className="text-white/35">—</span> },
             { key: "total_miles", label: "Miles", hideOnMobile: true, render: (f) => f.total_miles ? f.total_miles.toLocaleString() : <span className="text-white/35">—</span> },

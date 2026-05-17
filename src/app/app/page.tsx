@@ -86,8 +86,8 @@ export default function DashboardPage() {
     <AppShell crumbs="DASHBOARD" title={`${greeting}${fname ? `, ${fname.charAt(0).toUpperCase()+fname.slice(1)}` : ""}`}>
       <div className="p-6 max-w-7xl">
         <div className="mb-6">
-          <p className="text-white/65">
-            {carrier ? <>Live snapshot for <strong className="text-white">{carrier.name}</strong>.</> : "Loading your carrier…"}
+          <p className="text-[var(--fg-muted)]">
+            {carrier ? <>Live snapshot for <strong className="text-[var(--fg)]">{carrier.name}</strong>.</> : "Loading your carrier…"}
           </p>
         </div>
 
@@ -112,28 +112,28 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold text-[15px]">Recently added drivers</h3>
+              <h3 className="text-[var(--fg)] font-bold text-[15px]">Recently added drivers</h3>
               <Link href="/app/drivers" className="text-[11px] text-[#22D3EE] font-bold hover:underline">View all →</Link>
             </div>
             {loading ? (
-              <div className="text-white/55 text-sm py-6 text-center">Loading…</div>
+              <div className="text-[var(--fg-muted)] text-sm py-6 text-center">Loading…</div>
             ) : recentDrivers.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-2xl mb-2">🚛</div>
-                <p className="text-white/65 text-sm mb-3">No drivers yet</p>
-                <Link href="/app/drivers" className="inline-block px-4 py-2 rounded-lg font-bold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Add your first →</Link>
+                <p className="text-[var(--fg-muted)] text-sm mb-3">No drivers yet</p>
+                <Link href="/app/drivers" className="inline-block px-4 py-2 rounded-lg font-bold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Add your first →</Link>
               </div>
             ) : (
               <ul className="space-y-2">
                 {recentDrivers.map((d) => (
                   <li key={d.id} className="flex items-center justify-between py-1.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full grid place-items-center text-[11px] font-black text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{(d.first_name?.[0]||"")+(d.last_name?.[0]||"")}</div>
+                      <div className="w-8 h-8 rounded-full grid place-items-center text-[11px] font-black text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{(d.first_name?.[0]||"")+(d.last_name?.[0]||"")}</div>
                       <div>
-                        <Link href={`/app/drivers?id=${d.id}`} className="text-white font-semibold hover:text-[#22D3EE] text-sm">{d.first_name} {d.last_name}</Link>
-                        <div className="text-[11px] text-white/55">{d.cdl_state || "—"} · {d.status}</div>
+                        <Link href={`/app/drivers?id=${d.id}`} className="text-[var(--fg)] font-semibold hover:text-[#22D3EE] text-sm">{d.first_name} {d.last_name}</Link>
+                        <div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_state || "—"} · {d.status}</div>
                       </div>
                     </div>
                   </li>
@@ -142,8 +142,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
-            <h3 className="text-white font-bold text-[15px] mb-4">Compliance health</h3>
+          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+            <h3 className="text-[var(--fg)] font-bold text-[15px] mb-4">Compliance health</h3>
             <ul className="space-y-3">
               <HealthRow label="CDL expirations 60d" count={counts.cdl_expiring_60d} okLabel="All current" />
               <HealthRow label="Medical cards 60d" count={counts.medical_expiring_60d} okLabel="All current" />
@@ -161,10 +161,10 @@ export default function DashboardPage() {
 
 function QuickAction({ href, icon, title, desc }: { href: string; icon: string; title: string; desc: string }) {
   return (
-    <Link href={href} className="block rounded-xl border border-[#1E3556] bg-[#0F1C32] hover:border-[#22D3EE] p-5 transition-colors">
+    <Link href={href} className="block rounded-xl border border-[var(--border)] bg-[#0F1C32] hover:border-[#22D3EE] p-5 transition-colors">
       <div className="text-2xl mb-2">{icon}</div>
-      <div className="text-white font-bold text-[14px] mb-1">{title}</div>
-      <div className="text-white/55 text-[12px]">{desc}</div>
+      <div className="text-[var(--fg)] font-bold text-[14px] mb-1">{title}</div>
+      <div className="text-[var(--fg-muted)] text-[12px]">{desc}</div>
     </Link>
   );
 }
@@ -174,7 +174,7 @@ function HealthRow({ label, count, okLabel, warnLevel = 0 }: { label: string; co
   const color = status === "ok" ? "#34D399" : status === "warn" ? "#FACC15" : "#F87171";
   return (
     <li className="flex items-center justify-between text-[13px]">
-      <span className="text-white/75">{label}</span>
+      <span className="text-[var(--fg-muted)]">{label}</span>
       <span className="font-extrabold tabular-nums" style={{ color }}>{count === 0 ? `✓ ${okLabel}` : count}</span>
     </li>
   );

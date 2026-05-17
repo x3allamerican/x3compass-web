@@ -25,14 +25,14 @@ export default function HosPage() {
   return (
     <AppShell crumbs="HOS / ELD" title="Hours of Service">
       <div className="p-6 space-y-6">
-        <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+        <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
           <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">Connect your ELD</div>
-          <p className="text-white/65 text-sm leading-relaxed mb-3">
+          <p className="text-[var(--fg-muted)] text-sm leading-relaxed mb-3">
             Compass HOS ingests RODS data from your ELD via the FMCSA-compliant ELD output file. Once connected, daily logs, status changes, and HOS violations appear here automatically. Supported integrations roadmap: Motive, Samsara, KeepTruckin, Geotab, EROAD, Garmin.
           </p>
           <div className="flex gap-3">
-            <Link href="/app/settings" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Set ELD provider →</Link>
-            <a href="https://csa.fmcsa.dot.gov" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-[12px] font-bold text-white border border-[#1E3556] hover:border-[#22D3EE]">FMCSA ELD info</a>
+            <Link href="/app/settings" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Set ELD provider →</Link>
+            <a href="https://csa.fmcsa.dot.gov" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[#22D3EE]">FMCSA ELD info</a>
           </div>
         </div>
 

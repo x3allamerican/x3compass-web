@@ -29,9 +29,9 @@ export default function DrugAlcoholPage() {
 
   return (
     <AppShell crumbs="DRUG & ALCOHOL" title="Drug & Alcohol Testing"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log test</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log test</button>}>
       <div className="p-6">
-        <div className="mb-4 text-[12px] text-white/55">49 CFR Part 382 — pre-employment, random, post-accident, reasonable-suspicion, return-to-duty, and follow-up tests.</div>
+        <div className="mb-4 text-[12px] text-[var(--fg-muted)]">49 CFR Part 382 — pre-employment, random, post-accident, reasonable-suspicion, return-to-duty, and follow-up tests.</div>
         <TenantTable<T> rows={rows} loading={loading}
           emptyTitle="No tests logged"
           emptyDesc="Log every drug or alcohol test for audit-ready FMCSA Clearinghouse records."

@@ -51,17 +51,17 @@ const FAQS = [
 export default function FAQ() {
   return (
     <SiteShell>
-      <div className="bg-[#0A1929] text-white">
+      <div className="bg-[var(--bg)] text-[var(--fg)]">
         {/* HERO */}
         <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center relative">
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-4">
             FREQUENTLY ASKED QUESTIONS
           </div>
-          <h1 className="text-[44px] sm:text-[60px] font-extrabold text-white tracking-tight leading-[1.05] mb-4">
+          <h1 className="text-[44px] sm:text-[60px] font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] mb-4">
             Short answers.{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Real ones.</span>
           </h1>
-          <p className="text-[17px] text-white/65">
+          <p className="text-[17px] text-[var(--fg-muted)]">
             Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
             <Link href="/app/ask" className="text-[#22D3EE] font-bold">ask Compass directly</Link>.
           </p>
@@ -73,24 +73,24 @@ export default function FAQ() {
             <section key={sec.section}>
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE]">{sec.section}</span>
-                <span className="flex-1 h-px bg-[#1E3556]" />
+                <span className="flex-1 h-px bg-[var(--border)]" />
               </div>
               <div className="space-y-3">
                 {sec.items.map((f, i) => (
                   <details
                     key={i}
-                    className="group bg-[#15233D] border border-[#1E3556] rounded-xl hover:border-[#22D3EE]/40 transition-colors"
+                    className="group bg-[var(--surface)] border border-[var(--border)] rounded-xl hover:border-[#22D3EE]/40 transition-colors"
                   >
                     <summary className="px-5 py-4 cursor-pointer list-none flex items-center justify-between gap-4">
-                      <span className="text-[15px] font-bold text-white">{f.q}</span>
+                      <span className="text-[15px] font-bold text-[var(--fg)]">{f.q}</span>
                       <span
-                        className="w-7 h-7 rounded-full grid place-items-center text-[14px] text-[#0A1929] font-black flex-shrink-0 group-open:rotate-45 transition-transform"
+                        className="w-7 h-7 rounded-full grid place-items-center text-[14px] text-[var(--bg)] font-black flex-shrink-0 group-open:rotate-45 transition-transform"
                         style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
                       >
                         +
                       </span>
                     </summary>
-                    <div className="px-5 pb-5 text-[14px] text-white/75 leading-relaxed">
+                    <div className="px-5 pb-5 text-[14px] text-[var(--fg-muted)] leading-relaxed">
                       {f.a}
                     </div>
                   </details>
@@ -101,7 +101,7 @@ export default function FAQ() {
         </div>
 
         {/* Final CTA */}
-        <section className="relative py-16 overflow-hidden border-t border-[#1E3556] bg-[#091525]">
+        <section className="relative py-16 overflow-hidden border-t border-[var(--border)] bg-[var(--bg-3)]">
           <div className="absolute inset-0 pointer-events-none"
             style={{
               background:
@@ -109,20 +109,20 @@ export default function FAQ() {
             }}
           />
           <div className="max-w-3xl mx-auto px-6 text-center relative">
-            <h2 className="text-[32px] sm:text-[40px] font-extrabold text-white mb-4 leading-tight">
+            <h2 className="text-[32px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-4 leading-tight">
               Still have questions?{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>Ask Compass.</span>
             </h2>
-            <p className="text-[16px] text-white/65 mb-6">
+            <p className="text-[16px] text-[var(--fg-muted)] mb-6">
               No signup needed. Try the demo brain — answers in seconds, cited to the CFR.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
-              <Link href="/app/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]"
+              <Link href="/app/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
                 style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
               >
                 ★ Ask Compass →
               </Link>
-              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-white border border-white/25 hover:bg-white/5">
+              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--fg)] border border-white/25 hover:bg-white/5">
                 Start 7-day trial
               </Link>
             </div>

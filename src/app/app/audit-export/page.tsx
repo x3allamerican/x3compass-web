@@ -25,11 +25,11 @@ export default function AuditExportPage() {
 
   return (
     <AppShell crumbs="AUDIT EXPORT" title="Audit Packet Generator"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Generate packet</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Generate packet</button>}>
       <div className="p-6">
-        <div className="mb-4 rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+        <div className="mb-4 rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
           <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">What this does</div>
-          <p className="text-white/65 text-sm leading-relaxed">
+          <p className="text-[var(--fg-muted)] text-sm leading-relaxed">
             Bundles drivers, DQ documents, MVRs, drug & alcohol test results, training records, accidents, and roadside inspections into a single DOT audit-ready ZIP. Use for FMCSA Compliance Reviews, insurance underwriting, or M&amp;A due diligence.
           </p>
         </div>
@@ -80,7 +80,7 @@ function ExportFormModal({ carrier_id, onClose, onSaved }:{ carrier_id:string; o
           <Field label="From"><input type="date" className="x3i" value={form.date_range_start||""} onChange={(e)=>setForm({...form,date_range_start:e.target.value})} /></Field>
           <Field label="To"><input type="date" className="x3i" value={form.date_range_end||""} onChange={(e)=>setForm({...form,date_range_end:e.target.value})} /></Field>
         </div>
-        <p className="text-[11px] text-white/55">Leaving dates blank = all-time. Packet generation is queued; you&apos;ll see status update to <strong>ready</strong> when the ZIP is downloadable.</p>
+        <p className="text-[11px] text-[var(--fg-muted)]">Leaving dates blank = all-time. Packet generation is queued; you&apos;ll see status update to <strong>ready</strong> when the ZIP is downloadable.</p>
         {error && <Err msg={error} />}
         <ModalActions onClose={onClose} busy={busy} submitLabel="Queue export" />
       </form>

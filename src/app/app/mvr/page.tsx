@@ -27,13 +27,13 @@ export default function MvrPage() {
 
   return (
     <AppShell crumbs="MVR" title="MVR Tracker"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log MVR pull</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log MVR pull</button>}>
       <div className="p-6">
         <TenantTable<Mvr> rows={rows} loading={loading}
           emptyTitle={drivers.length === 0 ? "Add drivers first" : "No MVR pulls yet"}
           emptyDesc={drivers.length === 0 ? "MVR records attach to drivers." : "FMCSA § 391.25 requires annual MVR review. Log each pull here."}
           columns={[
-            { key: "driver", label: "Driver", render: (m) => <span className="text-white">{driverLabel(drivers.find(d => d.id === m.driver_id))}</span> },
+            { key: "driver", label: "Driver", render: (m) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(d => d.id === m.driver_id))}</span> },
             { key: "pulled_on", label: "Pulled", render: (m) => fmtDate(m.pulled_on) },
             { key: "state", label: "State", hideOnMobile: true, render: (m) => m.state || <span className="text-white/35">—</span> },
             { key: "result", label: "Result", render: (m) => m.result ? <Badge color={COLOR[m.result]||"gray"}>{m.result}</Badge> : <Badge color="gray">pending</Badge> },

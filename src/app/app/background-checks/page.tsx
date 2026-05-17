@@ -49,7 +49,7 @@ export default function BackgroundChecksPage() {
     return () => { newInvite.destroy?.(); reports.destroy?.(); };
   }, [sdkReady, tokenPath]);
 
-  if (loading || !user) return <div className="min-h-screen bg-[#0A1929] grid place-items-center text-white/55">Loading…</div>;
+  if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">Loading…</div>;
 
   return (
     <div style={{ minHeight: "100vh", background: "#0A1929", color: "white" }}>

@@ -21,26 +21,26 @@ export function TenantTable<T extends { id: string }>({
   loading?: boolean;
 }) {
   if (loading) {
-    return <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-12 text-center text-white/55 text-sm">Loading…</div>;
+    return <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-12 text-center text-[var(--fg-muted)] text-sm">Loading…</div>;
   }
   if (!rows.length) {
     return (
-      <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-12 text-center">
+      <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-12 text-center">
         <div className="text-2xl mb-3">📋</div>
-        <h3 className="text-white font-bold text-lg mb-2">{emptyTitle || "Nothing here yet"}</h3>
-        <p className="text-white/55 text-sm mb-5 max-w-md mx-auto">{emptyDesc || "Add your first record to get started."}</p>
+        <h3 className="text-[var(--fg)] font-bold text-lg mb-2">{emptyTitle || "Nothing here yet"}</h3>
+        <p className="text-[var(--fg-muted)] text-sm mb-5 max-w-md mx-auto">{emptyDesc || "Add your first record to get started."}</p>
         {emptyAction}
       </div>
     );
   }
   return (
-    <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#1E3556] bg-[#0A1929]/40">
+            <tr className="border-b border-[var(--border)] bg-[var(--bg)]/40">
               {columns.map((c) => (
-                <th key={String(c.key)} className={`px-4 py-3 text-left text-[11px] tracking-[.14em] uppercase text-white/55 font-bold ${c.hideOnMobile ? "max-md:hidden" : ""}`} style={c.width ? { width: c.width } : undefined}>
+                <th key={String(c.key)} className={`px-4 py-3 text-left text-[11px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold ${c.hideOnMobile ? "max-md:hidden" : ""}`} style={c.width ? { width: c.width } : undefined}>
                   {c.label}
                 </th>
               ))}
@@ -48,9 +48,9 @@ export function TenantTable<T extends { id: string }>({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} onClick={() => onRowClick?.(row)} className={`border-b border-[#1E3556]/60 hover:bg-[#0A1929]/40 ${onRowClick ? "cursor-pointer" : ""}`}>
+              <tr key={row.id} onClick={() => onRowClick?.(row)} className={`border-b border-[var(--border)]/60 hover:bg-[var(--bg)]/40 ${onRowClick ? "cursor-pointer" : ""}`}>
                 {columns.map((c) => (
-                  <td key={String(c.key)} className={`px-4 py-3 text-white/85 ${c.hideOnMobile ? "max-md:hidden" : ""}`}>
+                  <td key={String(c.key)} className={`px-4 py-3 text-[var(--fg-muted)] ${c.hideOnMobile ? "max-md:hidden" : ""}`}>
                     {c.render ? c.render(row) : ((row as unknown as Record<string, unknown>)[c.key as string] as ReactNode) ?? <span className="text-white/35">—</span>}
                   </td>
                 ))}
@@ -77,10 +77,10 @@ export function Badge({ children, color = "cyan" }: { children: ReactNode; color
 
 export function StatCard({ label, value, sub, accent = "#22D3EE" }: { label: string; value: string | number; sub?: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
-      <div className="text-[10px] tracking-[.16em] uppercase text-white/55 font-bold mb-2">{label}</div>
+    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+      <div className="text-[10px] tracking-[.16em] uppercase text-[var(--fg-muted)] font-bold mb-2">{label}</div>
       <div className="text-3xl font-extrabold mb-1" style={{ color: accent }}>{value}</div>
-      {sub && <div className="text-[11px] text-white/55">{sub}</div>}
+      {sub && <div className="text-[11px] text-[var(--fg-muted)]">{sub}</div>}
     </div>
   );
 }

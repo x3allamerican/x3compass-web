@@ -56,24 +56,24 @@ export default function SettingsPage() {
     finally { setBusy(false); }
   }
 
-  if (loading) return <AppShell title="Settings"><div className="p-6 text-white/55">Loading…</div></AppShell>;
+  if (loading) return <AppShell title="Settings"><div className="p-6 text-[var(--fg-muted)]">Loading…</div></AppShell>;
 
   return (
     <AppShell crumbs="SETTINGS" title="Settings">
       <div className="p-6 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Account banner */}
-          <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
-            <div className="text-[10px] tracking-[.16em] uppercase text-white/55 font-bold mb-3">Account</div>
+          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+            <div className="text-[10px] tracking-[.16em] uppercase text-[var(--fg-muted)] font-bold mb-3">Account</div>
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <div className="text-white font-bold">{user?.email}</div>
-                <div className="text-[12px] text-white/55">Owner · {(form.service_tier||"diy").toUpperCase()} {form.hazmat_addon ? "+ Hazmat" : ""} · <span className="text-[#22D3EE]">{form.subscription_status}</span>
+                <div className="text-[var(--fg)] font-bold">{user?.email}</div>
+                <div className="text-[12px] text-[var(--fg-muted)]">Owner · {(form.service_tier||"diy").toUpperCase()} {form.hazmat_addon ? "+ Hazmat" : ""} · <span className="text-[#22D3EE]">{form.subscription_status}</span>
                 {form.trial_ends_at && form.subscription_status === "trialing" && <> · trial ends {new Date(form.trial_ends_at).toLocaleDateString()}</>}</div>
               </div>
               <div className="flex gap-2">
-                <Link href="/app/settings/billing" className="px-3 py-2 rounded-lg text-[12px] font-bold text-[#22D3EE] border border-[#1E3556] hover:border-[#22D3EE]">Manage billing</Link>
-                <button type="button" onClick={signOut} className="px-3 py-2 rounded-lg text-[12px] font-bold text-white/65 hover:text-white border border-[#1E3556]">Sign out</button>
+                <Link href="/app/settings/billing" className="px-3 py-2 rounded-lg text-[12px] font-bold text-[#22D3EE] border border-[var(--border)] hover:border-[#22D3EE]">Manage billing</Link>
+                <button type="button" onClick={signOut} className="px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] hover:text-[var(--fg)] border border-[var(--border)]">Sign out</button>
               </div>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
           {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
           {savedAt && Date.now() - savedAt < 4000 && <div className="text-[12px] text-emerald-300 bg-emerald-900/20 border border-emerald-700/40 rounded-lg px-3 py-2">✓ Saved</div>}
           <div className="flex gap-3">
-            <button type="submit" disabled={busy} className="px-5 py-2.5 rounded-lg font-extrabold text-sm text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : "Save changes"}</button>
+            <button type="submit" disabled={busy} className="px-5 py-2.5 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : "Save changes"}</button>
           </div>
         </form>
       </div>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
       <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-3">{title}</div>
       <div className="space-y-3">{children}</div>
     </div>
@@ -135,9 +135,9 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 }
 function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-1 md:grid-cols-3 gap-3">{children}</div>; }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-white/55 font-bold mb-1">{label}</div>{children}</label>;
+  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1">{label}</div>{children}</label>;
 }
 function Input(p: { value: string; onChange: (v: string)=>void; type?: string; required?: boolean; maxLength?: number }) {
   return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} required={p.required} maxLength={p.maxLength}
-    className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />;
+    className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[#22D3EE]" />;
 }

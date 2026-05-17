@@ -20,7 +20,7 @@ export default function StubPage({
     <AppShell title={title} crumbs={crumbs}>
       <div className="px-6 py-10 max-w-4xl mx-auto space-y-6">
         <div
-          className="rounded-2xl p-8 border border-[#1E3556] relative overflow-hidden"
+          className="rounded-2xl p-8 border border-[var(--border)] relative overflow-hidden"
           style={{ background: "linear-gradient(135deg, #15233D 0%, #0F1C32 100%)" }}
         >
           <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full blur-3xl pointer-events-none"
@@ -30,7 +30,7 @@ export default function StubPage({
             <div className="flex items-center gap-4 mb-4">
               <div className="text-[44px]">{icon}</div>
               <div>
-                <h2 className="text-[26px] font-extrabold text-white">{title}</h2>
+                <h2 className="text-[26px] font-extrabold text-[var(--fg)]">{title}</h2>
                 <div className="text-[12px] font-mono text-[#22D3EE] mt-1">{cfr}</div>
               </div>
             </div>
@@ -38,33 +38,33 @@ export default function StubPage({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
               {features.map((f, i) => (
-                <div key={i} className="rounded-xl p-4 bg-[#0A1929]/60 border border-[#1E3556]">
+                <div key={i} className="rounded-xl p-4 bg-[var(--bg)]/60 border border-[var(--border)]">
                   <div className="text-[#22D3EE] font-bold text-[14px] mb-1">✓ {f.name}</div>
-                  <div className="text-[12px] text-white/70 leading-relaxed">{f.detail}</div>
+                  <div className="text-[12px] text-[var(--fg-muted)] leading-relaxed">{f.detail}</div>
                 </div>
               ))}
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              <Link href="/app/ask" className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
+              <Link href="/app/ask" className="px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
                 style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
               >
                 ★ Ask Compass about {title} →
               </Link>
-              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
+              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[var(--fg)] border border-white/20 hover:bg-white/5">
                 ⬆ Import CSV template
               </button>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl p-5 border border-[#1E3556] flex items-start gap-4"
+        <div className="rounded-2xl p-5 border border-[var(--border)] flex items-start gap-4"
           style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
         >
           <div className="text-[20px]">🚧</div>
           <div className="flex-1">
-            <div className="text-white font-bold text-[14px] mb-1">This page is in active build</div>
-            <div className="text-[13px] text-white/70">
+            <div className="text-[var(--fg)] font-bold text-[14px] mb-1">This page is in active build</div>
+            <div className="text-[13px] text-[var(--fg-muted)]">
               The brain is live and answering questions on{" "}
               <Link href="/app/ask" className="text-[#22D3EE] font-bold hover:underline">Ask Compass</Link>.
               The dedicated screen — table view, detail drawers, CSV/manual/API import — ships next sprint.

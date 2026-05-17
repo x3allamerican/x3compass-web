@@ -1,46 +1,107 @@
 @import "tailwindcss";
 
-/* ============ X3 COMPASS · DESIGN TOKENS (locked) ============ */
+/* ============================================================
+   X3 COMPASS · DUAL-MODE THEME SYSTEM (2026-05-17)
+   Both dark + light themes share the cyan brand accent.
+   Theme is toggled by adding the `light` class to <html>.
+   Defaults to dark; ThemeProvider respects prefers-color-scheme
+   then localStorage on subsequent visits.
+   ============================================================ */
+
+/* ---- DARK (default) ---- */
 :root {
-  --cream:        #FCF8F3;
-  --cream-2:      #F7F1E8;
-  --paper:        #FFFFFF;
-  --navy:         #0A1A3C;
-  --navy-2:       #001830;
-  --navy-3:       #1E2E5A;
-  --red:          #DC2626;
-  --red-deep:     #B91C1C;
-  --gold:         #FFC72C;
-  --ink-soft:     #475569;
-  --ink-muted:    #6B7280;
-  --hairline:     #E5E0D8;
+  /* Surfaces */
+  --bg:           #0A1929;
+  --bg-2:         #0B1B2E;
+  --bg-3:         #091525;
+  --surface:      #15233D;
+  --surface-2:    #1A2B47;
+  --surface-3:    #0F1E33;
+
+  /* Text */
+  --fg:           #FFFFFF;
+  --fg-muted:     rgba(255, 255, 255, 0.65);
+  --fg-faint:     rgba(255, 255, 255, 0.45);
+  --fg-on-accent: #0A1929;
+
+  /* Lines */
+  --border:       #1E3556;
+  --border-strong:#2A446B;
+  --hairline:     rgba(255, 255, 255, 0.08);
+
+  /* Brand */
+  --accent:       #22D3EE;
+  --accent-2:     #06B6D4;
+  --accent-fg:    #0A1929;
+
+  /* Status */
+  --success:      #34D399;
+  --warning:      #FBBF24;
+  --danger:       #F87171;
+
+  /* Layered shadow */
+  --shadow-sm:    0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg:    0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* ---- LIGHT ---- */
+:root.light {
+  --bg:           #F6F9FB;
+  --bg-2:         #FFFFFF;
+  --bg-3:         #EEF4F8;
+  --surface:      #FFFFFF;
+  --surface-2:    #F9FBFC;
+  --surface-3:    #FAFCFD;
+
+  --fg:           #0F1E33;
+  --fg-muted:     #4B5C72;
+  --fg-faint:     #6F809A;
+  --fg-on-accent: #FFFFFF;
+
+  --border:       #DCE5EE;
+  --border-strong:#B9C9D8;
+  --hairline:     rgba(15, 30, 51, 0.08);
+
+  /* Slightly darker cyan for AA contrast on white */
+  --accent:       #0891B2;
+  --accent-2:     #0E7490;
+  --accent-fg:    #FFFFFF;
+
+  --success:      #059669;
+  --warning:      #D97706;
+  --danger:       #DC2626;
+
+  --shadow-sm:    0 2px 6px rgba(15, 30, 51, 0.06);
+  --shadow-md:    0 8px 24px rgba(15, 30, 51, 0.08);
+  --shadow-lg:    0 20px 50px rgba(15, 30, 51, 0.12);
 }
 
 @theme inline {
-  --color-cream: var(--cream);
-  --color-cream-2: var(--cream-2);
-  --color-paper: var(--paper);
-  --color-navy: var(--navy);
-  --color-navy-2: var(--navy-2);
-  --color-navy-3: var(--navy-3);
-  --color-red: var(--red);
-  --color-red-deep: var(--red-deep);
-  --color-gold: var(--gold);
-  --color-ink-soft: var(--ink-soft);
-  --color-ink-muted: var(--ink-muted);
-  --color-hairline: var(--hairline);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Inter", "Segoe UI", Roboto, sans-serif;
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-border-default: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--cream);
-  color: var(--navy);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 /* Italic emphasis serif — for "every card you collect" style words */
@@ -49,113 +110,3 @@ html, body {
   font-style: italic;
   font-weight: 500;
 }
-
-.eyebrow {
-  display: inline-block;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--red);
-  font-weight: 700;
-}
-
-.section-tick {
-  display: inline-flex;
-  gap: 2px;
-  margin-bottom: 14px;
-}
-.section-tick span {
-  display: block;
-  width: 28px;
-  height: 3px;
-}
-.section-tick span:first-child { background: var(--red); }
-.section-tick span:last-child { background: var(--navy); }
-
-.sparkle-wash::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(600px 400px at 20% 20%, rgba(220, 38, 38, 0.06), transparent 60%),
-    radial-gradient(500px 300px at 85% 70%, rgba(255, 199, 44, 0.10), transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.btn-red {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 24px;
-  background: var(--red);
-  color: white;
-  font-weight: 600;
-  font-size: 15px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.12s ease, transform 0.12s ease;
-  text-decoration: none;
-}
-.btn-red:hover { background: var(--red-deep); transform: translateY(-1px); }
-
-.btn-outline {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 24px;
-  background: transparent;
-  color: var(--navy);
-  font-weight: 600;
-  font-size: 15px;
-  border-radius: 999px;
-  border: 1px solid var(--navy);
-  cursor: pointer;
-  transition: background 0.12s ease;
-  text-decoration: none;
-}
-.btn-outline:hover { background: var(--navy); color: white; }
-
-.card-hairline {
-  background: var(--paper);
-  border: 1px solid var(--hairline);
-  border-radius: 14px;
-  padding: 22px;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.18s ease;
-}
-.card-hairline:hover {
-  transform: translateY(-2px);
-  border-color: var(--red);
-  box-shadow: 0 14px 32px rgba(15, 30, 56, 0.06);
-}
-
-/* Pricing card "Most Popular" ribbon */
-.popular-ribbon {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--red);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 4px 12px;
-  border-radius: 999px;
-  text-transform: uppercase;
-}
-
-/* Dark navy hero strip pattern */
-.navy-strip {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-.navy-strip::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(800px 500px at 15% 100%, rgba(220, 38, 38, 0.16), transparent 60%),
-    radial-gradient(700px 400px at 90% 0%, rgba(255, 199, 44, 0.18), transparent 60%);
-  pointer-events: none;
-}
-.navy-strip > * { position: relative; z-index: 1; }

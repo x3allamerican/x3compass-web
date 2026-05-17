@@ -47,13 +47,13 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
 
   if (loading || !user) {
     return (
-      <div className="bg-[#0A1929] min-h-screen text-white flex flex-col">
+      <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
         <TopNav />
         <div className="flex-1 grid place-items-center">
           <div className="text-center px-6">
-            <div className="w-14 h-14 rounded-full grid place-items-center text-[#0A1929] font-black text-[22px] mx-auto mb-4" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>∞</div>
-            <div className="text-[14px] text-white/70 font-semibold mb-2">Checking your session…</div>
-            <div className="text-[12px] text-white/45">If this takes more than a moment, you&apos;ll be redirected to sign in.</div>
+            <div className="w-14 h-14 rounded-full grid place-items-center text-[var(--bg)] font-black text-[22px] mx-auto mb-4" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>∞</div>
+            <div className="text-[14px] text-[var(--fg-muted)] font-semibold mb-2">Checking your session…</div>
+            <div className="text-[12px] text-[var(--fg-faint)]">If this takes more than a moment, you&apos;ll be redirected to sign in.</div>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const carrierLabel = carrier ? `${carrier.name}${carrier.subscription_status === "trialing" ? " · trial" : ""}` : "No carrier";
 
   return (
-    <div className="bg-[#0A1929] min-h-screen text-white flex flex-col">
+    <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
       <TopNav />
       {carrier?.subscription_status === "trialing" && carrier.trial_ends_at && (
         <div className="bg-cyan-900/40 border-b border-cyan-700/30 px-6 py-2 text-[12px] text-cyan-100 flex items-center justify-between">
@@ -84,8 +84,8 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
         </div>
       )}
       <div className="grid grid-cols-[260px_1fr] max-md:grid-cols-[72px_1fr] flex-1">
-        <aside className="border-r border-[#1E3556] bg-[#102742] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
-          <div className="px-3 pt-4 pb-3 border-b border-[#1E3556]">
+        <aside className="border-r border-[var(--border)] bg-[#102742] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+          <div className="px-3 pt-4 pb-3 border-b border-[var(--border)]">
             <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] px-2">Workspace</div>
           </div>
           <nav className="flex-1 px-2 py-3 space-y-5">
@@ -96,7 +96,7 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
                   {sec.items.map((it) => {
                     const active = pathname === it.href || (it.href !== "/app" && pathname?.startsWith(it.href));
                     return (
-                      <Link key={it.href} href={it.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-semibold transition-colors ${active ? "bg-[#22D3EE]/15 text-white border-l-2 border-[#22D3EE] pl-[10px]" : "text-white/85 hover:bg-white/10 hover:text-white"}`}>
+                      <Link key={it.href} href={it.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-semibold transition-colors ${active ? "bg-[#22D3EE]/15 text-white border-l-2 border-[#22D3EE] pl-[10px]" : "text-[var(--fg-muted)] hover:bg-white/10 hover:text-white"}`}>
                         <span className="text-[17px] w-6 text-center">{it.icon}</span>
                         <span className="max-md:hidden">{it.label}</span>
                       </Link>
@@ -106,31 +106,31 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
               </div>
             ))}
           </nav>
-          <div className="px-3 py-4 border-t border-[#1E3556]">
+          <div className="px-3 py-4 border-t border-[var(--border)]">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full grid place-items-center font-black text-[13px] flex-shrink-0" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", color: "#0A1929" }}>{initials}</div>
               <div className="leading-tight min-w-0 flex-1 max-md:hidden">
-                <div className="text-white text-[13px] font-bold truncate">{userLabel}</div>
-                <div className="text-white/65 text-[11px] truncate">{carrierLabel}</div>
+                <div className="text-[var(--fg)] text-[13px] font-bold truncate">{userLabel}</div>
+                <div className="text-[var(--fg-muted)] text-[11px] truncate">{carrierLabel}</div>
               </div>
             </div>
-            <button onClick={signOut} className="w-full text-[11px] text-white/55 hover:text-white px-2 py-1.5 rounded max-md:hidden text-left">Sign out →</button>
+            <button onClick={signOut} className="w-full text-[11px] text-[var(--fg-muted)] hover:text-[var(--fg)] px-2 py-1.5 rounded max-md:hidden text-left">Sign out →</button>
           </div>
         </aside>
         <div className="min-w-0 flex flex-col">
-          <header className="sticky top-16 z-20 bg-[#0A1929]/85 backdrop-blur-md border-b border-[#1E3556]">
+          <header className="sticky top-16 z-20 bg-[var(--bg)]/85 backdrop-blur-md border-b border-[var(--border)]">
             <div className="px-6 h-16 flex items-center justify-between gap-4">
               <div className="min-w-0">
                 {crumbs && <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-1">{crumbs}</div>}
-                <h1 className="text-white font-extrabold text-[19px] truncate">{title ?? ""}</h1>
+                <h1 className="text-[var(--fg)] font-extrabold text-[19px] truncate">{title ?? ""}</h1>
               </div>
-              <div className="flex items-center gap-2">{actions}<button className="w-9 h-9 rounded-full grid place-items-center text-white/60 hover:text-white hover:bg-white/5" aria-label="Notifications">🔔</button></div>
+              <div className="flex items-center gap-2">{actions}<button className="w-9 h-9 rounded-full grid place-items-center text-white/60 hover:text-[var(--fg)] hover:bg-white/5" aria-label="Notifications">🔔</button></div>
             </div>
           </header>
           <main className="flex-1">{children}</main>
         </div>
       </div>
-      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)" }} aria-label="Ask Compass">∞</Link>
+      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)" }} aria-label="Ask Compass">∞</Link>
     </div>
   );
 }
