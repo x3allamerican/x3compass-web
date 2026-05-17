@@ -86,9 +86,9 @@ export default function OnboardingPage() {
           <p className="text-[var(--fg-muted)]">Three quick steps and you&apos;re live.</p>
         </div>
         <div className="flex justify-center gap-2 mb-10">
-          {[1,2,3].map((n) => (<div key={n} className={`h-1.5 w-20 rounded-full ${step >= n ? "bg-[#22D3EE]" : "bg-[var(--border)]"}`} />))}
+          {[1,2,3].map((n) => (<div key={n} className={`h-1.5 w-20 rounded-full ${step >= n ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`} />))}
         </div>
-        <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
+        <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
           {step === 1 && (<>
             <h2 className="text-xl font-extrabold mb-4">1 · Confirm your company info</h2>
             <div className="space-y-4">
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
             </div>
             <div className="space-y-3 mb-6">
               <Field label="Number of drivers"><input className="x3-input" type="number" min={1} value={drivers} onChange={(e) => setDrivers(Math.max(1, Number(e.target.value)))} /></Field>
-              <label className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[#22D3EE]">
+              <label className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)]">
                 <input type="checkbox" checked={hazmat} onChange={(e) => setHazmat(e.target.checked)} />
                 <div className="flex-1">
                   <div className="text-sm font-bold">+ Hazmat add-on</div>
@@ -147,12 +147,12 @@ export default function OnboardingPage() {
             </div>
           </>)}
         </div>
-        <p className="text-center mt-6 text-[12px] text-white/35">Want to talk first? <Link href="/faq" className="text-[#22D3EE]">FAQ →</Link></p>
+        <p className="text-center mt-6 text-[12px] text-[var(--fg-faint)]">Want to talk first? <Link href="/faq" className="text-[var(--accent)]">FAQ →</Link></p>
       </div>
       <style jsx global>{`
-        .x3-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: #0A1929; border: 1px solid #1E3556; color: white; font-size: 14px; }
+        .x3-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
         .x3-input:focus { outline: none; border-color: #22D3EE; }
-        .x3-btn-primary { width: 100%; padding: 12px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; color: #0A1929; background: linear-gradient(135deg, #22D3EE, #06B6D4); border: 0; cursor: pointer; }
+        .x3-btn-primary { width: 100%; padding: 12px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; color: var(--accent-fg); background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 0; cursor: pointer; }
         .x3-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .x3-btn-secondary { padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; color: white; background: transparent; border: 1px solid #1E3556; cursor: pointer; }
       `}</style>
@@ -168,7 +168,7 @@ function Err({ msg }: { msg: string }) {
 }
 function PlanCard({ active, onClick, title, price, sub, desc }: { active: boolean; onClick: () => void; title: string; price: string; sub: string; desc: string }) {
   return (
-    <button onClick={onClick} className={`w-full text-left p-4 rounded-lg border ${active ? "border-[#22D3EE] bg-[#0F2438]" : "border-[var(--border)] bg-[var(--bg)]"}`}>
+    <button onClick={onClick} className={`w-full text-left p-4 rounded-lg border ${active ? "border-[var(--accent)] bg-[var(--surface-3)]" : "border-[var(--border)] bg-[var(--bg)]"}`}>
       <div className="flex items-baseline justify-between mb-1">
         <div className="font-extrabold text-base">{title}</div>
         <div><span className="font-extrabold text-lg">{price}</span><span className="text-[12px] text-[var(--fg-muted)]">{sub}</span></div>

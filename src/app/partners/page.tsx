@@ -75,8 +75,8 @@ const FAQ = [
   },
 ];
 
-const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
-const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/40 transition-colors";
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function PartnersPage() {
   return (
@@ -91,7 +91,7 @@ export default function PartnersPage() {
           </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
+              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-6">
                 COMPASS PARTNER · WHITE-LABEL RESELLER PROGRAM
               </div>
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[64px] mb-6">
@@ -136,10 +136,10 @@ export default function PartnersPage() {
         {/* WHO IT'S FOR */}
         <section className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">01 · WHO COMPASS PARTNER IS FOR</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">01 · WHO COMPASS PARTNER IS FOR</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             If you advise carriers,{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Compass becomes your stack.</span>
@@ -166,10 +166,10 @@ export default function PartnersPage() {
         <section id="components" className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-7xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
-              <span className="w-7 h-[3px] bg-[#22D3EE]" />
+              <span className="w-7 h-[3px] bg-[var(--accent)]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">02 · WHAT&apos;S INSIDE COMPASS PARTNER</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · WHAT&apos;S INSIDE COMPASS PARTNER</div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               12 components.{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
@@ -182,7 +182,7 @@ export default function PartnersPage() {
                 <div key={c.n} className={`${cardDark} p-6`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[28px] font-black" style={{ color: "#22D3EE" }}>{c.n}</div>
-                    <span className="text-[9.5px] font-extrabold tracking-wider text-[var(--bg)] bg-[#22D3EE] px-2 py-1 rounded-full">{c.badge}</span>
+                    <span className="text-[9.5px] font-extrabold tracking-wider text-[var(--bg)] bg-[var(--accent)] px-2 py-1 rounded-full">{c.badge}</span>
                   </div>
                   <h3 className="text-[17px] font-bold text-[var(--fg)] mb-2 leading-snug">{c.title}</h3>
                   <p className="text-[13px] text-[var(--fg-muted)] leading-relaxed mb-3">{c.desc}</p>
@@ -198,10 +198,10 @@ export default function PartnersPage() {
         {/* ECONOMICS */}
         <section className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · YOUR ECONOMICS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · YOUR ECONOMICS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             The math.{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Plain and honest.</span>
@@ -211,14 +211,14 @@ export default function PartnersPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className={`${cardDark} p-6`}>
-              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">YEAR 1 — Getting started</div>
+              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">YEAR 1 — Getting started</div>
               <h3 className="text-[22px] font-extrabold text-[var(--fg)] mb-4">Solo consultant · 4 carriers signed</h3>
               <table className="w-full text-[13px] mb-4">
                 <tbody>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers signed by Month 12</td><td className="py-2 text-right font-bold text-[var(--fg)]">4</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">22</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">88</td></tr>
-                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$52,800</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$52,800</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$15,840</td></tr>
                   <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-300">~$36,960</td></tr>
                 </tbody>
@@ -227,15 +227,15 @@ export default function PartnersPage() {
                 Math: 88 drivers × $50/driver/mo × 12 = $52,800. X3 fee = 30% × $52,800 = $15,840 (floor of $10,560 doesn&apos;t apply at $50 retail).
               </p>
             </div>
-            <div className={`${cardDark} p-6 border-[#22D3EE]/60`}>
-              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">YEAR 3 — Mature Partner</div>
+            <div className={`${cardDark} p-6 border-[var(--accent)]/60`}>
+              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">YEAR 3 — Mature Partner</div>
               <h3 className="text-[22px] font-extrabold text-[var(--fg)] mb-4">15 carriers · 375 drivers</h3>
               <table className="w-full text-[13px] mb-4">
                 <tbody>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">15</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">25</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">375</td></tr>
-                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[#22D3EE]">$225,000</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$225,000</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-300">-$67,500</td></tr>
                   <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-300">~$157,500</td></tr>
                 </tbody>
@@ -251,10 +251,10 @@ export default function PartnersPage() {
         <section className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-4xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
-              <span className="w-7 h-[3px] bg-[#22D3EE]" />
+              <span className="w-7 h-[3px] bg-[var(--accent)]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">04 · FAQ</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">04 · FAQ</div>
             <h2 className="text-[36px] sm:text-[42px] font-extrabold tracking-tight text-[var(--fg)] mb-10 leading-tight">
               Questions Partners ask.
             </h2>
@@ -273,7 +273,7 @@ export default function PartnersPage() {
         <section id="apply" className="relative py-24 overflow-hidden">
           {/* decorative wash removed for production design pass */}
           <div className="max-w-3xl mx-auto px-6 text-center relative">
-            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
               05 · APPLY TO BECOME A PARTNER
             </div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-4 leading-tight">
@@ -291,7 +291,7 @@ export default function PartnersPage() {
               ★ Start your application →
             </Link>
             <div className="mt-6 text-[12px] text-[var(--fg-faint)]">
-              Or email <a href="mailto:partners@x3compass.com" className="text-[#22D3EE] hover:underline">partners@x3compass.com</a> with questions before applying.
+              Or email <a href="mailto:partners@x3compass.com" className="text-[var(--accent)] hover:underline">partners@x3compass.com</a> with questions before applying.
             </div>
           </div>
         </section>

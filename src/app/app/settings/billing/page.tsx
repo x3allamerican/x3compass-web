@@ -44,17 +44,17 @@ function BillingInner() {
           <div className="text-[11px] tracking-[.18em] uppercase text-[var(--fg-muted)] font-bold mb-3">Plan</div>
           <div className="flex items-center justify-between mb-1">
             <div className="text-xl font-extrabold">{(carrier.service_tier || "diy").toUpperCase()} {carrier.hazmat_addon ? "+ Hazmat" : ""}</div>
-            <div className={`text-[12px] font-bold uppercase tracking-[.14em] ${isActive ? "text-green-400" : isTrial ? "text-[#22D3EE]" : isPastDue ? "text-orange-400" : "text-[var(--fg-muted)]"}`}>{carrier.subscription_status}</div>
+            <div className={`text-[12px] font-bold uppercase tracking-[.14em] ${isActive ? "text-green-400" : isTrial ? "text-[var(--accent)]" : isPastDue ? "text-orange-400" : "text-[var(--fg-muted)]"}`}>{carrier.subscription_status}</div>
           </div>
           {isTrial && carrier.trial_ends_at && <div className="text-[12px] text-[var(--fg-muted)]">Trial ends {new Date(carrier.trial_ends_at).toLocaleDateString()}</div>}
         </div>
         <div className="grid md:grid-cols-2 gap-4">
-          <button onClick={openPortal} disabled={portalLoading} className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[#22D3EE] text-left">
+          <button onClick={openPortal} disabled={portalLoading} className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] text-left">
             <div className="text-xl font-extrabold mb-1">Manage subscription</div>
             <div className="text-[12px] text-[var(--fg-muted)]">Update card · cancel · invoices · change plan</div>
-            {portalLoading && <div className="text-[11px] text-[#22D3EE] mt-3">Opening Stripe portal…</div>}
+            {portalLoading && <div className="text-[11px] text-[var(--accent)] mt-3">Opening Stripe portal…</div>}
           </button>
-          <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[#22D3EE] block">
+          <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] block">
             <div className="text-xl font-extrabold mb-1">Switch plan</div>
             <div className="text-[12px] text-[var(--fg-muted)]">Compare DIY vs DFY vs Enterprise</div>
           </Link>

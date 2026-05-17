@@ -44,7 +44,7 @@ function AuthCallbackInner() {
       <div className="text-center max-w-md">
         <div className="text-3xl mb-4">🔑</div>
         <h1 className="text-xl font-bold mb-2">{message}</h1>
-        <p className="text-[12px] text-[var(--fg-muted)]">If this takes more than a few seconds, <a href="/signin" className="text-[#22D3EE]">sign in manually</a>.</p>
+        <p className="text-[12px] text-[var(--fg-muted)]">If this takes more than a few seconds, <a href="/signin" className="text-[var(--accent)]">sign in manually</a>.</p>
       </div>
     </div>
   );

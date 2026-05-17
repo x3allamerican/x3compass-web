@@ -29,7 +29,7 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 relative">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[11px] tracking-[.18em] uppercase text-[var(--accent)] font-bold mb-4">Pricing</div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Simple, transparent <span style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>per-driver</span> pricing</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Simple, transparent <span style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>per-driver</span> pricing</h1>
             <p className="text-[var(--fg-muted)] text-lg max-w-2xl mx-auto">7-day free trial. No credit card required. Cancel anytime.</p>
           </div>
         </div>
@@ -38,15 +38,15 @@ export default function PricingPage() {
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid md:grid-cols-3 gap-6 mb-14">
           {PLANS.map((p) => (
-            <div key={p.name} className={`rounded-2xl p-7 border ${p.featured ? "border-[#22D3EE]" : "border-[var(--border)]"} relative`} style={{ background: p.featured ? "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" : "#0F1C32" }}>
-              {p.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] tracking-[.18em] uppercase font-extrabold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Most popular</div>}
-              <div className="text-[#22D3EE] tracking-[.18em] text-[11px] uppercase font-bold mb-2">{p.name}</div>
+            <div key={p.name} className={`rounded-2xl p-7 border ${p.featured ? "border-[var(--accent)]" : "border-[var(--border)]"} relative`} style={{ background: p.featured ? "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" : "var(--surface-3)" }}>
+              {p.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] tracking-[.18em] uppercase font-extrabold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Most popular</div>}
+              <div className="text-[var(--accent)] tracking-[.18em] text-[11px] uppercase font-bold mb-2">{p.name}</div>
               <div className="flex items-baseline gap-1 mb-2">
                 {p.price === null ? <div className="text-3xl font-extrabold">Custom</div> : <><div className="text-5xl font-extrabold">${p.price}</div><div className="text-[var(--fg-muted)]">/driver/mo</div></>}
               </div>
               <div className="text-[13px] text-[var(--fg-muted)] mb-5">{p.blurb}</div>
-              <Link href={p.cta.href} className={`block text-center w-full py-3 rounded-lg font-extrabold text-[13px] mb-6 ${p.featured ? "text-[var(--bg)]" : "text-white"}`} style={p.featured ? { background: "linear-gradient(135deg, #22D3EE, #06B6D4)" } : { background: "#0A1929", border: "1px solid #1E3556" }}>{p.cta.label}</Link>
-              <ul className="space-y-2">{p.features.map((f, i) => (<li key={i} className="text-[13px] text-[var(--fg-muted)] flex items-start gap-2"><span className="text-[#22D3EE] font-bold mt-0.5">✓</span><span>{f}</span></li>))}</ul>
+              <Link href={p.cta.href} className={`block text-center w-full py-3 rounded-lg font-extrabold text-[13px] mb-6 ${p.featured ? "text-[var(--bg)]" : "text-[var(--fg)]"}`} style={p.featured ? { background: "linear-gradient(135deg, var(--accent), var(--accent-2))" } : { background: "var(--bg)", border: "1px solid var(--border)" }}>{p.cta.label}</Link>
+              <ul className="space-y-2">{p.features.map((f, i) => (<li key={i} className="text-[13px] text-[var(--fg-muted)] flex items-start gap-2"><span className="text-[var(--accent)] font-bold mt-0.5">✓</span><span>{f}</span></li>))}</ul>
             </div>
           ))}
         </div>
@@ -55,7 +55,7 @@ export default function PricingPage() {
           <ROICalculator />
         </div>
 
-        <div className="rounded-2xl p-8 border border-[#FACC15] mb-14" style={{ background: "linear-gradient(180deg, #1F2333 0%, #0F1C32 100%)" }}>
+        <div className="rounded-2xl p-8 border border-[#FACC15] mb-14" style={{ background: "linear-gradient(180deg, var(--surface-2) 0%, var(--surface-3) 100%)" }}>
           <div className="md:flex md:items-center md:justify-between gap-6">
             <div className="md:flex-1 mb-4 md:mb-0">
               <div className="text-[#FACC15] tracking-[.18em] text-[11px] uppercase font-bold mb-2">Add-on</div>
@@ -72,7 +72,7 @@ export default function PricingPage() {
           ))}
         </div>
         <div className="text-center">
-          <Link href="/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 12px 28px rgba(34, 211, 238, 0.32)" }}>Start your free trial →</Link>
+          <Link href="/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 28px rgba(34, 211, 238, 0.32)" }}>Start your free trial →</Link>
         </div>
       </div>
     </div>

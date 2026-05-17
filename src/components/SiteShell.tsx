@@ -18,7 +18,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[var(--bg)]"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                 >
                   X3
                 </div>

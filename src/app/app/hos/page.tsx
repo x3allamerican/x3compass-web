@@ -26,13 +26,13 @@ export default function HosPage() {
     <AppShell crumbs="HOS / ELD" title="Hours of Service">
       <div className="p-6 space-y-6">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
-          <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">Connect your ELD</div>
+          <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">Connect your ELD</div>
           <p className="text-[var(--fg-muted)] text-sm leading-relaxed mb-3">
             Compass HOS ingests RODS data from your ELD via the FMCSA-compliant ELD output file. Once connected, daily logs, status changes, and HOS violations appear here automatically. Supported integrations roadmap: Motive, Samsara, KeepTruckin, Geotab, EROAD, Garmin.
           </p>
           <div className="flex gap-3">
-            <Link href="/app/settings" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Set ELD provider →</Link>
-            <a href="https://csa.fmcsa.dot.gov" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[#22D3EE]">FMCSA ELD info</a>
+            <Link href="/app/settings" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Set ELD provider →</Link>
+            <a href="https://csa.fmcsa.dot.gov" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]">FMCSA ELD info</a>
           </div>
         </div>
 
@@ -45,8 +45,8 @@ export default function HosPage() {
             { key: "drive", label: "Drive", render: (l) => `${Math.floor((l.total_drive_minutes||0)/60)}h ${(l.total_drive_minutes||0)%60}m` },
             { key: "on_duty", label: "On-duty", hideOnMobile: true, render: (l) => `${Math.floor((l.total_on_duty_minutes||0)/60)}h ${(l.total_on_duty_minutes||0)%60}m` },
             { key: "violations", label: "Violations", render: (l) => Array.isArray(l.violations) ? (l.violations as unknown[]).length : 0 },
-            { key: "certified", label: "Certified", render: (l) => l.certified ? <span className="text-green-400">✓</span> : <span className="text-white/35">—</span> },
-            { key: "eld_source", label: "Source", hideOnMobile: true, render: (l) => l.eld_source || <span className="text-white/35">manual</span> },
+            { key: "certified", label: "Certified", render: (l) => l.certified ? <span className="text-green-400">✓</span> : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "eld_source", label: "Source", hideOnMobile: true, render: (l) => l.eld_source || <span className="text-[var(--fg-faint)]">manual</span> },
           ]}
         />
       </div>

@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 
-const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function PartnerApplyPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -48,7 +48,7 @@ export default function PartnerApplyPage() {
           <div className="max-w-xl text-center">
             <div
               className="w-20 h-20 rounded-full grid place-items-center text-[var(--bg)] font-black text-[36px] mx-auto mb-6"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 0 0 6px rgba(34, 211, 238, 0.12)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 6px rgba(34, 211, 238, 0.12)" }}
             >
               ✓
             </div>
@@ -58,7 +58,7 @@ export default function PartnerApplyPage() {
             </p>
             <div className="text-[12px] text-[var(--fg-muted)] mb-8">
               Questions in the meantime?{" "}
-              <a href="mailto:partners@x3compass.com" className="text-[#22D3EE] hover:underline">partners@x3compass.com</a>
+              <a href="mailto:partners@x3compass.com" className="text-[var(--accent)] hover:underline">partners@x3compass.com</a>
             </div>
             <Link href="/partners" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-[13px] text-[var(--fg)] border border-white/20 hover:bg-white/5">
               ← Back to Compass Partner
@@ -76,7 +76,7 @@ export default function PartnerApplyPage() {
           <Link href="/partners" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">
             ← Back to Compass Partner
           </Link>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
             PARTNER APPLICATION
           </div>
           <h1 className="text-[36px] sm:text-[42px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
@@ -88,8 +88,8 @@ export default function PartnerApplyPage() {
 
           <form onSubmit={handleSubmit} className="space-y-7">
             {/* Section 1 — About you */}
-            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-3">SECTION 1 · ABOUT YOU</div>
+            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 1 · ABOUT YOU</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Your full name" required name="name" placeholder="Sam Carter" />
                 <Field label="Email" required name="email" type="email" placeholder="sam@your-consultancy.com" />
@@ -99,8 +99,8 @@ export default function PartnerApplyPage() {
             </div>
 
             {/* Section 2 — Business */}
-            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-3">SECTION 2 · YOUR CONSULTING BUSINESS</div>
+            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 2 · YOUR CONSULTING BUSINESS</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Business name" required name="company" placeholder="Carter Safety Solutions LLC" />
                 <Field label="Business state" required name="state" placeholder="TX" />
@@ -142,8 +142,8 @@ export default function PartnerApplyPage() {
             </div>
 
             {/* Section 3 — Fit */}
-            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-3">SECTION 3 · WHY COMPASS PARTNER</div>
+            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 3 · WHY COMPASS PARTNER</div>
               <TextAreaField
                 label="What's the #1 reason you're considering Compass Partner?"
                 required
@@ -174,8 +174,8 @@ export default function PartnerApplyPage() {
             </div>
 
             {/* Section 4 — References */}
-            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-3">SECTION 4 · CREDIBILITY (OPTIONAL BUT HELPS)</div>
+            <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 4 · CREDIBILITY (OPTIONAL BUT HELPS)</div>
               <TextAreaField
                 label="Notable credentials (former FMCSA / state DOT inspector, CSP, OSHA 30, etc.)"
                 name="credentials"
@@ -193,7 +193,7 @@ export default function PartnerApplyPage() {
             </div>
 
             {/* Acknowledge */}
-            <div className="rounded-xl p-4 border border-[#22D3EE]/30 bg-[#22D3EE]/5 text-[12.5px] text-white/80 leading-relaxed">
+            <div className="rounded-xl p-4 border border-[var(--accent)]/30 bg-[var(--accent)]/5 text-[12.5px] text-[var(--fg)] leading-relaxed">
               <strong className="text-[var(--fg)]">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor — no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
             </div>
 
@@ -215,7 +215,7 @@ export default function PartnerApplyPage() {
 
             <div className="text-center text-[12px] text-[var(--fg-faint)]">
               Questions before submitting?{" "}
-              <a href="mailto:partners@x3compass.com" className="text-[#22D3EE] hover:underline">partners@x3compass.com</a>
+              <a href="mailto:partners@x3compass.com" className="text-[var(--accent)] hover:underline">partners@x3compass.com</a>
             </div>
           </form>
         </div>
@@ -235,7 +235,7 @@ function Field({ label, name, type = "text", required, placeholder }: { label: s
         name={name}
         required={required}
         placeholder={placeholder}
-        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
+        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] placeholder:text-[var(--fg-faint)] focus:outline-none focus:border-[var(--accent)]"
       />
     </div>
   );
@@ -252,7 +252,7 @@ function TextAreaField({ label, name, required, placeholder, rows = 3 }: { label
         required={required}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE] resize-none"
+        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] placeholder:text-[var(--fg-faint)] focus:outline-none focus:border-[var(--accent)] resize-none"
       />
     </div>
   );
@@ -267,7 +267,7 @@ function SelectField({ label, name, required, options }: { label: string; name: 
       <select
         name={name}
         required={required}
-        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] focus:outline-none focus:border-[#22D3EE]"
+        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-[var(--fg)] text-[14px] focus:outline-none focus:border-[var(--accent)]"
         defaultValue=""
       >
         <option value="" disabled>Select…</option>

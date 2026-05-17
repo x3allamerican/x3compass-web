@@ -51,7 +51,7 @@ export function TenantTable<T extends { id: string }>({
               <tr key={row.id} onClick={() => onRowClick?.(row)} className={`border-b border-[var(--border)]/60 hover:bg-[var(--bg)]/40 ${onRowClick ? "cursor-pointer" : ""}`}>
                 {columns.map((c) => (
                   <td key={String(c.key)} className={`px-4 py-3 text-[var(--fg-muted)] ${c.hideOnMobile ? "max-md:hidden" : ""}`}>
-                    {c.render ? c.render(row) : ((row as unknown as Record<string, unknown>)[c.key as string] as ReactNode) ?? <span className="text-white/35">—</span>}
+                    {c.render ? c.render(row) : ((row as unknown as Record<string, unknown>)[c.key as string] as ReactNode) ?? <span className="text-[var(--fg-faint)]">—</span>}
                   </td>
                 ))}
               </tr>

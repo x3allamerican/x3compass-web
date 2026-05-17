@@ -72,7 +72,7 @@ export default function FAQ() {
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
           </div>
           <div className="max-w-4xl mx-auto px-6 pt-20 pb-14 text-center relative">
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-4">
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-4">
             FREQUENTLY ASKED QUESTIONS
           </div>
           <h1 className="text-[44px] sm:text-[60px] font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] mb-4">
@@ -80,8 +80,8 @@ export default function FAQ() {
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Real ones.</span>
           </h1>
             <p className="text-[17px] text-[var(--fg-muted)]">
-              Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
-              <Link href="/app/ask" className="text-[#22D3EE] font-bold">ask Compass directly</Link>.
+              Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[var(--accent)] font-bold">Email us</Link> or{" "}
+              <Link href="/app/ask" className="text-[var(--accent)] font-bold">ask Compass directly</Link>.
             </p>
           </div>
         </section>
@@ -91,20 +91,20 @@ export default function FAQ() {
           {FAQS.map((sec) => (
             <section key={sec.section}>
               <div className="flex items-center gap-3 mb-6">
-                <span className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE]">{sec.section}</span>
+                <span className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)]">{sec.section}</span>
                 <span className="flex-1 h-px bg-[var(--border)]" />
               </div>
               <div className="space-y-3">
                 {sec.items.map((f, i) => (
                   <details
                     key={i}
-                    className="group bg-[var(--surface)] border border-[var(--border)] rounded-xl hover:border-[#22D3EE]/40 transition-colors"
+                    className="group bg-[var(--surface)] border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/40 transition-colors"
                   >
                     <summary className="px-5 py-4 cursor-pointer list-none flex items-center justify-between gap-4">
                       <span className="text-[15px] font-bold text-[var(--fg)]">{f.q}</span>
                       <span
                         className="w-7 h-7 rounded-full grid place-items-center text-[14px] text-[var(--bg)] font-black flex-shrink-0 group-open:rotate-45 transition-transform"
-                        style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                        style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                       >
                         +
                       </span>
@@ -132,7 +132,7 @@ export default function FAQ() {
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <Link href="/app/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
               >
                 ★ Ask Compass →
               </Link>

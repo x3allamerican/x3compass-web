@@ -25,7 +25,7 @@ export default function IftaPage() {
 
   return (
     <AppShell crumbs="IFTA" title="IFTA Filings"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ New filing</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ New filing</button>}>
       <div className="p-6">
         <div className="mb-4 text-[12px] text-[var(--fg-muted)]">International Fuel Tax Agreement quarterly returns. Due Apr 30 (Q1), Jul 31 (Q2), Oct 31 (Q3), Jan 31 (Q4).</div>
         <TenantTable<F> rows={rows} loading={loading}
@@ -34,11 +34,11 @@ export default function IftaPage() {
           columns={[
             { key: "quarter", label: "Quarter", render: (f) => <span className="text-[var(--fg)] font-semibold">{f.quarter}</span> },
             { key: "status", label: "Status", render: (f) => <Badge color={SC[f.status]||"gray"}>{f.status}</Badge> },
-            { key: "filed_on", label: "Filed", render: (f) => fmtDate(f.filed_on) || <span className="text-white/35">—</span> },
-            { key: "total_miles", label: "Miles", hideOnMobile: true, render: (f) => f.total_miles ? f.total_miles.toLocaleString() : <span className="text-white/35">—</span> },
-            { key: "total_gallons", label: "Gallons", hideOnMobile: true, render: (f) => f.total_gallons ? f.total_gallons.toLocaleString() : <span className="text-white/35">—</span> },
-            { key: "net_tax_due", label: "Net tax", render: (f) => f.net_tax_due !== null && f.net_tax_due !== undefined ? `$${Number(f.net_tax_due).toLocaleString(undefined,{minimumFractionDigits:2})}` : <span className="text-white/35">—</span> },
-            { key: "receipt_url", label: "Receipt", render: (f) => f.receipt_url ? <a href={f.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
+            { key: "filed_on", label: "Filed", render: (f) => fmtDate(f.filed_on) || <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "total_miles", label: "Miles", hideOnMobile: true, render: (f) => f.total_miles ? f.total_miles.toLocaleString() : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "total_gallons", label: "Gallons", hideOnMobile: true, render: (f) => f.total_gallons ? f.total_gallons.toLocaleString() : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "net_tax_due", label: "Net tax", render: (f) => f.net_tax_due !== null && f.net_tax_due !== undefined ? `$${Number(f.net_tax_due).toLocaleString(undefined,{minimumFractionDigits:2})}` : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "receipt_url", label: "Receipt", render: (f) => f.receipt_url ? <a href={f.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">View</a> : <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

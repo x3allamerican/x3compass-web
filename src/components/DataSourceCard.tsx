@@ -54,7 +54,7 @@ export default function DataSourceCard({
     return (
       <div
         className="rounded-xl px-4 py-3 border border-[var(--border)] flex items-center justify-between gap-3"
-        style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+        style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
@@ -62,13 +62,13 @@ export default function DataSourceCard({
             <div className="text-[12px] text-[var(--fg)]">
               <span className="font-bold text-[var(--fg)]">{status === "connected" ? `Connected · ${connectedVendor}` : status === "imported" ? `CSV imported · ${csvFileName ?? csvTemplate.name}` : "Manual entry"}</span>
               <span className="text-[var(--fg-muted)] ml-2">{recordCount} records</span>
-              {lastSync && <span className="text-white/40 ml-2">· last sync {lastSync}</span>}
+              {lastSync && <span className="text-[var(--fg-faint)] ml-2">· last sync {lastSync}</span>}
             </div>
           </div>
         </div>
         <button
           onClick={() => setExpanded(true)}
-          className="text-[11px] font-semibold text-[#22D3EE] hover:underline whitespace-nowrap"
+          className="text-[11px] font-semibold text-[var(--accent)] hover:underline whitespace-nowrap"
         >
           Change source →
         </button>
@@ -80,13 +80,13 @@ export default function DataSourceCard({
     <>
       <div
         className="rounded-2xl border border-[var(--border)] overflow-hidden"
-        style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+        style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
       >
         {/* Header */}
         <div className="px-5 pt-5 pb-4 border-b border-[var(--border)]">
           <div className="flex items-baseline justify-between gap-3 mb-1">
             <div>
-              <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE]/80 mb-1">
+              <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)]/80 mb-1">
                 Data source for {trackerLabel}
               </div>
               <h3 className="text-[17px] font-extrabold text-[var(--fg)]">How do you want to get data in here?</h3>
@@ -102,7 +102,7 @@ export default function DataSourceCard({
           </div>
           {cfr && (
             <div className="text-[11px] text-[var(--fg-muted)]">
-              Backed by <span className="font-mono text-[#22D3EE]">{cfr}</span>
+              Backed by <span className="font-mono text-[var(--accent)]">{cfr}</span>
             </div>
           )}
         </div>
@@ -119,8 +119,8 @@ export default function DataSourceCard({
               onClick={() => setActiveTab(t.id)}
               className={`flex-1 px-4 py-3 text-[12px] font-bold transition-colors ${
                 activeTab === t.id
-                  ? "text-white bg-[#22D3EE]/10 border-b-2 border-[#22D3EE]"
-                  : "text-[var(--fg-muted)] hover:text-white border-b-2 border-transparent"
+                  ? "text-[var(--fg)] bg-[var(--accent)]/10 border-b-2 border-[var(--accent)]"
+                  : "text-[var(--fg-muted)] hover:text-[var(--fg)] border-b-2 border-transparent"
               }`}
             >
               <div>{t.label}</div>
@@ -141,15 +141,15 @@ export default function DataSourceCard({
                 {vendors.map((v) => (
                   <div
                     key={v.name}
-                    className="rounded-xl p-4 border border-[var(--border)] hover:border-[#22D3EE]/40 transition-colors"
-                    style={{ background: "#0F1C32" }}
+                    className="rounded-xl p-4 border border-[var(--border)] hover:border-[var(--accent)]/40 transition-colors"
+                    style={{ background: "var(--surface-3)" }}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="min-w-0">
                         <div className="text-[var(--fg)] font-bold text-[13.5px] flex items-center gap-2 flex-wrap">
                           {v.name}
                           {v.badge === "Recommended" && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold text-[var(--bg)] bg-[#22D3EE]">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold text-[var(--bg)] bg-[var(--accent)]">
                               {v.badge}
                             </span>
                           )}
@@ -174,7 +174,7 @@ export default function DataSourceCard({
                           setExpanded(false);
                         }}
                         className="text-[11px] font-bold text-[var(--bg)] px-3 py-1.5 rounded-full"
-                        style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                        style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                       >
                         Connect →
                       </button>
@@ -183,7 +183,7 @@ export default function DataSourceCard({
                 ))}
               </div>
               <div className="text-[11px] text-[var(--fg-faint)] pt-2">
-                Don&apos;t see your vendor? <a href="mailto:support@x3compass.com?subject=Vendor%20request" className="text-[#22D3EE] hover:underline">Request an integration →</a>
+                Don&apos;t see your vendor? <a href="mailto:support@x3compass.com?subject=Vendor%20request" className="text-[var(--accent)] hover:underline">Request an integration →</a>
               </div>
             </div>
           )}
@@ -196,11 +196,11 @@ export default function DataSourceCard({
               </div>
 
               {/* CSV template download */}
-              <div className="rounded-xl p-4 border border-[var(--border)] flex items-center justify-between gap-3 flex-wrap" style={{ background: "#0F1C32" }}>
+              <div className="rounded-xl p-4 border border-[var(--border)] flex items-center justify-between gap-3 flex-wrap" style={{ background: "var(--surface-3)" }}>
                 <div className="min-w-0">
                   <div className="text-[var(--fg)] font-bold text-[13px] mb-1">Step 1 · Download the template</div>
                   <div className="text-[11px] text-[var(--fg-muted)]">
-                    Columns: <span className="font-mono text-[#22D3EE]">{csvTemplate.columns.join(", ")}</span>
+                    Columns: <span className="font-mono text-[var(--accent)]">{csvTemplate.columns.join(", ")}</span>
                   </div>
                 </div>
                 <button
@@ -223,7 +223,7 @@ export default function DataSourceCard({
 
               {/* CSV upload */}
               <div
-                className="rounded-xl p-6 border-2 border-dashed border-[#22D3EE]/40 text-center cursor-pointer hover:border-[#22D3EE] hover:bg-[#22D3EE]/5 transition-colors"
+                className="rounded-xl p-6 border-2 border-dashed border-[var(--accent)]/40 text-center cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors"
                 style={{ background: "rgba(34, 211, 238, 0.03)" }}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -259,7 +259,7 @@ export default function DataSourceCard({
                 Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later — no data is lost.
               </div>
 
-              <div className="rounded-xl p-5 border border-[var(--border)] flex items-center justify-between gap-3" style={{ background: "#0F1C32" }}>
+              <div className="rounded-xl p-5 border border-[var(--border)] flex items-center justify-between gap-3" style={{ background: "var(--surface-3)" }}>
                 <div>
                   <div className="text-[var(--fg)] font-bold text-[13px]">Add records manually</div>
                   <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">Best for fleets &lt; 5 drivers, or for adding one-off records.</div>
@@ -267,7 +267,7 @@ export default function DataSourceCard({
                 <button
                   onClick={() => setShowManualModal(true)}
                   className="text-[12px] font-bold text-[var(--bg)] px-4 py-2 rounded-full whitespace-nowrap"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                 >
                   + {manualLabel}
                 </button>
@@ -289,7 +289,7 @@ export default function DataSourceCard({
         >
           <div
             className="w-full max-w-md rounded-2xl border border-[var(--border)] p-6"
-            style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+            style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-baseline justify-between mb-4">
@@ -314,7 +314,7 @@ export default function DataSourceCard({
                   <input
                     type="text"
                     placeholder={`Enter ${col}`}
-                    className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--fg)] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
+                    className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--fg)] placeholder:text-[var(--fg-faint)] focus:outline-none focus:border-[var(--accent)]"
                   />
                 </div>
               ))}
@@ -333,7 +333,7 @@ export default function DataSourceCard({
                   setShowManualModal(false);
                 }}
                 className="text-[12px] font-bold text-[var(--bg)] px-5 py-2 rounded-full"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
               >
                 Save record
               </button>

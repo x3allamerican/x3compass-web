@@ -91,8 +91,8 @@ const GHS_PICTOGRAMS = [
   { id: "ghs09", file: "ghs-environmental.svg", label: "Environment" },
 ];
 
-const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
-const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/40 transition-colors";
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function Hazmat() {
   return (
@@ -103,7 +103,7 @@ export default function Hazmat() {
           {/* decorative wash removed for production design pass */}
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
+              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-6">
                 THE HAZMAT CENTER · 100 CFR-CITED SKILLS · 1 PLACARD WIZARD
               </div>
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[68px] mb-6">
@@ -129,7 +129,7 @@ export default function Hazmat() {
         {/* PLACARD GRID — DOT-compliant SVG generators (downloadable) */}
         <section className="max-w-7xl mx-auto px-6 py-12">
           <div className={`${cardDark} p-6`}>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">DOT-COMPLIANT PLACARDS · 49 CFR § 172.519</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">DOT-COMPLIANT PLACARDS · 49 CFR § 172.519</div>
             <h3 className="text-[20px] font-extrabold text-[var(--fg)] mb-2">
               All 12 placard classes Compass generates.
             </h3>
@@ -151,7 +151,7 @@ export default function Hazmat() {
         <section id="wizard" className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)]">
           {/* decorative wash removed for production design pass */}
           <div className="max-w-4xl mx-auto px-6 text-center relative">
-            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
               01 · PLACARD WIZARD
             </div>
             <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
@@ -166,7 +166,7 @@ export default function Hazmat() {
             <PlacardWizardLive />
 
             <div className="mt-6 text-[12px] text-[var(--fg-muted)] text-center">
-              💡 Try: <button type="button" className="text-[#22D3EE] hover:underline">UN1203 (gasoline)</button>, <button type="button" className="text-[#22D3EE] hover:underline">UN1830 (sulfuric acid)</button>, <button type="button" className="text-[#22D3EE] hover:underline">UN1075 (LPG)</button>, or <button type="button" className="text-[#22D3EE] hover:underline">UN3480 (lithium batteries)</button>.
+              💡 Try: <button type="button" className="text-[var(--accent)] hover:underline">UN1203 (gasoline)</button>, <button type="button" className="text-[var(--accent)] hover:underline">UN1830 (sulfuric acid)</button>, <button type="button" className="text-[var(--accent)] hover:underline">UN1075 (LPG)</button>, or <button type="button" className="text-[var(--accent)] hover:underline">UN3480 (lithium batteries)</button>.
             </div>
           </div>
         </section>
@@ -174,10 +174,10 @@ export default function Hazmat() {
         {/* HAZMAT BRAINS */}
         <section className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">02 · HAZMAT BRAINS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · HAZMAT BRAINS</div>
           <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Six brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One hazmat shipment.</span>
           </h2>
@@ -189,11 +189,11 @@ export default function Hazmat() {
               <Link key={i} href="/app/ask" className={`${cardDark} block p-6`}>
                 <div className="text-[28px] mb-3">{b.icon}</div>
                 <h3 className="text-[18px] font-bold text-[var(--fg)] mb-2">{b.title}</h3>
-                <div className="inline-block text-[11px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-3">
+                <div className="inline-block text-[11px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-1 rounded-full font-mono mb-3">
                   {b.cfr}
                 </div>
                 <p className="text-[14px] text-[var(--fg-muted)] leading-relaxed">{b.desc}</p>
-                <div className="mt-4 text-[13px] font-bold text-[#22D3EE]">Open {b.title} →</div>
+                <div className="mt-4 text-[13px] font-bold text-[var(--accent)]">Open {b.title} →</div>
               </Link>
             ))}
           </div>
@@ -203,10 +203,10 @@ export default function Hazmat() {
         <section id="skills" className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-7xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
-              <span className="w-7 h-[3px] bg-[#22D3EE]" />
+              <span className="w-7 h-[3px] bg-[var(--accent)]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · 100 HAZMAT-ONLY SKILLS</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 100 HAZMAT-ONLY SKILLS</div>
             <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               Every hazmat question.{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>One CFR away.</span>
@@ -217,12 +217,12 @@ export default function Hazmat() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {HAZMAT_SKILLS.map((s, i) => (
                 <Link key={i} href="/app/ask" className={`${cardDark} relative pr-10 block p-5`}>
-                  <div className="inline-block text-[10px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-2">
+                  <div className="inline-block text-[10px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-1 rounded-full font-mono mb-2">
                     {s.cfr}
                   </div>
                   <div className="text-[15px] font-bold text-[var(--fg)] mb-1">{s.name}</div>
                   <div className="text-[13px] italic text-[var(--fg-muted)]">&ldquo;{s.q}&rdquo;</div>
-                  <div className="absolute right-5 top-5 text-[#22D3EE] font-bold">→</div>
+                  <div className="absolute right-5 top-5 text-[var(--accent)] font-bold">→</div>
                 </Link>
               ))}
             </div>
@@ -232,7 +232,7 @@ export default function Hazmat() {
         {/* PLACARD LIBRARY — real Wikimedia-sourced placards */}
         <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-2)]">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · PLACARD LIBRARY</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · PLACARD LIBRARY</div>
             <h2 className="text-[28px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-2 leading-tight">
               Every <span className="serif-italic" style={{ color: "#22D3EE" }}>real placard.</span>
             </h2>
@@ -294,10 +294,10 @@ export default function Hazmat() {
               </div>
               <div className="md:col-span-2 text-[12px] text-[var(--fg-muted)] leading-relaxed">
                 <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-3">Attribution + License</div>
-                <p className="mb-2">All 40 placard images sourced from <a href="https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards" target="_blank" rel="noreferrer" className="text-[#22D3EE] hover:underline">Wikimedia Commons</a>.</p>
+                <p className="mb-2">All 40 placard images sourced from <a href="https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards" target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">Wikimedia Commons</a>.</p>
                 <p className="mb-2"><strong className="text-[var(--fg-muted)]">DOT placards:</strong> US Government works — public domain per 17 USC § 105.</p>
                 <p className="mb-2"><strong className="text-[var(--fg-muted)]">GHS + NFPA 704:</strong> released as PD-self by their Wikimedia authors.</p>
-                <p className="mt-3"><a href="/placards/manifest.json" className="text-[#22D3EE] hover:underline">View manifest.json</a> &middot; <a href="/placards/LICENSES.md" className="text-[#22D3EE] hover:underline">License details</a></p>
+                <p className="mt-3"><a href="/placards/manifest.json" className="text-[var(--accent)] hover:underline">View manifest.json</a> &middot; <a href="/placards/LICENSES.md" className="text-[var(--accent)] hover:underline">License details</a></p>
               </div>
             </div>
           </div>

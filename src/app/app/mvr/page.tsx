@@ -27,7 +27,7 @@ export default function MvrPage() {
 
   return (
     <AppShell crumbs="MVR" title="MVR Tracker"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log MVR pull</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Log MVR pull</button>}>
       <div className="p-6">
         <TenantTable<Mvr> rows={rows} loading={loading}
           emptyTitle={drivers.length === 0 ? "Add drivers first" : "No MVR pulls yet"}
@@ -35,10 +35,10 @@ export default function MvrPage() {
           columns={[
             { key: "driver", label: "Driver", render: (m) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(d => d.id === m.driver_id))}</span> },
             { key: "pulled_on", label: "Pulled", render: (m) => fmtDate(m.pulled_on) },
-            { key: "state", label: "State", hideOnMobile: true, render: (m) => m.state || <span className="text-white/35">—</span> },
+            { key: "state", label: "State", hideOnMobile: true, render: (m) => m.state || <span className="text-[var(--fg-faint)]">—</span> },
             { key: "result", label: "Result", render: (m) => m.result ? <Badge color={COLOR[m.result]||"gray"}>{m.result}</Badge> : <Badge color="gray">pending</Badge> },
             { key: "violations_count", label: "Violations", hideOnMobile: true, render: (m) => m.violations_count ?? 0 },
-            { key: "file_url", label: "File", render: (m) => m.file_url ? <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
+            { key: "file_url", label: "File", render: (m) => m.file_url ? <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">View</a> : <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

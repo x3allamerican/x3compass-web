@@ -42,7 +42,7 @@ export default function TopNav() {
           <div
             className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[var(--bg)]"
             style={{
-              background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+              background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
               boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
             }}
           >
@@ -50,7 +50,7 @@ export default function TopNav() {
           </div>
           <div className="leading-tight">
             <div className="text-[var(--fg)] font-extrabold text-[15px] tracking-tight">X3 COMPASS</div>
-            <div className="text-[10px] tracking-[.18em] text-[#22D3EE] font-bold uppercase">
+            <div className="text-[10px] tracking-[.18em] text-[var(--accent)] font-bold uppercase">
               AI Safety Director
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function TopNav() {
               <Link
                 href="/app"
                 className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
               >
                 Open app →
               </Link>
@@ -102,7 +102,7 @@ export default function TopNav() {
                 href="/signup"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
                 style={{
-                  background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                  background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
                   boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
                 }}
               >

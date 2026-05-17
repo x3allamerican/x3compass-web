@@ -52,9 +52,9 @@ export default function BackgroundChecksPage() {
   if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">Loading…</div>;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0A1929", color: "white" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)" }}>
       <Script src={SDK_URL} strategy="afterInteractive" onLoad={() => setSdkReady(true)} onError={() => console.error("[checkr-sdk] failed to load")} />
-      <div style={{ background: "#091525", borderBottom: "1px solid #1E3556", padding: "18px 24px" }}>
+      <div style={{ background: "var(--bg-3)", borderBottom: "1px solid var(--border)", padding: "18px 24px" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Background Checks</h1>
@@ -62,7 +62,7 @@ export default function BackgroundChecksPage() {
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ fontSize: 11, color: sdkReady ? "#34D399" : "#FACC15", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>{sdkReady ? "✓ SDK ready" : "Loading SDK…"}</div>
-            <Link href="/app" style={{ padding: "6px 12px", borderRadius: 6, background: "#0F2438", color: "#94A3B8", border: "1px solid #1E3556", fontSize: 12 }}>Dashboard</Link>
+            <Link href="/app" style={{ padding: "6px 12px", borderRadius: 6, background: "var(--surface)", color: "#94A3B8", border: "1px solid var(--border)", fontSize: 12 }}>Dashboard</Link>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function BackgroundChecksPage() {
             {!sdkReady && <div style={{ minHeight: 400, display: "grid", placeItems: "center", color: "#94A3B8", fontSize: 13 }}>Loading Checkr NewInvitation…</div>}
           </div>
           {lastInvitation && (
-            <div style={{ marginTop: 14, padding: 12, background: "#0F2438", border: "1px solid #34D399", borderRadius: 8, fontSize: 12 }}>
+            <div style={{ marginTop: 14, padding: 12, background: "var(--surface)", border: "1px solid #34D399", borderRadius: 8, fontSize: 12 }}>
               <strong style={{ color: "#34D399" }}>✓ Invitation sent</strong>
               <pre style={{ color: "#94A3B8", fontSize: 11, marginTop: 6, overflow: "auto" }}>{JSON.stringify(lastInvitation, null, 2)}</pre>
             </div>
@@ -91,7 +91,7 @@ export default function BackgroundChecksPage() {
         </div>
       </div>
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px 40px" }}>
-        <div style={{ background: "#091525", border: "1px solid #1E3556", borderRadius: 12, padding: 16, fontSize: 12, color: "#94A3B8", lineHeight: 1.6 }}>
+        <div style={{ background: "var(--bg-3)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, fontSize: 12, color: "#94A3B8", lineHeight: 1.6 }}>
           <strong style={{ color: "white" }}>FCRA reminder:</strong> Before ordering a consumer report, provide the candidate a clear/conspicuous disclosure + obtain written authorization. The Checkr embed handles both. Follow pre-adverse + post-adverse procedures on &quot;consider&quot; results. See <a href="/faq" style={{ color: "#22D3EE" }}>FAQ</a> and 15 U.S.C. § 1681b.
         </div>
       </div>

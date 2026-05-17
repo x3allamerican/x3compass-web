@@ -34,7 +34,7 @@ export default function PageGuide(config: PageGuideConfig) {
   return (
     <div
       className="rounded-2xl border border-[var(--border)] overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+      style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
     >
       {/* COLLAPSED HEADER (always visible) */}
       <button
@@ -45,21 +45,21 @@ export default function PageGuide(config: PageGuideConfig) {
         <div
           className="w-9 h-9 rounded-full grid place-items-center font-black text-[var(--bg)] flex-shrink-0"
           style={{
-            background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+            background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
             boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
           }}
         >
           ?
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE]/80 mb-1">
+          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)]/80 mb-1">
             How this page works · <span className="font-mono">{config.cfr}</span>
           </div>
           <div className="text-[var(--fg)] text-[14px] font-bold leading-snug">
             {config.what}
           </div>
         </div>
-        <div className="text-[12px] font-semibold text-[#22D3EE] flex-shrink-0 mt-1">
+        <div className="text-[12px] font-semibold text-[var(--accent)] flex-shrink-0 mt-1">
           {open ? "Hide guide ↑" : "Show me how ↓"}
         </div>
       </button>
@@ -74,7 +74,7 @@ export default function PageGuide(config: PageGuideConfig) {
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1.5">
                 Who needs this page
               </div>
-              <p className="text-[13px] text-white/80 leading-relaxed">{config.who}</p>
+              <p className="text-[13px] text-[var(--fg)] leading-relaxed">{config.who}</p>
             </div>
 
             {/* How-to steps */}
@@ -87,7 +87,7 @@ export default function PageGuide(config: PageGuideConfig) {
                   <li key={s.n} className="flex gap-3">
                     <div
                       className="w-6 h-6 rounded-full grid place-items-center font-black text-[11px] text-[var(--bg)] flex-shrink-0 mt-0.5"
-                      style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                      style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                     >
                       {s.n}
                     </div>
@@ -108,8 +108,8 @@ export default function PageGuide(config: PageGuideConfig) {
                 </div>
                 <ul className="space-y-1.5">
                   {config.weeklyHabits.map((h, i) => (
-                    <li key={i} className="text-[12.5px] text-white/80 leading-relaxed pl-5 relative">
-                      <span className="absolute left-0 top-1 text-[#22D3EE] font-bold">✓</span>
+                    <li key={i} className="text-[12.5px] text-[var(--fg)] leading-relaxed pl-5 relative">
+                      <span className="absolute left-0 top-1 text-[var(--accent)] font-bold">✓</span>
                       {h}
                     </li>
                   ))}
@@ -143,8 +143,8 @@ export default function PageGuide(config: PageGuideConfig) {
             )}
 
             {config.askCompassLinks && config.askCompassLinks.length > 0 && (
-              <div className="rounded-xl p-4 border border-[#22D3EE]/30" style={{ background: "rgba(34, 211, 238, 0.05)" }}>
-                <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-3">
+              <div className="rounded-xl p-4 border border-[var(--accent)]/30" style={{ background: "rgba(34, 211, 238, 0.05)" }}>
+                <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">
                   ∞ Ask Compass about this
                 </div>
                 <div className="space-y-1.5">
@@ -154,7 +154,7 @@ export default function PageGuide(config: PageGuideConfig) {
                       href={`/app/ask?q=${encodeURIComponent(l.query)}`}
                       className="block text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-white/5 rounded px-2 py-1.5 leading-snug transition-colors"
                     >
-                      <span className="text-[#22D3EE] font-bold">→</span> {l.label}
+                      <span className="text-[var(--accent)] font-bold">→</span> {l.label}
                     </a>
                   ))}
                 </div>

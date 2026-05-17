@@ -26,7 +26,7 @@ export default function TrainingPage() {
   const today = new Date().toISOString().slice(0,10);
   return (
     <AppShell crumbs="TRAINING" title="Training Records"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add training</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add training</button>}>
       <div className="p-6">
         <TenantTable<T> rows={rows} loading={loading}
           emptyTitle={drivers.length === 0 ? "Add drivers first" : "No training records yet"}
@@ -34,10 +34,10 @@ export default function TrainingPage() {
           columns={[
             { key: "driver", label: "Driver", render: (r) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(d => d.id === r.driver_id))}</span> },
             { key: "course_name", label: "Course", render: (r) => <span className="text-[var(--fg)]">{r.course_name}</span> },
-            { key: "course_category", label: "Category", hideOnMobile: true, render: (r) => r.course_category || <span className="text-white/35">—</span> },
+            { key: "course_category", label: "Category", hideOnMobile: true, render: (r) => r.course_category || <span className="text-[var(--fg-faint)]">—</span> },
             { key: "completed_on", label: "Completed", render: (r) => fmtDate(r.completed_on) },
-            { key: "expires_on", label: "Expires", render: (r) => !r.expires_on ? <span className="text-white/35">—</span> : r.expires_on < today ? <Badge color="red">{fmtDate(r.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(r.expires_on)}</span> },
-            { key: "certificate_url", label: "Cert", render: (r) => r.certificate_url ? <a href={r.certificate_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
+            { key: "expires_on", label: "Expires", render: (r) => !r.expires_on ? <span className="text-[var(--fg-faint)]">—</span> : r.expires_on < today ? <Badge color="red">{fmtDate(r.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(r.expires_on)}</span> },
+            { key: "certificate_url", label: "Cert", render: (r) => r.certificate_url ? <a href={r.certificate_url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">View</a> : <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

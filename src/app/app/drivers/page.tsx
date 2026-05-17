@@ -61,14 +61,14 @@ export default function DriversPage() {
 
   return (
     <AppShell crumbs="DRIVERS" title="Drivers"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add driver</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>}>
       <div className="p-6">
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input
             value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, CDL #, email…"
-            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[#22D3EE]"
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
           />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
@@ -82,7 +82,7 @@ export default function DriversPage() {
           rows={filtered} loading={loading}
           emptyTitle={drivers.length ? "No matches" : "No drivers yet"}
           emptyDesc={drivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
-          emptyAction={drivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add first driver</button> : undefined}
+          emptyAction={drivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
           onRowClick={(d) => setEditDriver(d)}
           columns={[
             { key: "name", label: "Driver", render: (d) =>
@@ -91,14 +91,14 @@ export default function DriversPage() {
                 <div className="text-[11px] text-[var(--fg-muted)]">{d.email || d.phone || "—"}</div>
               </div> },
             { key: "cdl", label: "CDL", hideOnMobile: true, render: (d) =>
-              d.cdl_number ? <div><div className="text-[var(--fg)]">{d.cdl_state} · {d.cdl_class}</div><div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_number}</div></div> : <span className="text-white/35">—</span> },
+              d.cdl_number ? <div><div className="text-[var(--fg)]">{d.cdl_state} · {d.cdl_class}</div><div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_number}</div></div> : <span className="text-[var(--fg-faint)]">—</span> },
             { key: "cdl_expires_on", label: "CDL expires", hideOnMobile: true, render: (d) =>
-              !d.cdl_expires_on ? <span className="text-white/35">—</span> :
+              !d.cdl_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
               isExpired(d.cdl_expires_on) ? <Badge color="red">{fmtDate(d.cdl_expires_on)}</Badge> :
               isExpiring(d.cdl_expires_on) ? <Badge color="amber">{fmtDate(d.cdl_expires_on)}</Badge> :
               <span className="text-[var(--fg-muted)]">{fmtDate(d.cdl_expires_on)}</span> },
             { key: "medical_card_expires_on", label: "Medical", hideOnMobile: true, render: (d) =>
-              !d.medical_card_expires_on ? <span className="text-white/35">—</span> :
+              !d.medical_card_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
               isExpired(d.medical_card_expires_on) ? <Badge color="red">{fmtDate(d.medical_card_expires_on)}</Badge> :
               isExpiring(d.medical_card_expires_on) ? <Badge color="amber">{fmtDate(d.medical_card_expires_on)}</Badge> :
               <span className="text-[var(--fg-muted)]">{fmtDate(d.medical_card_expires_on)}</span> },
@@ -200,7 +200,7 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
             <div>{driver && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete driver</button>}</div>
             <div className="flex gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>
-              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : driver ? "Save changes" : "Add driver"}</button>
+              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>{busy ? "Saving…" : driver ? "Save changes" : "Add driver"}</button>
             </div>
           </div>
         </form>
@@ -210,7 +210,7 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <div><div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">{title}</div><div className="space-y-2">{children}</div></div>;
+  return <div><div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">{title}</div><div className="space-y-2">{children}</div></div>;
 }
 function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-2 md:grid-cols-3 gap-3">{children}</div>; }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -218,7 +218,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 function Input(p: { value: string; onChange: (v: string)=>void; type?: string; required?: boolean; maxLength?: number }) {
   return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} required={p.required} maxLength={p.maxLength}
-    className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[#22D3EE]" />;
+    className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]" />;
 }
 function Select({ value, onChange, options }: { value: string; onChange: (v: string)=>void; options: string[] }) {
   return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")||"—"}</option>)}</select>;

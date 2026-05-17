@@ -12,7 +12,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
         <div className="p-6">{children}</div>
       </div>
       <style jsx global>{`
-        .x3i { width: 100%; padding: 8px 12px; border-radius: 8px; background: #0A1929; border: 1px solid #1E3556; color: white; font-size: 14px; }
+        .x3i { width: 100%; padding: 8px 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
         .x3i:focus { outline: none; border-color: #22D3EE; }
       `}</style>
     </div>
@@ -31,7 +31,7 @@ export function ModalActions({ onClose, busy, submitLabel = "Save" }: { onClose:
   return (
     <div className="flex justify-end gap-3 pt-2">
       <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>
-      <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : submitLabel}</button>
+      <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>{busy ? "Saving…" : submitLabel}</button>
     </div>
   );
 }

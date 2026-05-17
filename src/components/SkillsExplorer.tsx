@@ -72,16 +72,16 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-2xl p-5 border border-[var(--border)] bg-[var(--surface-3)] hover:border-[#22D3EE]/50 hover:bg-[#13243F] transition-colors relative pr-10 group"
-      style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+      className="text-left rounded-2xl p-5 border border-[var(--border)] bg-[var(--surface-3)] hover:border-[var(--accent)]/50 hover:bg-[var(--surface-2)] transition-colors relative pr-10 group"
+      style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
     >
-      <div className="inline-block text-[10px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-2">
+      <div className="inline-block text-[10px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-1 rounded-full font-mono mb-2">
         {skill.cfr}
       </div>
       <div className="text-[15px] font-bold text-[var(--fg)] mb-1">{skill.name}</div>
       <div className="text-[13px] italic text-[var(--fg-muted)]">&ldquo;{skill.q}&rdquo;</div>
-      <div className="absolute right-5 top-5 text-[#22D3EE] font-bold group-hover:translate-x-0.5 transition-transform">→</div>
-      <div className="text-[10px] text-[#22D3EE]/0 group-hover:text-[#22D3EE]/80 mt-3 font-semibold transition-colors">
+      <div className="absolute right-5 top-5 text-[var(--accent)] font-bold group-hover:translate-x-0.5 transition-transform">→</div>
+      <div className="text-[10px] text-[var(--accent)]/0 group-hover:text-[var(--accent)]/80 mt-3 font-semibold transition-colors">
         Preview sample answer ↗
       </div>
     </button>
@@ -133,9 +133,9 @@ function renderInline(s: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     // **bold**
-    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[var(--fg)] font-bold">$1</strong>')
     // CFR-like spans become cyan
-    .replace(/(§\s?\d+\.\d+(?:\([a-z0-9]+\))?(?:\([a-z0-9]+\))?|49 CFR (?:§\s?)?\d+(?:\.\d+)?|Part \d+|15 U\.S\.C\.\s?§\s?\d+(?:\([a-z0-9]+\))?(?:\([a-z0-9]+\))?|UN\d{4}|MCSA-\d+|FMVSS|FCRA)/g, '<span class="text-[#22D3EE] font-mono">$1</span>');
+    .replace(/(§\s?\d+\.\d+(?:\([a-z0-9]+\))?(?:\([a-z0-9]+\))?|49 CFR (?:§\s?)?\d+(?:\.\d+)?|Part \d+|15 U\.S\.C\.\s?§\s?\d+(?:\([a-z0-9]+\))?(?:\([a-z0-9]+\))?|UN\d{4}|MCSA-\d+|FMVSS|FCRA)/g, '<span class="text-[var(--accent)] font-mono">$1</span>');
 }
 
 export default function SkillsExplorer() {
@@ -166,14 +166,14 @@ export default function SkillsExplorer() {
         >
           <div
             className="w-full max-w-2xl rounded-2xl border border-[var(--border)] my-8"
-            style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+            style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="px-6 pt-6 pb-5 border-b border-[var(--border)]">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-extrabold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2.5 py-1 rounded-full font-mono">
+                  <span className="text-[11px] font-extrabold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2.5 py-1 rounded-full font-mono">
                     {openSkill.cfr}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--fg-faint)]">
@@ -199,7 +199,7 @@ export default function SkillsExplorer() {
               <div className="flex items-center gap-2 mb-3">
                 <div
                   className="w-7 h-7 rounded-full grid place-items-center text-[var(--bg)] font-black text-[14px]"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                 >
                   ∞
                 </div>
@@ -230,7 +230,7 @@ export default function SkillsExplorer() {
                     href="/signup"
                     className="text-[12.5px] font-bold text-[var(--bg)] px-5 py-2 rounded-full whitespace-nowrap"
                     style={{
-                      background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
+                      background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
                       boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
                     }}
                   >

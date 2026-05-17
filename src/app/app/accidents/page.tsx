@@ -30,7 +30,7 @@ export default function AccidentsPage() {
 
   return (
     <AppShell crumbs="ACCIDENTS" title="Accident Register"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log accident</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Log accident</button>}>
       <div className="p-6">
         <div className="mb-4 text-[12px] text-[var(--fg-muted)]">49 CFR § 390.15 — recordable accidents must be logged and retained for 3 years from date of accident.</div>
         <TenantTable<A> rows={rows} loading={loading}
@@ -38,11 +38,11 @@ export default function AccidentsPage() {
           emptyDesc="If you haven't had any in the last 3 years, leave this empty. The DOT requires only recordable accidents (fatality, injury w/ medical treatment off-scene, or tow-from-scene)."
           columns={[
             { key: "accident_date", label: "Date", render: (a) => fmtDate(a.accident_date) },
-            { key: "driver_id", label: "Driver", hideOnMobile: true, render: (a) => a.driver_id ? <span>{driverLabel(drivers.find(d => d.id === a.driver_id))}</span> : <span className="text-white/35">—</span> },
-            { key: "location", label: "Location", hideOnMobile: true, render: (a) => a.location || <span className="text-white/35">—</span> },
+            { key: "driver_id", label: "Driver", hideOnMobile: true, render: (a) => a.driver_id ? <span>{driverLabel(drivers.find(d => d.id === a.driver_id))}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "location", label: "Location", hideOnMobile: true, render: (a) => a.location || <span className="text-[var(--fg-faint)]">—</span> },
             { key: "recordable", label: "Recordable", render: (a) => a.recordable ? <Badge color="amber">Yes</Badge> : <Badge color="gray">No</Badge> },
             { key: "injuries", label: "Injuries / Fatal", render: (a) => <span>{a.injuries || 0} / {a.fatalities || 0}</span> },
-            { key: "preventable", label: "Preventable", hideOnMobile: true, render: (a) => a.preventable ? <Badge color={a.preventable === "preventable" ? "red" : a.preventable === "non_preventable" ? "green" : "gray"}>{a.preventable.replace("_"," ")}</Badge> : <span className="text-white/35">—</span> },
+            { key: "preventable", label: "Preventable", hideOnMobile: true, render: (a) => a.preventable ? <Badge color={a.preventable === "preventable" ? "red" : a.preventable === "non_preventable" ? "green" : "gray"}>{a.preventable.replace("_"," ")}</Badge> : <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

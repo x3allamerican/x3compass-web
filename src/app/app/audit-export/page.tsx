@@ -25,10 +25,10 @@ export default function AuditExportPage() {
 
   return (
     <AppShell crumbs="AUDIT EXPORT" title="Audit Packet Generator"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Generate packet</button>}>
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Generate packet</button>}>
       <div className="p-6">
         <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
-          <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">What this does</div>
+          <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">What this does</div>
           <p className="text-[var(--fg-muted)] text-sm leading-relaxed">
             Bundles drivers, DQ documents, MVRs, drug & alcohol test results, training records, accidents, and roadside inspections into a single DOT audit-ready ZIP. Use for FMCSA Compliance Reviews, insurance underwriting, or M&amp;A due diligence.
           </p>
@@ -41,8 +41,8 @@ export default function AuditExportPage() {
             { key: "scope", label: "Scope", render: (e) => e.scope || <Badge color="cyan">full</Badge> },
             { key: "range", label: "Date range", hideOnMobile: true, render: (e) => e.date_range_start ? `${fmtDate(e.date_range_start)} → ${fmtDate(e.date_range_end)||"now"}` : "all time" },
             { key: "status", label: "Status", render: (e) => <Badge color={SC[e.status]||"gray"}>{e.status}</Badge> },
-            { key: "size_bytes", label: "Size", hideOnMobile: true, render: (e) => e.size_bytes ? `${Math.round(e.size_bytes/1024)} KB` : <span className="text-white/35">—</span> },
-            { key: "packet_url", label: "Download", render: (e) => e.packet_url ? <a href={e.packet_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">ZIP</a> : <span className="text-white/35">pending</span> },
+            { key: "size_bytes", label: "Size", hideOnMobile: true, render: (e) => e.size_bytes ? `${Math.round(e.size_bytes/1024)} KB` : <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "packet_url", label: "Download", render: (e) => e.packet_url ? <a href={e.packet_url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">ZIP</a> : <span className="text-[var(--fg-faint)]">pending</span> },
           ]}
         />
       </div>

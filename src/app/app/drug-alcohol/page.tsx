@@ -29,7 +29,7 @@ export default function DrugAlcoholPage() {
 
   return (
     <AppShell crumbs="DRUG & ALCOHOL" title="Drug & Alcohol Testing"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log test</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Log test</button>}>
       <div className="p-6">
         <div className="mb-4 text-[12px] text-[var(--fg-muted)]">49 CFR Part 382 — pre-employment, random, post-accident, reasonable-suspicion, return-to-duty, and follow-up tests.</div>
         <TenantTable<T> rows={rows} loading={loading}
@@ -41,7 +41,7 @@ export default function DrugAlcoholPage() {
             { key: "test_type", label: "Type", hideOnMobile: true, render: (t) => <Badge color="cyan">{t.test_type.replace(/_/g," ")}</Badge> },
             { key: "test_kind", label: "Kind", hideOnMobile: true, render: (t) => t.test_kind },
             { key: "result", label: "Result", render: (t) => <Badge color={RC[t.result]||"gray"}>{t.result.replace(/_/g," ")}</Badge> },
-            { key: "lab", label: "Lab", hideOnMobile: true, render: (t) => t.lab || <span className="text-white/35">—</span> },
+            { key: "lab", label: "Lab", hideOnMobile: true, render: (t) => t.lab || <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

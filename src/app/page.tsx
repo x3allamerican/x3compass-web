@@ -67,8 +67,8 @@ const STEPS = [
   { n: 5, title: "Read the morning digest",           desc: "7am email tells you what expires in the next 30 days. Handle today's items. Tomorrow you do it again. That's it." },
 ];
 
-const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
-const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/40 transition-colors";
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function Home() {
   return (
@@ -86,7 +86,7 @@ export default function Home() {
           </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-24 relative">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
+              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-6">
                 EST. 2025 · 300 SKILLS · 12 BRAINS · BUILT BY FLEET OPERATORS
               </div>
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[60px] md:text-[72px] mb-6">
@@ -139,10 +139,10 @@ export default function Home() {
         {/* 01 · TWELVE BRAINS */}
         <section id="services" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">01 · TWELVE BRAINS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">01 · TWELVE BRAINS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Twelve brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
           </h2>
@@ -156,7 +156,7 @@ export default function Home() {
         <section className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-10">
-              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">02 · THE DASHBOARD</div>
+              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · THE DASHBOARD</div>
               <h2 className="font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-[1.1] text-[28px] sm:text-[34px] md:text-[40px] lg:text-[44px] whitespace-normal lg:whitespace-nowrap">
                 The screen you live in.{" "}
                 <span className="serif-italic" style={{ color: "#22D3EE" }}>Every signal, one page.</span>
@@ -202,10 +202,10 @@ export default function Home() {
         {/* 03 · 300 SKILLS */}
         <section id="skills" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · 300 PUBLISHED SKILLS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 300 PUBLISHED SKILLS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Ask any FMCSA question.{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Get a CFR-cited answer.</span>
@@ -218,14 +218,14 @@ export default function Home() {
             <div>
               <Link
                 href="/skills"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-white border border-[#22D3EE]/50 hover:bg-[#22D3EE]/10 hover:border-[#22D3EE]"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--fg)] border border-[var(--accent)]/50 hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]"
               >
                 ★ Browse all 300 skills · filter & search →
               </Link>
             </div>
             <div className="text-[13px] text-[var(--fg-muted)]">
               The full library unlocks inside Compass —{" "}
-              <Link href="/signup" className="text-[#22D3EE] font-bold">Start your 7-day free trial →</Link>
+              <Link href="/signup" className="text-[var(--accent)] font-bold">Start your 7-day free trial →</Link>
             </div>
           </div>
         </section>
@@ -235,7 +235,7 @@ export default function Home() {
           {/* Decorative wash removed — let the content carry the section */}
           <div className="max-w-7xl mx-auto px-6 relative">
             <div className="text-center mb-10">
-              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
                 04 · HAZMAT CENTER
               </div>
               <h2 className="text-[36px] sm:text-[44px] lg:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
@@ -264,10 +264,10 @@ export default function Home() {
         {/* 05 · HOW IT WORKS */}
         <section id="how" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[#22D3EE]" />
+            <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">05 · HOW IT WORKS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">05 · HOW IT WORKS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Live in the next <span className="serif-italic" style={{ color: "#22D3EE" }}>lunch break.</span>
           </h2>
@@ -279,7 +279,7 @@ export default function Home() {
               <div key={s.n} className={`${cardDark} p-6`}>
                 <div
                   className="w-9 h-9 rounded-full grid place-items-center text-[var(--bg)] font-black mb-3"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
                 >
                   {s.n}
                 </div>
@@ -313,10 +313,10 @@ export default function Home() {
         <section id="pricing" className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
           <div className="max-w-7xl mx-auto px-6">
             <div className="inline-flex gap-1 mb-3">
-              <span className="w-7 h-[3px] bg-[#22D3EE]" />
+              <span className="w-7 h-[3px] bg-[var(--accent)]" />
               <span className="w-7 h-[3px] bg-white/30" />
             </div>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">06 · PRICING</div>
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">06 · PRICING</div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               Drive it yourself.{" "}
               <span className="serif-italic" style={{ color: "#22D3EE" }}>Or let us drive it for you.</span>
@@ -333,15 +333,15 @@ export default function Home() {
                   key={i}
                   className={`relative flex flex-col rounded-2xl p-7 ${
                     p.popular
-                      ? "border-[#22D3EE]/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]"
+                      ? "border-[var(--accent)]/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]"
                       : "border-[var(--border)]"
                   } border`}
-                  style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
+                  style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}
                 >
                   {p.popular && (
                     <span
                       className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[.06em] text-[var(--bg)]"
-                      style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                      style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                     >
                       Most Popular
                     </span>
@@ -358,7 +358,7 @@ export default function Home() {
                   <ul className="space-y-2 mb-6 flex-1">
                     {p.bullets.map((b, j) => (
                       <li key={j} className="text-[14px] text-[var(--fg-muted)] flex gap-2">
-                        <span className="text-[#22D3EE] font-bold flex-shrink-0">✓</span>
+                        <span className="text-[var(--accent)] font-bold flex-shrink-0">✓</span>
                         <span>{b}</span>
                       </li>
                     ))}
@@ -366,7 +366,7 @@ export default function Home() {
                   <Link
                     href="/app"
                     className={`block text-center px-4 py-3 rounded-full font-bold text-[14px] ${
-                      p.popular ? "text-[var(--bg)]" : "text-white border border-white/20 hover:bg-white/5"
+                      p.popular ? "text-[var(--bg)]" : "text-[var(--fg)] border border-white/20 hover:bg-white/5"
                     }`}
                     style={p.popular ? ctaCyan : undefined}
                   >
@@ -377,7 +377,7 @@ export default function Home() {
             </div>
             <div className={`${cardDark} p-5 flex items-center justify-between gap-6 flex-wrap`}>
               <div>
-                <div className="text-[11px] tracking-wider uppercase font-bold text-[#22D3EE] mb-1">★ ADD-ON</div>
+                <div className="text-[11px] tracking-wider uppercase font-bold text-[var(--accent)] mb-1">★ ADD-ON</div>
                 <div className="text-[18px] font-extrabold text-[var(--fg)]">
                   Hazmat Center · <span style={{ color: "#22D3EE" }}>+$99/mo</span>
                 </div>

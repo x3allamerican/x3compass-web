@@ -5,7 +5,7 @@
  */
 export default function HazmatPreview() {
   return (
-    <div className="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_24px_72px_rgba(0,0,0,0.55)] text-left" style={{ background: "#0A1929" }}>
+    <div className="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_24px_72px_rgba(0,0,0,0.55)] text-left" style={{ background: "var(--bg)" }}>
       {/* Faux browser chrome */}
       <div className="flex items-center gap-2 px-4 py-3 bg-[var(--bg-3)] border-b border-[var(--border)]">
         <div className="flex gap-1.5">
@@ -21,7 +21,7 @@ export default function HazmatPreview() {
       {/* Header strip */}
       <div className="px-5 py-4 border-b border-[var(--border)] bg-[var(--surface-3)] flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] mb-0.5">
+          <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-0.5">
             X3 COMPASS · HAZMAT CENTER · 49 CFR PARTS 172–180
           </div>
           <h3 className="text-[var(--fg)] font-extrabold text-[16px]">100 hazmat skills · live tools</h3>
@@ -33,8 +33,8 @@ export default function HazmatPreview() {
 
       <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-3 p-4">
         {/* Placard Wizard card */}
-        <div className="rounded-xl border border-[var(--border)] p-4" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] mb-2">
+        <div className="rounded-xl border border-[var(--border)] p-4" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+          <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-2">
             ★ TOOL 1 · PLACARD WIZARD
           </div>
           <div className="text-[var(--fg)] font-bold text-[13px] mb-3">Lookup: 4,000 lbs · UN1203</div>
@@ -82,8 +82,8 @@ export default function HazmatPreview() {
         {/* Right column: Segregation + ERG quick-link */}
         <div className="space-y-3">
           {/* Segregation matrix card */}
-          <div className="rounded-xl border border-[var(--border)] p-4" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-            <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] mb-2">
+          <div className="rounded-xl border border-[var(--border)] p-4" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+            <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-2">
               ★ TOOL 2 · SEGREGATION MATRIX · § 177.848
             </div>
             <div className="text-[var(--fg)] font-bold text-[12px] mb-2">Class 3 + Class 8</div>
@@ -100,15 +100,15 @@ export default function HazmatPreview() {
                 <tbody>
                   <tr className="border-t border-[var(--border)]">
                     <td className="text-[var(--fg-muted)] font-bold p-1.5">Cl 3</td>
-                    <td className="text-center text-white/35 p-1.5">—</td>
+                    <td className="text-center text-[var(--fg-faint)] p-1.5">—</td>
                     <td className="text-center text-rose-300 p-1.5">X</td>
-                    <td className="text-center bg-[#22D3EE]/15 text-[#22D3EE] font-bold p-1.5">O</td>
+                    <td className="text-center bg-[var(--accent)]/15 text-[var(--accent)] font-bold p-1.5">O</td>
                   </tr>
                   <tr className="border-t border-[var(--border)]">
                     <td className="text-[var(--fg-muted)] font-bold p-1.5">Cl 8</td>
-                    <td className="text-center text-[#22D3EE] font-bold p-1.5">O</td>
+                    <td className="text-center text-[var(--accent)] font-bold p-1.5">O</td>
                     <td className="text-center text-rose-300 p-1.5">X</td>
-                    <td className="text-center text-white/35 p-1.5">—</td>
+                    <td className="text-center text-[var(--fg-faint)] p-1.5">—</td>
                   </tr>
                 </tbody>
               </table>
@@ -119,8 +119,8 @@ export default function HazmatPreview() {
           </div>
 
           {/* Skill grid mini */}
-          <div className="rounded-xl border border-[var(--border)] p-3" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-            <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] mb-2">
+          <div className="rounded-xl border border-[var(--border)] p-3" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+            <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-2">
               ★ TOOL 3 · 100 HAZMAT SKILLS · ASK COMPASS
             </div>
             <div className="grid grid-cols-2 gap-1.5">
@@ -130,8 +130,8 @@ export default function HazmatPreview() {
                 { c: "TSA H", n: "Endorsement clock" },
                 { c: "ERG 2024", n: "Emergency lookup" },
               ].map((s, i) => (
-                <div key={i} className="rounded p-2 border border-[var(--border)] text-[9.5px]" style={{ background: "#0F1C32" }}>
-                  <div className="font-mono text-[#22D3EE] text-[8px] mb-0.5">{s.c}</div>
+                <div key={i} className="rounded p-2 border border-[var(--border)] text-[9.5px]" style={{ background: "var(--surface-3)" }}>
+                  <div className="font-mono text-[var(--accent)] text-[8px] mb-0.5">{s.c}</div>
                   <div className="text-[var(--fg)] font-bold leading-tight">{s.n}</div>
                 </div>
               ))}

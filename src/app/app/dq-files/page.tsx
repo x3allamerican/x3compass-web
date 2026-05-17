@@ -32,7 +32,7 @@ export default function DQFilesPage() {
 
   return (
     <AppShell crumbs="DQ FILES" title="Driver Qualification Files"
-      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Upload document</button>}>
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Upload document</button>}>
       <div className="p-6">
         <div className="flex gap-3 mb-4">
           <select value={filterDriver} onChange={(e)=>setFilterDriver(e.target.value)} className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
@@ -47,9 +47,9 @@ export default function DQFilesPage() {
           columns={[
             { key: "driver", label: "Driver", render: (d) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(x => x.id === d.driver_id))}</span> },
             { key: "doc_type", label: "Type", render: (d) => <Badge color="cyan">{d.doc_type.replace(/_/g," ")}</Badge> },
-            { key: "label", label: "Label", hideOnMobile: true, render: (d) => d.label || <span className="text-white/35">—</span> },
-            { key: "expires_on", label: "Expires", render: (d) => !d.expires_on ? <span className="text-white/35">—</span> : d.expires_on < today ? <Badge color="red">{fmtDate(d.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(d.expires_on)}</span> },
-            { key: "url", label: "File", render: (d) => d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">Open</a> : <span className="text-white/35">—</span> },
+            { key: "label", label: "Label", hideOnMobile: true, render: (d) => d.label || <span className="text-[var(--fg-faint)]">—</span> },
+            { key: "expires_on", label: "Expires", render: (d) => !d.expires_on ? <span className="text-[var(--fg-faint)]">—</span> : d.expires_on < today ? <Badge color="red">{fmtDate(d.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(d.expires_on)}</span> },
+            { key: "url", label: "File", render: (d) => d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">Open</a> : <span className="text-[var(--fg-faint)]">—</span> },
           ]}
         />
       </div>

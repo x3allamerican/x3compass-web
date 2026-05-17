@@ -5,7 +5,7 @@
  */
 export default function DashboardPreview() {
   return (
-    <div className="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_24px_72px_rgba(0,0,0,0.55)]" style={{ background: "#0A1929" }}>
+    <div className="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_24px_72px_rgba(0,0,0,0.55)]" style={{ background: "var(--bg)" }}>
       {/* Faux browser chrome */}
       <div className="flex items-center gap-2 px-4 py-3 bg-[var(--bg-3)] border-b border-[var(--border)]">
         <div className="flex gap-1.5">
@@ -21,8 +21,8 @@ export default function DashboardPreview() {
       {/* App body */}
       <div className="grid grid-cols-[180px_1fr] max-md:grid-cols-1">
         {/* Sidebar */}
-        <aside className="bg-[#102742] border-r border-[var(--border)] p-3 max-md:hidden">
-          <div className="text-[8px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] px-2 mb-2">
+        <aside className="bg-[var(--surface)] border-r border-[var(--border)] p-3 max-md:hidden">
+          <div className="text-[8px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] px-2 mb-2">
             Workspace
           </div>
           <div className="space-y-0.5">
@@ -41,7 +41,7 @@ export default function DashboardPreview() {
                 key={i}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded text-[11px] font-semibold ${
                   n.active
-                    ? "bg-[#22D3EE]/15 text-white border-l-2 border-[#22D3EE]"
+                    ? "bg-[var(--accent)]/15 text-[var(--fg)] border-l-2 border-[var(--accent)]"
                     : "text-[var(--fg-muted)]"
                 }`}
               >
@@ -57,7 +57,7 @@ export default function DashboardPreview() {
           {/* Page header */}
           <header className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <div className="text-[8px] tracking-[.14em] uppercase font-extrabold text-[#22D3EE] mb-0.5">
+              <div className="text-[8px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-0.5">
                 DASHBOARD · APEX LOGISTICS · 38 TRUCKS · 72 DRIVERS
               </div>
               <h3 className="text-[var(--fg)] font-extrabold text-[15px]">Good morning, Joshua</h3>
@@ -77,8 +77,8 @@ export default function DashboardPreview() {
                 { l: "Expirations · 30d", v: "5", sub: "items due", c: "#A78BFA", arrow: "" },
                 { l: "OOS rate", v: "2.4%", sub: "vs 4.1% peer", c: "#10B981", arrow: "▼" },
               ].map((k, i) => (
-                <div key={i} className="rounded-xl p-3 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-                  <div className="text-[8.5px] tracking-[.14em] uppercase font-bold text-white/50 mb-0.5">{k.l}</div>
+                <div key={i} className="rounded-xl p-3 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+                  <div className="text-[8.5px] tracking-[.14em] uppercase font-bold text-[var(--fg-faint)] mb-0.5">{k.l}</div>
                   <div className="flex items-baseline gap-1.5">
                     <div className="text-[20px] font-black leading-none" style={{ color: k.c }}>{k.v}</div>
                     {k.arrow && <span className="text-[9px] font-bold text-emerald-300">{k.arrow}</span>}
@@ -98,7 +98,7 @@ export default function DashboardPreview() {
             >
               <div
                 className="w-6 h-6 rounded-full grid place-items-center text-[var(--bg)] font-black text-[11px] flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
               >
                 ∞
               </div>
@@ -106,11 +106,11 @@ export default function DashboardPreview() {
                 <div className="text-[var(--fg)] text-[11px] font-bold mb-0.5">
                   Compass · today&apos;s priority
                 </div>
-                <div className="text-[10.5px] text-white/80 leading-relaxed">
+                <div className="text-[10.5px] text-[var(--fg)] leading-relaxed">
                   Ricardo&apos;s medical cert expires <strong className="text-amber-300">in 9 days</strong>. I drafted a reminder + scheduled it for tomorrow 7am.
                 </div>
               </div>
-              <button className="text-[10px] font-bold text-[#22D3EE] whitespace-nowrap">Approve →</button>
+              <button className="text-[10px] font-bold text-[var(--accent)] whitespace-nowrap">Approve →</button>
             </div>
 
             {/* Driver activity row */}
@@ -125,7 +125,7 @@ export default function DashboardPreview() {
                   { i: "EP", n: "Emma Park", s: "Sleeper · TX · split 7+3", c: "#A78BFA" },
                   { i: "DR", n: "Diego Ramirez", s: "Driving · I-95 FL · 7.5h available", c: "#10B981" },
                 ].map((d, i) => (
-                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-[var(--border)] text-[10.5px]" style={{ background: "#0F1C32" }}>
+                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-[var(--border)] text-[10.5px]" style={{ background: "var(--surface-3)" }}>
                     <div className="w-6 h-6 rounded-full grid place-items-center font-extrabold text-[9px] text-[var(--bg)] flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${d.c}, #22D3EE)` }}>
                       {d.i}

@@ -168,7 +168,7 @@ export default function AdminPartnersPage() {
 
   if (!rows && !loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0A1929", color: "white", padding: "60px 24px", display: "grid", placeItems: "center" }}>
+      <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)", padding: "60px 24px", display: "grid", placeItems: "center" }}>
         <div style={{ maxWidth: 420, width: "100%" }}>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Admin · Partners</h1>
           <p style={{ color: "#94A3B8", fontSize: 14, marginBottom: 24 }}>
@@ -184,8 +184,8 @@ export default function AdminPartnersPage() {
               width: "100%",
               padding: "12px 14px",
               borderRadius: 8,
-              background: "#0F2438",
-              border: "1px solid #1E3556",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
               color: "white",
               fontSize: 14,
               marginBottom: 12,
@@ -198,8 +198,8 @@ export default function AdminPartnersPage() {
               width: "100%",
               padding: "12px 14px",
               borderRadius: 8,
-              background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-              color: "#0A1929",
+              background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
+              color: "var(--accent-fg)",
               fontWeight: 700,
               border: 0,
               cursor: key ? "pointer" : "not-allowed",
@@ -215,9 +215,9 @@ export default function AdminPartnersPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0A1929", color: "white" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)" }}>
       {/* Header */}
-      <div style={{ background: "#091525", borderBottom: "1px solid #1E3556", padding: "16px 24px" }}>
+      <div style={{ background: "var(--bg-3)", borderBottom: "1px solid var(--border)", padding: "16px 24px" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Admin · Partner applications</h1>
@@ -250,9 +250,9 @@ export default function AdminPartnersPage() {
               style={{
                 padding: "8px 14px",
                 borderRadius: 6,
-                background: "#0F2438",
+                background: "var(--surface)",
                 color: "#94A3B8",
-                border: "1px solid #1E3556",
+                border: "1px solid var(--border)",
                 fontSize: 13,
                 cursor: "pointer",
               }}
@@ -265,7 +265,7 @@ export default function AdminPartnersPage() {
 
       {/* Stats strip */}
       {stats && (
-        <div style={{ background: "#0F2438", borderBottom: "1px solid #1E3556", padding: "16px 24px" }}>
+        <div style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)", padding: "16px 24px" }}>
           <div style={{ maxWidth: 1400, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
             <Stat label="Total applications" value={stats.total} />
             <Stat label="Unreviewed" value={stats.unreviewed} color={stats.unreviewed > 0 ? "#FACC15" : "white"} />
@@ -288,7 +288,7 @@ export default function AdminPartnersPage() {
               fontSize: 12,
               cursor: "pointer",
               background: filter === f ? "#22D3EE" : "#1E3556",
-              color: filter === f ? "#0A1929" : "white",
+              color: filter === f ? "var(--accent-fg)" : "var(--fg)",
               fontWeight: filter === f ? 700 : 500,
               textTransform: "capitalize",
             }}
@@ -301,7 +301,7 @@ export default function AdminPartnersPage() {
       {/* List + detail */}
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px 40px", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)", gap: 20 }}>
         {/* List */}
-        <div style={{ background: "#0F2438", borderRadius: 12, border: "1px solid #1E3556", overflow: "hidden", maxHeight: "75vh", overflowY: "auto" }}>
+        <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)", overflow: "hidden", maxHeight: "75vh", overflowY: "auto" }}>
           {filteredRows.length === 0 ? (
             <div style={{ padding: 40, textAlign: "center", color: "#94A3B8", fontSize: 14 }}>No applications match the filter.</div>
           ) : (
@@ -313,9 +313,9 @@ export default function AdminPartnersPage() {
                   onClick={() => setSelectedId(r.id)}
                   style={{
                     padding: "12px 14px",
-                    borderBottom: "1px solid #1E3556",
+                    borderBottom: "1px solid var(--border)",
                     cursor: "pointer",
-                    background: selectedId === r.id ? "#143553" : "transparent",
+                    background: selectedId === r.id ? "var(--surface-2)" : "transparent",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -342,7 +342,7 @@ export default function AdminPartnersPage() {
         </div>
 
         {/* Detail */}
-        <div style={{ background: "#0F2438", borderRadius: 12, border: "1px solid #1E3556", padding: 24, maxHeight: "75vh", overflowY: "auto" }}>
+        <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)", padding: 24, maxHeight: "75vh", overflowY: "auto" }}>
           {!selected ? (
             <div style={{ color: "#94A3B8", textAlign: "center", padding: 60 }}>Select an application on the left</div>
           ) : (
@@ -369,8 +369,8 @@ function StatusDot({ status }: { status: string }) {
 
 function TierBadge({ tier, score }: { tier: "HOT" | "WARM" | "COLD"; score: number }) {
   const colors = {
-    HOT: { bg: "#22D3EE", fg: "#0A1929" },
-    WARM: { bg: "#FACC15", fg: "#0A1929" },
+    HOT: { bg: "var(--accent)", fg: "var(--accent-fg)" },
+    WARM: { bg: "#FACC15", fg: "var(--accent-fg)" },
     COLD: { bg: "#475569", fg: "white" },
   }[tier];
   return (
@@ -402,7 +402,7 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
         <TierBadge tier={t.tier} score={t.score} />
       </div>
 
-      <div style={{ background: "#143553", padding: 14, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+      <div style={{ background: "var(--surface-2)", padding: 14, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
         <strong style={{ color: "#22D3EE" }}>Triage signals:</strong> {t.signals.join(" · ") || "—"}
       </div>
 
@@ -448,7 +448,7 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
                 fontSize: 12,
                 cursor: "pointer",
                 background: row.status === s ? STATUS_COLORS[s] : "#1E3556",
-                color: row.status === s ? "#0A1929" : "white",
+                color: row.status === s ? "var(--accent-fg)" : "var(--fg)",
                 fontWeight: row.status === s ? 700 : 500,
                 textTransform: "capitalize",
               }}
@@ -470,9 +470,9 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
             marginTop: 6,
             padding: 12,
             borderRadius: 8,
-            background: "#0A1929",
+            background: "var(--bg)",
             color: "white",
-            border: "1px solid #1E3556",
+            border: "1px solid var(--border)",
             fontSize: 13,
             fontFamily: "inherit",
             resize: "vertical",
@@ -488,8 +488,8 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
             marginTop: 8,
             padding: "8px 14px",
             borderRadius: 6,
-            background: notes === savedNotes ? "#1E3556" : "linear-gradient(135deg, #22D3EE, #06B6D4)",
-            color: notes === savedNotes ? "#64748B" : "#0A1929",
+            background: notes === savedNotes ? "#1E3556" : "linear-gradient(135deg, var(--accent), var(--accent-2))",
+            color: notes === savedNotes ? "var(--fg-faint)" : "var(--accent-fg)",
             fontWeight: 700,
             border: 0,
             fontSize: 13,
@@ -503,7 +503,7 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
       <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1E3556", display: "flex", gap: 8, flexWrap: "wrap" }}>
         <a
           href={`mailto:${row.email}?subject=Re%3A%20your%20Compass%20Partner%20application&body=Hi%20${encodeURIComponent(row.name.split(" ")[0])}%2C%0A%0AThanks%20for%20applying%20to%20the%20X3%20Compass%20Partner%20program.%20`}
-          style={{ padding: "8px 14px", borderRadius: 6, background: "#22D3EE", color: "#0A1929", fontWeight: 700, fontSize: 13, textDecoration: "none" }}
+          style={{ padding: "8px 14px", borderRadius: 6, background: "var(--accent)", color: "var(--accent-fg)", fontWeight: 700, fontSize: 13, textDecoration: "none" }}
         >
           ✉ Reply by email
         </a>
@@ -511,7 +511,7 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
           href="https://calendly.com/joshua-x3compass/partner-discovery"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ padding: "8px 14px", borderRadius: 6, background: "#1E3556", color: "white", fontWeight: 700, fontSize: 13, textDecoration: "none" }}
+          style={{ padding: "8px 14px", borderRadius: 6, background: "var(--surface)", color: "var(--fg)", fontWeight: 700, fontSize: 13, textDecoration: "none" }}
         >
           🗓 Open Calendly link
         </a>
@@ -528,7 +528,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ color: "#22D3EE", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>{title}</div>
-      <div style={{ background: "#091525", padding: 14, borderRadius: 8, fontSize: 13, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{children}</div>
+      <div style={{ background: "var(--bg-3)", padding: 14, borderRadius: 8, fontSize: 13, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{children}</div>
     </div>
   );
 }

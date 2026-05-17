@@ -100,7 +100,7 @@ export default function SkillsCatalogPage() {
             <Link href="/" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">
               ← Back to home
             </Link>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
               THE COMPASS SKILL LIBRARY · OPEN-SOURCED ON GITHUB
             </div>
             <h1 className="text-[36px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
@@ -113,7 +113,7 @@ export default function SkillsCatalogPage() {
                 href="https://github.com/x3fleetsafety/skills"
                 target="_blank"
                 rel="noopener"
-                className="text-[#22D3EE] font-bold hover:underline"
+                className="text-[var(--accent)] font-bold hover:underline"
               >
                 Audit the source on GitHub ↗
               </a>
@@ -127,8 +127,8 @@ export default function SkillsCatalogPage() {
                 { l: "Apache 2.0 licensed", v: "Open source", c: "#10B981", small: true },
                 { l: "CFR coverage", v: "Parts 380–399 + Part 172–180", c: "#FBBF24", small: true },
               ].map((s, i) => (
-                <div key={i} className="rounded-2xl p-4 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-                  <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/50 mb-1">{s.l}</div>
+                <div key={i} className="rounded-2xl p-4 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+                  <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-faint)] mb-1">{s.l}</div>
                   <div className={`${s.small ? "text-[15px]" : "text-[28px]"} font-black leading-none`} style={{ color: s.c }}>
                     {s.v}
                   </div>
@@ -148,9 +148,9 @@ export default function SkillsCatalogPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by skill name, CFR section, or question…"
-                className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-full pl-10 pr-4 py-2.5 text-[13px] text-[var(--fg)] placeholder:text-white/35 focus:outline-none focus:border-[#22D3EE]"
+                className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-full pl-10 pr-4 py-2.5 text-[13px] text-[var(--fg)] placeholder:text-[var(--fg-faint)] focus:outline-none focus:border-[var(--accent)]"
               />
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--fg-faint)]">🔍</span>
             </div>
 
             {/* Status pill — only shown when there are coming-soon entries */}
@@ -161,7 +161,7 @@ export default function SkillsCatalogPage() {
                     key={opt}
                     onClick={() => setStatusFilter(opt)}
                     className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
-                      statusFilter === opt ? "text-[var(--bg)] bg-[#22D3EE]" : "text-[var(--fg-muted)] hover:text-white"
+                      statusFilter === opt ? "text-[var(--bg)] bg-[var(--accent)]" : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
                     }`}
                   >
                     {opt === "all" ? "All" : opt === "published" ? `Live · ${totalPublished}` : `Roadmap · ${totalComing}`}
@@ -180,7 +180,7 @@ export default function SkillsCatalogPage() {
             <button
               onClick={() => setFilter("ALL")}
               className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
-                filter === "ALL" ? "bg-[#22D3EE]/15 border-[#22D3EE] text-white" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-white"
+                filter === "ALL" ? "bg-[var(--accent)]/15 border-[var(--accent)] text-[var(--fg)]" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
               }`}
             >
               All · {SKILLS.length}
@@ -190,7 +190,7 @@ export default function SkillsCatalogPage() {
                 key={cat}
                 onClick={() => setFilter(cat)}
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
-                  filter === cat ? "bg-[#22D3EE]/15 border-[#22D3EE] text-white" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-white"
+                  filter === cat ? "bg-[var(--accent)]/15 border-[var(--accent)] text-[var(--fg)]" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
                 }`}
               >
                 {cat} · {n}
@@ -202,8 +202,8 @@ export default function SkillsCatalogPage() {
         {/* Catalog grid */}
         <section className="max-w-7xl mx-auto px-6 py-10">
           {filter !== "ALL" && CATEGORY_DESCRIPTIONS[filter] && (
-            <div className="mb-6 rounded-xl px-4 py-3 border border-[var(--border)] text-[13px] text-[var(--fg-muted)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <strong className="text-[#22D3EE]">{filter}</strong> · {CATEGORY_DESCRIPTIONS[filter]}
+            <div className="mb-6 rounded-xl px-4 py-3 border border-[var(--border)] text-[13px] text-[var(--fg-muted)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+              <strong className="text-[var(--accent)]">{filter}</strong> · {CATEGORY_DESCRIPTIONS[filter]}
             </div>
           )}
 
@@ -211,7 +211,7 @@ export default function SkillsCatalogPage() {
             <div className="text-center py-20">
               <div className="text-[48px] mb-3">🔍</div>
               <div className="text-[var(--fg)] font-bold mb-2">No skills match your filters</div>
-              <button onClick={() => { setFilter("ALL"); setStatusFilter("all"); setSearch(""); }} className="text-[12px] text-[#22D3EE] font-bold hover:underline">
+              <button onClick={() => { setFilter("ALL"); setStatusFilter("all"); setSearch(""); }} className="text-[12px] text-[var(--accent)] font-bold hover:underline">
                 Clear filters →
               </button>
             </div>
@@ -227,7 +227,7 @@ export default function SkillsCatalogPage() {
         {/* Bottom CTA */}
         <section className="bg-[var(--bg-3)] border-t border-[var(--border)] py-16">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
               EVERY SKILL · INSIDE EVERY COMPASS SUBSCRIPTION
             </div>
             <h2 className="text-[28px] sm:text-[36px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
@@ -239,7 +239,7 @@ export default function SkillsCatalogPage() {
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
             >
               ★ Start free trial →
             </Link>
@@ -255,19 +255,19 @@ function SkillTile({ skill }: { skill: Skill }) {
   return (
     <div
       className={`rounded-xl p-4 border transition-all relative ${
-        isComing ? "border-[var(--border)] bg-[var(--surface-3)]/50" : "border-[var(--border)] hover:border-[#22D3EE]/40"
+        isComing ? "border-[var(--border)] bg-[var(--surface-3)]/50" : "border-[var(--border)] hover:border-[var(--accent)]/40"
       }`}
-      style={!isComing ? { background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" } : undefined}
+      style={!isComing ? { background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" } : undefined}
     >
       <div className="flex items-center gap-2 flex-wrap mb-2">
-        <span className="text-[9.5px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-0.5 rounded-full font-mono">
+        <span className="text-[9.5px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-0.5 rounded-full font-mono">
           {skill.cfr}
         </span>
         <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--fg-faint)]">
           {skill.cat}
         </span>
         {skill.preview && (
-          <span className="text-[9px] font-extrabold tracking-wider text-[var(--bg)] bg-[#22D3EE] px-2 py-0.5 rounded-full">
+          <span className="text-[9px] font-extrabold tracking-wider text-[var(--bg)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
             ★ PREVIEW
           </span>
         )}
@@ -277,7 +277,7 @@ function SkillTile({ skill }: { skill: Skill }) {
           </span>
         )}
       </div>
-      <div className={`text-[14px] font-bold mb-1 ${isComing ? "text-[var(--fg-muted)]" : "text-white"}`}>
+      <div className={`text-[14px] font-bold mb-1 ${isComing ? "text-[var(--fg-muted)]" : "text-[var(--fg)]"}`}>
         {skill.name}
       </div>
       {skill.q && (
