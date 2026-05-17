@@ -67,6 +67,7 @@ export default function TopNav() {
           <Link href="/hazmat" className={linkClass("/hazmat")}>Hazmat</Link>
           <Link href="/faq" className={linkClass("/faq")}>FAQ</Link>
           <Link href="/trust" className={linkClass("/trust")}>Trust</Link>
+          <Link href="/blog" className={linkClass("/blog")}>Blog</Link>
           <Link href="/changelog" className={linkClass("/changelog")}>Changelog</Link>
         </nav>
 

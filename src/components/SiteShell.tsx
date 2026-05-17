@@ -39,6 +39,8 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <ul className="space-y-2 text-[14px]">
                 <li><Link href="/faq" className="hover:text-[var(--fg)]">FAQ</Link></li>
                 <li><Link href="/trust" className="hover:text-[var(--fg)]">Trust & Transparency</Link></li>
+                <li><Link href="/case-studies/sample" className="hover:text-[var(--fg)]">Sample audit walkthrough</Link></li>
+                <li><Link href="/blog" className="hover:text-[var(--fg)]">Blog</Link></li>
                 <li><Link href="/changelog" className="hover:text-[var(--fg)]">Changelog</Link></li>
                 <li><Link href="/#how" className="hover:text-[var(--fg)]">How it works</Link></li>
                 <li>
@@ -52,6 +54,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <h4 className="text-[var(--fg)] text-[12px] font-bold tracking-widest uppercase mb-3">Company</h4>
               <ul className="space-y-2 text-[14px]">
                 <li><Link href="/partners" className="hover:text-[var(--fg)]">Partner Program</Link></li>
+                <li><Link href="/security" className="hover:text-[var(--fg)]">Security deep-dive</Link></li>
                 <li><Link href="/trust" className="hover:text-[var(--fg)]">Security &amp; Privacy</Link></li>
                 <li><a href="https://github.com/x3fleetsafety" target="_blank" rel="noreferrer" className="hover:text-[var(--fg)]">GitHub</a></li>
                 <li><a href="mailto:joshua@x3compass.com" className="hover:text-[var(--fg)]">Contact</a></li>

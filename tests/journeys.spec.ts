@@ -104,6 +104,13 @@ test.describe("Critical user journeys (production)", () => {
     expect(m.placards.length).toBe(40);
   });
 
+  test("new redesign pages all serve 200 (no link rot after sprints 4-5)", async ({ request }) => {
+    for (const path of ["/changelog/", "/trust/", "/blog/", "/blog/cfr-accuracy-baseline/", "/case-studies/sample/", "/security/", "/og-image.png"]) {
+      const r = await request.get(`${PROD}${path}`);
+      expect(r.status(), `${path} returned non-200`).toBe(200);
+    }
+  });
+
   test("sitemap.xml lists app + marketing routes", async ({ request }) => {
     const r = await request.get(`${PROD}/sitemap.xml`);
     expect(r.status()).toBe(200);
