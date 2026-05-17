@@ -89,9 +89,13 @@ export default function SkillsCatalogPage() {
   return (
     <SiteShell>
       <div className="bg-[var(--bg)] text-[var(--fg)] min-h-screen">
-        {/* Hero */}
+        {/* Hero with real compliance-folder photo */}
         <section className="relative overflow-hidden border-b border-[var(--border)]">
-          {/* decorative wash removed for production design pass */}
+          <div className="absolute inset-0 -z-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/photos/compliance-folder.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
+          </div>
           <div className="max-w-7xl mx-auto px-6 pt-16 pb-12 relative">
             <Link href="/" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">
               ← Back to home

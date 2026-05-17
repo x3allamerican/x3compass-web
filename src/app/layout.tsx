@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     type: "website", locale: "en_US", url: SITE, siteName: "X3 Compass",
     title: "X3 Compass — AI Safety Director for fleets",
     description: "12 specialized brains. 300+ CFR-cited skills. The AI Safety Director for FMCSA-regulated fleets 1-100. Free 7-day trial.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "X3 Compass — AI Safety Director" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "X3 Compass — AI Safety Director" }],
   },
-  twitter: { card: "summary_large_image", title: "X3 Compass — AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. $25/driver. Free trial.", images: ["/og-image.png"] },
+  twitter: { card: "summary_large_image", title: "X3 Compass — AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. $25/driver. Free trial.", images: ["/opengraph-image"] },
   icons: { icon: "/favicon.ico", apple: "/apple-touch-icon.png" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
 };

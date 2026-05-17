@@ -45,8 +45,13 @@ function SignUpInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] grid place-items-center px-6 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] grid place-items-center px-6 py-12 relative overflow-hidden">
+      <div className="absolute inset-0 -z-10">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/photos/highway-night.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-15" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg)] via-[var(--bg)]/95 to-[var(--bg)]" />
+      </div>
+      <div className="w-full max-w-md relative">
         <Link href="/" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">← Back to home</Link>
         <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
           <div className="flex items-center gap-3 mb-7">
