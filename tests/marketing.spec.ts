@@ -1,22 +1,25 @@
 import { test, expect } from "@playwright/test";
 
-const MARKETING_PAGES = [
-  ["/",          "X3 Compass"],
-  ["/pricing",   "Pricing"],
-  ["/faq",       "X3 Compass"],
-  ["/hazmat",    "X3 Compass"],
-  ["/partners",  "X3 Compass"],
-  ["/skills",    "X3 Compass"],
-  ["/signin",    "Sign In"],
-  ["/signup",    "Start"],
-  ["/forgot-password", "Reset"],
+// Pages and the text we expect to find on them. Matched case-insensitively
+// because the brand renders as "X3 COMPASS" in the topbar but specs were
+// written with "X3 Compass". Either spelling should match.
+const MARKETING_PAGES: Array<[string, RegExp]> = [
+  ["/",                 /x3\s*compass/i],
+  ["/pricing",          /pricing/i],
+  ["/faq",              /x3\s*compass/i],
+  ["/hazmat",           /x3\s*compass/i],
+  ["/partners",         /x3\s*compass/i],
+  ["/skills",           /x3\s*compass/i],
+  ["/signin",           /sign\s*in/i],
+  ["/signup",           /start/i],
+  ["/forgot-password",  /reset/i],
 ];
 
-for (const [path, expectedText] of MARKETING_PAGES) {
-  test(`marketing page ${path} renders + has "${expectedText}"`, async ({ page }) => {
+for (const [path, expected] of MARKETING_PAGES) {
+  test(`marketing page ${path} renders + has ${expected}`, async ({ page }) => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
-    await expect(page.locator("body")).toContainText(expectedText, { timeout: 8000 });
+    await expect(page.locator("body")).toContainText(expected, { timeout: 8000 });
   });
 }
 
