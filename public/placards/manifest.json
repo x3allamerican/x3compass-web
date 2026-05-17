@@ -1,0 +1,409 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-05-17",
+  "purpose": "Real DOT/GHS/NFPA placard images sourced from Wikimedia Commons. Replaces the in-code SVG generator for regulatory accuracy.",
+  "attribution": "Most files are public domain US Government works (49 CFR placards). GHS pictograms are PD-self on Wikimedia. NFPA 704 template is PD-self.",
+  "count": 40,
+  "placards": [
+    {
+      "id": "class-1-1",
+      "file": "class-1-1.svg",
+      "category": "DOT",
+      "label": "Class 1.1 Explosives",
+      "hazard_class": "1.1",
+      "size": 8006,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-1-2",
+      "file": "class-1-2.svg",
+      "category": "DOT",
+      "label": "Class 1.2 Explosives",
+      "hazard_class": "1.2",
+      "size": 8593,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-1-3",
+      "file": "class-1-3.svg",
+      "category": "DOT",
+      "label": "Class 1.3 Explosives",
+      "hazard_class": "1.3",
+      "size": 9076,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-1-4",
+      "file": "class-1-4.svg",
+      "category": "DOT",
+      "label": "Class 1.4 Explosives",
+      "hazard_class": "1.4",
+      "size": 8033,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-1-5",
+      "file": "class-1-5.svg",
+      "category": "DOT",
+      "label": "Class 1.5 Blasting Agent",
+      "hazard_class": "1.5",
+      "size": 9684,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-1-6",
+      "file": "class-1-6.svg",
+      "category": "DOT",
+      "label": "Class 1.6 Extremely Insensitive",
+      "hazard_class": "1.6",
+      "size": 8809,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-2-1",
+      "file": "class-2-1.svg",
+      "category": "DOT",
+      "label": "Class 2.1 Flammable Gas",
+      "hazard_class": "2.1",
+      "size": 10657,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-2-2",
+      "file": "class-2-2.svg",
+      "category": "DOT",
+      "label": "Class 2.2 Non-Flammable Gas",
+      "hazard_class": "2.2",
+      "size": 10673,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-2-3",
+      "file": "class-2-3.svg",
+      "category": "DOT",
+      "label": "Class 2.3 Poison Gas",
+      "hazard_class": "2.3",
+      "size": 13390,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-3",
+      "file": "class-3.svg",
+      "category": "DOT",
+      "label": "Class 3 Flammable Liquid",
+      "hazard_class": "3",
+      "size": 7615,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-4-1",
+      "file": "class-4-1.svg",
+      "category": "DOT",
+      "label": "Class 4.1 Flammable Solid",
+      "hazard_class": "4.1",
+      "size": 11930,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-4-2",
+      "file": "class-4-2.svg",
+      "category": "DOT",
+      "label": "Class 4.2 Spontaneously Combustible",
+      "hazard_class": "4.2",
+      "size": 22214,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-4-3",
+      "file": "class-4-3.svg",
+      "category": "DOT",
+      "label": "Class 4.3 Dangerous When Wet",
+      "hazard_class": "4.3",
+      "size": 13548,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-5-1",
+      "file": "class-5-1.svg",
+      "category": "DOT",
+      "label": "Class 5.1 Oxidizer",
+      "hazard_class": "5.1",
+      "size": 9347,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-5-2",
+      "file": "class-5-2.svg",
+      "category": "DOT",
+      "label": "Class 5.2 Organic Peroxide",
+      "hazard_class": "5.2",
+      "size": 16614,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-6-1",
+      "file": "class-6-1.svg",
+      "category": "DOT",
+      "label": "Class 6.1 Toxic / Poison",
+      "hazard_class": "6.1",
+      "size": 12631,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-6-2",
+      "file": "class-6-2.svg",
+      "category": "DOT",
+      "label": "Class 6.2 Infectious Substance",
+      "hazard_class": "6.2",
+      "size": 18165,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-7",
+      "file": "class-7.svg",
+      "category": "DOT",
+      "label": "Class 7 Radioactive",
+      "hazard_class": "7",
+      "size": 8288,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-8",
+      "file": "class-8.svg",
+      "category": "DOT",
+      "label": "Class 8 Corrosive",
+      "hazard_class": "8",
+      "size": 39259,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "class-9",
+      "file": "class-9.svg",
+      "category": "DOT",
+      "label": "Class 9 Miscellaneous",
+      "hazard_class": "9",
+      "size": 2694,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "dangerous",
+      "file": "dangerous.svg",
+      "category": "DOT",
+      "label": "DANGEROUS (mixed loads)",
+      "hazard_class": "DANGEROUS",
+      "size": 8175,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "fuel-oil",
+      "file": "fuel-oil.svg",
+      "category": "DOT",
+      "label": "Fuel Oil",
+      "hazard_class": "FUEL-OIL",
+      "size": 4458,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "gasoline",
+      "file": "gasoline.svg",
+      "category": "DOT",
+      "label": "Gasoline",
+      "hazard_class": "GASOLINE",
+      "size": 5438,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-corrosive",
+      "file": "ghs-corrosive.svg",
+      "category": "GHS",
+      "label": "Corrosive (GHS05)",
+      "hazard_class": "GHS05",
+      "size": 7812,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-environmental",
+      "file": "ghs-environmental.svg",
+      "category": "GHS",
+      "label": "Environmental Hazard (GHS09)",
+      "hazard_class": "GHS09",
+      "size": 1526,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-explosive",
+      "file": "ghs-explosive.svg",
+      "category": "GHS",
+      "label": "Explosive (GHS01)",
+      "hazard_class": "GHS01",
+      "size": 17787,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-flammable",
+      "file": "ghs-flammable.svg",
+      "category": "GHS",
+      "label": "Flammable (GHS02)",
+      "hazard_class": "GHS02",
+      "size": 792,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-gas-cylinder",
+      "file": "ghs-gas-cylinder.svg",
+      "category": "GHS",
+      "label": "Gas Under Pressure (GHS04)",
+      "hazard_class": "GHS04",
+      "size": 2412,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-health-hazard",
+      "file": "ghs-health-hazard.svg",
+      "category": "GHS",
+      "label": "Health Hazard (GHS08)",
+      "hazard_class": "GHS08",
+      "size": 9554,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-irritant",
+      "file": "ghs-irritant.svg",
+      "category": "GHS",
+      "label": "Harmful / Irritant (GHS07)",
+      "hazard_class": "GHS07",
+      "size": 721,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-oxidizer",
+      "file": "ghs-oxidizer.svg",
+      "category": "GHS",
+      "label": "Oxidizer (GHS03)",
+      "hazard_class": "GHS03",
+      "size": 3202,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "ghs-toxic",
+      "file": "ghs-toxic.svg",
+      "category": "GHS",
+      "label": "Acute Toxic (GHS06)",
+      "hazard_class": "GHS06",
+      "size": 5927,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "inhalation-hazard-class-2",
+      "file": "inhalation-hazard-class-2.svg",
+      "category": "DOT",
+      "label": "Inhalation Hazard (Class 2)",
+      "hazard_class": "INH-2",
+      "size": 11829,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "inhalation-hazard-class-6",
+      "file": "inhalation-hazard-class-6.svg",
+      "category": "DOT",
+      "label": "Inhalation Hazard (Class 6)",
+      "hazard_class": "INH-6",
+      "size": 11968,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "inhalation-hazard-label",
+      "file": "inhalation-hazard-label.svg",
+      "category": "DOT",
+      "label": "Inhalation Hazard Label",
+      "hazard_class": "INH-LBL",
+      "size": 3485,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "nfpa-704-template",
+      "file": "nfpa-704-template.svg",
+      "category": "NFPA",
+      "label": "NFPA 704 Diamond template",
+      "hazard_class": "NFPA-704",
+      "size": 269,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "oxygen",
+      "file": "oxygen.svg",
+      "category": "DOT",
+      "label": "Oxygen",
+      "hazard_class": "OXYGEN",
+      "size": 5684,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "radioactive-1",
+      "file": "radioactive-1.svg",
+      "category": "DOT",
+      "label": "Radioactive I (white, 1 bar)",
+      "hazard_class": "7-RAM-I",
+      "size": 10674,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "radioactive-2",
+      "file": "radioactive-2.svg",
+      "category": "DOT",
+      "label": "Radioactive II (yellow, 2 bars)",
+      "hazard_class": "7-RAM-II",
+      "size": 13989,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    },
+    {
+      "id": "radioactive-3",
+      "file": "radioactive-3.svg",
+      "category": "DOT",
+      "label": "Radioactive III (yellow, 3 bars)",
+      "hazard_class": "7-RAM-III",
+      "size": 14066,
+      "license": "Public Domain (US Government work) or PD-self per Wikimedia Commons",
+      "source": "https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards"
+    }
+  ]
+}

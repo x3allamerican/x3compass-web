@@ -42,6 +42,54 @@ const HAZMAT_SKILLS = [
   { cfr: "§ 397.67",     name: "Class 7 Routing",          q: "Pre-trip Class 7 procedures?" },
 ];
 
+const DOT_PLACARDS = [
+  { id: "1-1", file: "class-1-1.svg", label: "1.1 Explosives" },
+  { id: "1-2", file: "class-1-2.svg", label: "1.2 Explosives" },
+  { id: "1-3", file: "class-1-3.svg", label: "1.3 Explosives" },
+  { id: "1-4", file: "class-1-4.svg", label: "1.4 Explosives" },
+  { id: "1-5", file: "class-1-5.svg", label: "1.5 Blasting Agent" },
+  { id: "1-6", file: "class-1-6.svg", label: "1.6 Extremely Insensitive" },
+  { id: "2-1", file: "class-2-1.svg", label: "2.1 Flammable Gas" },
+  { id: "2-2", file: "class-2-2.svg", label: "2.2 Non-Flammable Gas" },
+  { id: "2-3", file: "class-2-3.svg", label: "2.3 Poison Gas" },
+  { id: "3",   file: "class-3.svg",   label: "3 Flammable Liquid" },
+  { id: "4-1", file: "class-4-1.svg", label: "4.1 Flammable Solid" },
+  { id: "4-2", file: "class-4-2.svg", label: "4.2 Spontan. Combustible" },
+  { id: "4-3", file: "class-4-3.svg", label: "4.3 Dangerous When Wet" },
+  { id: "5-1", file: "class-5-1.svg", label: "5.1 Oxidizer" },
+  { id: "5-2", file: "class-5-2.svg", label: "5.2 Organic Peroxide" },
+  { id: "6-1", file: "class-6-1.svg", label: "6.1 Toxic / Poison" },
+  { id: "6-2", file: "class-6-2.svg", label: "6.2 Infectious" },
+  { id: "7",   file: "class-7.svg",   label: "7 Radioactive" },
+  { id: "8",   file: "class-8.svg",   label: "8 Corrosive" },
+  { id: "9",   file: "class-9.svg",   label: "9 Miscellaneous" },
+  { id: "fuel-oil", file: "fuel-oil.svg", label: "Fuel Oil" },
+  { id: "oxygen",   file: "oxygen.svg",   label: "Oxygen" },
+  { id: "gasoline", file: "gasoline.svg", label: "Gasoline" },
+  { id: "inh-2",    file: "inhalation-hazard-class-2.svg", label: "Inhalation (Cl. 2)" },
+  { id: "inh-6",    file: "inhalation-hazard-class-6.svg", label: "Inhalation (Cl. 6)" },
+  { id: "inh-lbl",  file: "inhalation-hazard-label.svg",   label: "Inhalation Label" },
+  { id: "dangerous",file: "dangerous.svg", label: "DANGEROUS" },
+];
+
+const RAM_LABELS = [
+  { id: "ram-1", file: "radioactive-1.svg", label: "Radioactive I" },
+  { id: "ram-2", file: "radioactive-2.svg", label: "Radioactive II" },
+  { id: "ram-3", file: "radioactive-3.svg", label: "Radioactive III" },
+];
+
+const GHS_PICTOGRAMS = [
+  { id: "ghs01", file: "ghs-explosive.svg",     label: "Explosive" },
+  { id: "ghs02", file: "ghs-flammable.svg",     label: "Flammable" },
+  { id: "ghs03", file: "ghs-oxidizer.svg",      label: "Oxidizer" },
+  { id: "ghs04", file: "ghs-gas-cylinder.svg",  label: "Gas Pressure" },
+  { id: "ghs05", file: "ghs-corrosive.svg",     label: "Corrosive" },
+  { id: "ghs06", file: "ghs-toxic.svg",         label: "Acute Toxic" },
+  { id: "ghs07", file: "ghs-irritant.svg",      label: "Irritant" },
+  { id: "ghs08", file: "ghs-health-hazard.svg", label: "Health Hazard" },
+  { id: "ghs09", file: "ghs-environmental.svg", label: "Environment" },
+];
+
 const cardDark = "bg-[#15233D] border border-[#1E3556] rounded-2xl hover:border-[#22D3EE]/40 transition-colors";
 const ctaCyan = { background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
@@ -186,6 +234,80 @@ export default function Hazmat() {
                   <div className="absolute right-5 top-5 text-[#22D3EE] font-bold">→</div>
                 </Link>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PLACARD LIBRARY — real Wikimedia-sourced placards */}
+        <section className="relative py-20 overflow-hidden border-y border-[#1E3556] bg-[#0B1B2E]">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-2">03 · PLACARD LIBRARY</div>
+            <h2 className="text-[28px] sm:text-[40px] font-extrabold text-white mb-2 leading-tight">
+              Every <span className="serif-italic" style={{ color: "#22D3EE" }}>real placard.</span>
+            </h2>
+            <p className="text-[15px] text-white/65 max-w-2xl mb-10">
+              40 authentic placard images — every DOT hazard class, every GHS pictogram, the NFPA 704 diamond. Sourced from Wikimedia Commons (public-domain U.S. government works under 49 CFR § 172).
+            </p>
+
+            {/* DOT placards */}
+            <div className="mb-12">
+              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-white/55 mb-4">DOT Hazardous Materials Placards · 49 CFR § 172.504</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5">
+                {DOT_PLACARDS.map((p) => (
+                  <figure key={p.id} className="flex flex-col items-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/placards/${p.file}`} alt={p.label} width={110} height={110} className="block" draggable={false} />
+                    <figcaption className="text-[10px] text-white/55 mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+
+            {/* Radioactive labels */}
+            <div className="mb-12">
+              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-white/55 mb-4">Class 7 Radioactive Labels · 49 CFR § 172.403</div>
+              <div className="grid grid-cols-3 gap-5 max-w-md">
+                {RAM_LABELS.map((p) => (
+                  <figure key={p.id} className="flex flex-col items-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/placards/${p.file}`} alt={p.label} width={110} height={110} className="block" draggable={false} />
+                    <figcaption className="text-[10px] text-white/55 mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+
+            {/* GHS pictograms */}
+            <div className="mb-12">
+              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-white/55 mb-4">UN GHS Pictograms · OSHA HazCom 2012</div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-5">
+                {GHS_PICTOGRAMS.map((p) => (
+                  <figure key={p.id} className="flex flex-col items-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/placards/${p.file}`} alt={p.label} width={84} height={84} className="block" draggable={false} />
+                    <figcaption className="text-[10px] text-white/55 mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+
+            {/* NFPA 704 + attribution */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              <div>
+                <div className="text-[10px] tracking-[.18em] uppercase font-bold text-white/55 mb-4">NFPA 704 Fire Diamond</div>
+                <figure className="flex flex-col items-start">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/placards/nfpa-704-template.svg" alt="NFPA 704 Diamond template" width={140} height={140} draggable={false} />
+                  <figcaption className="text-[10px] text-white/55 mt-2 font-mono">Fixed-facility hazard rating</figcaption>
+                </figure>
+              </div>
+              <div className="md:col-span-2 text-[12px] text-white/55 leading-relaxed">
+                <div className="text-[10px] tracking-[.18em] uppercase font-bold text-white/55 mb-3">Attribution + License</div>
+                <p className="mb-2">All 40 placard images sourced from <a href="https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards" target="_blank" rel="noreferrer" className="text-[#22D3EE] hover:underline">Wikimedia Commons</a>.</p>
+                <p className="mb-2"><strong className="text-white/75">DOT placards:</strong> US Government works — public domain per 17 USC § 105.</p>
+                <p className="mb-2"><strong className="text-white/75">GHS + NFPA 704:</strong> released as PD-self by their Wikimedia authors.</p>
+                <p className="mt-3"><a href="/placards/manifest.json" className="text-[#22D3EE] hover:underline">View manifest.json</a> &middot; <a href="/placards/LICENSES.md" className="text-[#22D3EE] hover:underline">License details</a></p>
+              </div>
             </div>
           </div>
         </section>

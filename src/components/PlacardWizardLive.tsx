@@ -213,23 +213,26 @@ export default function PlacardWizardLive() {
                 4 required<br />both sides + both ends
               </div>
               <button
-                onClick={() => {
-                  // Generate downloadable SVG
-                  const svg = document.querySelector("[aria-label*='DOT hazmat placard']");
-                  if (svg) {
-                    const xml = new XMLSerializer().serializeToString(svg);
-                    const blob = new Blob([xml], { type: "image/svg+xml" });
+                onClick={async () => {
+                  // Download the real Wikimedia-sourced SVG for this class
+                  try {
+                    const cls = String(placardClass).replace(".", "-");
+                    const src = `/placards/class-${cls}.svg`;
+                    const res = await fetch(src);
+                    const blob = await res.blob();
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
                     a.download = `placard-class-${placardClass}-UN${subject.un}.svg`;
                     a.click();
                     URL.revokeObjectURL(url);
+                  } catch (e) {
+                    console.error("placard download failed", e);
                   }
                 }}
                 className="mt-3 text-[11px] font-bold text-[#22D3EE] hover:underline"
               >
-                ⬇ Download SVG
+                ⬇ Download placard SVG
               </button>
             </>
           ) : subject ? (
