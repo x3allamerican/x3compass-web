@@ -1,0 +1,176 @@
+name: fmcsa-news-monitor
+
+# Daily FMCSA + Federal Register DOT/FMCSA scan.
+# Read-only. Posts an issue tagged `fmcsa-news` summarizing what's new in the last 24h.
+# Lowest-blast-radius agent — can't break anything. This is the live test of the
+# Agent Safety pattern before skill-builders go live.
+
+on:
+  schedule:
+    # 09:00 ET = 13:00 UTC during DST (May–Nov). Acceptable drift the rest of the year.
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate on AGENT_SAFETY.md presence
+        run: |
+          if [ ! -f AGENT_SAFETY.md ]; then
+            echo "::error::AGENT_SAFETY.md missing — refusing to run. See §1 of the rulebook."
+            exit 1
+          fi
+          echo "✓ AGENT_SAFETY.md present"
+
+      - name: scan FMCSA newsroom + Federal Register
+        id: scan
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          mkdir -p /tmp/scan
+          NOW_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          SINCE_UTC=$(date -u -d '25 hours ago' +%Y-%m-%d)
+
+          # 1. FMCSA newsroom RSS (official)
+          curl -fsSL --max-time 20 \
+            -H "User-Agent: x3compass-news-monitor/1.0 (+joshua@x3compass.com)" \
+            "https://www.fmcsa.dot.gov/newsroom/rss.xml" \
+            -o /tmp/scan/fmcsa.xml || echo "<rss><channel></channel></rss>" > /tmp/scan/fmcsa.xml
+
+          # 2. Federal Register — agency filter for FMCSA, last 25h
+          curl -fsSL --max-time 20 \
+            -H "User-Agent: x3compass-news-monitor/1.0 (+joshua@x3compass.com)" \
+            "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bagencies%5D%5B%5D=federal-motor-carrier-safety-administration&conditions%5Bpublication_date%5D%5Bgte%5D=${SINCE_UTC}&per_page=20&order=newest" \
+            -o /tmp/scan/fedreg.json || echo '{"results":[]}' > /tmp/scan/fedreg.json
+
+          # 3. Parse + summarize
+          python3 << 'PYEOF'
+          import json, re, os, html
+          from xml.etree import ElementTree as ET
+
+          out = []
+
+          # FMCSA RSS
+          try:
+              tree = ET.parse('/tmp/scan/fmcsa.xml')
+              items = tree.findall('.//item')[:10]
+              for it in items:
+                  title = (it.findtext('title') or '').strip()
+                  link = (it.findtext('link') or '').strip()
+                  date = (it.findtext('pubDate') or '').strip()
+                  if title:
+                      out.append({'source': 'FMCSA Newsroom', 'title': title, 'link': link, 'date': date})
+          except Exception as e:
+              print(f'fmcsa parse error: {e}')
+
+          # Federal Register
+          try:
+              fr = json.load(open('/tmp/scan/fedreg.json'))
+              for r in (fr.get('results') or [])[:10]:
+                  out.append({
+                      'source': 'Federal Register (FMCSA)',
+                      'title': r.get('title', '').strip(),
+                      'link': r.get('html_url', ''),
+                      'date': r.get('publication_date', ''),
+                      'type': r.get('type', ''),
+                      'abstract': (r.get('abstract') or '')[:400],
+                  })
+          except Exception as e:
+              print(f'fedreg parse error: {e}')
+
+          # Write summary
+          with open('/tmp/scan/summary.md', 'w') as f:
+              if not out:
+                  f.write("_No new FMCSA news in the last 25 hours._\n")
+              else:
+                  f.write(f"## {len(out)} new item(s)\n\n")
+                  for o in out:
+                      f.write(f"### [{o['source']}] {o['title']}\n")
+                      f.write(f"- **Date:** {o['date']}\n")
+                      if o.get('type'):
+                          f.write(f"- **Type:** {o['type']}\n")
+                      if o.get('link'):
+                          f.write(f"- **Link:** {o['link']}\n")
+                      if o.get('abstract'):
+                          f.write(f"- **Abstract:** {o['abstract']}…\n")
+                      f.write("\n")
+
+          # Decide skill-candidate flag (rule/regulation type from Federal Register)
+          skill_candidates = [o for o in out if 'rule' in (o.get('type') or '').lower() or 'regulation' in (o.get('type') or '').lower()]
+          with open('/tmp/scan/skill_candidate_count', 'w') as f:
+              f.write(str(len(skill_candidates)))
+          with open('/tmp/scan/total_count', 'w') as f:
+              f.write(str(len(out)))
+          PYEOF
+
+          echo "total=$(cat /tmp/scan/total_count)" >> "$GITHUB_OUTPUT"
+          echo "skill_candidates=$(cat /tmp/scan/skill_candidate_count)" >> "$GITHUB_OUTPUT"
+          {
+            echo 'summary<<DELIM'
+            cat /tmp/scan/summary.md
+            echo 'DELIM'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: post daily news issue (only if anything found)
+        if: steps.scan.outputs.total != '0' && steps.scan.outputs.total != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toISOString().slice(0, 10);
+            const total = process.env.TOTAL;
+            const skillCount = process.env.SKILL_COUNT;
+            const summary = process.env.SUMMARY;
+            const labels = ['fmcsa-news'];
+            if (parseInt(skillCount) > 0) labels.push('skill-candidate');
+
+            // De-dupe: skip if an issue with title prefix for today already exists
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'fmcsa-news', per_page: 5,
+            });
+            const dupe = existing.data.find(i => i.title.startsWith(`[news] FMCSA daily scan — ${today}`));
+            if (dupe) {
+              console.log(`Already posted today: #${dupe.number}`);
+              return;
+            }
+
+            const body = [
+              `**Generated by:** \`.github/workflows/fmcsa-news-monitor.yml\``,
+              `**Agent rules:** see \`AGENT_SAFETY.md\` §2 (safe-action whitelist) — this agent only reads + posts.`,
+              ``,
+              `**Total new items:** ${total}`,
+              `**Skill candidates (rule/regulation type):** ${skillCount}`,
+              ``,
+              summary,
+              ``,
+              `---`,
+              `_If any item warrants a new compliance skill, the human triages it and either tags it for a skill-builder run or closes this issue. Auto-closes after 14 days if no action._`,
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[news] FMCSA daily scan — ${today} (${total} items)`,
+              body, labels,
+            });
+        env:
+          TOTAL: ${{ steps.scan.outputs.total }}
+          SKILL_COUNT: ${{ steps.scan.outputs.skill_candidates }}
+          SUMMARY: ${{ steps.scan.outputs.summary }}
+
+      - name: log run outcome
+        if: always()
+        run: |
+          echo "## News Monitor Run" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Total items: ${{ steps.scan.outputs.total }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Skill candidates: ${{ steps.scan.outputs.skill_candidates }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Started: $(date -u)" >> "$GITHUB_STEP_SUMMARY"

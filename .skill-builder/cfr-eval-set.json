@@ -1,0 +1,100 @@
+{
+  "version": "1.0.0",
+  "purpose": "Hallucination-prevention eval set for X3 Compass FMCSA skill builders. Every skill-builder agent must pass >= 95% of these before its PR can be merged. CFR text round-trips against eCFR API (ecfr.federalregister.gov/api/versioner/v1/full/...).",
+  "scoring": {
+    "pass_threshold": 0.95,
+    "method": "Each Q&A is scored 0 or 1. The agent's answer must (a) cite the exact CFR section listed under 'citation', and (b) the quoted regulation text in its answer (if any) must be an exact substring of the live eCFR text. Paraphrase OK. Made-up citations or quotes = 0.",
+    "minimum_questions_per_run": 50
+  },
+  "questions": [
+    {
+      "id": "DQF-001",
+      "category": "Driver Qualification File",
+      "question": "What documents must be retained in a driver's qualification file for the duration of employment plus three years after termination?",
+      "citation": "49 CFR 391.51",
+      "key_concepts": ["application for employment", "inquiries to previous employers", "medical examiner certificate", "MVR annual review", "road test certificate"],
+      "common_hallucinations": ["citing 391.21 (which is just the application form, not the file contents)", "claiming a 7-year retention (it's 3 years post-termination)"]
+    },
+    {
+      "id": "HOS-001",
+      "category": "Hours of Service",
+      "question": "What is the maximum driving time for a property-carrying driver between off-duty periods?",
+      "citation": "49 CFR 395.3(a)(3)",
+      "key_concepts": ["11 hours driving", "14-hour window", "10 consecutive hours off duty"],
+      "common_hallucinations": ["confusing with passenger-carrying limits in 395.5", "claiming 13 hours (Canadian rule)"]
+    },
+    {
+      "id": "DA-001",
+      "category": "Drug & Alcohol",
+      "question": "When is a post-accident drug test required under 49 CFR Part 382?",
+      "citation": "49 CFR 382.303",
+      "key_concepts": ["fatality", "citation issued + bodily injury treated away from scene", "citation issued + disabling damage requiring tow", "8-hour alcohol window", "32-hour drug window"],
+      "common_hallucinations": ["claiming all accidents trigger a test (only those meeting the threshold)", "wrong testing windows"]
+    },
+    {
+      "id": "MED-001",
+      "category": "Medical",
+      "question": "How long is a standard CDL driver medical examiner's certificate valid?",
+      "citation": "49 CFR 391.43(h)",
+      "key_concepts": ["up to 24 months", "shorter at examiner's discretion based on health"],
+      "common_hallucinations": ["claiming always 24 months (the examiner may issue shorter)", "claiming 12 months default"]
+    },
+    {
+      "id": "INSP-001",
+      "category": "Inspection / Maintenance",
+      "question": "How long must a motor carrier retain annual inspection reports for each vehicle?",
+      "citation": "49 CFR 396.21(b)",
+      "key_concepts": ["14 months from inspection report date", "kept at location specified by carrier"],
+      "common_hallucinations": ["12 months", "3 years", "duration of vehicle ownership"]
+    },
+    {
+      "id": "HM-001",
+      "category": "Hazmat",
+      "question": "What is the placard threshold for Table 2 hazardous materials being transported by highway?",
+      "citation": "49 CFR 172.504(c)",
+      "key_concepts": ["1,001 pounds aggregate gross weight", "Table 1 materials placard regardless of quantity"],
+      "common_hallucinations": ["confusing Table 1 vs Table 2", "wrong weight threshold"]
+    },
+    {
+      "id": "CSA-001",
+      "category": "CSA / SMS",
+      "question": "Which BASIC categories does FMCSA's Safety Measurement System (SMS) currently use?",
+      "citation": "FMCSA SMS Methodology v3.0.5",
+      "key_concepts": ["Unsafe Driving", "Hours-of-Service Compliance", "Driver Fitness", "Controlled Substances and Alcohol", "Vehicle Maintenance", "Hazardous Materials Compliance", "Crash Indicator"],
+      "common_hallucinations": ["omitting Crash Indicator", "naming categories that don't exist"],
+      "note": "This question intentionally cites a methodology doc, not the CFR. Skill must acknowledge BASIC percentiles are NOT public via free FMCSA API since the 2015 FAST Act."
+    },
+    {
+      "id": "MVR-001",
+      "category": "MVR / Annual Review",
+      "question": "How often must a motor carrier obtain a Motor Vehicle Record (MVR) for each driver?",
+      "citation": "49 CFR 391.25(a)",
+      "key_concepts": ["at least once every 12 months", "from each state where driver held a CDL during the year"],
+      "common_hallucinations": ["claiming every 24 months", "only the home state"]
+    },
+    {
+      "id": "FIN-001",
+      "category": "Financial Responsibility",
+      "question": "What is the minimum public liability insurance amount required for a for-hire motor carrier transporting non-hazardous freight?",
+      "citation": "49 CFR 387.9",
+      "key_concepts": ["$750,000", "BMC-91 or BMC-91X filing"],
+      "common_hallucinations": ["claiming $1M (that's the hazmat threshold for some materials)", "claiming $300k (intrastate-only in some states)"]
+    },
+    {
+      "id": "GEN-001",
+      "category": "Applicability",
+      "question": "What is the weight threshold (GVWR or GVW) above which a vehicle is considered a commercial motor vehicle (CMV) under Part 390?",
+      "citation": "49 CFR 390.5",
+      "key_concepts": ["gross vehicle weight rating or gross vehicle weight of 10,001 pounds or more", "designed/used to transport 9+ passengers including the driver for compensation", "16+ passengers not for compensation", "any quantity of hazmat requiring placards"],
+      "common_hallucinations": ["claiming 26,001 lbs (that's the CDL threshold, not the CMV threshold)", "omitting the passenger and hazmat triggers"]
+    }
+  ],
+  "expansion_plan": "Grow this from 10 → 50 → 200 questions across all 7 BASIC categories + hazmat + cross-border + financial. Each new skill-builder PR appends 1-3 questions covering the regulation it codifies. Score baseline: claude-sonnet-4-6 unaided on the first 10 = TBD (run before first skill-builder agent goes live).",
+  "review_log": [
+    {
+      "date": "2026-05-17",
+      "reviewer": "Joshua Kovarik",
+      "notes": "Initial 10-question seed set. Built before skill-builder agents stand up. Next: actually run claude-sonnet-4-6 against these 10 and capture the baseline."
+    }
+  ]
+}
