@@ -136,7 +136,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);
     if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
-    userId = user.sub;
+    userId = user.id;
 
     const rl = rateLimit(ctx.request, { key: "ask", max: 30, windowSec: 60 });
     if (rl) return rl;
