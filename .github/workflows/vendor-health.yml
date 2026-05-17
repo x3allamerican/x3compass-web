@@ -78,9 +78,9 @@ jobs:
                 -o "/tmp/vh/sb-$TYPE.json" 2>/dev/null || echo "[]" > "/tmp/vh/sb-$TYPE.json"
               ERRORS=$(python3 -c "
           import json
-          d = json.load(open("/tmp/vh/sb-$TYPE.json"))
-          lints = d.get("lints", []) if isinstance(d, dict) else d
-          errs = [l for l in lints if l.get("level") == "ERROR"]
+          d = json.load(open('/tmp/vh/sb-' + '$TYPE' + '.json'))
+          lints = d.get('lints', []) if isinstance(d, dict) else d
+          errs = [l for l in lints if l.get('level') == 'ERROR']
           print(len(errs))
           ")
               if [ "$ERRORS" -gt "0" ]; then
