@@ -1,0 +1,172 @@
+name: cloudflare-deploy-watcher
+
+# Catches the class of silent failure that happened on 2026-05-17:
+# Cloudflare Pages was failing every deploy for 4 commits because of an
+# R2 binding misconfiguration. From the outside everything looked healthy
+# because the last successful deploy keeps serving.
+# This workflow polls the CF API every 10 minutes, reads the latest deploy
+# status across all our Pages projects, and pages the doctor if ANY recent
+# deploy is in failure state.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate on AGENT_SAFETY.md
+        run: |
+          [ -f AGENT_SAFETY.md ] || { echo "::error::AGENT_SAFETY.md missing"; exit 1; }
+          echo "✓ rulebook present"
+
+      - name: check Cloudflare Pages deploy status
+        id: cf
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -e
+          if [ -z "$CF_TOKEN" ] || [ -z "$CF_ACCT" ]; then
+            echo "::warning::CF secrets not set — skipping" ; echo "skip=true" >> "$GITHUB_OUTPUT" ; exit 0
+          fi
+
+          PROJECTS="x3compass-web x3fleetsafety-hub"
+          OUT=/tmp/deploy-status.json
+          echo '{"failures":[],"checked":[]}' > "$OUT"
+
+          for P in $PROJECTS; do
+            curl -fsSL --max-time 10 -H "Authorization: Bearer $CF_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/$P/deployments?per_page=1" \
+              -o /tmp/r.json 2>/dev/null || { echo "$P: API error"; continue; }
+
+            python3 - <<PYEOF
+          import json
+          o = json.load(open("/tmp/deploy-status.json"))
+          try:
+              d = json.load(open("/tmp/r.json"))["result"][0]
+              info = {
+                  "project": "$P",
+                  "deploy_id": d["short_id"],
+                  "stage": d["latest_stage"]["name"],
+                  "status": d["latest_stage"]["status"],
+                  "commit": (d.get("deployment_trigger",{}).get("metadata",{}).get("commit_hash","-") or "-")[:8],
+                  "url": f"https://dash.cloudflare.com/${{1}}/pages/view/$P/{d['short_id']}",
+                  "created_on": d["created_on"],
+              }
+              o["checked"].append(info)
+              if info["status"] == "failure":
+                  o["failures"].append(info)
+          except Exception as e:
+              o["checked"].append({"project":"$P","error":str(e)})
+          json.dump(o, open("/tmp/deploy-status.json","w"))
+          PYEOF
+          done
+
+          python3 -c "
+          import json
+          o = json.load(open('/tmp/deploy-status.json'))
+          print('Checked:', json.dumps(o['checked'], indent=2))
+          print('Failures:', len(o['failures']))
+          "
+          FAIL_COUNT=$(python3 -c "import json; print(len(json.load(open('/tmp/deploy-status.json'))['failures']))")
+          echo "fail_count=$FAIL_COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo 'status_json<<DELIM'
+            cat /tmp/deploy-status.json
+            echo 'DELIM'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: file incident on failure
+        if: steps.cf.outputs.fail_count != '0' && steps.cf.outputs.fail_count != ''
+        uses: actions/github-script@v7
+        env:
+          STATUS_JSON: ${{ steps.cf.outputs.status_json }}
+        with:
+          script: |
+            const data = JSON.parse(process.env.STATUS_JSON);
+            const failures = data.failures;
+            if (!failures.length) return;
+
+            // De-dupe by deploy_id — don't refile if we already filed for these
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'cloudflare-deploy-failure', per_page: 10,
+            });
+            const knownDeployIds = new Set(
+              existing.data.flatMap(i => (i.body || '').match(/\bdeploy_id[:= ]+([a-f0-9]{6,})/gi) || [])
+            );
+            const newOnes = failures.filter(f => !knownDeployIds.has(f.deploy_id));
+            if (!newOnes.length) {
+              console.log('All current failures already have open issues');
+              return;
+            }
+
+            const body = [
+              `**Cloudflare Pages deploy failure detected**`,
+              ``,
+              `**Agent rules:** see \`AGENT_SAFETY.md\`. Doctor will be auto-dispatched.`,
+              ``,
+              ...newOnes.map(f =>
+                `### ${f.project} — deploy ${f.deploy_id} (commit ${f.commit})\n` +
+                `- **Stage:** ${f.stage}\n` +
+                `- **Status:** **${f.status}**\n` +
+                `- **Created:** ${f.created_on}\n`
+              ),
+              ``,
+              `Production is still serving the last successful deploy, so customers don't see this — but new commits aren't reaching them either. Fix this within 1 hour or roll back.`,
+            ].join('\n');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[CF-DEPLOY] ${newOnes.length} Cloudflare Pages deploy(s) failing`,
+              body, labels: ['cloudflare-deploy-failure', 'uptime-alert', 'incident', 'p1-critical'],
+            });
+
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner, repo: context.repo.repo,
+                workflow_id: 'doctor.yml', ref: 'main',
+                inputs: { issue_number: String(issue.data.number) },
+              });
+            } catch (e) {
+              console.log(`Doctor dispatch failed: ${e.message}`);
+            }
+
+      - name: close stale issues if all green
+        if: steps.cf.outputs.fail_count == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'cloudflare-deploy-failure', per_page: 10,
+            });
+            for (const i of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: i.number,
+                body: `✓ All CF Pages deploys back to success at ${new Date().toISOString()}. Auto-closing.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: i.number,
+                state: 'closed', state_reason: 'completed', labels: [...i.labels.map(l=>l.name), 'auto-resolved'],
+              });
+            }
+
+      - name: log
+        if: always()
+        run: |
+          echo "## Cloudflare deploy watch" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Failures: ${{ steps.cf.outputs.fail_count }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Ran at: $(date -u)" >> "$GITHUB_STEP_SUMMARY"

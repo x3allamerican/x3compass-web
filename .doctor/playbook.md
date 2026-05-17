@@ -117,6 +117,44 @@ bot management. Cheaper interim: just retry; symptom is transient by definition.
 
 ---
 
+## Pattern: Auth gate hang ("Checking your session" loop)
+**Codes:** journey-probe-failure label; probe `unauthenticated visitor → /app/ask redirects to /signin within 8s` fails
+**Probable cause:** A throw in the useUser hook (Supabase getUser, getSupabase, or compass_carrier_users query) leaves loading=true forever, so the AppShell loader is shown but the redirect-to-signin useEffect never fires.
+**Auto-fix:** Cannot self-fix (code change). Tag `needs-human` + comment with: (1) most recent commit hash, (2) whether the safety-timeout string `session check timed out` is present in the deployed JS (it should be — if missing, the new useUser.ts didn't ship).
+**Escalate if:** Detected — always escalate (P1, blocks customer signin and Ask Compass).
+**Last seen:** 2026-05-17 (the original incident — patched in commit de75160 with try/catch + 6-second safety timeout).
+**Notes:** Verify fix is live by inspecting any /app/* page's JS bundle for the literal string "session check timed out".
+
+## Pattern: Cloudflare Pages deploy failure (silent)
+**Codes:** cloudflare-deploy-failure label; production still serves last successful deploy so external probes are green
+**Probable cause:** Wrangler validation rejects something in the Pages config — historically: R2 binding with invalid `jurisdiction` field, missing env var the Function references, TypeScript compile error in /functions, exceeded 25MB worker size.
+**Auto-fix:** Cannot self-fix (config change). The doctor reads /tmp/r.json from the deploy log if accessible, summarizes the wrangler error line, and tags `needs-human`.
+**Escalate if:** Detected — always escalate. If 2+ consecutive deploys fail, severity → P1.
+**Last seen:** 2026-05-17 — Pages project R2 binding had `jurisdiction: "default"` string; wrangler rejected. Fixed by PATCHing the project to drop the jurisdiction field.
+**Notes:** Production stays up during these failures because Pages doesn't promote a failed deploy. Customers don't see this immediately — but new bug fixes also don't reach them. 1-hour SLA from detection.
+
+## Pattern: Stripe webhook signing-secret mismatch (post-rotation)
+**Codes:** vendor-health label citing `webhook event(s) with pending_webhooks>0 older than 1h`
+**Probable cause:** STRIPE_WEBHOOK_SECRET in Cloudflare Pages env doesn't match the secret Stripe is signing with. Usually after rotating webhook endpoints OR after a redeploy that lost the env var.
+**Auto-fix:** Cannot self-fix (env-var change is forbidden by AGENT_SAFETY §3).
+**Escalate if:** Detected — always escalate (P1, blocks subscription state updates → users can't be billed correctly).
+**Notes:** Manual fix: copy webhook signing secret from Stripe dashboard → patch Cloudflare Pages env var → trigger redeploy. After fix, Stripe will retry pending events automatically.
+
+## Pattern: Supabase RLS recursion or denial
+**Codes:** 500 from any /app/* page combined with `infinite recursion detected in policy` OR `permission denied for table compass_*` in server logs
+**Probable cause:** RLS policy references its own table in a subquery, OR an authenticated request doesn't have the role the policy expects.
+**Auto-fix:** Cannot self-fix (DDL change is forbidden by AGENT_SAFETY §3).
+**Escalate if:** Detected — always escalate.
+**Last seen:** 2026-05-16 (the original compass_carrier_users recursion — fixed via compass_fix_rls_recursion migration).
+**Notes:** Check Supabase advisors (`/v1/projects/{ref}/advisors/security`) before opening — recursion warnings show up there before they hit production traffic.
+
+## Pattern: Client-side JS error spike
+**Codes:** `client-error-spike` label from the aggregator; ≥5 unique IPs reporting the same error message in 15 minutes
+**Probable cause:** A new release introduced a runtime error in the client bundle (`undefined is not a function`, missing import, hydration mismatch).
+**Auto-fix:** Cannot self-fix (code rollback or fix-forward needed).
+**Escalate if:** Always — but include the top error message + the impacted route + the deploy commit it correlates with.
+**Notes:** The aggregator queries `compass_client_errors` table grouped by error message. If correlated with a deploy in the last 60 min, recommend immediate rollback via `wrangler pages deployment rollback`.
+
 ## Maintenance
 
 When a new symptom appears that isn't covered here:

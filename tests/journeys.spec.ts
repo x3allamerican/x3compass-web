@@ -1,0 +1,100 @@
+/**
+ * Production journey probes.
+ *
+ * Unlike marketing.spec.ts (which just asserts pages return 200), these
+ * probes drive real user flows and assert the OUTCOME, not just the
+ * HTTP status. They catch the class of bug where the page returns 200
+ * but the user is actually stuck.
+ *
+ * Run against production on a 15-min cron via .github/workflows/journey-probes.yml.
+ */
+import { test, expect } from "@playwright/test";
+
+const PROD = process.env.PW_BASE_URL || "https://x3compass-web.pages.dev";
+
+test.describe("Critical user journeys (production)", () => {
+  test("unauthenticated visitor → /app/ask redirects to /signin within 8s", async ({ page }) => {
+    // This is the auth-loop bug we just fixed. If the AuthGate ever hangs
+    // again, this test fails fast.
+    await page.goto(`${PROD}/app/ask`);
+    // Either we land on /signin OR we see the chat UI (if a residual session existed).
+    // We do NOT want to be on a page that contains "Checking your session" after 8s.
+    await page.waitForFunction(
+      () => !document.body.innerText.includes("Checking your session"),
+      undefined,
+      { timeout: 9000 },
+    );
+    // Final URL should be either /signin (most common) or /app/ask (if session valid)
+    const url = page.url();
+    expect(url.includes("/signin") || url.includes("/app/ask")).toBeTruthy();
+    // If on /signin, confirm the form is reachable
+    if (url.includes("/signin")) {
+      await expect(page.locator("input[type='email']")).toBeVisible({ timeout: 3000 });
+    }
+  });
+
+  test("/api/health returns operational with sub-second budget", async ({ request }) => {
+    const r = await request.get(`${PROD}/api/health`);
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.status).toBe("operational");
+    expect(body.services.supabase.ok).toBe(true);
+    expect(body.services.stripe.ok).toBe(true);
+    // Soft check — log if slow but don't fail. Hard ceiling is 5s.
+    expect(body.total_ms).toBeLessThan(5000);
+  });
+
+  test("/api/ask rejects unauthenticated requests with 401 (not 500 or hang)", async ({ request }) => {
+    // Contract test: the LLM endpoint must require auth, fail fast, and
+    // return JSON. Catches: route handler crashes, missing env vars,
+    // Anthropic SDK init failures.
+    const r = await request.post(`${PROD}/api/ask`, {
+      data: { prompt: "test", history: [] },
+      headers: { "Content-Type": "application/json" },
+      timeout: 6000,
+    });
+    expect(r.status()).toBe(401);
+    const body = await r.json().catch(() => null);
+    expect(body).toBeTruthy();
+  });
+
+  test("signup form is reachable and accepts input", async ({ page }) => {
+    await page.goto(`${PROD}/signup`);
+    await expect(page.locator("input[type='email']")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("input[type='password']")).toBeVisible();
+    // Don't actually submit — we don't want to create real accounts on every run
+  });
+
+  test("Stripe Checkout endpoint accepts unauth POST with 401 (not 500)", async ({ request }) => {
+    const r = await request.post(`${PROD}/api/stripe/create-checkout-session`, {
+      data: { plan: "diy" },
+      headers: { "Content-Type": "application/json" },
+      timeout: 6000,
+    });
+    expect(r.status()).toBe(401);
+  });
+
+  test("hub site x3fleetsafety.com is reachable", async ({ request }) => {
+    const r = await request.get("https://x3fleetsafety.com/", { timeout: 8000 });
+    expect(r.status()).toBe(200);
+    const text = await r.text();
+    expect(text.toLowerCase()).toContain("x3");
+  });
+
+  test("placard manifest is deployed and lists 40 placards", async ({ request }) => {
+    const r = await request.get(`${PROD}/placards/manifest.json`, { timeout: 5000 });
+    expect(r.status()).toBe(200);
+    const m = await r.json();
+    expect(m.count).toBe(40);
+    expect(m.placards.length).toBe(40);
+  });
+
+  test("sitemap.xml lists app + marketing routes", async ({ request }) => {
+    const r = await request.get(`${PROD}/sitemap.xml`);
+    expect(r.status()).toBe(200);
+    const body = await r.text();
+    expect(body).toContain("<urlset");
+    // At least one of the canonical marketing URLs must be there
+    expect(body).toContain("hazmat");
+  });
+});

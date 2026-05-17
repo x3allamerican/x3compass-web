@@ -1,0 +1,123 @@
+name: client-error-aggregator
+
+# Aggregates /api/errors client-side error reports. Detects spikes that
+# indicate a runtime error was introduced in a recent release.
+#
+# Reads from the compass_client_errors Supabase table via the anon key
+# (the table has a SELECT-for-service-role-only policy in production, so
+# this workflow uses the service role JWT — added as SUPABASE_SERVICE_ROLE
+# secret). If the secret isn't set, the workflow logs a warning and skips.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate
+        run: |
+          [ -f AGENT_SAFETY.md ] || { echo "::error::AGENT_SAFETY.md missing"; exit 1; }
+
+      - name: query client errors
+        id: agg
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: |
+          set -e
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE" ]; then
+            echo "::warning::Supabase secrets not set — skipping" ; echo "skip=true" >> "$GITHUB_OUTPUT" ; exit 0
+          fi
+
+          # Fetch last 15 minutes of client errors
+          SINCE=$(date -u -d '15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+          curl -fsSL --max-time 15 \
+            -H "apikey: $SUPABASE_SERVICE_ROLE" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE" \
+            "${SUPABASE_URL}/rest/v1/compass_client_errors?created_at=gte.${SINCE}&select=*" \
+            -o /tmp/errs.json 2>/dev/null || echo '[]' > /tmp/errs.json
+
+          # Group by error message, count unique IPs
+          python3 <<'PYEOF'
+          import json,collections,os
+          rows = json.load(open('/tmp/errs.json'))
+          # group by message → set of IPs
+          groups = collections.defaultdict(set)
+          paths = collections.defaultdict(set)
+          for r in rows:
+              msg = (r.get('message') or '')[:200]
+              ip = r.get('ip') or '?'
+              path = r.get('url') or '?'
+              groups[msg].add(ip)
+              paths[msg].add(path)
+          spikes = [(m, len(ips), list(paths[m])[:3]) for m, ips in groups.items() if len(ips) >= 5]
+          spikes.sort(key=lambda x: -x[1])
+          out = {'total_rows': len(rows), 'unique_messages': len(groups), 'spikes': spikes[:5]}
+          with open('/tmp/agg.json','w') as f: json.dump(out, f)
+          print(f"Rows: {len(rows)}, unique msgs: {len(groups)}, spikes (>=5 IPs): {len(spikes)}")
+          for m,n,p in spikes[:5]:
+              print(f"  {n} IPs: {m[:100]}  paths={p}")
+          PYEOF
+
+          SPIKES=$(python3 -c "import json; print(len(json.load(open('/tmp/agg.json'))['spikes']))")
+          echo "spike_count=$SPIKES" >> "$GITHUB_OUTPUT"
+          {
+            echo 'spikes_json<<DELIM'
+            cat /tmp/agg.json
+            echo 'DELIM'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: file incident on spike
+        if: steps.agg.outputs.spike_count != '0' && steps.agg.outputs.spike_count != ''
+        uses: actions/github-script@v7
+        env:
+          SPIKES_JSON: ${{ steps.agg.outputs.spikes_json }}
+        with:
+          script: |
+            const data = JSON.parse(process.env.SPIKES_JSON);
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'client-error-spike', per_page: 5,
+            });
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body: `Still seeing spikes at ${new Date().toISOString()}:\n` +
+                  data.spikes.map(([m,n,p])=>`- ${n} IPs: \`${m}\` on ${p.join(', ')}`).join('\n'),
+              });
+              return;
+            }
+            const body = [
+              `**Client-side JS error spike detected** (≥5 unique IPs in 15 min)`,
+              ``,
+              `**Top messages:**`,
+              data.spikes.map(([m,n,p])=>`- **${n} unique IPs:** \`${m}\` — paths: ${p.join(', ')}`).join('\n'),
+              ``,
+              `**Agent rules:** see \`AGENT_SAFETY.md\`. Doctor will be dispatched.`,
+              `**Recommendation:** check the last deploy on x3compass-web — if within 60 min of the spike, consider rollback.`,
+            ].join('\n');
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[CLIENT-ERR] JS error spike — ${data.spikes.length} pattern(s) over threshold`,
+              body, labels: ['client-error-spike', 'uptime-alert', 'incident'],
+            });
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner, repo: context.repo.repo,
+                workflow_id: 'doctor.yml', ref: 'main',
+                inputs: { issue_number: String(issue.data.number) },
+              });
+            } catch (e) { console.log(`Doctor dispatch failed: ${e.message}`); }

@@ -1,0 +1,135 @@
+name: journey-probes
+
+# Production user-journey monitoring. Catches the class of bug where pages
+# return HTTP 200 but the actual experience is broken (e.g. the
+# "Checking your session..." auth loop from 2026-05-17).
+#
+# Runs every 15 minutes against the live production URL, drives real
+# user flows in headless Chromium, asserts on actual behavior.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  # Also run after every push to main as the "deployment health gate"
+  # — gives us a known-good baseline within 5 min of every release.
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: journey-probes
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate on AGENT_SAFETY.md
+        run: |
+          [ -f AGENT_SAFETY.md ] || { echo "::error::AGENT_SAFETY.md missing"; exit 1; }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: "npm" }
+
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+
+      # For push-triggered runs, wait for the Cloudflare Pages deploy to swap
+      - name: wait for deploy on push
+        if: github.event_name == 'push'
+        run: sleep 75
+
+      - name: run journey probes against production
+        id: probe
+        continue-on-error: true
+        run: |
+          npx playwright test tests/journeys.spec.ts --reporter=line || echo "PROBE_FAILED=1" >> "$GITHUB_ENV"
+        env:
+          PW_BASE_URL: https://x3compass-web.pages.dev
+          CI: 1
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: file incident if probes failed
+        if: env.PROBE_FAILED == '1' && github.event_name != 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // De-dupe — only one open journey-probe issue at a time
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'journey-probe-failure', per_page: 5,
+            });
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body: `Still failing at ${new Date().toISOString()}. [Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              });
+              return;
+            }
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[JOURNEY] User-flow probes failing at ${new Date().toISOString()}`,
+              body: [
+                `**One or more production user-journey probes failed.**`,
+                ``,
+                `**Agent rules:** see \`AGENT_SAFETY.md\`. Doctor will be auto-dispatched.`,
+                ``,
+                `Pages return HTTP 200 but the actual behavior is wrong. Possible classes:`,
+                `- Auth gate hanging on \`/app/ask\` (the "Checking your session..." pattern)`,
+                `- API endpoint returning 500 instead of 401 for unauth requests`,
+                `- Stripe / Anthropic / Supabase wiring broken in a way that's invisible to /api/health`,
+                `- Hub site / placard manifest missing`,
+                ``,
+                `[Run + artifact](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              ].join('\n'),
+              labels: ['journey-probe-failure', 'uptime-alert', 'incident', 'p1-critical'],
+            });
+
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner, repo: context.repo.repo,
+                workflow_id: 'doctor.yml', ref: 'main',
+                inputs: { issue_number: String(issue.data.number) },
+              });
+            } catch (e) {
+              console.log(`Doctor dispatch failed: ${e.message}`);
+            }
+
+      - name: close stale issues if all probes green
+        if: env.PROBE_FAILED != '1'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'journey-probe-failure', per_page: 5,
+            });
+            for (const i of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: i.number,
+                body: `✓ Journey probes back to green at ${new Date().toISOString()}. Auto-closing.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: i.number,
+                state: 'closed', state_reason: 'completed',
+                labels: [...i.labels.map(l=>l.name), 'auto-resolved'],
+              });
+            }

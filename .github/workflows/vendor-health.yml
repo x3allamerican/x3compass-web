@@ -1,0 +1,124 @@
+name: vendor-health
+
+# Polls our 3 critical vendors every 30 minutes for signs of trouble
+# that won't show up in /api/health:
+#   - Stripe: webhook delivery failures, recent disputes
+#   - Anthropic: 429 spikes, usage near limits (we can't query this without
+#     a separate token, so for now we count internal 429s from /api/errors)
+#   - Supabase: connection saturation, RLS errors via the management API
+#     when SUPABASE_MGMT_TOKEN is configured
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate
+        run: |
+          [ -f AGENT_SAFETY.md ] || { echo "::error::AGENT_SAFETY.md missing"; exit 1; }
+
+      - name: poll vendors
+        id: check
+        continue-on-error: true
+        env:
+          STRIPE_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          set -e
+          mkdir -p /tmp/vh
+          ISSUES=()
+
+          # ---- Stripe webhook delivery health ----
+          if [ -n "$STRIPE_KEY" ]; then
+            # Pull last 50 events; flag any with pending_webhooks > 0 older than 1 hour
+            curl -fsSL --max-time 15 -u "${STRIPE_KEY}:" \
+              "https://api.stripe.com/v1/events?limit=50" -o /tmp/vh/stripe-events.json 2>/dev/null \
+              || echo '{"data":[]}' > /tmp/vh/stripe-events.json
+
+            STUCK=$(python3 -c "
+          import json,time
+          d = json.load(open('/tmp/vh/stripe-events.json'))
+          now = int(time.time())
+          stuck = [e for e in d.get('data',[]) if e.get('pending_webhooks',0) > 0 and (now - e.get('created',now)) > 3600]
+          print(len(stuck))
+          ")
+            if [ "$STUCK" -gt "0" ]; then
+              ISSUES+=("Stripe: $STUCK webhook event(s) with pending_webhooks>0 older than 1h")
+            fi
+            echo "  ✓ Stripe webhook check: $STUCK stuck events"
+          else
+            echo "  ⚠ STRIPE_SECRET_KEY not available — skipping Stripe poll"
+          fi
+
+          # ---- Anthropic — count 429s our /api/errors recorded in the last hour ----
+          # (We don't have the usage API directly; we use our own client-error log
+          # as a proxy. If Anthropic 429s show up in Compass's own /api/ask,
+          # they get logged to compass_client_errors.)
+          # Skipped here — handled by client-error-aggregator workflow.
+          echo "  ⚠ Anthropic check delegated to client-error-aggregator"
+
+          # ---- Supabase Postgres connection count ----
+          # The /api/health endpoint already tests Supabase reachability with a
+          # quick PING. We do NOT have a free way to query connection saturation
+          # without the Management API. This is the gap to close once we have
+          # SUPABASE_MGMT_TOKEN.
+          echo "  ⚠ Supabase deep check requires SUPABASE_MGMT_TOKEN (TODO)"
+
+          # ---- Output ----
+          printf 'count=%d\n' "${#ISSUES[@]}" >> "$GITHUB_OUTPUT"
+          if [ "${#ISSUES[@]}" -gt "0" ]; then
+            {
+              echo 'issues<<DELIM'
+              for i in "${ISSUES[@]}"; do echo "- $i"; done
+              echo 'DELIM'
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: file incident on vendor issue
+        if: steps.check.outputs.count != '0' && steps.check.outputs.count != ''
+        uses: actions/github-script@v7
+        env:
+          ISSUES: ${{ steps.check.outputs.issues }}
+        with:
+          script: |
+            const issues = process.env.ISSUES;
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'vendor-health', per_page: 5,
+            });
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body: `Still tripped at ${new Date().toISOString()}:\n${issues}`,
+              });
+              return;
+            }
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[VENDOR] Vendor-health probe tripped at ${new Date().toISOString()}`,
+              body: [
+                `**Vendor-side issues detected by 30-min poller:**`,
+                ``, issues, ``,
+                `**Agent rules:** see \`AGENT_SAFETY.md\`. Doctor will be dispatched.`,
+              ].join('\n'),
+              labels: ['vendor-health', 'uptime-alert', 'incident'],
+            });
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner, repo: context.repo.repo,
+                workflow_id: 'doctor.yml', ref: 'main',
+                inputs: { issue_number: String(issue.data.number) },
+              });
+            } catch (e) { console.log(`Doctor dispatch failed: ${e.message}`); }
