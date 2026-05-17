@@ -67,10 +67,11 @@ export default function FAQ() {
             Short answers.{" "}
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Real ones.</span>
           </h1>
-          <p className="text-[17px] text-[var(--fg-muted)]">
-            Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
-            <Link href="/app/ask" className="text-[#22D3EE] font-bold">ask Compass directly</Link>.
-          </p>
+            <p className="text-[17px] text-[var(--fg-muted)]">
+              Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
+              <Link href="/app/ask" className="text-[#22D3EE] font-bold">ask Compass directly</Link>.
+            </p>
+          </div>
         </section>
 
         {/* FAQ sections */}
