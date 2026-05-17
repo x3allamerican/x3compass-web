@@ -52,8 +52,14 @@ export default function FAQ() {
   return (
     <SiteShell>
       <div className="bg-[var(--bg)] text-[var(--fg)]">
-        {/* HERO */}
-        <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center relative">
+        {/* HERO with real driver-thinking photo */}
+        <section className="relative overflow-hidden border-b border-[var(--border)]">
+          <div className="absolute inset-0 -z-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/photos/faq-driver-thinking.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
+          </div>
+          <div className="max-w-4xl mx-auto px-6 pt-20 pb-14 text-center relative">
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-4">
             FREQUENTLY ASKED QUESTIONS
           </div>

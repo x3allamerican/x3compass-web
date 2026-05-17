@@ -75,14 +75,23 @@ export default function TrustStrip() {
           <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-faint)] mb-4 text-center">
             Wired into the tools you already trust
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-6 text-[14px] font-semibold text-[var(--fg-muted)]">
-            <span>Stripe</span><span>·</span>
-            <span>Checkr</span><span>·</span>
-            <span>Anthropic</span><span>·</span>
-            <span>Supabase</span><span>·</span>
-            <span>Cloudflare</span><span>·</span>
-            <span>Resend</span><span>·</span>
-            <Link href="/partners" className="text-[var(--accent)] hover:underline">+ Partner integrations →</Link>
+          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
+            {[
+              { name: "Stripe",     file: "stripe.svg",     w: 56 },
+              { name: "Anthropic",  file: "anthropic.svg",  w: 32 },
+              { name: "Supabase",   file: "supabase.svg",   w: 32 },
+              { name: "Cloudflare", file: "cloudflare.svg", w: 48 },
+              { name: "Resend",     file: "resend.svg",     w: 32 },
+              { name: "Twilio",     file: "twilio.svg",     w: 64 },
+              { name: "Checkr",     file: "checkr.svg",     w: 64 },
+            ].map((p) => (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img key={p.name} src={`/logos/${p.file}`} alt={p.name} className="h-7 opacity-60 hover:opacity-100 transition-opacity"
+                   style={{ width: p.w + "px", filter: "saturate(0)" }} />
+            ))}
+            <Link href="/partners" className="text-[12px] font-bold text-[var(--accent)] hover:underline ml-2">
+              + Partner integrations →
+            </Link>
           </div>
         </div>
       </div>

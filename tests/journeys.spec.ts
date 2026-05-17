@@ -44,6 +44,21 @@ test.describe("Critical user journeys (production)", () => {
     expect(body.total_ms).toBeLessThan(5000);
   });
 
+  test("/api/ask-demo returns CFR-cited answer to public prompts (the homepage demo)", async ({ request }) => {
+    const r = await request.post(`${PROD}/api/ask-demo`, {
+      data: { prompt: "How long must I keep DQ files after a driver leaves?" },
+      headers: { "Content-Type": "application/json" },
+      timeout: 30000,
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.ok).toBe(true);
+    expect(body.content.length).toBeGreaterThan(50);
+    // Must cite at least one 49 CFR section (the answer about DQ retention should cite 391.51)
+    expect(Array.isArray(body.cited_sections)).toBe(true);
+    expect(body.cited_sections.length).toBeGreaterThan(0);
+  });
+
   test("/api/ask rejects unauthenticated requests with 401 (not 500 or hang)", async ({ request }) => {
     // Contract test: the LLM endpoint must require auth, fail fast, and
     // return JSON. Catches: route handler crashes, missing env vars,

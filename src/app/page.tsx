@@ -95,9 +95,11 @@ export default function Home() {
                 <span className="serif-italic" style={{ color: "#22D3EE" }}>Or a real one.</span>{" "}
                 Both work.
               </h1>
-              <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
-                Driver qualification files, MVRs, drug & alcohol, Clearinghouse, CSA scores, training, hazmat — every FMCSA artifact, every CFR-cited answer.{" "}
-                <strong className="text-[var(--fg)]">DIY at $25/driver</strong> or <strong className="text-[var(--fg)]">done-for-you at $50/driver</strong>.
+              <p className="text-[20px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-3 leading-relaxed">
+                Every FMCSA compliance task — DQ files, MVRs, D&A, CSA, hazmat — answered with the exact CFR section.
+              </p>
+              <p className="text-[16px] text-[var(--fg-faint)] max-w-2xl mx-auto mb-8">
+                <strong className="text-[var(--fg)]">$25/driver</strong> DIY · <strong className="text-[var(--fg)]">$50/driver</strong> done-for-you · 7-day free trial, no card
               </p>
               <div className="flex gap-3 justify-center flex-wrap mb-4">
                 <Link href="/app" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
@@ -145,7 +147,7 @@ export default function Home() {
             Twelve brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-            Each brain is built around the actual regulation — not a generic vault that forces you to learn a new filing system. Sign in to open any brain directly in the app.
+            One brain per regulation. Open the actual CFR part — not a generic vault that makes you learn a new filing system.
           </p>
           <BrainGrid />
         </section>

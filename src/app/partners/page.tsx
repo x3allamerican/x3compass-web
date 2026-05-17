@@ -82,9 +82,13 @@ export default function PartnersPage() {
   return (
     <SiteShell>
       <div className="bg-[var(--bg)] text-[var(--fg)]">
-        {/* HERO */}
+        {/* HERO with real handshake photo */}
         <section className="relative overflow-hidden">
-          {/* decorative wash removed for production design pass */}
+          <div className="absolute inset-0 -z-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/photos/partners-handshake.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-25" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/80 via-[var(--bg)]/90 to-[var(--bg)]" />
+          </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">

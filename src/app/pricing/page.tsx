@@ -18,12 +18,23 @@ const HAZMAT_FEATURES = ["100+ hazmat-specific skills (Parts 100-180)","Interact
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0F2438] border border-[var(--border)] text-[11px] tracking-[.18em] uppercase text-[#22D3EE] font-bold mb-4">Pricing</div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Simple, transparent <span style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>per-driver</span> pricing</h1>
-          <p className="text-[var(--fg-muted)] text-lg max-w-2xl mx-auto">7-day free trial. No credit card required. Cancel anytime.</p>
+      {/* HERO with real fleet-yard photo */}
+      <section className="relative overflow-hidden border-b border-[var(--border)]">
+        <div className="absolute inset-0 -z-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/photos/pricing-yard.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
         </div>
+        <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 relative">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[11px] tracking-[.18em] uppercase text-[var(--accent)] font-bold mb-4">Pricing</div>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Simple, transparent <span style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>per-driver</span> pricing</h1>
+            <p className="text-[var(--fg-muted)] text-lg max-w-2xl mx-auto">7-day free trial. No credit card required. Cancel anytime.</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid md:grid-cols-3 gap-6 mb-14">
           {PLANS.map((p) => (
             <div key={p.name} className={`rounded-2xl p-7 border ${p.featured ? "border-[#22D3EE]" : "border-[var(--border)]"} relative`} style={{ background: p.featured ? "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" : "#0F1C32" }}>
