@@ -51,10 +51,46 @@ jobs:
         id: probe
         continue-on-error: true
         run: |
-          npx playwright test tests/journeys.spec.ts --reporter=line || echo "PROBE_FAILED=1" >> "$GITHUB_ENV"
+          mkdir -p test-results
+          npx playwright test tests/journeys.spec.ts --reporter=json > test-results/results.json 2> /tmp/pw.log || echo "PROBE_FAILED=1" >> "$GITHUB_ENV"
+          tail -20 /tmp/pw.log
         env:
           PW_BASE_URL: https://x3compass-web.pages.dev
           CI: 1
+
+      - name: surface per-test timings (bottleneck attribution)
+        if: always()
+        run: |
+          python3 <<'PY'
+          import json, os
+          try:
+              d = json.load(open('test-results/results.json'))
+          except Exception as e:
+              print(f"no results: {e}"); exit(0)
+          rows = []
+          for suite in d.get('suites', []):
+              for s in suite.get('suites', []) + [suite]:
+                  for t in s.get('specs', []) + (s.get('tests', []) if 'tests' in s else []):
+                      # Playwright JSON has nested specs → tests → results
+                      tests = t.get('tests', [t]) if 'tests' in t else [t]
+                      for tt in tests:
+                          name = t.get('title') or tt.get('title','?')
+                          results = tt.get('results', [])
+                          if results:
+                              dur = results[0].get('duration', 0)
+                              status = results[0].get('status', '?')
+                              rows.append((name[:60], dur, status))
+          rows.sort(key=lambda x: -x[1])
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Journey timing (per-test)\n\n')
+              f.write('| Test | Duration (ms) | Status |\n|---|---:|:--|\n')
+              for n,d_,s in rows:
+                  ic = '✓' if s == 'passed' else '✗'
+                  f.write(f'| {n} | {d_} | {ic} {s} |\n')
+              if rows:
+                  total = sum(r[1] for r in rows)
+                  f.write(f'\n**Total:** {total} ms across {len(rows)} probes. Slowest: `{rows[0][0]}` at {rows[0][1]} ms.\n')
+          PY
 
       - if: always()
         uses: actions/upload-artifact@v4
