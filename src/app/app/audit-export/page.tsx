@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
 import { useUser } from "@/lib/useUser";
+import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 
 type E = { id:string; exported_on:string; scope:string|null; date_range_start:string|null; date_range_end:string|null; status:string; packet_url:string|null; size_bytes:number|null };
@@ -56,8 +57,10 @@ function ExportFormModal({ carrier_id, onClose, onSaved }:{ carrier_id:string; o
   async function handleSubmit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError(null);
     try {
-      const { error } = await getSupabase().from("compass_audit_exports").insert([{ ...form, carrier_id, status: "queued" }]);
-      if (error) throw error;
+      const inserted = await getSupabase().from("compass_audit_exports").insert([{ ...form, carrier_id, status: "queued" }]).select("id").single();
+      if (inserted.error) throw inserted.error;
+      // Kick off the build (background-ish — UI doesn't wait for completion)
+      apiFetch("/api/audit/build", { method: "POST", body: JSON.stringify({ id: inserted.data!.id }) }).catch(()=>{});
       onSaved();
     } catch (err) { setError(err instanceof Error ? err.message : "Queue failed"); }
     finally { setBusy(false); }
