@@ -6,6 +6,8 @@ import DashboardPreview from "@/components/DashboardPreview";
 import HazmatPreview from "@/components/HazmatPreview";
 import TrustStrip from "@/components/TrustStrip";
 import FounderNote from "@/components/FounderNote";
+import AskCompassDemo from "@/components/AskCompassDemo";
+import NumberCounter from "@/components/NumberCounter";
 
 const PRICING = [
   {
@@ -116,12 +118,14 @@ export default function Home() {
         <section className="border-y border-[var(--border)] bg-[var(--bg-3)]">
           <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: "300", desc: "FMCSA skills, every one CFR-cited" },
-              { n: "12",  desc: "Specialized brains, one per compliance domain" },
-              { n: "$25", desc: "per driver, DIY · or $50 done-for-you" },
+              { count: 300, prefix: "",  suffix: "", desc: "FMCSA skills, every one CFR-cited",        key: "skills" },
+              { count: 12,  prefix: "",  suffix: "", desc: "Specialized brains, one per compliance domain", key: "brains" },
+              { count: 25,  prefix: "$", suffix: "", desc: "per driver, DIY · or $50 done-for-you",      key: "price" },
             ].map((s, i) => (
               <div key={i} className="text-center md:text-left">
-                <div className="text-[64px] sm:text-[80px] font-black leading-none" style={{ color: "#22D3EE" }}>{s.n}</div>
+                <div className="text-[64px] sm:text-[80px] font-black leading-none" style={{ color: "#22D3EE" }}>
+                  <NumberCounter to={s.count} prefix={s.prefix} suffix={s.suffix} sessionKey={s.key} />
+                </div>
                 <div className="serif-italic text-[var(--fg-muted)] text-[18px] mt-2">{s.desc}</div>
               </div>
             ))}
@@ -171,6 +175,23 @@ export default function Home() {
               </Link>
               <div className="mt-3 text-[12px] text-[var(--fg-faint)]">Free trial · no card required · see your real fleet on this screen in under 10 minutes</div>
             </div>
+          </div>
+        </section>
+
+        {/* ASK COMPASS DEMO — live, no signup, real eCFR verification */}
+        <section className="border-y border-[var(--border)] bg-[var(--bg)] py-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-8">
+              <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02.5 · TASTE THE PRODUCT</div>
+              <h2 className="font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-[1.1] text-[32px] sm:text-[40px] md:text-[48px]">
+                Ask one. <span className="serif-italic" style={{ color: "#22D3EE" }}>See the answer.</span>
+              </h2>
+              <p className="text-[16px] text-[var(--fg-muted)] max-w-2xl mx-auto">
+                Type any FMCSA compliance question. Every CFR citation in the answer is checked against the live eCFR.gov
+                registry — verified citations get a green ✓ chip. No signup. 5 free questions per IP per 6 hours.
+              </p>
+            </div>
+            <AskCompassDemo />
           </div>
         </section>
 

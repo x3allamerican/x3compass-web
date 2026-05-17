@@ -38,6 +38,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <h4 className="text-[var(--fg)] text-[12px] font-bold tracking-widest uppercase mb-3">Resources</h4>
               <ul className="space-y-2 text-[14px]">
                 <li><Link href="/faq" className="hover:text-[var(--fg)]">FAQ</Link></li>
+                <li><Link href="/trust" className="hover:text-[var(--fg)]">Trust & Transparency</Link></li>
                 <li><Link href="/#how" className="hover:text-[var(--fg)]">How it works</Link></li>
                 <li>
                   <a href="https://github.com/x3fleetsafety/skills" target="_blank" rel="noopener" className="hover:text-[var(--fg)]">

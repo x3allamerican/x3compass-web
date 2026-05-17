@@ -14,8 +14,13 @@ export default function TrustStrip() {
   return (
     <section className="border-y border-[var(--border)] bg-[var(--bg-2)]">
       <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-5 text-center">
-          Built on verifiable proof — every claim checkable
+        <div className="flex items-center justify-between mb-5">
+          <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)]">
+            Built on verifiable proof — every claim checkable
+          </div>
+          <Link href="/trust" className="text-[11px] font-bold text-[var(--accent)] hover:underline">
+            See all the proof →
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

@@ -39,7 +39,7 @@ function SignInInner() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] grid place-items-center px-6 py-12 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(900px 600px at 20% 0%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(800px 500px at 90% 100%, rgba(139, 92, 246, 0.20), transparent 60%)" }} />
+      {/* decorative wash removed for production design pass */}
       <div className="w-full max-w-md relative">
         <Link href="/" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">← Back to home</Link>
         <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)", boxShadow: "0 24px 60px rgba(0, 0, 0, 0.45)" }}>

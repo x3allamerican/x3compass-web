@@ -84,12 +84,7 @@ export default function PartnersPage() {
       <div className="bg-[var(--bg)] text-[var(--fg)]">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 20% 0%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 80% 100%, rgba(139, 92, 246, 0.18), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
@@ -272,12 +267,7 @@ export default function PartnersPage() {
 
         {/* APPLY */}
         <section id="apply" className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 25% 100%, rgba(34, 211, 238, 0.20), transparent 60%), radial-gradient(700px 400px at 85% 0%, rgba(139, 92, 246, 0.22), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
               05 · APPLY TO BECOME A PARTNER

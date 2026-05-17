@@ -102,12 +102,7 @@ export default function FAQ() {
 
         {/* Final CTA */}
         <section className="relative py-16 overflow-hidden border-t border-[var(--border)] bg-[var(--bg-3)]">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(800px 500px at 25% 100%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 85% 0%, rgba(139, 92, 246, 0.18), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[32px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-4 leading-tight">
               Still have questions?{" "}

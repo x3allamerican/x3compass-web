@@ -91,13 +91,7 @@ export default function SkillsCatalogPage() {
       <div className="bg-[var(--bg)] text-[var(--fg)] min-h-screen">
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-[var(--border)]">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(800px 400px at 15% 0%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 90% 100%, rgba(139, 92, 246, 0.16), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-7xl mx-auto px-6 pt-16 pb-12 relative">
             <Link href="/" className="text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] inline-flex items-center gap-2 mb-6">
               ← Back to home

@@ -99,12 +99,7 @@ export default function Hazmat() {
       <div className="bg-[var(--bg)] text-[var(--fg)]">
         {/* HERO */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 20% 0%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(700px 400px at 85% 100%, rgba(139, 92, 246, 0.16), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
@@ -153,12 +148,7 @@ export default function Hazmat() {
 
         {/* PLACARD WIZARD PREVIEW */}
         <section id="wizard" className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)]">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(800px 500px at 15% 100%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 90% 0%, rgba(139, 92, 246, 0.18), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-4xl mx-auto px-6 text-center relative">
             <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
               01 · PLACARD WIZARD
@@ -314,12 +304,7 @@ export default function Hazmat() {
 
         {/* PRICING TIE-IN */}
         <section className="relative py-16 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(700px 400px at 25% 100%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(600px 400px at 85% 0%, rgba(139, 92, 246, 0.16), transparent 60%)",
-            }}
-          />
+          {/* decorative wash removed for production design pass */}
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[28px] sm:text-[36px] font-extrabold text-[var(--fg)] mb-3 leading-tight">
               Hazmat add-on:{" "}
