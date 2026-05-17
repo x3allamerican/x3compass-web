@@ -134,7 +134,7 @@ export default function SecurityPage() {
                 </tr>
               </thead>
               <tbody className="text-[var(--fg-muted)]">
-                <tr className="border-t border-[var(--border)]"><td className="py-2">SOC 2 Type II</td><td>Preparation</td><td>Q4 2026</td></tr>
+                <tr className="border-t border-[var(--border)]"><td className="py-2"><Link href="/security/soc2" className="text-[var(--accent)] font-bold hover:underline">SOC 2 Type II →</Link></td><td>Preparation</td><td>Q4 2026 · <Link href="/security/soc2" className="text-[var(--accent)] hover:underline">milestones</Link></td></tr>
                 <tr className="border-t border-[var(--border)]"><td className="py-2">FCRA-compliant background checks</td><td className="text-[var(--success)]">In production</td><td>Live via Checkr</td></tr>
                 <tr className="border-t border-[var(--border)]"><td className="py-2">DPA (GDPR / CCPA)</td><td className="text-[var(--success)]">Available</td><td>On request</td></tr>
                 <tr className="border-t border-[var(--border)]"><td className="py-2">HIPAA BAA</td><td>Not pursuing (no PHI processed)</td><td>—</td></tr>
