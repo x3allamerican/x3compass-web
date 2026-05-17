@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
+import Related from "@/components/Related";
 
 export const metadata = {
   title: "Sample audit walkthrough — X3 Compass",
@@ -129,6 +130,7 @@ export default function SampleCaseStudyPage() {
             </Link>
           </div>
         </section>
+        <Related links={[{"href": "/hazmat", "title": "Hazmat Center", "desc": "Real DOT placards + the segregation engine used in day 5."}, {"href": "/trust", "title": "Trust & transparency", "desc": "The verifiable signals carriers ask about."}, {"href": "/pricing", "title": "Pricing + ROI calculator", "desc": "Estimate what Compass would cost your fleet."}]} />
       </div>
     </SiteShell>
   );

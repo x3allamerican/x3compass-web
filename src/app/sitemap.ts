@@ -19,6 +19,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/changelog`,                 lastModified: now, changeFrequency: "weekly",  priority: 0.7 },
     { url: `${SITE}/blog`,                      lastModified: now, changeFrequency: "weekly",  priority: 0.7 },
     { url: `${SITE}/blog/cfr-accuracy-baseline`,lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE}/help`,                      lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE}/docs`,                      lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE}/faq`,                       lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE}/signup`,                    lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE}/signin`,                    lastModified: now, changeFrequency: "monthly", priority: 0.5 },

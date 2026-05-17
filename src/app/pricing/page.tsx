@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ROICalculator from "@/components/ROICalculator";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -49,6 +50,11 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
+        {/* ROI calculator — interactive widget */}
+        <div className="mb-14">
+          <ROICalculator />
+        </div>
+
         <div className="rounded-2xl p-8 border border-[#FACC15] mb-14" style={{ background: "linear-gradient(180deg, #1F2333 0%, #0F1C32 100%)" }}>
           <div className="md:flex md:items-center md:justify-between gap-6">
             <div className="md:flex-1 mb-4 md:mb-0">

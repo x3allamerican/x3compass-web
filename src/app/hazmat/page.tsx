@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
+import Related from "@/components/Related";
 import Placard, { HazardClass } from "@/components/Placard";
 import PlacardWizardLive from "@/components/PlacardWizardLive";
 
@@ -318,6 +319,7 @@ export default function Hazmat() {
             </Link>
           </div>
         </section>
+        <Related links={[{"href": "/case-studies/sample", "title": "Sample audit walkthrough", "desc": "See where hazmat preparation lands in a 6-day compliance review."}, {"href": "/skills", "title": "All 300 skills", "desc": "100+ hazmat-only skills mapped to 49 CFR Parts 100-180."}, {"href": "/pricing", "title": "Pricing + ROI", "desc": "Hazmat add-on +$99/mo flat on any tier."}]} />
       </div>
     </SiteShell>
   );

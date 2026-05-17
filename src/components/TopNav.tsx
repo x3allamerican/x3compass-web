@@ -69,6 +69,7 @@ export default function TopNav() {
           <Link href="/trust" className={linkClass("/trust")}>Trust</Link>
           <Link href="/blog" className={linkClass("/blog")}>Blog</Link>
           <Link href="/changelog" className={linkClass("/changelog")}>Changelog</Link>
+          <Link href="/help" className={linkClass("/help")}>Help</Link>
         </nav>
 
         <div className="flex items-center gap-3 flex-shrink-0">

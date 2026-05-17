@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
+import Related from "@/components/Related";
 
 export const metadata = {
   title: "Trust & Transparency — X3 Compass",
@@ -212,6 +213,7 @@ export default function TrustPage() {
             </Link>
           </div>
         </section>
+        <Related links={[{"href": "/security", "title": "Security deep-dive", "desc": "Threat model, RLS policy, incident response — the longer read."}, {"href": "/case-studies/sample", "title": "Sample audit walkthrough", "desc": "What an FMCSA Compliance Review looks like inside Compass."}, {"href": "/changelog", "title": "Changelog", "desc": "Every shipped feature and fix. Built in the open."}]} />
       </div>
     </SiteShell>
   );

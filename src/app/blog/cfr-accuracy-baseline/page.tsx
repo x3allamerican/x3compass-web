@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
+import Related from "@/components/Related";
 
 export const metadata = {
   title: "How we got to 85% citation accuracy on a 60-question FMCSA eval — X3 Compass blog",
@@ -161,6 +162,7 @@ export default function CfrAccuracyPost() {
           </p>
         </article>
 
+        <Related links={[{"href": "/blog", "title": "All posts", "desc": "Engineering, compliance, build-in-public notes."}, {"href": "/changelog", "title": "Changelog", "desc": "Weekly eval re-runs land here when they change."}, {"href": "/", "title": "Try the live demo", "desc": "Ask Compass a question with verified citations."}]} />
       </div>
     </SiteShell>
   );

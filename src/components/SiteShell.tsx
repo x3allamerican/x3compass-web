@@ -46,6 +46,8 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
                 <li><Link href="/case-studies/sample" className="hover:text-[var(--fg)]">Sample audit walkthrough</Link></li>
                 <li><Link href="/blog" className="hover:text-[var(--fg)]">Blog</Link></li>
                 <li><Link href="/changelog" className="hover:text-[var(--fg)]">Changelog</Link></li>
+                <li><Link href="/docs" className="hover:text-[var(--fg)]">Documentation</Link></li>
+                <li><Link href="/help" className="hover:text-[var(--fg)]">Help &amp; Support</Link></li>
                 <li><Link href="/#how" className="hover:text-[var(--fg)]">How it works</Link></li>
                 <li>
                   <a href="https://github.com/x3fleetsafety/skills" target="_blank" rel="noopener" className="hover:text-[var(--fg)]">

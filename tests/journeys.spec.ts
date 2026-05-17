@@ -120,3 +120,29 @@ test.describe("Critical user journeys (production)", () => {
     expect(body).toContain("hazmat");
   });
 });
+
+
+test.describe("Multi-viewport (sprint 8)", () => {
+  for (const [name, viewport] of [
+    ["iPhone 15", { width: 393, height: 852 }],
+    ["iPad", { width: 820, height: 1180 }],
+    ["Ultrawide", { width: 1920, height: 1080 }],
+  ] as const) {
+    test(`${name} (${viewport.width}x${viewport.height}) — homepage renders + primary CTA reachable`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto(`${PROD}/`);
+      // Hero headline must be visible (not overflowed off screen)
+      await expect(page.locator("h1").first()).toBeVisible();
+      // The TopNav must show at minimum either a hamburger or the Sign-in link
+      const cta = page.locator("a", { hasText: /Start free trial|Sign in/ }).first();
+      await expect(cta).toBeVisible({ timeout: 5000 });
+    });
+  }
+
+  test("mobile 393px — no horizontal scrollbar on homepage", async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.goto(`${PROD}/`);
+    const bodyOverflowsX = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(bodyOverflowsX, "body has horizontal overflow on mobile — fix responsive layout").toBe(false);
+  });
+});
