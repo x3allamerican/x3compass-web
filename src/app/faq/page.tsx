@@ -49,14 +49,26 @@ const FAQS = [
 ];
 
 export default function FAQ() {
+  // FAQ JSON-LD for SEO — flatten the sections
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.flatMap((s) => s.items).map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    })),
+  };
+
   return (
     <SiteShell>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="bg-[var(--bg)] text-[var(--fg)]">
         {/* HERO with real driver-thinking photo */}
         <section className="relative overflow-hidden border-b border-[var(--border)]">
           <div className="absolute inset-0 -z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/faq-driver-thinking.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-20" />
+            <img src="/photos/faq-driver-thinking.jpg" alt="" aria-hidden="true" width="2400" height="1600" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-20" />
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
           </div>
           <div className="max-w-4xl mx-auto px-6 pt-20 pb-14 text-center relative">

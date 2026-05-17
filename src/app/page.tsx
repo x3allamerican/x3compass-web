@@ -79,7 +79,7 @@ export default function Home() {
           {/* Background: real photo */}
           <div className="absolute inset-0 -z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/hero-truck-highway.jpg" alt="" aria-hidden="true"
+            <img src="/photos/hero-truck-highway.jpg" alt="" aria-hidden="true" width="2400" height="1600" fetchPriority="high" decoding="async"
                  className="w-full h-full object-cover" />
             {/* Dark overlay — keeps text readable, gives the hero its mood */}
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/75 to-[var(--bg)]" />

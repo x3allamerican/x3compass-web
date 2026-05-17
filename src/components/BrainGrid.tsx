@@ -53,6 +53,8 @@ export default function BrainGrid() {
               <img
                 src={b.photo}
                 alt={b.title}
+                width="800" height="500"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading={i < 3 ? "eager" : "lazy"}
               />

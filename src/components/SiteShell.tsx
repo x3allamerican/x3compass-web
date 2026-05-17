@@ -4,8 +4,12 @@ import TopNav from "@/components/TopNav";
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--fg)]">
+      <a href="#main-content"
+         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--accent)] focus:text-[var(--accent-fg)] focus:font-bold focus:text-[13px] focus:shadow-lg">
+        Skip to main content
+      </a>
       <TopNav />
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
 
       <footer className="bg-[var(--bg-3)] border-t border-[var(--border)] text-[var(--fg-muted)] px-6 py-12">
         <div className="max-w-7xl mx-auto">

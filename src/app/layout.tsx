@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
 };
 
-const ORG_JSONLD = {
+const SOFTWARE_JSONLD = {
   "@context": "https://schema.org", "@type": "SoftwareApplication",
   name: "X3 Compass", applicationCategory: "BusinessApplication", operatingSystem: "Web", url: SITE,
   description: "AI-powered DOT compliance platform for FMCSA-regulated motor carriers.",
@@ -40,6 +40,36 @@ const ORG_JSONLD = {
   provider: { "@type": "Organization", name: "X3 Fleet Safety LLC", url: SITE, contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "support@x3compass.com" } },
 };
 
+const ORGANIZATION_JSONLD = {
+  "@context": "https://schema.org", "@type": "Organization",
+  name: "X3 Fleet Safety LLC",
+  legalName: "X3 Fleet Safety LLC",
+  url: SITE,
+  logo: `${SITE}/og-image.png`,
+  sameAs: [
+    "https://github.com/x3fleetsafety",
+    "https://github.com/x3fleetsafety/skills",
+  ],
+  contactPoint: [{
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: "support@x3compass.com",
+    availableLanguage: "en",
+  }, {
+    "@type": "ContactPoint",
+    contactType: "security",
+    email: "security@x3compass.com",
+    availableLanguage: "en",
+  }],
+};
+
+const WEBSITE_JSONLD = {
+  "@context": "https://schema.org", "@type": "WebSite",
+  name: "X3 Compass",
+  url: SITE,
+  publisher: { "@type": "Organization", name: "X3 Fleet Safety LLC" },
+};
+
 const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -47,7 +77,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SOFTWARE_JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSONLD) }} />
         {/* No-flash theme bootstrap — runs before React hydration */}
         <script
           dangerouslySetInnerHTML={{

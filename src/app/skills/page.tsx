@@ -93,7 +93,7 @@ export default function SkillsCatalogPage() {
         <section className="relative overflow-hidden border-b border-[var(--border)]">
           <div className="absolute inset-0 -z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/compliance-folder.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-20" />
+            <img src="/photos/compliance-folder.jpg" alt="" aria-hidden="true" width="2400" height="1600" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-20" />
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
           </div>
           <div className="max-w-7xl mx-auto px-6 pt-16 pb-12 relative">

@@ -41,7 +41,7 @@ function SignInInner() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] grid place-items-center px-6 py-12 relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/photos/driver-coffee.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-15" />
+        <img src="/photos/driver-coffee.jpg" alt="" aria-hidden="true" width="2400" height="1600" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg)] via-[var(--bg)]/95 to-[var(--bg)]" />
       </div>
       <div className="w-full max-w-md relative">

@@ -22,7 +22,7 @@ export default function PricingPage() {
       <section className="relative overflow-hidden border-b border-[var(--border)]">
         <div className="absolute inset-0 -z-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/pricing-yard.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-25" />
+          <img src="/photos/pricing-yard.jpg" alt="" aria-hidden="true" width="2400" height="1600" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-25" />
           <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/95 to-[var(--bg)]" />
         </div>
         <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 relative">

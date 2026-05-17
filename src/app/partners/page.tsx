@@ -86,7 +86,7 @@ export default function PartnersPage() {
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 -z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/photos/partners-handshake.jpg" alt="" aria-hidden="true" className="w-full h-full object-cover opacity-25" />
+            <img src="/photos/partners-handshake.jpg" alt="" aria-hidden="true" width="2400" height="1600" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-25" />
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/80 via-[var(--bg)]/90 to-[var(--bg)]" />
           </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
