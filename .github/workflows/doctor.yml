@@ -1,0 +1,117 @@
+name: doctor
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        required: true
+        description: Issue number to diagnose
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  diagnose:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue && contains(github.event.issue.labels.*.name, 'uptime-alert'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: doctor diagnose + remediate
+        uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number || github.event.inputs.issue_number }}
+        with:
+          script: |
+            const fs = require('fs');
+            const issueNumber = parseInt(process.env.ISSUE_NUMBER, 10);
+            if (!issueNumber) { console.log('no issue'); return; }
+
+            // 1. Load the playbook (the doctor's knowledge base)
+            let playbook = "";
+            try { playbook = fs.readFileSync('.doctor/playbook.md', 'utf8'); }
+            catch { playbook = "(no playbook yet)"; }
+
+            const log = [];
+            const post = (msg) => { log.push(msg); console.log(msg); };
+
+            post(`🩺 **Doctor agent starting diagnosis** at ${new Date().toISOString()}`);
+
+            // 2. Read the issue body to figure out what failed
+            const issue = await github.rest.issues.get({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber });
+            const body = issue.data.body || "";
+            const failedProbes = [...body.matchAll(/\*\*(\w+)\*\* → got (\d+)/g)].map(m => ({label: m[1], code: parseInt(m[2])}));
+            post(`\n## Symptoms\n${failedProbes.map(p => `- ${p.label} returned ${p.code}`).join('\n') || '- (could not parse symptoms from body)'}`);
+
+            // 3. Diagnostic playbook — pattern-match the failure
+            const diagnosis = [];
+            for (const f of failedProbes) {
+              if (f.code === 522 || f.code === 523 || f.code === 524) diagnosis.push(`**${f.label}**: Cloudflare can't reach origin (522/523/524). Most likely: Pages deploy in progress, or origin worker exception. Auto-retry will resolve if it's a swap window.`);
+              else if (f.code === 500) diagnosis.push(`**${f.label}**: Worker threw an exception. Check Cloudflare Pages Functions logs.`);
+              else if (f.code === 502 || f.code === 503 || f.code === 504) diagnosis.push(`**${f.label}**: Upstream dependency unhealthy (502/503/504). Check Supabase + Stripe status.`);
+              else if (f.code === 0) diagnosis.push(`**${f.label}**: Network/DNS resolution failure. Check Cloudflare DNS for the apex.`);
+              else if (f.code === 404) diagnosis.push(`**${f.label}**: Path missing — possibly a deploy with stale routing. Re-deploying may help.`);
+              else if (f.code !== 200 && f.code !== 401) diagnosis.push(`**${f.label}**: Unexpected status ${f.code}.`);
+            }
+            post(`\n## Diagnosis\n${diagnosis.join('\n') || '- No obvious pattern match. Escalating.'}`);
+
+            // 4. Check upstream status pages
+            post(`\n## Upstream dependency check`);
+            async function checkUrl(url, label) {
+              try {
+                const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+                const ok = res.ok;
+                post(`- ${ok ? '✓' : '✗'} ${label}: HTTP ${res.status}`);
+                return ok;
+              } catch (e) {
+                post(`- ✗ ${label}: ${e.message}`);
+                return false;
+              }
+            }
+            await checkUrl('https://www.cloudflarestatus.com/api/v2/status.json', 'Cloudflare status');
+            await checkUrl('https://status.supabase.com/api/v2/status.json', 'Supabase status');
+            await checkUrl('https://status.stripe.com/api/v2/status.json', 'Stripe status');
+
+            // 5. Try a fresh probe ourselves
+            post(`\n## Live recheck`);
+            try {
+              const r = await fetch('https://x3compass-web.pages.dev/api/health', { signal: AbortSignal.timeout(15000) });
+              const txt = await r.text();
+              const j = JSON.parse(txt);
+              post(`- /api/health → HTTP ${r.status}  ok=${j.ok}  total_ms=${j.total_ms}`);
+              post(`- supabase=${j.services?.supabase?.ok}  stripe=${j.services?.stripe?.ok}`);
+              if (j.ok === true) {
+                post(`\n## ✅ Auto-resolved\nThe issue is no longer reproducing. Closing this incident.`);
+                await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body: log.join('\n') });
+                await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, state: "closed", state_reason: "completed", labels: [...new Set([...(issue.data.labels.map(l=>l.name)),"auto-resolved"])] });
+                return;
+              }
+            } catch (e) {
+              post(`- live recheck threw: ${e.message}`);
+            }
+
+            // 6. Attempt remediation — known fixes
+            post(`\n## Remediation attempts`);
+            const allCloudflareConnect = failedProbes.every(p => [522, 523, 524].includes(p.code));
+            if (allCloudflareConnect) {
+              post(`- pattern: all-Cloudflare connect errors. Triggering fresh Pages deploy.`);
+              try {
+                await github.rest.actions.createWorkflowDispatch({ owner: context.repo.owner, repo: context.repo.repo, workflow_id: "uptime.yml", ref: "main" });
+                post(`  ✓ re-queued uptime check`);
+              } catch (e) {
+                post(`  ✗ couldn't redeploy: ${e.message}`);
+              }
+            }
+
+            // 7. Escalate to human if we didn't resolve
+            post(`\n## ⚠️ Escalating to human`);
+            post(`Doctor could not auto-resolve. Adding \`needs-human\` label.\n\n@joshuakovarik review when you can.`);
+            const labels = [...new Set([...(issue.data.labels.map(l=>l.name)),"needs-human","doctor-tried"])];
+            await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, labels });
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber, body: log.join('\n') });

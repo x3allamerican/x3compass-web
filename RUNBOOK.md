@@ -94,3 +94,37 @@ Cloudflare auto-builds the revert.
 - Multi-region database — Supabase free is single region (us-east-1)
 - Cookie banner — no GDPR consent banner yet
 - Web Vitals monitoring — Cloudflare Web Analytics token slot exists but not wired
+
+---
+
+## Reliability v2 (added 2026-05-17)
+
+### Architecture
+1. **Synthetic monitoring** (`.github/workflows/uptime.yml`) runs every 5 min.
+   Hits 14 probes across P1 (signup/checkout/health), P2 (app pages), P3 (marketing).
+   Each probe gets 3 attempts × 10s spacing to survive deploy windows.
+2. **Workflow itself never fails** (`continue-on-error: true` on the monitor step).
+   Only the issue-create job posts when a P1 actually fails.
+   This means **no more GitHub default workflow-failure emails for transient blips**.
+3. **Doctor agent** (`.github/workflows/doctor.yml`) fires automatically on every
+   new `uptime-alert` issue. It:
+   - Reads the failure pattern from the issue body
+   - Consults `.doctor/playbook.md` for known fixes
+   - Checks upstream status pages (Cloudflare, Supabase, Stripe)
+   - Does a live recheck — if recovered, auto-closes the issue
+   - If still down: tries any auto-fix recipes from the playbook
+   - Last resort: tags `needs-human` + summarizes its work
+4. **Severity routing:**
+   - P1 (customer-blocking) → opens GitHub issue, doctor fires, you get one email per incident
+   - P2 (app degradation) → logs only, no issue
+   - P3 (nice-to-have) → silent
+
+### Alert noise budget
+- 0 emails for transient deploy swaps (handled by retries)
+- 0 emails for P2/P3 failures (logged only)
+- 1 email per P1 incident, with doctor diagnosis attached
+- 0 emails when doctor auto-resolves
+
+### Growing the doctor
+Edit `.doctor/playbook.md`. Each pattern entry teaches the doctor a new fix.
+Over time the doctor handles more cases without escalation.

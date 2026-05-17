@@ -1,7 +1,7 @@
-name: uptime-check
+name: uptime
 on:
   schedule:
-    - cron: "*/5 * * * *"   # every 5 minutes
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,75 +13,153 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ping:
+  monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 4
     steps:
-      - name: hit /api/health (with retries for deploy windows)
-        id: ping
+      - name: synthetic monitoring (P1 + P2 + P3)
+        id: monitor
+        continue-on-error: true   # workflow itself never fails — silences GitHub default failure emails
         run: |
-          set -e
-          # 3 attempts, 10s apart — survives a Cloudflare deploy swap window
-          for attempt in 1 2 3; do
-            echo "attempt $attempt..."
-            if curl -sf --max-time 20 https://x3compass-web.pages.dev/api/health > /tmp/health.json; then
-              OK=$(python3 -c "import json,sys;print(json.load(open('/tmp/health.json')).get('ok',False))")
-              if [ "$OK" = "True" ]; then
-                echo "✓ healthy on attempt $attempt"
-                cat /tmp/health.json
-                exit 0
-              fi
-              echo "got response but ok=false: $(cat /tmp/health.json)"
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              echo "retry in 10s..."
-              sleep 10
-            fi
-          done
-          echo "::error::Health check failed after 3 attempts"
-          cat /tmp/health.json 2>/dev/null || echo "(no body)"
-          exit 1
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error, time, os
+          BASE = "https://x3compass-web.pages.dev"
+          # severity, label, method, path, expected_status, body, headers
+          # P1 = customer-facing critical (signup/checkout must work)
+          # P2 = product-facing important (app pages, health)
+          # P3 = nice-to-have (marketing pages)
+          probes = [
+            ("P1", "homepage",       "GET",  "/",                              200, None),
+            ("P1", "signup",         "GET",  "/signup/",                       200, None),
+            ("P1", "signin",         "GET",  "/signin/",                       200, None),
+            ("P1", "pricing",        "GET",  "/pricing/",                      200, None),
+            ("P1", "api_health",     "GET",  "/api/health",                    200, "ok=true"),
+            ("P1", "checkout_auth",  "POST", "/api/stripe/create-checkout-session", 401, '{"plan":"diy"}'),
+            ("P1", "post_signup_auth","POST","/api/auth/post-signup",          401, "{}"),
+            ("P2", "app_dashboard",  "GET",  "/app/",                          200, None),
+            ("P2", "skills_catalog", "GET",  "/skills/",                       200, None),
+            ("P2", "background",     "GET",  "/app/background-checks/",        200, None),
+            ("P3", "sitemap",        "GET",  "/sitemap.xml",                   200, None),
+            ("P3", "robots",         "GET",  "/robots.txt",                    200, None),
+            ("P3", "hub",            "GET",  "https://x3fleetsafety.com/",     200, None),
+            ("P3", "archive",        "GET",  "https://archive.x3fleetsafety.com/", 200, None),
+          ]
+          def hit(method, url, body):
+              data = body.encode() if body and not body.startswith("ok=") else None
+              headers = {"Content-Type": "application/json"} if data else {}
+              req = urllib.request.Request(url, data=data, headers=headers, method=method)
+              t0 = time.time()
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as r:
+                      ms = round((time.time()-t0)*1000)
+                      txt = r.read().decode("utf-8","replace")[:300]
+                      return r.status, txt, ms, None
+              except urllib.error.HTTPError as e:
+                  ms = round((time.time()-t0)*1000)
+                  body = e.read().decode("utf-8","replace")[:300] if e.fp else ""
+                  return e.code, body, ms, None
+              except Exception as e:
+                  return 0, "", round((time.time()-t0)*1000), str(e)
 
-      - name: file issue on failure
-        if: failure()
+          # 3 attempts per probe with 10s spacing — survives deploy swap windows
+          results = []
+          for sev, label, method, path, expect_code, expect_body in probes:
+              url = path if path.startswith("http") else f"{BASE}{path}"
+              attempts = 0
+              while True:
+                  attempts += 1
+                  code, body, ms, err = hit(method, url, expect_body if expect_body and not expect_body.startswith("ok=") else None)
+                  ok = code == expect_code and (not (expect_body and expect_body.startswith("ok=")) or "true" in body.lower())
+                  if ok or attempts >= 3:
+                      break
+                  time.sleep(10)
+              results.append({"sev": sev, "label": label, "url": url, "expect": expect_code, "got": code, "ms": ms, "ok": ok, "err": err, "attempts": attempts, "snippet": body[:200] if not ok else ""})
+
+          failures = {"P1": [], "P2": [], "P3": []}
+          for r in results:
+              status = "✓" if r["ok"] else "✗"
+              print(f'  {status} {r["sev"]} {r["label"]:18}  {r["got"]:>3} (want {r["expect"]:>3})  {r["ms"]:>4}ms  attempts={r["attempts"]}  {r["url"]}')
+              if not r["ok"]:
+                  failures[r["sev"]].append(r)
+
+          # write summary for next step
+          with open("/tmp/monitor.json","w") as f:
+              json.dump({"results": results, "failures": failures}, f)
+
+          # exit code reflects severity — but step has continue-on-error so workflow never fails
+          if failures["P1"]: print(f'::error::P1 failures: {len(failures["P1"])}'); exit(1)
+          if failures["P2"]: print(f'::warning::P2 failures: {len(failures["P2"])}'); exit(2)
+          if failures["P3"]: print(f'::warning::P3 failures: {len(failures["P3"])}')
+          print("ALL OK")
+          PY
+
+      - name: open / update incident on P1 failure
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `Uptime alert: /api/health failed at ${new Date().toISOString()}`;
+            const fs = require('fs');
+            let data;
+            try { data = JSON.parse(fs.readFileSync('/tmp/monitor.json','utf8')); }
+            catch { console.log('no monitor.json — nothing to report'); return; }
+
+            const p1 = data.failures.P1 || [];
+            const p2 = data.failures.P2 || [];
+
+            // Look for existing open uptime issue
             const open = await github.rest.search.issuesAndPullRequests({
               q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:uptime-alert`,
             });
-            if (open.data.total_count > 0) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: open.data.items[0].number,
-                body: `Still failing at ${new Date().toISOString()}. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-              });
+
+            if (p1.length === 0 && p2.length === 0) {
+              // Everything healthy — auto-close any open incident
+              for (const issue of open.data.items) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `✓ Resolved — all probes green at ${new Date().toISOString()}. Auto-closing.`,
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, state: "closed", state_reason: "completed",
+                });
+              }
               return;
             }
-            await github.rest.issues.create({
-              owner: context.repo.owner, repo: context.repo.repo,
-              title,
-              labels: ["uptime-alert", "incident"],
-              body: `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nThis fires only after 3 consecutive curl attempts (10s apart) fail. If you see this, /api/health was unreachable for at least 30 seconds.\n\nSee RUNBOOK.md for incident response.`,
-            });
 
-      - name: auto-close uptime issues on success
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const open = await github.rest.search.issuesAndPullRequests({
-              q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:uptime-alert`,
-            });
-            for (const issue of open.data.items) {
+            if (p1.length === 0) {
+              // P2-only failure — log via summary, do NOT open an incident (too noisy)
+              console.log(`P2 failures: ${p2.map(f=>f.label).join(', ')} — logged only, no issue created`);
+              return;
+            }
+
+            // P1 failure path — only file/update if persistent
+            const severity = p1.length >= 3 ? "P1-CRITICAL" : "P1";
+            const title = `[${severity}] ${p1.map(f=>f.label).join(', ')} failed at ${new Date().toISOString()}`;
+            const body = [
+              `## What's broken`,
+              p1.map(f => `- **${f.label}** → got ${f.got} (wanted ${f.expect}), ${f.ms}ms, ${f.attempts} attempts. ${f.url}`).join('\n'),
+              p2.length ? `\n## Also degraded (P2)\n${p2.map(f=>`- ${f.label} → ${f.got}`).join('\n')}` : '',
+              `\n## What I tried`,
+              `- 3 attempts per probe with 10s backoff. Failed all 3.`,
+              `\n## Next`,
+              `- The 🩺 doctor agent has been triggered. It will diagnose + attempt remediation. Look for its comment in 1-2 minutes.`,
+              `- If the doctor can't fix it, this issue gets the \`needs-human\` label.`,
+              `\n[Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) · [Runbook](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/RUNBOOK.md)`
+            ].join('\n');
+
+            if (open.data.total_count > 0) {
+              const existing = open.data.items[0];
               await github.rest.issues.createComment({
                 owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: issue.number,
-                body: `✓ Resolved — /api/health is back to operational at ${new Date().toISOString()}.`,
+                issue_number: existing.number,
+                body: `### Still failing at ${new Date().toISOString()}\n${p1.map(f=>`- ${f.label}: ${f.got}`).join('\n')}\n[Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
               });
-              await github.rest.issues.update({
+            } else {
+              const issue = await github.rest.issues.create({
                 owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: issue.number, state: "closed",
+                title, body,
+                labels: ["uptime-alert", "incident", severity.toLowerCase()],
               });
+              console.log(`Filed: ${issue.data.html_url}`);
             }
