@@ -4,31 +4,50 @@ on:
     - cron: "*/5 * * * *"   # every 5 minutes
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 3
     steps:
-      - name: hit /api/health
+      - name: hit /api/health (with retries for deploy windows)
         id: ping
         run: |
           set -e
-          BODY=$(curl -sf --max-time 15 https://x3compass-web.pages.dev/api/health)
-          echo "body=$BODY" >> $GITHUB_OUTPUT
-          OK=$(echo "$BODY" | python3 -c "import json,sys;print(json.load(sys.stdin).get('ok',False))")
-          if [ "$OK" != "True" ]; then
-            echo "Health check failed: $BODY"
-            exit 1
-          fi
-          echo "✓ healthy: $BODY"
+          # 3 attempts, 10s apart — survives a Cloudflare deploy swap window
+          for attempt in 1 2 3; do
+            echo "attempt $attempt..."
+            if curl -sf --max-time 20 https://x3compass-web.pages.dev/api/health > /tmp/health.json; then
+              OK=$(python3 -c "import json,sys;print(json.load(open('/tmp/health.json')).get('ok',False))")
+              if [ "$OK" = "True" ]; then
+                echo "✓ healthy on attempt $attempt"
+                cat /tmp/health.json
+                exit 0
+              fi
+              echo "got response but ok=false: $(cat /tmp/health.json)"
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "retry in 10s..."
+              sleep 10
+            fi
+          done
+          echo "::error::Health check failed after 3 attempts"
+          cat /tmp/health.json 2>/dev/null || echo "(no body)"
+          exit 1
 
       - name: file issue on failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `Uptime alert: /api/health returned non-OK at ${new Date().toISOString()}`;
-            // dedupe: don't open a new issue if one is already open
+            const title = `Uptime alert: /api/health failed at ${new Date().toISOString()}`;
             const open = await github.rest.search.issuesAndPullRequests({
               q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:uptime-alert`,
             });
@@ -36,7 +55,7 @@ jobs:
               await github.rest.issues.createComment({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: open.data.items[0].number,
-                body: `Still failing at ${new Date().toISOString()}. Workflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                body: `Still failing at ${new Date().toISOString()}. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               });
               return;
             }
@@ -44,7 +63,7 @@ jobs:
               owner: context.repo.owner, repo: context.repo.repo,
               title,
               labels: ["uptime-alert", "incident"],
-              body: `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nSee RUNBOOK.md for incident response.`,
+              body: `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nThis fires only after 3 consecutive curl attempts (10s apart) fail. If you see this, /api/health was unreachable for at least 30 seconds.\n\nSee RUNBOOK.md for incident response.`,
             });
 
       - name: auto-close uptime issues on success

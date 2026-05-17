@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: playwright-${{ github.ref }}
   cancel-in-progress: true
@@ -12,13 +15,17 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "20", cache: "npm" }
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+      # If we just pushed to main, give Cloudflare ~45s to deploy before testing prod
+      - name: wait for deploy
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: sleep 45
       - run: npx playwright test
         env:
           PW_BASE_URL: https://x3compass-web.pages.dev
