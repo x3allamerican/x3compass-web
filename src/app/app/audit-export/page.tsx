@@ -27,7 +27,7 @@ export default function AuditExportPage() {
     <AppShell crumbs="AUDIT EXPORT" title="Audit Packet Generator"
       actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Generate packet</button>}>
       <div className="p-6">
-        <div className="mb-4 rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+        <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
           <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">What this does</div>
           <p className="text-[var(--fg-muted)] text-sm leading-relaxed">
             Bundles drivers, DQ documents, MVRs, drug & alcohol test results, training records, accidents, and roadside inspections into a single DOT audit-ready ZIP. Use for FMCSA Compliance Reviews, insurance underwriting, or M&amp;A due diligence.

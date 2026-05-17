@@ -40,7 +40,7 @@ function BillingInner() {
         {checkoutResult === "success" && <Banner kind="success">✓ Payment method saved. Subscription is active.</Banner>}
         {checkoutResult === "cancel" && <Banner kind="info">Checkout canceled. You can restart anytime.</Banner>}
         {isPastDue && <Banner kind="warn">⚠ Last payment failed. Update your card to avoid losing access.</Banner>}
-        <div className="rounded-2xl p-6 mb-6 bg-[#0F1C32] border border-[var(--border)]">
+        <div className="rounded-2xl p-6 mb-6 bg-[var(--surface-3)] border border-[var(--border)]">
           <div className="text-[11px] tracking-[.18em] uppercase text-[var(--fg-muted)] font-bold mb-3">Plan</div>
           <div className="flex items-center justify-between mb-1">
             <div className="text-xl font-extrabold">{(carrier.service_tier || "diy").toUpperCase()} {carrier.hazmat_addon ? "+ Hazmat" : ""}</div>
@@ -49,12 +49,12 @@ function BillingInner() {
           {isTrial && carrier.trial_ends_at && <div className="text-[12px] text-[var(--fg-muted)]">Trial ends {new Date(carrier.trial_ends_at).toLocaleDateString()}</div>}
         </div>
         <div className="grid md:grid-cols-2 gap-4">
-          <button onClick={openPortal} disabled={portalLoading} className="rounded-2xl p-6 bg-[#0F1C32] border border-[var(--border)] hover:border-[#22D3EE] text-left">
+          <button onClick={openPortal} disabled={portalLoading} className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[#22D3EE] text-left">
             <div className="text-xl font-extrabold mb-1">Manage subscription</div>
             <div className="text-[12px] text-[var(--fg-muted)]">Update card · cancel · invoices · change plan</div>
             {portalLoading && <div className="text-[11px] text-[#22D3EE] mt-3">Opening Stripe portal…</div>}
           </button>
-          <Link href="/pricing" className="rounded-2xl p-6 bg-[#0F1C32] border border-[var(--border)] hover:border-[#22D3EE] block">
+          <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[#22D3EE] block">
             <div className="text-xl font-extrabold mb-1">Switch plan</div>
             <div className="text-[12px] text-[var(--fg-muted)]">Compare DIY vs DFY vs Enterprise</div>
           </Link>

@@ -108,7 +108,7 @@ export default function DataSourceCard({
         </div>
 
         {/* Tab strip */}
-        <div className="flex border-b border-[var(--border)] bg-[#0E1B30]">
+        <div className="flex border-b border-[var(--border)] bg-[var(--surface-3)]">
           {[
             { id: "connect" as const, label: `🔌 Option A · Connect vendor`, sub: "(preferred)" },
             { id: "csv" as const, label: "📄 Option B · Import CSV", sub: "" },
@@ -314,7 +314,7 @@ export default function DataSourceCard({
                   <input
                     type="text"
                     placeholder={`Enter ${col}`}
-                    className="w-full bg-[#0F1C32] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--fg)] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
+                    className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--fg)] placeholder:text-white/30 focus:outline-none focus:border-[#22D3EE]"
                   />
                 </div>
               ))}

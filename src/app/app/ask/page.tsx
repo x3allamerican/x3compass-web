@@ -65,7 +65,7 @@ export default function AskCompassPage() {
             <p className="text-[var(--fg-muted)] mb-8">{carrier?.name && `On behalf of ${carrier.name}. `}300+ CFR-cited skills. Powered by Claude.</p>
             <div className="grid md:grid-cols-2 gap-2 max-w-2xl mx-auto">
               {STARTERS.map((s) => (
-                <button key={s} onClick={() => send(s)} disabled={busy} className="text-left p-3 rounded-lg bg-[#0F1C32] border border-[var(--border)] hover:border-[#22D3EE] text-[13px] text-[var(--fg-muted)] disabled:opacity-50">{s}</button>
+                <button key={s} onClick={() => send(s)} disabled={busy} className="text-left p-3 rounded-lg bg-[var(--surface-3)] border border-[var(--border)] hover:border-[#22D3EE] text-[13px] text-[var(--fg-muted)] disabled:opacity-50">{s}</button>
               ))}
             </div>
           </div>
@@ -74,18 +74,18 @@ export default function AskCompassPage() {
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-3 ${m.role === "user" ? "justify-end" : ""}`}>
                 {m.role === "assistant" && <div className="w-8 h-8 rounded-full grid place-items-center font-black text-sm flex-shrink-0 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>∞</div>}
-                <div className={`rounded-2xl px-4 py-3 max-w-[80%] ${m.role === "user" ? "bg-[#22D3EE]/15 border border-[#22D3EE]/30 text-white" : "bg-[#0F1C32] border border-[var(--border)] text-white/90"}`}>
+                <div className={`rounded-2xl px-4 py-3 max-w-[80%] ${m.role === "user" ? "bg-[#22D3EE]/15 border border-[#22D3EE]/30 text-white" : "bg-[var(--surface-3)] border border-[var(--border)] text-white/90"}`}>
                   <div className="text-[14px] leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMd(m.content) }} />
                 </div>
               </div>
             ))}
-            {busy && <div className="flex gap-3"><div className="w-8 h-8 rounded-full grid place-items-center font-black text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>∞</div><div className="rounded-2xl px-4 py-3 bg-[#0F1C32] border border-[var(--border)] text-[var(--fg-muted)] text-sm">Thinking…</div></div>}
+            {busy && <div className="flex gap-3"><div className="w-8 h-8 rounded-full grid place-items-center font-black text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>∞</div><div className="rounded-2xl px-4 py-3 bg-[var(--surface-3)] border border-[var(--border)] text-[var(--fg-muted)] text-sm">Thinking…</div></div>}
             {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
             <div ref={endRef} />
           </div>
         )}
         <form onSubmit={handleSubmit} className="sticky bottom-6">
-          <div className="flex gap-2 rounded-2xl border border-[var(--border)] bg-[#0F1C32] p-2">
+          <div className="flex gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface-3)] p-2">
             <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a FMCSA / DOT question…" disabled={busy} className="flex-1 bg-transparent px-3 py-2 text-[var(--fg)] outline-none text-sm" />
             <button type="submit" disabled={busy || !input.trim()} className="px-4 py-2 rounded-lg font-extrabold text-[13px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Send →</button>
           </div>

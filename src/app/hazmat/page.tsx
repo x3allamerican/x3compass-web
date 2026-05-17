@@ -142,7 +142,7 @@ export default function Hazmat() {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {PLACARD_GRID.map((p) => (
-                <figure key={p.cls} className="flex flex-col items-center text-center bg-[#0F1C32] rounded-xl p-3 border border-[var(--border)]">
+                <figure key={p.cls} className="flex flex-col items-center text-center bg-[var(--surface-3)] rounded-xl p-3 border border-[var(--border)]">
                   <Placard hazardClass={p.cls} size={120} />
                   <figcaption className="text-[10.5px] font-bold text-[var(--fg)] mt-2 leading-tight">{p.lbl}</figcaption>
                 </figure>

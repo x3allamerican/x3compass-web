@@ -1,88 +1,85 @@
 @import "tailwindcss";
 
 /* ============================================================
-   X3 COMPASS · DUAL-MODE THEME SYSTEM (2026-05-17)
+   X3 COMPASS · DUAL-MODE THEME SYSTEM (v2 — readable light)
    Both dark + light themes share the cyan brand accent.
-   Theme is toggled by adding the `light` class to <html>.
-   Defaults to dark; ThemeProvider respects prefers-color-scheme
-   then localStorage on subsequent visits.
+   Theme is toggled by adding `light` class to <html>.
    ============================================================ */
 
 /* ---- DARK (default) ---- */
 :root {
-  /* Surfaces */
   --bg:           #0A1929;
   --bg-2:         #0B1B2E;
   --bg-3:         #091525;
   --surface:      #15233D;
   --surface-2:    #1A2B47;
-  --surface-3:    #0F1E33;
+  --surface-3:    #0F1C32;
 
-  /* Text */
   --fg:           #FFFFFF;
-  --fg-muted:     rgba(255, 255, 255, 0.65);
-  --fg-faint:     rgba(255, 255, 255, 0.45);
+  --fg-muted:     rgba(255, 255, 255, 0.72);
+  --fg-faint:     rgba(255, 255, 255, 0.50);
   --fg-on-accent: #0A1929;
 
-  /* Lines */
   --border:       #1E3556;
   --border-strong:#2A446B;
   --hairline:     rgba(255, 255, 255, 0.08);
 
-  /* Brand */
   --accent:       #22D3EE;
   --accent-2:     #06B6D4;
   --accent-fg:    #0A1929;
 
-  /* Status */
   --success:      #34D399;
   --warning:      #FBBF24;
   --danger:       #F87171;
 
-  /* Layered shadow */
-  --shadow-sm:    0 2px 6px rgba(0, 0, 0, 0.25);
-  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg:    0 20px 50px rgba(0, 0, 0, 0.45);
+  --card-shadow:  0 1px 0 rgba(255,255,255,0.02), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --decoration-opacity: 1;
 }
 
-/* ---- LIGHT ---- */
+/* ---- LIGHT (high-contrast, slate-based) ---- */
 :root.light {
-  --bg:           #F6F9FB;
+  --bg:           #F4F7FA;        /* warm off-white */
   --bg-2:         #FFFFFF;
-  --bg-3:         #EEF4F8;
-  --surface:      #FFFFFF;
-  --surface-2:    #F9FBFC;
-  --surface-3:    #FAFCFD;
+  --bg-3:         #E8EFF5;
+  --surface:      #FFFFFF;        /* card bg = pure white, shadow gives the depth */
+  --surface-2:    #F8FAFC;
+  --surface-3:    #FFFFFF;
 
-  --fg:           #0F1E33;
-  --fg-muted:     #4B5C72;
-  --fg-faint:     #6F809A;
+  --fg:           #0F172A;        /* slate-900 — body text */
+  --fg-muted:     #334155;        /* slate-700 — readable secondary, NOT washed out */
+  --fg-faint:     #64748B;        /* slate-500 — captions only, still legible */
   --fg-on-accent: #FFFFFF;
 
-  --border:       #DCE5EE;
-  --border-strong:#B9C9D8;
-  --hairline:     rgba(15, 30, 51, 0.08);
+  --border:       #CBD5E1;        /* slate-300 — visible card edges */
+  --border-strong:#94A3B8;        /* slate-400 — emphasized */
+  --hairline:     rgba(15, 23, 42, 0.08);
 
-  /* Slightly darker cyan for AA contrast on white */
-  --accent:       #0891B2;
-  --accent-2:     #0E7490;
+  --accent:       #0E7490;        /* cyan-700 — AA contrast on white */
+  --accent-2:     #155E75;        /* cyan-800 */
   --accent-fg:    #FFFFFF;
 
-  --success:      #059669;
-  --warning:      #D97706;
-  --danger:       #DC2626;
+  --success:      #047857;        /* emerald-700 */
+  --warning:      #B45309;        /* amber-700 */
+  --danger:       #B91C1C;        /* red-700 */
 
-  --shadow-sm:    0 2px 6px rgba(15, 30, 51, 0.06);
-  --shadow-md:    0 8px 24px rgba(15, 30, 51, 0.08);
-  --shadow-lg:    0 20px 50px rgba(15, 30, 51, 0.12);
+  --card-shadow:  0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --decoration-opacity: 0.35;
 }
 
+/* ---- LIGHT-MODE: tame the dark-mode-only glow decorations ----
+   Many marketing sections apply inline `background: radial-gradient(...)` to a
+   decorative pseudo-element with cyan/violet glows tuned for dark navy. In
+   light mode they read as muddy washes. Drop their opacity in light mode. */
+:root.light [style*="radial-gradient"] {
+  opacity: var(--decoration-opacity);
+}
+
+/* ---- Theme-aware utility classes ---- */
 @theme inline {
   --color-bg: var(--bg);
   --color-bg-2: var(--bg-2);
   --color-bg-3: var(--bg-3);
   --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-faint: var(--fg-faint);
@@ -109,4 +106,22 @@ html, body {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 500;
+}
+
+/* Card utility — works beautifully in both modes.
+   Dark: subtle 1px border + shadow.
+   Light: visible border + soft shadow (gives card affordance without weight). */
+.x3-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.x3-card-hover {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.x3-card-hover:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }

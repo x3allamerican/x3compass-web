@@ -150,14 +150,14 @@ export default function SkillsCatalogPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by skill name, CFR section, or question…"
-                className="w-full bg-[#0F1C32] border border-[var(--border)] rounded-full pl-10 pr-4 py-2.5 text-[13px] text-[var(--fg)] placeholder:text-white/35 focus:outline-none focus:border-[#22D3EE]"
+                className="w-full bg-[var(--surface-3)] border border-[var(--border)] rounded-full pl-10 pr-4 py-2.5 text-[13px] text-[var(--fg)] placeholder:text-white/35 focus:outline-none focus:border-[#22D3EE]"
               />
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
             </div>
 
             {/* Status pill — only shown when there are coming-soon entries */}
             {totalComing > 0 && (
-              <div className="flex items-center gap-1 rounded-full border border-[var(--border)] p-1 bg-[#0F1C32]">
+              <div className="flex items-center gap-1 rounded-full border border-[var(--border)] p-1 bg-[var(--surface-3)]">
                 {(["all", "published", "coming-soon"] as const).map((opt) => (
                   <button
                     key={opt}
@@ -257,7 +257,7 @@ function SkillTile({ skill }: { skill: Skill }) {
   return (
     <div
       className={`rounded-xl p-4 border transition-all relative ${
-        isComing ? "border-[var(--border)] bg-[#0F1C32]/50" : "border-[var(--border)] hover:border-[#22D3EE]/40"
+        isComing ? "border-[var(--border)] bg-[var(--surface-3)]/50" : "border-[var(--border)] hover:border-[#22D3EE]/40"
       }`}
       style={!isComing ? { background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" } : undefined}
     >

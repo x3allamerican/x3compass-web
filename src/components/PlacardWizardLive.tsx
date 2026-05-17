@@ -90,7 +90,7 @@ export default function PlacardWizardLive() {
                 className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-3 text-[var(--fg)] text-[15px] font-mono focus:outline-none focus:border-[#22D3EE]"
               />
               {suggestions.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-[#0F1C32] border border-[#22D3EE]/40 rounded-lg overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.55)]">
+                <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-[var(--surface-3)] border border-[#22D3EE]/40 rounded-lg overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.55)]">
                   {suggestions.map((s) => (
                     <button
                       key={s.un + s.name}

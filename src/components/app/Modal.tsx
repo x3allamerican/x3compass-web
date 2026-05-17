@@ -4,8 +4,8 @@ import { ReactNode } from "react";
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
-      <div className="bg-[#0F1C32] border border-[var(--border)] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between sticky top-0 bg-[#0F1C32] z-10">
+      <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between sticky top-0 bg-[var(--surface-3)] z-10">
           <h2 className="text-[var(--fg)] font-extrabold text-lg">{title}</h2>
           <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl">×</button>
         </div>

@@ -150,8 +150,8 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
-      <div className="bg-[#0F1C32] border border-[var(--border)] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between sticky top-0 bg-[#0F1C32]">
+      <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between sticky top-0 bg-[var(--surface-3)]">
           <h2 className="text-[var(--fg)] font-extrabold text-lg">{driver ? `Edit ${driver.first_name} ${driver.last_name}` : "Add driver"}</h2>
           <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl">×</button>
         </div>
@@ -196,7 +196,7 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
           </Section>
 
           {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
-          <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[#0F1C32] py-2">
+          <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[var(--surface-3)] py-2">
             <div>{driver && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete driver</button>}</div>
             <div className="flex gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>

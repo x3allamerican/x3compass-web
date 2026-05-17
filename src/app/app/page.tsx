@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { StatCard } from "@/components/app/TenantTable";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 
@@ -40,7 +39,6 @@ export default function DashboardPage() {
     const ago90 = new Date(today.getTime() - 90*86400000).toISOString().slice(0,10);
 
     async function fetchAll() {
-      const head = (q: ReturnType<typeof sb.from>) => q;
       const r = await Promise.all([
         sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id),
         sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).eq("status","active"),
@@ -85,37 +83,43 @@ export default function DashboardPage() {
   return (
     <AppShell crumbs="DASHBOARD" title={`${greeting}${fname ? `, ${fname.charAt(0).toUpperCase()+fname.slice(1)}` : ""}`}>
       <div className="p-6 max-w-7xl">
-        <div className="mb-6">
-          <p className="text-[var(--fg-muted)]">
+        <div className="mb-8">
+          <p className="text-[var(--fg-muted)] text-[14px]">
             {carrier ? <>Live snapshot for <strong className="text-[var(--fg)]">{carrier.name}</strong>.</> : "Loading your carrier…"}
           </p>
         </div>
 
+        {/* STAT GRID — 4-col on desktop, with clear typographic hierarchy */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Drivers" value={counts.drivers_active} sub={`${counts.drivers} total · ${counts.drivers - counts.drivers_active} inactive`} />
-          <StatCard label="Vehicles" value={counts.vehicles} sub={counts.vehicles_oos ? `${counts.vehicles_oos} out of service` : "All in service"} accent="#34D399" />
-          <StatCard label="CDLs expiring 60d" value={counts.cdl_expiring_60d} accent={counts.cdl_expiring_60d ? "#FACC15" : "#34D399"} />
-          <StatCard label="Medical cards 60d" value={counts.medical_expiring_60d} accent={counts.medical_expiring_60d ? "#FACC15" : "#34D399"} />
-          <StatCard label="Inspections (90d)" value={counts.inspections_recent} sub={counts.oos_recent ? `${counts.oos_recent} OOS` : "no OOS"} />
-          <StatCard label="Accidents (90d)" value={counts.accidents_recent} accent={counts.accidents_recent ? "#F87171" : "#34D399"} />
-          <StatCard label="DOT insp. due 60d" value={counts.inspection_due_30d} accent={counts.inspection_due_30d ? "#FACC15" : "#22D3EE"} />
-          <StatCard label="MVR pulls pending" value={counts.mvr_pending} accent={counts.mvr_pending ? "#FACC15" : "#22D3EE"} />
+          <StatCard label="Active drivers"      value={counts.drivers_active} delta={counts.drivers ? `${counts.drivers - counts.drivers_active} inactive` : "—"} status="info" />
+          <StatCard label="Vehicles"            value={counts.vehicles}       delta={counts.vehicles_oos ? `${counts.vehicles_oos} OOS` : "All in service"} status={counts.vehicles_oos ? "warn" : "ok"} />
+          <StatCard label="CDLs expiring (60d)" value={counts.cdl_expiring_60d}     delta={counts.cdl_expiring_60d ? "Action needed" : "All current"} status={counts.cdl_expiring_60d ? "warn" : "ok"} />
+          <StatCard label="Medical cards (60d)" value={counts.medical_expiring_60d} delta={counts.medical_expiring_60d ? "Action needed" : "All current"} status={counts.medical_expiring_60d ? "warn" : "ok"} />
+          <StatCard label="Inspections (90d)"   value={counts.inspections_recent} delta={counts.oos_recent ? `${counts.oos_recent} OOS` : "no OOS"} status={counts.oos_recent ? "warn" : "info"} />
+          <StatCard label="Accidents (90d)"     value={counts.accidents_recent} delta={counts.accidents_recent ? "Review" : "None"} status={counts.accidents_recent ? "alert" : "ok"} />
+          <StatCard label="DOT insp. due 60d"   value={counts.inspection_due_30d} status={counts.inspection_due_30d ? "warn" : "info"} />
+          <StatCard label="MVR pulls pending"   value={counts.mvr_pending} status={counts.mvr_pending ? "warn" : "info"} />
         </div>
 
+        {/* QUICK ACTIONS */}
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="text-[12px] uppercase tracking-[.18em] font-bold text-[var(--fg-muted)]">Quick actions</h2>
+        </div>
         <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <QuickAction href="/app/drivers"          icon="👤" title="Add a driver" desc="Build a new DQ file from scratch" />
-          <QuickAction href="/app/vehicles"         icon="🚛" title="Add a vehicle" desc="Track maintenance + inspections" />
-          <QuickAction href="/app/background-checks" icon="🛡" title="Order BG check" desc="Live Checkr embed (FCRA-compliant)" />
-          <QuickAction href="/app/mvr"              icon="🪪" title="Pull an MVR" desc="State-specific MVR lookup" />
-          <QuickAction href="/app/audit-export"     icon="📄" title="Audit packet" desc="Generate full DOT compliance export" />
-          <QuickAction href="/app/ask"              icon="∞" title="Ask Compass" desc="CFR-cited answer to any FMCSA question" />
+          <QuickAction href="/app/drivers"           icon="👤" title="Add a driver"     desc="Build a new DQ file from scratch" />
+          <QuickAction href="/app/vehicles"          icon="🚛" title="Add a vehicle"    desc="Track maintenance + inspections" />
+          <QuickAction href="/app/background-checks" icon="🛡" title="Order BG check"   desc="Live Checkr embed (FCRA-compliant)" />
+          <QuickAction href="/app/mvr"               icon="🪪" title="Pull an MVR"      desc="State-specific MVR lookup" />
+          <QuickAction href="/app/audit-export"      icon="📄" title="Audit packet"     desc="Full DOT compliance export" />
+          <QuickAction href="/app/ask"               icon="∞" title="Ask Compass"      desc="CFR-cited answer to any FMCSA question" />
         </div>
 
+        {/* TWO-COLUMN: recent + compliance health */}
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+          <div className="x3-card p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[var(--fg)] font-bold text-[15px]">Recently added drivers</h3>
-              <Link href="/app/drivers" className="text-[11px] text-[#22D3EE] font-bold hover:underline">View all →</Link>
+              <Link href="/app/drivers" className="text-[11px] text-[var(--accent)] font-bold hover:underline">View all →</Link>
             </div>
             {loading ? (
               <div className="text-[var(--fg-muted)] text-sm py-6 text-center">Loading…</div>
@@ -123,16 +127,16 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <div className="text-2xl mb-2">🚛</div>
                 <p className="text-[var(--fg-muted)] text-sm mb-3">No drivers yet</p>
-                <Link href="/app/drivers" className="inline-block px-4 py-2 rounded-lg font-bold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>Add your first →</Link>
+                <Link href="/app/drivers" className="inline-block px-4 py-2 rounded-lg font-bold text-[12px] text-[var(--accent-fg)] bg-[var(--accent)] hover:bg-[var(--accent-2)] transition-colors">Add your first →</Link>
               </div>
             ) : (
               <ul className="space-y-2">
                 {recentDrivers.map((d) => (
                   <li key={d.id} className="flex items-center justify-between py-1.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full grid place-items-center text-[11px] font-black text-[var(--bg)]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{(d.first_name?.[0]||"")+(d.last_name?.[0]||"")}</div>
+                      <div className="w-8 h-8 rounded-full grid place-items-center text-[11px] font-black text-[var(--accent-fg)] bg-[var(--accent)]">{(d.first_name?.[0]||"")+(d.last_name?.[0]||"")}</div>
                       <div>
-                        <Link href={`/app/drivers?id=${d.id}`} className="text-[var(--fg)] font-semibold hover:text-[#22D3EE] text-sm">{d.first_name} {d.last_name}</Link>
+                        <Link href={`/app/drivers?id=${d.id}`} className="text-[var(--fg)] font-semibold hover:text-[var(--accent)] text-sm">{d.first_name} {d.last_name}</Link>
                         <div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_state || "—"} · {d.status}</div>
                       </div>
                     </div>
@@ -142,15 +146,15 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+          <div className="x3-card p-5">
             <h3 className="text-[var(--fg)] font-bold text-[15px] mb-4">Compliance health</h3>
             <ul className="space-y-3">
-              <HealthRow label="CDL expirations 60d" count={counts.cdl_expiring_60d} okLabel="All current" />
-              <HealthRow label="Medical cards 60d" count={counts.medical_expiring_60d} okLabel="All current" />
-              <HealthRow label="Out-of-service vehicles" count={counts.vehicles_oos} okLabel="All in service" />
-              <HealthRow label="Recent OOS inspections" count={counts.oos_recent} okLabel="No OOS in last 90d" />
-              <HealthRow label="Recent accidents" count={counts.accidents_recent} okLabel="None recorded in 90d" warnLevel={1} />
-              <HealthRow label="DOT inspections due 60d" count={counts.inspection_due_30d} okLabel="All within window" />
+              <HealthRow label="CDL expirations (60d)"   count={counts.cdl_expiring_60d}     okLabel="All current" />
+              <HealthRow label="Medical cards (60d)"     count={counts.medical_expiring_60d} okLabel="All current" />
+              <HealthRow label="Out-of-service vehicles" count={counts.vehicles_oos}         okLabel="All in service" />
+              <HealthRow label="OOS inspections (90d)"   count={counts.oos_recent}           okLabel="No OOS in 90d" />
+              <HealthRow label="Recent accidents (90d)"  count={counts.accidents_recent}     okLabel="None recorded" warnLevel={1} />
+              <HealthRow label="DOT insp. due (60d)"     count={counts.inspection_due_30d}   okLabel="All within window" />
             </ul>
           </div>
         </div>
@@ -159,19 +163,42 @@ export default function DashboardPage() {
   );
 }
 
+/* ============================================================
+   DASHBOARD CARDS — refreshed for both modes
+   ============================================================ */
+
+type Status = "ok" | "info" | "warn" | "alert";
+
+function StatCard({ label, value, delta, status = "info" }: { label: string; value: number | string; delta?: string; status?: Status }) {
+  // Status drives a small color accent on the value + a left rail
+  const railColor =
+    status === "ok"    ? "var(--success)" :
+    status === "warn"  ? "var(--warning)" :
+    status === "alert" ? "var(--danger)"  :
+                          "var(--accent)";
+  return (
+    <div className="x3-card x3-card-hover relative p-5 overflow-hidden">
+      <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: railColor }} />
+      <div className="text-[10px] tracking-[.16em] uppercase font-bold text-[var(--fg-muted)] mb-2">{label}</div>
+      <div className="text-3xl font-extrabold tabular-nums text-[var(--fg)]">{value}</div>
+      {delta && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{delta}</div>}
+    </div>
+  );
+}
+
 function QuickAction({ href, icon, title, desc }: { href: string; icon: string; title: string; desc: string }) {
   return (
-    <Link href={href} className="block rounded-xl border border-[var(--border)] bg-[#0F1C32] hover:border-[#22D3EE] p-5 transition-colors">
+    <Link href={href} className="x3-card x3-card-hover block p-5 group">
       <div className="text-2xl mb-2">{icon}</div>
-      <div className="text-[var(--fg)] font-bold text-[14px] mb-1">{title}</div>
+      <div className="text-[var(--fg)] font-bold text-[14px] mb-1 group-hover:text-[var(--accent)] transition-colors">{title}</div>
       <div className="text-[var(--fg-muted)] text-[12px]">{desc}</div>
     </Link>
   );
 }
 
 function HealthRow({ label, count, okLabel, warnLevel = 0 }: { label: string; count: number; okLabel: string; warnLevel?: number }) {
-  const status = count === 0 ? "ok" : count <= warnLevel ? "warn" : "alert";
-  const color = status === "ok" ? "#34D399" : status === "warn" ? "#FACC15" : "#F87171";
+  const status: Status = count === 0 ? "ok" : count <= warnLevel ? "warn" : "alert";
+  const color = status === "ok" ? "var(--success)" : status === "warn" ? "var(--warning)" : "var(--danger)";
   return (
     <li className="flex items-center justify-between text-[13px]">
       <span className="text-[var(--fg-muted)]">{label}</span>

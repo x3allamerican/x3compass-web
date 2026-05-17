@@ -21,11 +21,11 @@ export function TenantTable<T extends { id: string }>({
   loading?: boolean;
 }) {
   if (loading) {
-    return <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-12 text-center text-[var(--fg-muted)] text-sm">Loading…</div>;
+    return <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-12 text-center text-[var(--fg-muted)] text-sm">Loading…</div>;
   }
   if (!rows.length) {
     return (
-      <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-12 text-center">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-12 text-center">
         <div className="text-2xl mb-3">📋</div>
         <h3 className="text-[var(--fg)] font-bold text-lg mb-2">{emptyTitle || "Nothing here yet"}</h3>
         <p className="text-[var(--fg-muted)] text-sm mb-5 max-w-md mx-auto">{emptyDesc || "Add your first record to get started."}</p>
@@ -34,7 +34,7 @@ export function TenantTable<T extends { id: string }>({
     );
   }
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -77,7 +77,7 @@ export function Badge({ children, color = "cyan" }: { children: ReactNode; color
 
 export function StatCard({ label, value, sub, accent = "#22D3EE" }: { label: string; value: string | number; sub?: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
       <div className="text-[10px] tracking-[.16em] uppercase text-[var(--fg-muted)] font-bold mb-2">{label}</div>
       <div className="text-3xl font-extrabold mb-1" style={{ color: accent }}>{value}</div>
       {sub && <div className="text-[11px] text-[var(--fg-muted)]">{sub}</div>}

@@ -51,7 +51,7 @@ export default function PricingPage() {
         </div>
         <div className="grid md:grid-cols-2 gap-6 mb-14">
           {[["Is the trial really free?","Yes — 7 days, no card required. We don't auto-charge."],["Can I bring my own drug consortium, ELD, MVR vendor?","Yes on DIY; DFY bundles a Compass-managed consortium."],["Does the price include FMCSA filings?","USDOT/MC filing fees are paid directly to FMCSA."],["Can I cancel anytime?","Yes. Self-serve from your billing portal."],["Annual billing discount?","10% off annual. Reach out for the link."],["500 drivers?","Enterprise — let's talk."]].map(([q,a], i) => (
-            <div key={i} className="rounded-xl p-5 bg-[#0F1C32] border border-[var(--border)]"><div className="font-extrabold text-[var(--fg)] mb-1.5">{q}</div><div className="text-[13px] text-[var(--fg-muted)]">{a}</div></div>
+            <div key={i} className="rounded-xl p-5 bg-[var(--surface-3)] border border-[var(--border)]"><div className="font-extrabold text-[var(--fg)] mb-1.5">{q}</div><div className="text-[13px] text-[var(--fg-muted)]">{a}</div></div>
           ))}
         </div>
         <div className="text-center">

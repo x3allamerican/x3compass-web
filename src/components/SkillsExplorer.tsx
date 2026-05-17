@@ -72,7 +72,7 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-2xl p-5 border border-[var(--border)] bg-[#0F1C32] hover:border-[#22D3EE]/50 hover:bg-[#13243F] transition-colors relative pr-10 group"
+      className="text-left rounded-2xl p-5 border border-[var(--border)] bg-[var(--surface-3)] hover:border-[#22D3EE]/50 hover:bg-[#13243F] transition-colors relative pr-10 group"
       style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}
     >
       <div className="inline-block text-[10px] font-bold tracking-wider text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/25 px-2 py-1 rounded-full font-mono mb-2">

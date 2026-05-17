@@ -19,7 +19,7 @@ export default function HazmatPreview() {
       </div>
 
       {/* Header strip */}
-      <div className="px-5 py-4 border-b border-[var(--border)] bg-[#0F1C32] flex items-center justify-between gap-3 flex-wrap">
+      <div className="px-5 py-4 border-b border-[var(--border)] bg-[var(--surface-3)] flex items-center justify-between gap-3 flex-wrap">
         <div>
           <div className="text-[9px] tracking-[.16em] uppercase font-extrabold text-[#22D3EE] mb-0.5">
             X3 COMPASS · HAZMAT CENTER · 49 CFR PARTS 172–180

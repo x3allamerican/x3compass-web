@@ -63,7 +63,7 @@ export default function SettingsPage() {
       <div className="p-6 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Account banner */}
-          <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
             <div className="text-[10px] tracking-[.16em] uppercase text-[var(--fg-muted)] font-bold mb-3">Account</div>
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
       <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-3">{title}</div>
       <div className="space-y-3">{children}</div>
     </div>

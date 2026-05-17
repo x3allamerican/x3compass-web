@@ -25,7 +25,7 @@ export default function HosPage() {
   return (
     <AppShell crumbs="HOS / ELD" title="Hours of Service">
       <div className="p-6 space-y-6">
-        <div className="rounded-xl border border-[var(--border)] bg-[#0F1C32] p-5">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
           <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">Connect your ELD</div>
           <p className="text-[var(--fg-muted)] text-sm leading-relaxed mb-3">
             Compass HOS ingests RODS data from your ELD via the FMCSA-compliant ELD output file. Once connected, daily logs, status changes, and HOS violations appear here automatically. Supported integrations roadmap: Motive, Samsara, KeepTruckin, Geotab, EROAD, Garmin.
