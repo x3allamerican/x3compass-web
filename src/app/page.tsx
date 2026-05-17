@@ -4,6 +4,8 @@ import BrainGrid from "@/components/BrainGrid";
 import SkillsExplorer from "@/components/SkillsExplorer";
 import DashboardPreview from "@/components/DashboardPreview";
 import HazmatPreview from "@/components/HazmatPreview";
+import TrustStrip from "@/components/TrustStrip";
+import FounderNote from "@/components/FounderNote";
 
 const PRICING = [
   {
@@ -70,14 +72,16 @@ export default function Home() {
   return (
     <SiteShell>
       <div className="bg-[var(--bg)] text-[var(--fg)]">
-        {/* HERO */}
+        {/* HERO — real highway photo, not a gradient wash */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 20% 0%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 80% 100%, rgba(139, 92, 246, 0.14), transparent 60%)",
-            }}
-          />
+          {/* Background: real photo */}
+          <div className="absolute inset-0 -z-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/photos/hero-truck-highway.jpg" alt="" aria-hidden="true"
+                 className="w-full h-full object-cover" />
+            {/* Dark overlay — keeps text readable, gives the hero its mood */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/75 to-[var(--bg)]" />
+          </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-24 relative">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-6">
@@ -124,6 +128,8 @@ export default function Home() {
           </div>
         </section>
 
+        <TrustStrip />
+
         {/* 01 · TWELVE BRAINS */}
         <section id="services" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
@@ -168,6 +174,8 @@ export default function Home() {
           </div>
         </section>
 
+        <FounderNote />
+
         {/* 03 · 300 SKILLS */}
         <section id="skills" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
@@ -201,12 +209,7 @@ export default function Home() {
 
         {/* 04 · HAZMAT */}
         <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)]">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(700px 400px at 15% 100%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(700px 400px at 90% 0%, rgba(139, 92, 246, 0.16), transparent 60%)",
-            }}
-          />
+          {/* Decorative wash removed — let the content carry the section */}
           <div className="max-w-7xl mx-auto px-6 relative">
             <div className="text-center mb-10">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[#22D3EE] mb-3">
@@ -368,12 +371,7 @@ export default function Home() {
 
         {/* FINAL CTA */}
         <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 25% 100%, rgba(34, 211, 238, 0.20), transparent 60%), radial-gradient(700px 400px at 85% 0%, rgba(139, 92, 246, 0.22), transparent 60%)",
-            }}
-          />
+          {/* Decorative wash removed */}
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-4 leading-tight">
               Stop running compliance from a{" "}
