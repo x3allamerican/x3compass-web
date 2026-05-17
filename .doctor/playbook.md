@@ -52,6 +52,20 @@ Each pattern entry:
 **Last seen:** 2026-05-17 (very common during heavy push days)
 **Notes:** Most common false-positive. Build retry into all probes (3 attempts × 10s spacing).
 
+## Pattern: Cloudflare bot-management 403 during deploy
+**Codes:** 403 on ALL probes simultaneously, lasting < 60s, then auto-resolves
+**Probable cause:** During a Cloudflare Pages deploy swap, Cloudflare's bot management
+sometimes blocks GitHub Actions runners (known bot fingerprint) with 403. Differs from
+the 522 swap pattern — same root cause (deploy in flight), different rejection layer.
+**Auto-fix:** Same as the 522 pattern — wait 60s and re-probe. If now green, comment
+on issue with diagnosis + add `auto-resolved` label + close. (Counts as 1 `auto` action.)
+**Escalate if:** Persists > 3 minutes, OR if 403s come from real customer IPs (check
+/api/errors and Cloudflare WAF event log).
+**Last seen:** 2026-05-17 (Issue #2 — caught while monitoring, doctor cascade was
+broken at the time; resolved manually). After this, the doctor should auto-handle.
+**Notes:** Long-term fix is to whitelist the GitHub Actions IP range in Cloudflare
+bot management. Cheaper interim: just retry; symptom is transient by definition.
+
 ## Pattern: Stripe webhook signing-secret mismatch
 **Codes:** 401 on `/api/stripe/webhook` with "Invalid signature" in body, every event from Stripe
 **Probable cause:** STRIPE_WEBHOOK_SECRET env var doesn't match the secret Stripe is signing with. Often happens after rotating webhook endpoints.

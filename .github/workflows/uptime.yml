@@ -162,4 +162,17 @@ jobs:
                 labels: ["uptime-alert", "incident", severity.toLowerCase()],
               });
               console.log(`Filed: ${issue.data.html_url}`);
+
+              // Explicitly trigger the doctor — GITHUB_TOKEN-created issues do NOT
+              // cascade via 'issues.opened'/'labeled' triggers (anti-recursion safety).
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  workflow_id: 'doctor.yml', ref: 'main',
+                  inputs: { issue_number: String(issue.data.number) },
+                });
+                console.log(`🩺 Doctor dispatched on #${issue.data.number}`);
+              } catch (e) {
+                console.log(`Doctor dispatch failed (issue still filed): ${e.message}`);
+              }
             }
