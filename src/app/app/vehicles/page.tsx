@@ -1,238 +1,190 @@
-import Link from "next/link";
+"use client";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
-import DataSourceCard from "@/components/DataSourceCard";
-
-type Status = "active" | "pm-due" | "oos" | "annual-due";
+import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
 type Vehicle = {
-  id: string;
-  unit: string;
-  type: string;
-  vin: string;
-  year: number;
-  make: string;
-  plate: string;
-  miles: number;
-  driver: string;
-  annual: string;
-  pm: string;
-  status: Status;
-  statusLabel: string;
+  id: string; carrier_id: string;
+  vin: string | null; license_plate: string | null; license_plate_state: string | null;
+  year: number | null; make: string | null; model: string | null;
+  gvwr_lbs: number | null; vehicle_type: string | null; fuel_type: string | null;
+  current_odometer: number | null;
+  in_service_date: string | null; out_of_service_date: string | null;
+  status: string;
+  last_dot_inspection_on: string | null; next_dot_inspection_due: string | null;
+  created_at: string;
 };
 
-const VEHICLES: Vehicle[] = [
-  { id: "156A", unit: "Unit 156A",  type: "Tractor", vin: "1FUJGBDV9BLAY3856", year: 2021, make: "Freightliner Cascadia", plate: "TX-4U3K9", miles: 418923, driver: "Ricardo Torres", annual: "2026-08-04", pm: "2026-01-01", status: "pm-due",     statusLabel: "PM 134d overdue" },
-  { id: "109",  unit: "Unit 109",   type: "Tractor", vin: "3HSDJSJR3GN203827", year: 2019, make: "Peterbilt 579",         plate: "TX-7N2L1", miles: 612471, driver: "Jared Martinez", annual: "2026-11-22", pm: "2026-01-04", status: "pm-due",     statusLabel: "PM 131d overdue" },
-  { id: "154",  unit: "Unit 154",   type: "Tractor", vin: "1NPXLP9X1EN255672", year: 2022, make: "Kenworth T680",         plate: "TX-8R4P2", miles: 287113, driver: "Mike Kowalski",  annual: "2027-02-15", pm: "2026-01-22", status: "pm-due",     statusLabel: "PM 113d overdue" },
-  { id: "167",  unit: "Unit 167",   type: "Tractor", vin: "4V4NC9EH2KN912233", year: 2020, make: "Volvo VNL 760",         plate: "FL-3X9Q7", miles: 521002, driver: "Diego Ramirez",  annual: "2026-12-30", pm: "2026-01-29", status: "pm-due",     statusLabel: "PM 106d overdue" },
-  { id: "134",  unit: "Unit 134",   type: "Tractor", vin: "5KJJAEDR0KPLM6612", year: 2018, make: "International LT",      plate: "NM-5P3T4", miles: 743882, driver: "Emma Park",      annual: "2026-09-11", pm: "2026-02-07", status: "pm-due",     statusLabel: "PM 97d overdue" },
-  { id: "188",  unit: "Unit 188",   type: "Tractor", vin: "1FUJGBDV5GLAH2987", year: 2024, make: "Freightliner Cascadia", plate: "TX-9R7S3", miles: 98443,  driver: "Alex Carter",    annual: "2027-04-18", pm: "2026-07-12", status: "active",     statusLabel: "Active" },
-  { id: "T-12", unit: "Trailer T-12", type: "Dry van 53ft", vin: "1JJV532W0LL112245", year: 2020, make: "Wabash DuraPlate", plate: "TX-T8412", miles: 0, driver: "Pool", annual: "2026-06-22", pm: "2026-06-22", status: "annual-due", statusLabel: "Annual 31d" },
-  { id: "T-08", unit: "Trailer T-08", type: "Reefer 53ft", vin: "1JJV532W2LL098771",  year: 2019, make: "Utility 3000R",   plate: "TX-T7811", miles: 0, driver: "Pool", annual: "2026-07-05", pm: "2026-04-22", status: "active",     statusLabel: "Active" },
-  { id: "172",  unit: "Unit 172",   type: "Tractor", vin: "1NPXLP9X8KN277104", year: 2023, make: "Kenworth T680",         plate: "OK-6V2K9", miles: 165890, driver: "Linda Wilson",   annual: "2027-01-08", pm: "2026-08-04", status: "active",     statusLabel: "Active" },
-  { id: "191",  unit: "Unit 191",   type: "Tractor", vin: "5KJJAEDR4LPLM7228", year: 2024, make: "International LT",      plate: "CA-3X8N4", miles: 42117,  driver: "Raj Mehta",      annual: "2027-09-04", pm: "2026-11-15", status: "active",     statusLabel: "Active" },
-];
-
-const STATUS_PILL: Record<Status, string> = {
-  active:       "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  "pm-due":     "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-  "annual-due": "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-  oos:          "bg-rose-500/15 text-rose-300 border border-rose-500/30",
+const VEHICLE_TYPES = ["tractor","straight_truck","trailer","tank","dump","bus","other"];
+const STATUSES = ["active","out_of_service","sold","totaled"];
+const STATUS_COLORS: Record<string, "green"|"red"|"gray"|"amber"> = {
+  active: "green", out_of_service: "amber", sold: "gray", totaled: "red",
 };
 
 export default function VehiclesPage() {
-  const total = VEHICLES.length;
-  const active = VEHICLES.filter(v => v.status === "active").length;
-  const pmDue = VEHICLES.filter(v => v.status === "pm-due").length;
-  const annualDue = VEHICLES.filter(v => v.status === "annual-due").length;
+  const { carrier } = useUser();
+  const [rows, setRows] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [edit, setEdit] = useState<Vehicle | null>(null);
+
+  async function refresh() {
+    if (!carrier) return;
+    setLoading(true);
+    const { data, error } = await getSupabase().from("compass_vehicles").select("*").eq("carrier_id", carrier.id).order("created_at", { ascending: false });
+    if (!error) setRows((data as Vehicle[]) || []);
+    setLoading(false);
+  }
+  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(v => `${v.vin} ${v.license_plate} ${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q));
+  }, [rows, search]);
+
+  const today = new Date().toISOString().slice(0,10);
+  const in60  = new Date(Date.now() + 60*86400000).toISOString().slice(0,10);
 
   return (
-    <AppShell
-      title="Vehicles & Preventive Maintenance"
-      crumbs="VEHICLES BRAIN · 49 CFR § 396.3 / § 396.17"
-      actions={
-        <>
-          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
-            ⬆ Import CSV
-          </button>
-          <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-          >
-            + Add vehicle
-          </Link>
-        </>
-      }
-    >
-      <div className="px-6 py-8 space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="49 CFR § 390.21 + Part 396"
-          what="Your fleet inventory + preventive-maintenance schedule. Every truck and trailer with VIN, plate, registration, annual inspection, and PM trigger mileage."
-          who="Every motor carrier — vehicle records are required from day one. Annual DOT inspections (§ 396.17) are mandatory regardless of mileage. PM scheduling avoids cascading violations."
-          howTo={[
-            { n: 1, title: "Connect telematics (Motive, Samsara, Geotab, Fleetio)", detail: "OAuth pulls your fleet roster + live odometer per VIN. PM triggers fire automatically when a vehicle hits the mileage threshold you set." },
-            { n: 2, title: "Or upload your fleet CSV", detail: "Template columns: unit #, VIN, year/make/model, GVWR, plate, plate state, current odometer. Compass auto-classifies each vehicle and starts the annual-inspection clock." },
-            { n: 3, title: "Or add vehicles individually", detail: "+ Add vehicle — useful for occasional acquisitions or small fleets. Manual odometer updates work too if you don't have telematics." },
-            { n: 4, title: "Set your PM intervals once", detail: "Industry standard: A-service every 15K, B-service every 45K, C-service every 90K, annual DOT inspection (§ 396.17) every 12 months. Compass tracks per-VIN." },
+    <AppShell crumbs="VEHICLES" title="Vehicles"
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add vehicle</button>}>
+      <div className="p-6">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search VIN, plate, make/model…"
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />
+          <div className="text-[12px] text-white/55">{filtered.length} of {rows.length}</div>
+        </div>
+
+        <TenantTable<Vehicle>
+          rows={filtered} loading={loading}
+          emptyTitle={rows.length ? "No matches" : "No vehicles yet"}
+          emptyDesc={rows.length ? "Try a different search." : "Add your first power unit to start tracking inspections and maintenance."}
+          emptyAction={rows.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add first vehicle</button> : undefined}
+          onRowClick={(v) => setEdit(v)}
+          columns={[
+            { key: "vehicle", label: "Vehicle", render: (v) =>
+              <div>
+                <div className="text-white font-semibold">{v.year} {v.make} {v.model}</div>
+                <div className="text-[11px] text-white/55">{v.license_plate ? `${v.license_plate_state || ""} ${v.license_plate}` : "—"}</div>
+              </div> },
+            { key: "vin", label: "VIN", hideOnMobile: true, render: (v) => v.vin ? <code className="text-[11px] text-white/85">{v.vin}</code> : <span className="text-white/35">—</span> },
+            { key: "vehicle_type", label: "Type", hideOnMobile: true, render: (v) => v.vehicle_type ? <Badge color="cyan">{v.vehicle_type.replace("_"," ")}</Badge> : <span className="text-white/35">—</span> },
+            { key: "next_dot_inspection_due", label: "DOT due", hideOnMobile: true, render: (v) =>
+              !v.next_dot_inspection_due ? <span className="text-white/35">—</span> :
+              v.next_dot_inspection_due < today ? <Badge color="red">{fmtDate(v.next_dot_inspection_due)}</Badge> :
+              v.next_dot_inspection_due <= in60 ? <Badge color="amber">{fmtDate(v.next_dot_inspection_due)}</Badge> :
+              <span className="text-white/85">{fmtDate(v.next_dot_inspection_due)}</span> },
+            { key: "status", label: "Status", render: (v) => <Badge color={STATUS_COLORS[v.status] || "gray"}>{v.status.replace("_"," ")}</Badge> },
           ]}
-          weeklyHabits={["Friday: review vehicles whose annual inspection (§ 396.17) is due in next 30 days", "Review DVIR-with-defects entries from past week — confirm repairs were completed before re-dispatch"]}
-          auditTraps={["Missing annual inspection certificates — auditors will ask for one per vehicle, retained 14 months", "Inspector qualification records missing — § 396.19 requires you keep the inspector's qualifications on file", "PM schedule on paper but not followed — auditors want to see a written program AND evidence of execution"]}
-          askCompassLinks={[{ label: "Build me a § 396 PM schedule", query: "Build me a 396 PM schedule" }, { label: "What's checked in the annual DOT inspection?", query: "What's checked in the annual DOT inspection" }, { label: "Are DVIRs required if no defects?", query: "Are DVIRs required if no defects" }]}
         />
-
-        {/* DATA SOURCE */}
-        <DataSourceCard
-          trackerLabel="Vehicles"
-          cfr="49 CFR § 390.21 + Part 396"
-          initialStatus="imported"
-          lastSync="1 hr ago"
-          recordCount={38}
-          vendors={[
-            { name: "Motive (KeepTruckin)", blurb: "Fleet roster + odometer from ELDs", badge: "Recommended", status: "live", cost: "Included" },
-            { name: "Samsara", blurb: "Fleet roster + maintenance alerts", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Geotab", blurb: "Fleet roster + diagnostics", badge: "API key", status: "live", cost: "Included" },
-            { name: "Fleetio", blurb: "PM schedule + fleet inventory", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Whip Around", blurb: "DVIR + roster sync", badge: "API key", status: "live", cost: "Included" },
-            { name: "RTA Fleet Management", blurb: "Full maintenance management sync", status: "manual-pull", cost: "$0.25/vehicle/mo" },
-          ]}
-          csvTemplate={{
-            name: "x3-compass-vehicles-template.csv",
-            columns: ["unit_number", "vin", "year", "make", "model", "gvwr", "license_plate", "plate_state", "odometer", "status"],
-          }}
-          manualLabel="Add vehicle"
-        />
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {[
-            { l: "Power units",         v: total - 2,    c: "#22D3EE" },
-            { l: "Trailers",            v: 2,            c: "#22D3EE" },
-            { l: "Active",              v: active,       c: "#10B981" },
-            { l: "PM overdue",          v: pmDue,        c: "#FBBF24" },
-            { l: "Annual DOT ≤ 30d",    v: annualDue,    c: "#FBBF24" },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/50 mb-1">{s.l}</div>
-              <div className="text-[26px] font-black leading-none" style={{ color: s.c }}>{s.v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Compass nudge */}
-        <div
-          className="rounded-2xl p-5 border flex gap-4 items-start"
-          style={{
-            background: "linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(15, 28, 50, 0.5))",
-            borderColor: "rgba(251, 191, 36, 0.30)",
-          }}
-        >
-          <div className="text-[22px]">⚠</div>
-          <div className="flex-1">
-            <div className="text-white font-bold text-[14px] mb-1">5 vehicles are past PM due dates · § 396.3(b)</div>
-            <div className="text-[13px] text-white/75 leading-relaxed mb-3">
-              Roadside inspections of a vehicle with no PM record on file count against your Vehicle Maintenance BASIC — your current percentile is{" "}
-              <strong className="text-amber-300">64</strong>, intervention threshold is 80. I can build a § 396.3 PM template per unit using the manufacturer&apos;s recommended cycle.
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button className="px-4 py-2 rounded-full text-[12px] font-bold text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>
-                Build PM templates →
-              </button>
-              <button className="px-4 py-2 rounded-full text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">
-                Email shop manager
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter row */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex-1 min-w-[240px] relative">
-            <input type="search" placeholder="Search by unit #, VIN, plate, make…"
-              className="w-full bg-[#15233D] border border-[#1E3556] rounded-full pl-10 pr-4 py-2.5 text-[14px] text-white placeholder:text-white/40 focus:border-[#22D3EE] focus:outline-none focus:ring-2 focus:ring-[#22D3EE]/20"
-            />
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-[14px]">🔍</span>
-          </div>
-          {["All 67", "Tractors 60", "Trailers 7", "PM overdue 5", "Hazmat-rated 12"].map((f, i) => (
-            <button
-              key={i}
-              className={`text-[12px] font-semibold px-3 py-2 rounded-full border ${
-                i === 0
-                  ? "bg-[#22D3EE]/15 border-[#22D3EE]/40 text-[#22D3EE]"
-                  : "border-[#1E3556] text-white/70 hover:border-[#22D3EE]/40 hover:text-white"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {/* Vehicles table */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-5 py-4 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-[15px] font-extrabold text-white">Power units & trailers · 67 total</h3>
-            <span className="text-[11px] font-mono text-[#22D3EE]/70">§ 396 · annual + PM tracking</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[10px] tracking-[.14em] uppercase font-bold text-white/45">
-                  <th className="py-3 px-4">Unit</th>
-                  <th className="py-3 px-3">Make / Year</th>
-                  <th className="py-3 px-3">VIN</th>
-                  <th className="py-3 px-3">Plate</th>
-                  <th className="py-3 px-3 text-right">Mileage</th>
-                  <th className="py-3 px-3">Driver</th>
-                  <th className="py-3 px-3">Annual due</th>
-                  <th className="py-3 px-3">PM due</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {VEHICLES.map((v) => (
-                  <tr key={v.id} className="hover:bg-[#22D3EE]/5 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="text-[22px]">{v.type === "Tractor" ? "🚛" : "📦"}</div>
-                        <div className="min-w-0">
-                          <div className="font-bold text-white">{v.unit}</div>
-                          <div className="text-white/45 text-[11px]">{v.type}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-white/85">{v.make}<div className="text-[10px] text-white/45">{v.year}</div></td>
-                    <td className="py-3 px-3 font-mono text-white/80 text-[11px]">{v.vin}</td>
-                    <td className="py-3 px-3 font-mono text-white/80 text-[12px]">{v.plate}</td>
-                    <td className="py-3 px-3 text-white/85 text-right tabular-nums">{v.miles.toLocaleString()}</td>
-                    <td className="py-3 px-3 text-white/85 text-[12px]">{v.driver}</td>
-                    <td className="py-3 px-3 text-white/85">{v.annual}</td>
-                    <td className="py-3 px-3 text-white/85">{v.pm}</td>
-                    <td className="py-3 px-3">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ${STATUS_PILL[v.status]}`}>
-                        {v.statusLabel}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link href="#" className="text-[12px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">
-                        Open →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-5 py-3 border-t border-[#1E3556] flex items-center justify-between text-[12px] text-white/55">
-            <span>Showing 10 of 67 vehicles</span>
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1 rounded border border-[#1E3556] hover:border-[#22D3EE]/40">‹</button>
-              <span className="text-white/80 font-semibold">1 / 7</span>
-              <button className="px-3 py-1 rounded border border-[#1E3556] hover:border-[#22D3EE]/40">›</button>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {(showAdd || edit) && <VehicleFormModal carrier_id={carrier!.id} vehicle={edit} onClose={() => { setShowAdd(false); setEdit(null); }} onSaved={() => { refresh(); setShowAdd(false); setEdit(null); }} />}
     </AppShell>
   );
+}
+
+function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_id: string; vehicle: Vehicle | null; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<Vehicle>>(vehicle || { status: "active", vehicle_type: "tractor" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function set<K extends keyof Vehicle>(k: K, v: string | number | null) {
+    setForm((prev) => ({ ...prev, [k]: v === "" ? null : v as Vehicle[K] }));
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setError(null);
+    try {
+      const sb = getSupabase();
+      const payload = { ...form, carrier_id };
+      if (vehicle?.id) {
+        const { error } = await sb.from("compass_vehicles").update(payload).eq("id", vehicle.id);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from("compass_vehicles").insert([payload]);
+        if (error) throw error;
+      }
+      onSaved();
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+
+  async function handleDelete() {
+    if (!vehicle?.id) return;
+    if (!confirm("Remove this vehicle? This cannot be undone.")) return;
+    setBusy(true);
+    const { error } = await getSupabase().from("compass_vehicles").delete().eq("id", vehicle.id);
+    if (error) { setError(error.message); setBusy(false); return; }
+    onSaved();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
+      <div className="bg-[#0F1C32] border border-[#1E3556] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[#1E3556] flex items-center justify-between sticky top-0 bg-[#0F1C32] z-10">
+          <h2 className="text-white font-extrabold text-lg">{vehicle ? `Edit ${vehicle.year || ""} ${vehicle.make || ""} ${vehicle.model || ""}` : "Add vehicle"}</h2>
+          <button onClick={onClose} className="text-white/55 hover:text-white text-xl">×</button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <Section title="Vehicle">
+            <Row>
+              <Field label="Year"><Input type="number" value={String(form.year||"")} onChange={(v)=>set("year", v?Number(v):null)} /></Field>
+              <Field label="Make"><Input value={form.make||""} onChange={(v)=>set("make",v)} /></Field>
+              <Field label="Model"><Input value={form.model||""} onChange={(v)=>set("model",v)} /></Field>
+            </Row>
+            <Row>
+              <Field label="VIN"><Input value={form.vin||""} onChange={(v)=>set("vin",v.toUpperCase())} maxLength={17} /></Field>
+              <Field label="Plate"><Input value={form.license_plate||""} onChange={(v)=>set("license_plate",v.toUpperCase())} /></Field>
+              <Field label="Plate state"><Input value={form.license_plate_state||""} onChange={(v)=>set("license_plate_state",v.toUpperCase())} maxLength={2} /></Field>
+            </Row>
+            <Row>
+              <Field label="Type"><Select value={form.vehicle_type||"tractor"} onChange={(v)=>set("vehicle_type",v)} options={VEHICLE_TYPES} /></Field>
+              <Field label="GVWR (lbs)"><Input type="number" value={String(form.gvwr_lbs||"")} onChange={(v)=>set("gvwr_lbs", v?Number(v):null)} /></Field>
+              <Field label="Fuel"><Input value={form.fuel_type||""} onChange={(v)=>set("fuel_type",v)} /></Field>
+            </Row>
+          </Section>
+
+          <Section title="Service & inspection">
+            <Row>
+              <Field label="Status"><Select value={form.status||"active"} onChange={(v)=>set("status",v)} options={STATUSES} /></Field>
+              <Field label="Odometer"><Input type="number" value={String(form.current_odometer||"")} onChange={(v)=>set("current_odometer", v?Number(v):null)} /></Field>
+              <Field label="In-service date"><Input type="date" value={form.in_service_date||""} onChange={(v)=>set("in_service_date",v)} /></Field>
+            </Row>
+            <Row>
+              <Field label="Last DOT inspection"><Input type="date" value={form.last_dot_inspection_on||""} onChange={(v)=>set("last_dot_inspection_on",v)} /></Field>
+              <Field label="Next DOT due"><Input type="date" value={form.next_dot_inspection_due||""} onChange={(v)=>set("next_dot_inspection_due",v)} /></Field>
+            </Row>
+          </Section>
+
+          {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+          <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[#0F1C32] py-2">
+            <div>{vehicle && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete vehicle</button>}</div>
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-white/65 hover:text-white text-sm border border-[#1E3556]">Cancel</button>
+              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : vehicle ? "Save changes" : "Add vehicle"}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return <div><div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">{title}</div><div className="space-y-2">{children}</div></div>;
+}
+function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-2 md:grid-cols-3 gap-3">{children}</div>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-white/55 font-bold mb-1">{label}</div>{children}</label>;
+}
+function Input(p: { value: string; onChange: (v: string)=>void; type?: string; maxLength?: number }) {
+  return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} maxLength={p.maxLength} className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />;
+}
+function Select({ value, onChange, options }: { value: string; onChange: (v: string)=>void; options: string[] }) {
+  return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")}</option>)}</select>;
 }

@@ -1,242 +1,87 @@
-import Link from "next/link";
+"use client";
+import { FormEvent, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
-import DataSourceCard from "@/components/DataSourceCard";
+import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
+import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
 
-type MVRStatus = "current" | "due" | "overdue" | "monitoring";
+type Mvr = { id:string; driver_id:string; pulled_on:string; state:string|null; result:string|null; violations_count:number|null; notes:string|null; file_url:string|null; source:string|null };
+const RESULTS = ["clean","minor","major","serious","disqualifying","pending","failed"];
+const COLOR: Record<string, "green"|"amber"|"red"|"violet"|"gray"|"cyan"> = { clean:"green", minor:"amber", major:"red", serious:"red", disqualifying:"red", pending:"cyan", failed:"red" };
 
-type MVR = {
-  driver: string;
-  initials: string;
-  state: string;
-  license: string;
-  pulled: string;
-  pulledBy: string;
-  points: number;
-  violations: number;
-  status: MVRStatus;
-  statusLabel: string;
-};
+export default function MvrPage() {
+  const { carrier } = useUser();
+  const drivers = useDrivers(carrier?.id);
+  const [rows, setRows] = useState<Mvr[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
 
-const MVR_DATA: MVR[] = [
-  { driver: "Jared Martinez",  initials: "JM", state: "TX", license: "TX-DL-8847291", pulled: "2026-04-18", pulledBy: "X3 staff",     points: 0, violations: 0, status: "current",    statusLabel: "Current · clean" },
-  { driver: "Ricardo Torres",  initials: "RT", state: "TX", license: "TX-DL-8901442", pulled: "2026-03-10", pulledBy: "Self-upload",  points: 2, violations: 1, status: "current",    statusLabel: "Current · 1 vio" },
-  { driver: "Sarah Johnson",   initials: "SJ", state: "AR", license: "AR-DL-7724913", pulled: "2025-05-11", pulledBy: "X3 staff",     points: 0, violations: 0, status: "overdue",    statusLabel: "3 days overdue" },
-  { driver: "Mike Kowalski",   initials: "MK", state: "OK", license: "OK-DL-3382711", pulled: "2026-02-22", pulledBy: "SambaSafety",  points: 0, violations: 0, status: "monitoring", statusLabel: "Continuous monitoring" },
-  { driver: "Emma Park",       initials: "EP", state: "NM", license: "NM-DL-5571220", pulled: "2025-12-08", pulledBy: "X3 staff",     points: 0, violations: 0, status: "current",    statusLabel: "5 mo · clean" },
-  { driver: "Diego Ramirez",   initials: "DR", state: "FL", license: "FL-DL-9982310", pulled: "2026-04-02", pulledBy: "X3 staff",     points: 1, violations: 1, status: "current",    statusLabel: "Current · 1 vio" },
-  { driver: "Alex Carter",     initials: "AC", state: "TX", license: "TX-DL-6710038", pulled: "2026-01-14", pulledBy: "X3 staff",     points: 0, violations: 0, status: "current",    statusLabel: "4 mo · clean" },
-  { driver: "Linda Wilson",    initials: "LW", state: "GA", license: "GA-DL-4471188", pulled: "2025-11-20", pulledBy: "X3 staff",     points: 4, violations: 2, status: "due",        statusLabel: "Due in 28d" },
-  { driver: "Raj Mehta",       initials: "RM", state: "CA", license: "CA-DL-3389002", pulled: "2026-04-29", pulledBy: "X3 staff",     points: 0, violations: 0, status: "current",    statusLabel: "Current · clean" },
-  { driver: "Kim Jackson",     initials: "KJ", state: "TN", license: "TN-DL-7892130", pulled: "2025-08-30", pulledBy: "X3 staff",     points: 6, violations: 3, status: "overdue",    statusLabel: "75d overdue · 6 pts" },
-];
-
-const STATUS_PILL: Record<MVRStatus, string> = {
-  current:    "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  due:        "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-  overdue:    "bg-rose-500/15 text-rose-300 border border-rose-500/30",
-  monitoring: "bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30",
-};
-
-const AVATAR_GRAD: Record<string, string> = {
-  JM: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-  RT: "linear-gradient(135deg, #8B5CF6, #22D3EE)",
-  SJ: "linear-gradient(135deg, #F59E0B, #EF4444)",
-  MK: "linear-gradient(135deg, #22D3EE, #10B981)",
-  EP: "linear-gradient(135deg, #EF4444, #8B5CF6)",
-  DR: "linear-gradient(135deg, #10B981, #22D3EE)",
-  AC: "linear-gradient(135deg, #FBBF24, #10B981)",
-  LW: "linear-gradient(135deg, #22D3EE, #F59E0B)",
-  RM: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-  KJ: "linear-gradient(135deg, #06B6D4, #3B82F6)",
-};
-
-export default function MVRPage() {
-  const overdue = MVR_DATA.filter(m => m.status === "overdue").length;
-  const due = MVR_DATA.filter(m => m.status === "due").length;
-  const monitoring = MVR_DATA.filter(m => m.status === "monitoring").length;
+  async function refresh() {
+    if (!carrier) return;
+    const { data } = await getSupabase().from("compass_mvr_records").select("*").eq("carrier_id", carrier.id).order("pulled_on",{ascending:false});
+    setRows((data as Mvr[]) || []); setLoading(false);
+  }
+  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
   return (
-    <AppShell
-      title="MVR Tracker"
-      crumbs="MVR BRAIN · 49 CFR § 391.25"
-      actions={
-        <>
-          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
-            ⬆ Upload MVR
-          </button>
-          <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-          >
-            + Order new MVR pull
-          </Link>
-        </>
-      }
-    >
-      <div className="px-6 py-8 space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="49 CFR § 391.25 + § 391.27"
-          what="Annual MVR pull + review for every CDL driver, with optional continuous monitoring for real-time conviction alerts. Tracks license class, points, violations, and disqualification risk."
-          who="Every motor carrier — § 391.25 requires an MVR review for every driver within 12 months of hire and every 12 months thereafter. Continuous monitoring is optional but recommended for high-risk fleets."
-          howTo={[
-            { n: 1, title: "Connect SambaSafety (continuous monitoring — preferred)", detail: "$4.95/driver/month gets you real-time alerts the moment a conviction posts to the state MVR. Compass routes the alert to your safety director for review + action." },
-            { n: 2, title: "Or use Foley / JJ Keller / Driver iQ", detail: "Bundle MVR + DQF management. Annual pulls automated. Slightly less responsive than SambaSafety for new convictions." },
-            { n: 3, title: "Or upload MVRs you've already pulled", detail: "State DMV-issued MVR PDF — Compass OCRs the document, extracts violations + class + endorsements, and updates the driver's record." },
-            { n: 4, title: "Manually log annual driver's certificate of violations", detail: "Per § 391.27, every driver must annually certify their violations. The form is in the DQ Files module — once signed, Compass cross-references against the MVR to flag discrepancies." },
+    <AppShell crumbs="MVR" title="MVR Tracker"
+      actions={<button onClick={() => setShowAdd(true)} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929] disabled:opacity-50" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Log MVR pull</button>}>
+      <div className="p-6">
+        <TenantTable<Mvr> rows={rows} loading={loading}
+          emptyTitle={drivers.length === 0 ? "Add drivers first" : "No MVR pulls yet"}
+          emptyDesc={drivers.length === 0 ? "MVR records attach to drivers." : "FMCSA § 391.25 requires annual MVR review. Log each pull here."}
+          columns={[
+            { key: "driver", label: "Driver", render: (m) => <span className="text-white">{driverLabel(drivers.find(d => d.id === m.driver_id))}</span> },
+            { key: "pulled_on", label: "Pulled", render: (m) => fmtDate(m.pulled_on) },
+            { key: "state", label: "State", hideOnMobile: true, render: (m) => m.state || <span className="text-white/35">—</span> },
+            { key: "result", label: "Result", render: (m) => m.result ? <Badge color={COLOR[m.result]||"gray"}>{m.result}</Badge> : <Badge color="gray">pending</Badge> },
+            { key: "violations_count", label: "Violations", hideOnMobile: true, render: (m) => m.violations_count ?? 0 },
+            { key: "file_url", label: "File", render: (m) => m.file_url ? <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
           ]}
-          weeklyHabits={["Review continuous-monitoring alerts from past 7 days — driver convictions, license suspensions, endorsement losses", "Run the annual review for drivers whose review is coming due in next 30 days"]}
-          auditTraps={["Annual review not done within 12 months of last review — § 391.25 — exact dates matter", "Driver's certificate of violations missing — § 391.27", "Multi-state CDL driver — MVR pulled from wrong state or only one state", "Disqualified driver still on roster (CDL suspended in state DMV but driver still showing active)"]}
-          askCompassLinks={[{ label: "Continuous MVR monitoring vs annual pull", query: "Continuous MVR monitoring vs annual pull" }, { label: "What violations disqualify a driver? (§ 391.15)", query: "What violations disqualify a driver" }, { label: "Multi-state CDL driver — what MVR do I pull?", query: "Multi-state CDL driver MVR" }]}
         />
-
-        {/* DATA SOURCE */}
-        <DataSourceCard
-          trackerLabel="Motor Vehicle Records"
-          cfr="49 CFR § 391.25 (annual review) + § 391.27"
-          initialStatus="connected"
-          connectedVendor="SambaSafety"
-          lastSync="3 days ago"
-          recordCount={72}
-          vendors={[
-            { name: "SambaSafety", blurb: "Continuous MVR monitoring · 50-state coverage", badge: "Recommended", status: "live", cost: "$4.95/driver/mo" },
-            { name: "Foley Carrier Services", blurb: "Annual + 6-month MVR pulls · packaged", badge: "API key", status: "live", cost: "$8/driver/mo" },
-            { name: "JJ Keller MVR Service", blurb: "Annual MVR + monitoring", status: "manual-pull", cost: "$6.50/driver/mo" },
-            { name: "HireRight DAC", blurb: "MVR + employment-history bundled", badge: "API key", status: "live", cost: "$12/driver/mo" },
-            { name: "Driver iQ", blurb: "MVR + DataQ history", badge: "API key", status: "live", cost: "$7/driver/mo" },
-            { name: "Direct state DMV portals", blurb: "Per-pull pricing · varies by state", status: "manual-pull", cost: "$3-25/pull" },
-          ]}
-          csvTemplate={{
-            name: "x3-compass-mvr-template.csv",
-            columns: ["driver_id", "cdl_number", "state", "pulled_date", "class", "points", "violations", "status"],
-          }}
-          manualLabel="Add MVR result"
-        />
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {[
-            { l: "Drivers tracked",          v: MVR_DATA.length, c: "#22D3EE" },
-            { l: "Continuous monitoring",    v: monitoring,      c: "#22D3EE" },
-            { l: "Due ≤ 30 days",            v: due,             c: "#FBBF24" },
-            { l: "Overdue",                  v: overdue,         c: "#F87171" },
-            { l: "Avg points across fleet",   v: "1.3",          c: "#FBBF24" },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-white/65 mb-1">{s.l}</div>
-              <div className="text-[26px] font-black leading-none" style={{ color: s.c }}>{s.v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Compass nudge */}
-        <div className="rounded-2xl p-5 border flex gap-4 items-start"
-          style={{
-            background: "linear-gradient(135deg, rgba(248, 113, 113, 0.10), rgba(15, 28, 50, 0.5))",
-            borderColor: "rgba(248, 113, 113, 0.40)",
-          }}
-        >
-          <div className="w-11 h-11 rounded-full grid place-items-center font-black text-[20px] text-[#0A1929] flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-          >
-            ∞
-          </div>
-          <div className="flex-1">
-            <div className="text-white font-bold text-[15px] mb-1">2 MVR reviews overdue · § 391.25</div>
-            <div className="text-[14px] text-white/85 leading-relaxed mb-3">
-              Federal regulation requires annual review of each driver&apos;s MVR. <strong className="text-white">Sarah Johnson</strong> is 3 days past her annual; <strong className="text-white">Kim Jackson</strong> is 75 days past hers and has accumulated 6 points (TN serious offense threshold is 12). I can pull both right now — $14 to Arkansas DMV, $9 to Tennessee.
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-              >
-                Pull both MVRs · $23 →
-              </button>
-              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-                Switch Kim to continuous monitoring
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Upgrade promo */}
-        <div className="rounded-2xl p-5 border border-[#22D3EE]/30 flex gap-4 items-start"
-          style={{ background: "linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(15, 28, 50, 0.5))" }}
-        >
-          <div className="text-[28px]">🔔</div>
-          <div className="flex-1">
-            <div className="text-white font-bold text-[15px] mb-1">
-              Stop pulling MVRs annually. <span className="text-[#22D3EE]">Continuously monitor.</span>
-            </div>
-            <div className="text-[14px] text-white/75 leading-relaxed mb-3">
-              SambaSafety integration: $4.95/driver/mo. The instant any state DMV updates a driver&apos;s record — violation, suspension, license-status change — you get notified. No more annual blind spots. Currently active for <strong className="text-white">1 driver</strong>.
-            </div>
-            <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-            >
-              Enroll all 72 drivers · $356/mo
-            </button>
-          </div>
-        </div>
-
-        {/* MVR table */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-5 py-4 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-[16px] font-extrabold text-white">Annual MVR review log</h3>
-            <span className="text-[12px] font-mono text-[#22D3EE]/80">§ 391.25 · per driver · per state</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[14px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[11px] tracking-[.14em] uppercase font-extrabold text-white/60">
-                  <th className="py-3 px-4">Driver</th>
-                  <th className="py-3 px-3">State / License</th>
-                  <th className="py-3 px-3">Last pulled</th>
-                  <th className="py-3 px-3">Pulled by</th>
-                  <th className="py-3 px-3 text-center">Points</th>
-                  <th className="py-3 px-3 text-center">Vio</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {MVR_DATA.map((m, i) => (
-                  <tr key={i} className="hover:bg-[#22D3EE]/5 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full grid place-items-center font-bold text-[11px] text-[#0A1929] flex-shrink-0"
-                          style={{ background: AVATAR_GRAD[m.initials] }}
-                        >
-                          {m.initials}
-                        </div>
-                        <span className="text-white font-semibold">{m.driver}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="text-white font-bold">{m.state}</span>
-                      <div className="text-[11px] text-white/55 font-mono">{m.license}</div>
-                    </td>
-                    <td className="py-3 px-3 text-white/90">{m.pulled}</td>
-                    <td className="py-3 px-3 text-white/75 text-[13px]">{m.pulledBy}</td>
-                    <td className="py-3 px-3 text-center">
-                      <span className={`font-bold tabular-nums ${m.points >= 4 ? "text-amber-300" : m.points >= 6 ? "text-rose-300" : "text-white/80"}`}>{m.points}</span>
-                    </td>
-                    <td className="py-3 px-3 text-center text-white/85 tabular-nums">{m.violations}</td>
-                    <td className="py-3 px-3">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${STATUS_PILL[m.status]}`}>
-                        {m.statusLabel}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link href="#" className="text-[13px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Open →</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
+      {showAdd && <MvrFormModal carrier_id={carrier!.id} drivers={drivers} onClose={()=>setShowAdd(false)} onSaved={()=>{refresh();setShowAdd(false);}} />}
     </AppShell>
+  );
+}
+
+function MvrFormModal({ carrier_id, drivers, onClose, onSaved }:{ carrier_id:string; drivers:DriverOpt[]; onClose:()=>void; onSaved:()=>void }) {
+  const [form, setForm] = useState<Partial<Mvr>>({ pulled_on: new Date().toISOString().slice(0,10), result: "pending", violations_count: 0 });
+  const [busy, setBusy] = useState(false); const [error, setError] = useState<string|null>(null);
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setError(null);
+    try {
+      if (!form.driver_id) throw new Error("Select a driver");
+      const { error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]);
+      if (error) throw error;
+      // Also update driver.last_mvr_pulled_on
+      await getSupabase().from("compass_drivers").update({ last_mvr_pulled_on: form.pulled_on }).eq("id", form.driver_id);
+      onSaved();
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+  return (
+    <Modal title="Log MVR pull" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <Field label="Driver *">
+          <select required value={form.driver_id||""} onChange={(e)=>setForm({...form,driver_id:e.target.value})} className="x3i">
+            <option value="">Select…</option>
+            {drivers.map(d => <option key={d.id} value={d.id}>{driverLabel(d)}</option>)}
+          </select>
+        </Field>
+        <Field label="Pulled on"><input type="date" className="x3i" value={form.pulled_on||""} onChange={(e)=>setForm({...form,pulled_on:e.target.value})} required /></Field>
+        <Field label="State"><input className="x3i" value={form.state||""} onChange={(e)=>setForm({...form,state:e.target.value.toUpperCase()})} maxLength={2} /></Field>
+        <Field label="Result">
+          <select value={form.result||""} onChange={(e)=>setForm({...form,result:e.target.value})} className="x3i">{RESULTS.map(r => <option key={r} value={r}>{r}</option>)}</select>
+        </Field>
+        <Field label="Violation count"><input type="number" min={0} className="x3i" value={String(form.violations_count||0)} onChange={(e)=>setForm({...form,violations_count:Number(e.target.value)})} /></Field>
+        <Field label="File URL"><input type="url" className="x3i" value={form.file_url||""} onChange={(e)=>setForm({...form,file_url:e.target.value})} /></Field>
+        <Field label="Notes"><textarea className="x3i" rows={2} value={form.notes||""} onChange={(e)=>setForm({...form,notes:e.target.value})} /></Field>
+        {error && <Err msg={error} />}
+        <ModalActions onClose={onClose} busy={busy} />
+      </form>
+    </Modal>
   );
 }

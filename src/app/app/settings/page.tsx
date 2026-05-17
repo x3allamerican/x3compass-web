@@ -1,277 +1,143 @@
+"use client";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
-const TEAM = [
-  { initials: "JK", name: "Joshua Kovarik",   email: "joshua@x3compass.com",  role: "Owner",      lastSeen: "Active now" },
-  { initials: "RT", name: "Ricardo Torres",   email: "ricardo@apexlogistics.com", role: "Driver", lastSeen: "2 hr ago" },
-  { initials: "DM", name: "Dana Mitchell",    email: "dana@apexlogistics.com",    role: "Dispatcher", lastSeen: "Yesterday" },
-  { initials: "BR", name: "Brad Reynolds",    email: "brad@apexlogistics.com",    role: "Safety", lastSeen: "Mar 18" },
-];
-
-const ROLE_COLOR: Record<string, string> = {
-  Owner: "bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30",
-  Driver: "bg-slate-500/15 text-slate-300 border border-slate-500/30",
-  Dispatcher: "bg-violet-500/15 text-violet-300 border border-violet-500/30",
-  Safety: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  Billing: "bg-amber-500/15 text-amber-300 border border-amber-500/30",
+type CarrierFull = {
+  id: string; name: string;
+  usdot_number: string | null; mc_number: string | null;
+  legal_entity: string | null; ein: string | null;
+  primary_contact_email: string | null; primary_contact_phone: string | null;
+  street_address: string | null; city: string | null; state: string | null; zip: string | null;
+  power_units_count: number | null; drivers_count: number | null;
+  service_tier: string; hazmat_addon: boolean; subscription_status: string;
+  trial_ends_at: string | null; current_period_end: string | null;
 };
 
-const NOTIFICATIONS = [
-  { evt: "DQ document expires in 30/14/7 days",    cfr: "§ 391.51",   email: true,  sms: false, app: true,  daily: true },
-  { evt: "Med cert expires in 30/14/7 days",        cfr: "§ 391.43",   email: true,  sms: true,  app: true,  daily: true },
-  { evt: "Annual MVR review due",                   cfr: "§ 391.25",   email: true,  sms: false, app: true,  daily: true },
-  { evt: "Clearinghouse annual query due",          cfr: "§ 382.701",  email: true,  sms: false, app: true,  daily: true },
-  { evt: "Roadside inspection logged (any)",        cfr: "§ 396.9",    email: true,  sms: true,  app: true,  daily: false },
-  { evt: "Inspection flagged as contestable",       cfr: "Part 386",   email: true,  sms: true,  app: true,  daily: false },
-  { evt: "HOS BASIC percentile crosses threshold",  cfr: "Part 385",   email: true,  sms: false, app: true,  daily: false },
-  { evt: "Accident logged",                          cfr: "§ 390.15",   email: true,  sms: true,  app: true,  daily: false },
-  { evt: "Random D&A selection due",                 cfr: "§ 382.305",  email: true,  sms: false, app: true,  daily: false },
-  { evt: "ELD malfunction detected",                 cfr: "§ 395.20",   email: false, sms: true,  app: true,  daily: false },
-];
-
-const Pill = ({ on }: { on: boolean }) => (
-  <span className={`inline-flex items-center justify-center w-10 h-6 rounded-full ${on ? "bg-[#22D3EE]/15" : "bg-white/5"} border ${on ? "border-[#22D3EE]/40" : "border-white/10"}`}>
-    <span className={`w-4 h-4 rounded-full transition-transform ${on ? "translate-x-2 bg-[#22D3EE]" : "-translate-x-2 bg-white/30"}`} />
-  </span>
-);
-
 export default function SettingsPage() {
+  const { user, carrier, refresh: refreshUser, signOut } = useUser();
+  const [form, setForm] = useState<Partial<CarrierFull>>({});
+  const [loading, setLoading] = useState(true);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!carrier) return;
+    (async () => {
+      const { data } = await getSupabase().from("compass_carriers").select("*").eq("id", carrier.id).single();
+      if (data) setForm(data);
+      setLoading(false);
+    })();
+  }, [carrier]);
+
+  function set<K extends keyof CarrierFull>(k: K, v: string | number | boolean | null) {
+    setForm((p) => ({ ...p, [k]: v === "" ? null : v as CarrierFull[K] }));
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!carrier) return;
+    setBusy(true); setError(null);
+    try {
+      const { error } = await getSupabase().from("compass_carriers").update({
+        name: form.name, usdot_number: form.usdot_number, mc_number: form.mc_number,
+        legal_entity: form.legal_entity, ein: form.ein,
+        primary_contact_email: form.primary_contact_email, primary_contact_phone: form.primary_contact_phone,
+        street_address: form.street_address, city: form.city, state: form.state, zip: form.zip,
+        power_units_count: form.power_units_count, drivers_count: form.drivers_count,
+      }).eq("id", carrier.id);
+      if (error) throw error;
+      setSavedAt(Date.now());
+      await refreshUser();
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+
+  if (loading) return <AppShell title="Settings"><div className="p-6 text-white/55">Loading…</div></AppShell>;
+
   return (
-    <AppShell title="Settings" crumbs="ACCOUNT · WORKSPACE & TEAM">
-      <div className="px-6 py-8 max-w-6xl mx-auto space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="Carrier configuration · no specific CFR"
-          what="Your carrier identity, billing, notification preferences, integrations, team seats, and Compass behavior settings."
-          who="Carrier admins. Most settings are one-time setup; you'll come back occasionally to add a new integration or adjust notification rules."
-          howTo={[
-            { n: 1, title: "Fill out carrier profile", detail: "Carrier name, DOT#, MC#, operating authority, fleet size, primary terminal address. Used in audit packets and all generated documents." },
-            { n: 2, title: "Connect integrations", detail: "Centralized view of every vendor integration — ELDs, fuel cards, MVR services, drug-testing labs, payroll. OAuth or API-key flow per integration." },
-            { n: 3, title: "Configure notifications", detail: "Per-event rules: who gets notified when (CSA score change, expiration warnings, OOS events, positive D&A tests). Email + SMS routing." },
-            { n: 4, title: "Invite your team", detail: "Add safety director, dispatcher, fleet manager roles. Each has different access — safety has DQF + D&A; dispatcher has HOS; etc." },
-          ]}
-          askCompassLinks={[
-            { label: "How do I add a team member?", query: "How do I add a team member" },
-            { label: "Which integrations should I connect first?", query: "Which integrations should I connect first" },
-          ]}
-        />
-
-        {/* TABS */}
-        <div className="flex gap-1 p-1 rounded-lg bg-[#15233D] border border-[#1E3556] w-fit">
-          {["Carrier profile", "Team", "Notifications", "API & Integrations", "Billing"].map((t, i) => (
-            <button
-              key={i}
-              className={`px-4 py-2 rounded-md text-[13px] font-bold ${
-                i === 0
-                  ? "bg-[#22D3EE]/15 text-[#22D3EE]"
-                  : "text-white/65 hover:text-white"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        {/* CARRIER PROFILE */}
-        <div className="rounded-2xl p-6 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-            <h3 className="text-[16px] font-extrabold text-white">Carrier profile</h3>
-            <span className="text-[10px] font-mono text-[#22D3EE]/70">FMCSA REGISTRATION</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {[
-              { label: "Legal name", value: "Apex Logistics LLC", help: "Per DOT registration" },
-              { label: "DOT #",     value: "8001247",            help: "USDOT decal number" },
-              { label: "MC #",      value: "MC-1098432",         help: "Motor Carrier authority" },
-              { label: "EIN",       value: "84-3392851",         help: "Federal Employer ID" },
-              { label: "Principal place of business", value: "1240 Logistics Way, Houston, TX 77032", help: "" },
-              { label: "Operating authority",  value: "Authorized to operate as Common Carrier (Property)", help: "" },
-              { label: "Hazmat-registered",    value: "Yes · DOT Hazmat ID 062118-091X", help: "EPA Hazmat registration" },
-              { label: "Insurance · BIPD",     value: "$1,000,000 / $5,000,000 · Sentry Insurance", help: "Carrier liability" },
-            ].map((f, i) => (
-              <div key={i}>
-                <label className="block text-[11px] tracking-wider uppercase font-bold text-white/55 mb-1.5">{f.label}</label>
-                <input
-                  type="text"
-                  defaultValue={f.value}
-                  className="w-full bg-[#0A1929] border border-[#1E3556] rounded-lg px-3 py-2.5 text-[13.5px] text-white focus:border-[#22D3EE] focus:outline-none focus:ring-2 focus:ring-[#22D3EE]/20"
-                />
-                {f.help && <div className="text-[11px] text-white/45 mt-1">{f.help}</div>}
+    <AppShell crumbs="SETTINGS" title="Settings">
+      <div className="p-6 max-w-3xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Account banner */}
+          <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+            <div className="text-[10px] tracking-[.16em] uppercase text-white/55 font-bold mb-3">Account</div>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <div className="text-white font-bold">{user?.email}</div>
+                <div className="text-[12px] text-white/55">Owner · {(form.service_tier||"diy").toUpperCase()} {form.hazmat_addon ? "+ Hazmat" : ""} · <span className="text-[#22D3EE]">{form.subscription_status}</span>
+                {form.trial_ends_at && form.subscription_status === "trialing" && <> · trial ends {new Date(form.trial_ends_at).toLocaleDateString()}</>}</div>
               </div>
-            ))}
-          </div>
-          <div className="mt-6 flex gap-2">
-            <button className="px-5 py-2.5 rounded-full text-[13px] font-bold text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-            >
-              Save changes
-            </button>
-            <button className="px-5 py-2.5 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-              Discard
-            </button>
-          </div>
-        </div>
-
-        {/* TEAM */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-6 py-5 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h3 className="text-[16px] font-extrabold text-white">Team members</h3>
-              <p className="text-[13px] text-white/55 mt-0.5">Unlimited seats on every plan. Each member has their own login.</p>
-            </div>
-            <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-            >
-              + Invite member
-            </button>
-          </div>
-          <div className="divide-y divide-[#1E3556]">
-            {TEAM.map((m, i) => (
-              <div key={i} className="px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full grid place-items-center font-extrabold text-[11px] text-[#0A1929] flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-                  >
-                    {m.initials}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-white font-bold truncate">{m.name}</div>
-                    <div className="text-white/55 text-[12px] truncate">{m.email}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${ROLE_COLOR[m.role]}`}>{m.role}</span>
-                  <span className="text-[11px] text-white/45">{m.lastSeen}</span>
-                  <button className="text-[12px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Edit</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* NOTIFICATIONS */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-6 py-5 border-b border-[#1E3556]">
-            <h3 className="text-[16px] font-extrabold text-white">Notification rules</h3>
-            <p className="text-[13px] text-white/55 mt-0.5">Per-event control. Daily digest aggregates everything marked “digest” at 7am.</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[10px] tracking-[.14em] uppercase font-bold text-white/45">
-                  <th className="py-3 px-6">Event</th>
-                  <th className="py-3 px-3">CFR</th>
-                  <th className="py-3 px-3 text-center">Email</th>
-                  <th className="py-3 px-3 text-center">SMS</th>
-                  <th className="py-3 px-3 text-center">In-app</th>
-                  <th className="py-3 px-3 text-center">Daily digest</th>
-                  <th className="py-3 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {NOTIFICATIONS.map((n, i) => (
-                  <tr key={i} className="hover:bg-[#22D3EE]/5">
-                    <td className="py-3 px-6 text-white/90 font-semibold">{n.evt}</td>
-                    <td className="py-3 px-3 font-mono text-[11px] text-[#22D3EE]/80">{n.cfr}</td>
-                    <td className="py-3 px-3 text-center"><Pill on={n.email} /></td>
-                    <td className="py-3 px-3 text-center"><Pill on={n.sms} /></td>
-                    <td className="py-3 px-3 text-center"><Pill on={n.app} /></td>
-                    <td className="py-3 px-3 text-center"><Pill on={n.daily} /></td>
-                    <td className="py-3 px-6 text-right text-[12px]">
-                      <button className="text-[#22D3EE] font-bold hover:text-[#67E8F9]">Test send</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* API & INTEGRATIONS */}
-        <div className="rounded-2xl p-6 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <h3 className="text-[16px] font-extrabold text-white mb-4">API & data integrations</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[11px] tracking-wider uppercase font-bold text-white/55 mb-1.5">Endpoint URL</label>
               <div className="flex gap-2">
-                <code className="flex-1 bg-[#0A1929] border border-[#1E3556] rounded-lg px-3 py-2.5 text-[13px] font-mono text-[#22D3EE]">
-                  https://api.x3compass.com/v1/ingest
-                </code>
-                <button className="px-3 py-2.5 rounded-lg text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">Copy</button>
+                <Link href="/app/settings/billing" className="px-3 py-2 rounded-lg text-[12px] font-bold text-[#22D3EE] border border-[#1E3556] hover:border-[#22D3EE]">Manage billing</Link>
+                <button type="button" onClick={signOut} className="px-3 py-2 rounded-lg text-[12px] font-bold text-white/65 hover:text-white border border-[#1E3556]">Sign out</button>
               </div>
-            </div>
-            <div>
-              <label className="block text-[11px] tracking-wider uppercase font-bold text-white/55 mb-1.5">API key</label>
-              <div className="flex gap-2">
-                <code className="flex-1 bg-[#0A1929] border border-[#1E3556] rounded-lg px-3 py-2.5 text-[13px] font-mono text-white/85">
-                  cmpss_live_••••••••••••••••••••••3pK9
-                </code>
-                <button className="px-3 py-2.5 rounded-lg text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">Reveal</button>
-                <button className="px-3 py-2.5 rounded-lg text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">Rotate</button>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
-              <a href="#" className="rounded-xl p-4 bg-[#0A1929] border border-[#1E3556] hover:border-[#22D3EE]/40">
-                <div className="text-[20px] mb-2">📄</div>
-                <div className="text-[13px] font-bold text-white mb-1">API docs</div>
-                <div className="text-[11px] text-white/55">Endpoints, schemas, examples</div>
-              </a>
-              <a href="#" className="rounded-xl p-4 bg-[#0A1929] border border-[#1E3556] hover:border-[#22D3EE]/40">
-                <div className="text-[20px] mb-2">📥</div>
-                <div className="text-[13px] font-bold text-white mb-1">CSV templates</div>
-                <div className="text-[11px] text-white/55">Drivers, vehicles, inspections, D&A</div>
-              </a>
-              <a href="#" className="rounded-xl p-4 bg-[#0A1929] border border-[#1E3556] hover:border-[#22D3EE]/40">
-                <div className="text-[20px] mb-2">🔔</div>
-                <div className="text-[13px] font-bold text-white mb-1">Webhooks</div>
-                <div className="text-[11px] text-white/55">Subscribe to events from X3</div>
-              </a>
             </div>
           </div>
-        </div>
 
-        {/* BILLING */}
-        <div className="rounded-2xl p-6 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-            <h3 className="text-[16px] font-extrabold text-white">Plan & billing</h3>
-            <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30">
-              DIY · Compass AI · 72 drivers
-            </span>
+          {/* Company info */}
+          <Block title="Company info">
+            <Row><Field label="Company name *"><Input value={form.name||""} onChange={(v)=>set("name",v)} required /></Field></Row>
+            <Row>
+              <Field label="USDOT #"><Input value={form.usdot_number||""} onChange={(v)=>set("usdot_number",v)} /></Field>
+              <Field label="MC #"><Input value={form.mc_number||""} onChange={(v)=>set("mc_number",v)} /></Field>
+            </Row>
+            <Row>
+              <Field label="Legal entity"><Input value={form.legal_entity||""} onChange={(v)=>set("legal_entity",v)} /></Field>
+              <Field label="EIN"><Input value={form.ein||""} onChange={(v)=>set("ein",v)} /></Field>
+            </Row>
+          </Block>
+
+          <Block title="Primary contact">
+            <Row>
+              <Field label="Email"><Input type="email" value={form.primary_contact_email||""} onChange={(v)=>set("primary_contact_email",v)} /></Field>
+              <Field label="Phone"><Input value={form.primary_contact_phone||""} onChange={(v)=>set("primary_contact_phone",v)} /></Field>
+            </Row>
+          </Block>
+
+          <Block title="Principal address">
+            <Row><Field label="Street"><Input value={form.street_address||""} onChange={(v)=>set("street_address",v)} /></Field></Row>
+            <Row>
+              <Field label="City"><Input value={form.city||""} onChange={(v)=>set("city",v)} /></Field>
+              <Field label="State"><Input value={form.state||""} onChange={(v)=>set("state",v)} maxLength={2} /></Field>
+              <Field label="ZIP"><Input value={form.zip||""} onChange={(v)=>set("zip",v)} /></Field>
+            </Row>
+          </Block>
+
+          <Block title="Fleet stats">
+            <Row>
+              <Field label="Power units"><Input type="number" value={String(form.power_units_count||"")} onChange={(v)=>set("power_units_count", v?Number(v):0)} /></Field>
+              <Field label="Drivers"><Input type="number" value={String(form.drivers_count||"")} onChange={(v)=>set("drivers_count", v?Number(v):0)} /></Field>
+            </Row>
+          </Block>
+
+          {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+          {savedAt && Date.now() - savedAt < 4000 && <div className="text-[12px] text-emerald-300 bg-emerald-900/20 border border-emerald-700/40 rounded-lg px-3 py-2">✓ Saved</div>}
+          <div className="flex gap-3">
+            <button type="submit" disabled={busy} className="px-5 py-2.5 rounded-lg font-extrabold text-sm text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : "Save changes"}</button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-            <div>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-1">Current plan</div>
-              <div className="text-[18px] font-extrabold text-white">DIY · $25/driver</div>
-              <div className="text-[12px] text-white/55">$1,800 / mo at 72 drivers</div>
-            </div>
-            <div>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-1">Add-ons</div>
-              <div className="text-[18px] font-extrabold text-white">Hazmat · $99/mo</div>
-              <div className="text-[12px] text-white/55">Placard Wizard + 100 hazmat skills</div>
-            </div>
-            <div>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-1">Next invoice</div>
-              <div className="text-[18px] font-extrabold text-white">$1,899 · Jun 14</div>
-              <div className="text-[12px] text-white/55">Visa ending 4421</div>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>
-              Upgrade to DFY · $50/driver
-            </button>
-            <button className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-              View invoices
-            </button>
-            <button className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-              Update payment
-            </button>
-            <Link href="/#pricing" className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-              Compare plans
-            </Link>
-          </div>
-        </div>
+        </form>
       </div>
     </AppShell>
   );
+}
+
+function Block({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+      <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-3">{title}</div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-1 md:grid-cols-3 gap-3">{children}</div>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-white/55 font-bold mb-1">{label}</div>{children}</label>;
+}
+function Input(p: { value: string; onChange: (v: string)=>void; type?: string; required?: boolean; maxLength?: number }) {
+  return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} required={p.required} maxLength={p.maxLength}
+    className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />;
 }

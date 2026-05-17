@@ -1,222 +1,84 @@
-import Link from "next/link";
+"use client";
+import { FormEvent, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
-import DataSourceCard from "@/components/DataSourceCard";
+import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
-type ReturnStatus = "Filed" | "Ready to submit" | "Awaiting data" | "Overdue";
+type F = { id:string; quarter:string; filed_on:string|null; total_miles:number|null; total_gallons:number|null; net_tax_due:number|null; status:string; filing_state:string|null; receipt_url:string|null; notes:string|null };
+const STATUSES = ["draft","filed","accepted","rejected","amended"];
+const SC: Record<string,"gray"|"cyan"|"green"|"red"|"amber"> = { draft:"gray", filed:"cyan", accepted:"green", rejected:"red", amended:"amber" };
 
-const RETURNS = [
-  { quarter: "Q1 2026",  due: "2026-04-30", filed: "2026-04-22", taxOwed: "$3,847.20",   refund: "—",         status: "Filed" as ReturnStatus },
-  { quarter: "Q4 2025",  due: "2026-01-31", filed: "2026-01-18", taxOwed: "$2,914.55",   refund: "—",         status: "Filed" as ReturnStatus },
-  { quarter: "Q3 2025",  due: "2025-10-31", filed: "2025-10-12", taxOwed: "—",            refund: "$412.30",    status: "Filed" as ReturnStatus },
-  { quarter: "Q2 2025",  due: "2025-07-31", filed: "2025-07-08", taxOwed: "$3,128.40",   refund: "—",         status: "Filed" as ReturnStatus },
-  { quarter: "Q2 2026",  due: "2026-07-31", filed: "—",          taxOwed: "$2,184.10 (est)", refund: "—",         status: "Awaiting data" as ReturnStatus },
-];
+export default function IftaPage() {
+  const { carrier } = useUser();
+  const [rows, setRows] = useState<F[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
 
-const STATE_BREAKDOWN = [
-  { state: "TX", name: "Texas",       miles: 38127, gallons: 5732, tax: "$1,089.08", net: "$281.04 owed" },
-  { state: "OK", name: "Oklahoma",    miles: 12442, gallons: 1908, tax: "$324.36",   net: "$87.94 owed" },
-  { state: "AR", name: "Arkansas",    miles: 8211,  gallons: 1234, tax: "$284.82",   net: "$58.21 owed" },
-  { state: "NM", name: "New Mexico",  miles: 9908,  gallons: 1530, tax: "$321.30",   net: "$31.45 owed" },
-  { state: "FL", name: "Florida",     miles: 14217, gallons: 2168, tax: "$735.92",   net: "$112.40 owed" },
-  { state: "GA", name: "Georgia",     miles: 5642,  gallons: 850,  tax: "$272.85",   net: "$24.92 refund" },
-  { state: "CA", name: "California",  miles: 4128,  gallons: 624,  tax: "$501.18",   net: "$118.41 refund" },
-  { state: "TN", name: "Tennessee",   miles: 3992,  gallons: 612,  tax: "$170.13",   net: "$8.67 owed" },
-];
+  async function refresh() {
+    if (!carrier) return;
+    const { data } = await getSupabase().from("compass_ifta_filings").select("*").eq("carrier_id", carrier.id).order("quarter",{ascending:false});
+    setRows((data as F[]) || []); setLoading(false);
+  }
+  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
-const STATUS_PILL: Record<ReturnStatus, string> = {
-  Filed:             "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  "Ready to submit": "bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30",
-  "Awaiting data":   "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-  Overdue:           "bg-rose-500/15 text-rose-300 border border-rose-500/30",
-};
-
-export default function IFTAPage() {
   return (
-    <AppShell
-      title="IFTA Concierge"
-      crumbs="FUEL TAX · IFTA · UCR § 367"
-      actions={
-        <>
-          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
-            ⬆ Import fuel + trip data
-          </button>
-          <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-          >
-            File current quarter →
-          </Link>
-        </>
-      }
-    >
-      <div className="px-6 py-8 space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="IFTA Articles of Agreement"
-          what="Quarterly IFTA fuel-tax return prep: state-by-state mileage from your ELD or trip sheets, fuel purchases from fuel cards, automatic tax owed / refund calculation."
-          who="Any motor carrier with a CMV that crosses state lines and exceeds the 26,000-lb GVW threshold. Required quarterly, due 30 days after each quarter ends."
-          howTo={[
-            { n: 1, title: "Connect your fuel card (WEX, Comdata, EFS, Fleet One)", detail: "OAuth/API pulls every fuel transaction with state + amount automatically. Combined with miles from your ELD, this is the fully-automated path." },
-            { n: 2, title: "Connect your ELD for state-by-state mileage", detail: "Motive / Samsara / Geotab — Compass extracts state-crossings from GPS data and computes state-by-state miles per quarter." },
-            { n: 3, title: "Or upload fuel + mileage CSVs", detail: "Two templates: fuel transactions (date, state, gallons, cost) and mileage by state (date, vehicle, miles per state). Useful if you do paper trip sheets." },
-            { n: 4, title: "Compass generates the quarterly return", detail: "Pre-built quarterly return ready for review. Variance flags compare to prior quarters. Direct e-file to base state (when state portal supports it) or printable PDF." },
+    <AppShell crumbs="IFTA" title="IFTA Filings"
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ New filing</button>}>
+      <div className="p-6">
+        <div className="mb-4 text-[12px] text-white/55">International Fuel Tax Agreement quarterly returns. Due Apr 30 (Q1), Jul 31 (Q2), Oct 31 (Q3), Jan 31 (Q4).</div>
+        <TenantTable<F> rows={rows} loading={loading}
+          emptyTitle="No filings yet"
+          emptyDesc="Start tracking IFTA returns. Connect your ELD to auto-populate miles & gallons (coming next sprint)."
+          columns={[
+            { key: "quarter", label: "Quarter", render: (f) => <span className="text-white font-semibold">{f.quarter}</span> },
+            { key: "status", label: "Status", render: (f) => <Badge color={SC[f.status]||"gray"}>{f.status}</Badge> },
+            { key: "filed_on", label: "Filed", render: (f) => fmtDate(f.filed_on) || <span className="text-white/35">—</span> },
+            { key: "total_miles", label: "Miles", hideOnMobile: true, render: (f) => f.total_miles ? f.total_miles.toLocaleString() : <span className="text-white/35">—</span> },
+            { key: "total_gallons", label: "Gallons", hideOnMobile: true, render: (f) => f.total_gallons ? f.total_gallons.toLocaleString() : <span className="text-white/35">—</span> },
+            { key: "net_tax_due", label: "Net tax", render: (f) => f.net_tax_due !== null && f.net_tax_due !== undefined ? `$${Number(f.net_tax_due).toLocaleString(undefined,{minimumFractionDigits:2})}` : <span className="text-white/35">—</span> },
+            { key: "receipt_url", label: "Receipt", render: (f) => f.receipt_url ? <a href={f.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">View</a> : <span className="text-white/35">—</span> },
           ]}
-          weeklyHabits={["Quick weekly fuel-vs-miles sanity check — Compass flags anomalies", "Late in Q4: review Q1 reconciliation to confirm payment was applied correctly"]}
-          auditTraps={["Mileage from ELD vs odometer mismatch — IFTA auditors look for this", "Fuel receipts double-counted or missing", "Personal-use miles included in IFTA reporting", "Late filing penalties (returns due 30 days after quarter)"]}
-          askCompassLinks={[{ label: "How do I file IFTA quarterly?", query: "How do I file IFTA quarterly" }, { label: "IFTA audit preparation — what records do I produce?", query: "IFTA audit preparation" }, { label: "IFTA mileage by state calculation", query: "IFTA mileage by state calculation" }]}
         />
-
-        {/* DATA SOURCE */}
-        <DataSourceCard
-          trackerLabel="IFTA fuel + miles"
-          cfr="International Fuel Tax Agreement (IFTA Articles)"
-          initialStatus="imported"
-          lastSync="yesterday"
-          recordCount={1248}
-          vendors={[
-            { name: "WEX Fleet (fuel card)", blurb: "Auto-pull every fuel transaction with state + amount", badge: "Recommended", status: "live", cost: "Included with WEX" },
-            { name: "Comdata Fuel", blurb: "Auto-pull fuel transactions", badge: "API key", status: "live", cost: "Included" },
-            { name: "EFS (Electronic Funds Source)", blurb: "Daily fuel transaction sync", badge: "API key", status: "live", cost: "Included" },
-            { name: "Fleet One Edge", blurb: "Auto-pull fuel + cash advances", badge: "API key", status: "live", cost: "Included" },
-            { name: "Motive miles", blurb: "Auto-pull state-by-state mileage from ELD", badge: "OAuth", status: "live", cost: "Included with Motive" },
-            { name: "Samsara miles", blurb: "Auto-pull state-by-state mileage from ELD", badge: "OAuth", status: "live", cost: "Included with Samsara" },
-          ]}
-          csvTemplate={{
-            name: "x3-compass-ifta-template.csv",
-            columns: ["trip_id", "date", "vehicle_id", "start_state", "end_state", "miles", "gallons", "fuel_cost", "fuel_state", "jurisdiction_miles_json"],
-          }}
-          manualLabel="Add fuel/miles entry"
-        />
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {[
-            { l: "Current quarter",       v: "Q2 '26",      c: "#22D3EE" },
-            { l: "Filing due",             v: "Jul 31",     c: "#22D3EE" },
-            { l: "Est. tax owed",          v: "$2,184",     c: "#FBBF24" },
-            { l: "Jurisdictions",          v: "8 states",   c: "#22D3EE" },
-            { l: "Avg MPG · fleet",        v: "6.65",       c: "#10B981" },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-white/65 mb-1">{s.l}</div>
-              <div className="text-[26px] font-black leading-none" style={{ color: s.c }}>{s.v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Compass nudge */}
-        <div className="rounded-2xl p-5 border flex gap-4 items-start"
-          style={{
-            background: "linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(15, 28, 50, 0.5))",
-            borderColor: "rgba(34, 211, 238, 0.35)",
-          }}
-        >
-          <div className="w-11 h-11 rounded-full grid place-items-center font-black text-[20px] text-[#0A1929] flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-          >
-            ∞
-          </div>
-          <div className="flex-1">
-            <div className="text-white font-bold text-[15px] mb-1">Q2 2026 is 75% complete · 47 days until filing due</div>
-            <div className="text-[14px] text-white/85 leading-relaxed mb-3">
-              You have <strong className="text-white">96,667 miles</strong> logged across <strong className="text-white">8 jurisdictions</strong> and <strong className="text-white">14,658 gallons</strong> of fuel purchases. Compass projects <strong className="text-amber-300">$2,184.10</strong> tax owed, primarily to Texas ($281) and California ($118 refund). Drop in your remaining ELD data and I&apos;ll have a ready-to-submit return on July 1.
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-[#0A1929]"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-              >
-                Sync ELD mileage now →
-              </button>
-              <button className="px-4 py-2 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-                Upload fuel-card CSV
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Quarter-by-quarter */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-5 py-4 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-[16px] font-extrabold text-white">Quarterly filing history</h3>
-            <span className="text-[12px] font-mono text-[#22D3EE]/80">IFTA · 4 years retention</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[14px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[11px] tracking-[.14em] uppercase font-extrabold text-white/60">
-                  <th className="py-3 px-4">Quarter</th>
-                  <th className="py-3 px-3">Due</th>
-                  <th className="py-3 px-3">Filed</th>
-                  <th className="py-3 px-3">Tax owed</th>
-                  <th className="py-3 px-3">Refund</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {RETURNS.map((r, i) => (
-                  <tr key={i} className="hover:bg-[#22D3EE]/5 transition-colors">
-                    <td className="py-3 px-4 text-white font-bold">{r.quarter}</td>
-                    <td className="py-3 px-3 text-white/90">{r.due}</td>
-                    <td className="py-3 px-3 text-white/85">{r.filed}</td>
-                    <td className="py-3 px-3 text-white/90 tabular-nums">{r.taxOwed}</td>
-                    <td className="py-3 px-3 text-emerald-300 tabular-nums">{r.refund}</td>
-                    <td className="py-3 px-3">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${STATUS_PILL[r.status]}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link href="#" className="text-[13px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Open →</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* State breakdown */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-5 py-4 border-b border-[#1E3556]">
-            <h3 className="text-[16px] font-extrabold text-white">Q2 2026 · jurisdiction breakdown</h3>
-            <p className="text-[13px] text-white/65 mt-0.5">Mileage and fuel auto-segmented from your ELD trip log + fuel card data.</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[14px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[11px] tracking-[.14em] uppercase font-extrabold text-white/60">
-                  <th className="py-3 px-4">State</th>
-                  <th className="py-3 px-3 text-right">Miles</th>
-                  <th className="py-3 px-3 text-right">Gallons</th>
-                  <th className="py-3 px-3 text-right">Tax due</th>
-                  <th className="py-3 px-3 text-right">Net (owed / refund)</th>
-                  <th className="py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {STATE_BREAKDOWN.map((s) => (
-                  <tr key={s.state} className="hover:bg-[#22D3EE]/5 transition-colors">
-                    <td className="py-3 px-4 flex items-center gap-2.5">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#22D3EE]/15 text-[#22D3EE] font-bold text-[12px]">
-                        {s.state}
-                      </span>
-                      <span className="text-white">{s.name}</span>
-                    </td>
-                    <td className="py-3 px-3 text-white/90 text-right tabular-nums">{s.miles.toLocaleString()}</td>
-                    <td className="py-3 px-3 text-white/85 text-right tabular-nums">{s.gallons.toLocaleString()}</td>
-                    <td className="py-3 px-3 text-white/90 text-right tabular-nums">{s.tax}</td>
-                    <td className={`py-3 px-3 text-right font-bold tabular-nums ${s.net.includes("refund") ? "text-emerald-300" : "text-amber-300"}`}>{s.net}</td>
-                    <td className="py-3 px-4 text-right">
-                      <Link href="#" className="text-[13px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Detail →</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
+      {showAdd && <IftaFormModal carrier_id={carrier!.id} onClose={()=>setShowAdd(false)} onSaved={()=>{refresh();setShowAdd(false);}} />}
     </AppShell>
+  );
+}
+
+function IftaFormModal({ carrier_id, onClose, onSaved }:{ carrier_id:string; onClose:()=>void; onSaved:()=>void }) {
+  const y = new Date().getFullYear();
+  const q = Math.ceil((new Date().getMonth() + 1) / 3);
+  const [form, setForm] = useState<Partial<F>>({ quarter: `${y}-Q${q}`, status: "draft" });
+  const [busy, setBusy] = useState(false); const [error, setError] = useState<string|null>(null);
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setError(null);
+    try {
+      if (!form.quarter) throw new Error("Quarter required");
+      const { error } = await getSupabase().from("compass_ifta_filings").insert([{ ...form, carrier_id }]);
+      if (error) throw error;
+      onSaved();
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+  return (
+    <Modal title="New IFTA filing" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <Field label="Quarter (e.g. 2026-Q2) *"><input className="x3i" required value={form.quarter||""} onChange={(e)=>setForm({...form,quarter:e.target.value})} placeholder="2026-Q2" /></Field>
+        <Field label="Status"><select className="x3i" value={form.status||"draft"} onChange={(e)=>setForm({...form,status:e.target.value})}>{STATUSES.map(s=><option key={s}>{s}</option>)}</select></Field>
+        <Field label="Filed on"><input type="date" className="x3i" value={form.filed_on||""} onChange={(e)=>setForm({...form,filed_on:e.target.value})} /></Field>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Total miles"><input type="number" className="x3i" value={String(form.total_miles||"")} onChange={(e)=>setForm({...form,total_miles:e.target.value?Number(e.target.value):null})} /></Field>
+          <Field label="Total gallons"><input type="number" className="x3i" value={String(form.total_gallons||"")} onChange={(e)=>setForm({...form,total_gallons:e.target.value?Number(e.target.value):null})} /></Field>
+        </div>
+        <Field label="Net tax due ($)"><input type="number" step="0.01" className="x3i" value={String(form.net_tax_due||"")} onChange={(e)=>setForm({...form,net_tax_due:e.target.value?Number(e.target.value):null})} /></Field>
+        <Field label="Filing state"><input className="x3i" maxLength={2} value={form.filing_state||""} onChange={(e)=>setForm({...form,filing_state:e.target.value.toUpperCase()})} /></Field>
+        <Field label="Receipt URL"><input type="url" className="x3i" value={form.receipt_url||""} onChange={(e)=>setForm({...form,receipt_url:e.target.value})} /></Field>
+        <Field label="Notes"><textarea className="x3i" rows={2} value={form.notes||""} onChange={(e)=>setForm({...form,notes:e.target.value})} /></Field>
+        {error && <Err msg={error} />}
+        <ModalActions onClose={onClose} busy={busy} />
+      </form>
+    </Modal>
   );
 }

@@ -1,162 +1,86 @@
-import Link from "next/link";
+"use client";
+import { FormEvent, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
+import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
-const SECTIONS = [
-  { key: "drivers",   label: "Driver Qualification Files", cfr: "§ 391.51",     count: "72 drivers · 864 docs",         size: "184 MB", on: true },
-  { key: "med",       label: "Medical Certificates",        cfr: "§ 391.43",     count: "72 certs · 3-year history",     size: "42 MB",  on: true },
-  { key: "mvr",       label: "MVR Annual Reviews",          cfr: "§ 391.25",     count: "72 reviews · 3-year history",   size: "28 MB",  on: true },
-  { key: "da",        label: "Drug & Alcohol Test History",  cfr: "Part 382",    count: "184 tests · 3-year history",    size: "76 MB",  on: true },
-  { key: "ch",        label: "Clearinghouse Queries",       cfr: "§ 382.701",    count: "248 queries · 3-year history",  size: "12 MB",  on: true },
-  { key: "training",  label: "Training Records",            cfr: "Part 380",     count: "72 drivers · 412 certs",        size: "58 MB",  on: true },
-  { key: "vehicles",  label: "Vehicle Inventory & PM",      cfr: "Part 396",     count: "67 units · maint history",      size: "92 MB",  on: true },
-  { key: "annual",    label: "Annual DOT Inspections",      cfr: "§ 396.17",     count: "67 units · 3-year history",     size: "44 MB",  on: true },
-  { key: "insp",      label: "Roadside Inspections",        cfr: "§ 396.9",      count: "118 inspections · 3 years",     size: "32 MB",  on: true },
-  { key: "incidents", label: "Accident Register",           cfr: "§ 390.15",     count: "5 accidents · 3 years",         size: "18 MB",  on: true },
-  { key: "hazmat",    label: "Hazmat Records",              cfr: "Part 172",     count: "Security plan, training, ER",   size: "6 MB",   on: false },
-  { key: "ifta",      label: "IFTA Quarterly Returns",      cfr: "IFTA",         count: "12 quarters",                   size: "8 MB",   on: false },
-];
-
-const RECENT_EXPORTS = [
-  { id: "EXP-0024", name: "Q1 2026 audit bundle · full fleet",     when: "2026-04-12", size: "476 MB", actor: "Joshua Kovarik" },
-  { id: "EXP-0021", name: "Sarah Johnson · driver-only packet",     when: "2026-03-28", size: "12 MB",  actor: "Joshua Kovarik" },
-  { id: "EXP-0019", name: "Texas roadside inspection year",         when: "2026-02-15", size: "84 MB",  actor: "Brad Reynolds" },
-];
+type E = { id:string; exported_on:string; scope:string|null; date_range_start:string|null; date_range_end:string|null; status:string; packet_url:string|null; size_bytes:number|null };
+const SC: Record<string,"cyan"|"green"|"red"|"gray"|"amber"> = { queued:"amber", generating:"cyan", ready:"green", failed:"red", expired:"gray" };
 
 export default function AuditExportPage() {
+  const { carrier } = useUser();
+  const [rows, setRows] = useState<E[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+
+  async function refresh() {
+    if (!carrier) return;
+    const { data } = await getSupabase().from("compass_audit_exports").select("*").eq("carrier_id", carrier.id).order("exported_on",{ascending:false});
+    setRows((data as E[]) || []); setLoading(false);
+  }
+  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
+
   return (
-    <AppShell title="Audit Export" crumbs="ADVANCED · ONE-CLICK DOT BUNDLE">
-      <div className="px-6 py-8 max-w-6xl mx-auto space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="FMCSA Audit Procedures"
-          what="One-click audit packet — every document FMCSA expects during a Compliance Review or Safety Audit, organized by topic and ready to hand to the auditor."
-          who="Every carrier expecting an FMCSA visit (Compliance Review, Off-Site Investigation, or new-entrant Safety Audit). Also useful for insurance underwriting reviews and proactive mock audits."
-          howTo={[
-            { n: 1, title: "Click 'Generate Audit Packet'", detail: "Compass compiles everything: driver lists, DQ files (PDF per driver), HOS records (RODS by date), vehicle records, D&A history, accident register, insurance, operating authority." },
-            { n: 2, title: "Choose your date range + scope", detail: "Past 12 months (typical Compliance Review scope), past 6 months (Off-Site), or past 24 months (deep dive). Specific driver/vehicle samples or full fleet." },
-            { n: 3, title: "Download the ZIP — properly named + indexed", detail: "All PDFs with consistent naming (yyyymmdd-type-driver/vehicle). Index file explaining the structure. Audit-ready." },
-            { n: 4, title: "Or share via secure link to the auditor", detail: "FMCSA accepts electronic submission. Generate a time-limited link the auditor can download from — no email size limits." },
-          ]}
-          weeklyHabits={["Generate a mock audit packet monthly — confirm everything you'd need is producible quickly", "Address any gaps Compass flags during packet generation"]}
-          auditTraps={["Missing prior-employer inquiry responses — Compass flags these before the packet ships", "Expired medical certificates included as 'current' — Compass cross-references dates", "Disorganized PDFs that auditors can't navigate easily — Compass standardizes the structure"]}
-          askCompassLinks={[
-            { label: "I just got a Compliance Review notice — what now?", query: "Compliance Review notice" },
-            { label: "Audit document production best practices", query: "Audit document production best practices" },
-            { label: "New-entrant safety audit preparation", query: "New entrant safety audit preparation" },
+    <AppShell crumbs="AUDIT EXPORT" title="Audit Packet Generator"
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Generate packet</button>}>
+      <div className="p-6">
+        <div className="mb-4 rounded-xl border border-[#1E3556] bg-[#0F1C32] p-5">
+          <div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">What this does</div>
+          <p className="text-white/65 text-sm leading-relaxed">
+            Bundles drivers, DQ documents, MVRs, drug & alcohol test results, training records, accidents, and roadside inspections into a single DOT audit-ready ZIP. Use for FMCSA Compliance Reviews, insurance underwriting, or M&amp;A due diligence.
+          </p>
+        </div>
+        <TenantTable<E> rows={rows} loading={loading}
+          emptyTitle="No exports yet"
+          emptyDesc="Generate your first audit packet — covers all data in your account, all dates by default."
+          columns={[
+            { key: "exported_on", label: "Generated", render: (e) => new Date(e.exported_on).toLocaleString() },
+            { key: "scope", label: "Scope", render: (e) => e.scope || <Badge color="cyan">full</Badge> },
+            { key: "range", label: "Date range", hideOnMobile: true, render: (e) => e.date_range_start ? `${fmtDate(e.date_range_start)} → ${fmtDate(e.date_range_end)||"now"}` : "all time" },
+            { key: "status", label: "Status", render: (e) => <Badge color={SC[e.status]||"gray"}>{e.status}</Badge> },
+            { key: "size_bytes", label: "Size", hideOnMobile: true, render: (e) => e.size_bytes ? `${Math.round(e.size_bytes/1024)} KB` : <span className="text-white/35">—</span> },
+            { key: "packet_url", label: "Download", render: (e) => e.packet_url ? <a href={e.packet_url} target="_blank" rel="noopener noreferrer" className="text-[#22D3EE] underline">ZIP</a> : <span className="text-white/35">pending</span> },
           ]}
         />
-
-        {/* Hero */}
-        <div
-          className="rounded-2xl p-8 relative overflow-hidden border border-[#22D3EE]/30"
-          style={{ background: "linear-gradient(135deg, #15233D 0%, #0F1C32 100%)" }}
-        >
-          <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full blur-3xl pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(34, 211, 238, 0.22), transparent 70%)" }}
-          />
-          <div className="relative flex items-center gap-6 flex-wrap">
-            <div className="text-[56px]">📄</div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-[28px] font-extrabold text-white tracking-tight mb-1">
-                Walk into your DOT audit with{" "}
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>a single USB drive.</span>
-              </h2>
-              <p className="text-[15px] text-white/75 max-w-2xl">
-                One click. Every required record, every CFR-cited document, every retention window — indexed, watermarked, page-numbered. The bundle is the audit-readiness story.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Builder */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-6 py-5 border-b border-[#1E3556]">
-            <h3 className="text-[16px] font-extrabold text-white">Build your audit bundle</h3>
-            <p className="text-[13px] text-white/55 mt-0.5">Toggle sections to include. Estimated size + page count update live.</p>
-          </div>
-          <div className="divide-y divide-[#1E3556]">
-            {SECTIONS.map((s) => (
-              <label
-                key={s.key}
-                className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-[#22D3EE]/5 cursor-pointer"
-              >
-                <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <span className={`inline-flex items-center justify-center w-10 h-6 rounded-full ${s.on ? "bg-[#22D3EE]/15" : "bg-white/5"} border ${s.on ? "border-[#22D3EE]/40" : "border-white/10"}`}>
-                    <span className={`w-4 h-4 rounded-full ${s.on ? "translate-x-2 bg-[#22D3EE]" : "-translate-x-2 bg-white/30"}`} />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="text-white font-bold">{s.label}</div>
-                    <div className="text-[11px] text-white/55 mt-0.5 flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-[#22D3EE]/80">{s.cfr}</span>
-                      <span>·</span>
-                      <span>{s.count}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-[12px] text-white/55 tabular-nums">{s.size}</div>
-              </label>
-            ))}
-          </div>
-          <div className="px-6 py-5 border-t border-[#1E3556] bg-[#0A1929]/60">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="space-y-1">
-                <div className="text-[12px] text-white/55">Estimated bundle</div>
-                <div className="text-[20px] font-extrabold text-white">476 MB · ~3,840 pages</div>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <button className="px-4 py-2.5 rounded-full text-[13px] font-bold text-white border border-white/20 hover:bg-white/5">
-                  Preview index
-                </button>
-                <button
-                  className="px-5 py-2.5 rounded-full text-[14px] font-bold text-[#0A1929]"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-                >
-                  📄 Generate bundle →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { label: "Audit window", value: "Last 36 months", help: "Match the FMCSA review period" },
-            { label: "Filter drivers", value: "All 72 drivers", help: "Or pick specific names" },
-            { label: "Output format", value: "Single indexed PDF + ZIP", help: "Watermarked, page-numbered" },
-          ].map((f, i) => (
-            <div key={i} className="rounded-2xl p-5 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/55 mb-1.5">{f.label}</div>
-              <div className="text-white font-bold mb-1">{f.value}</div>
-              <div className="text-[11px] text-white/55">{f.help}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent exports */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-6 py-5 border-b border-[#1E3556] flex items-center justify-between">
-            <h3 className="text-[16px] font-extrabold text-white">Recent exports</h3>
-            <span className="text-[11px] font-mono text-[#22D3EE]/70">Retention: 12 months</span>
-          </div>
-          <div className="divide-y divide-[#1E3556]">
-            {RECENT_EXPORTS.map((r, i) => (
-              <div key={i} className="px-6 py-3.5 flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                  <div className="text-white font-bold">{r.name}</div>
-                  <div className="text-[11px] text-white/55 font-mono">{r.id} · generated by {r.actor}</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[12px] text-white/55">{r.when}</span>
-                  <span className="text-[12px] text-white/55 tabular-nums">{r.size}</span>
-                  <button className="text-[12px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">Download →</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
+      {showAdd && <ExportFormModal carrier_id={carrier!.id} onClose={()=>setShowAdd(false)} onSaved={()=>{refresh();setShowAdd(false);}} />}
     </AppShell>
+  );
+}
+
+function ExportFormModal({ carrier_id, onClose, onSaved }:{ carrier_id:string; onClose:()=>void; onSaved:()=>void }) {
+  const [form, setForm] = useState<Partial<E>>({ scope: "full" });
+  const [busy, setBusy] = useState(false); const [error, setError] = useState<string|null>(null);
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setError(null);
+    try {
+      const { error } = await getSupabase().from("compass_audit_exports").insert([{ ...form, carrier_id, status: "queued" }]);
+      if (error) throw error;
+      onSaved();
+    } catch (err) { setError(err instanceof Error ? err.message : "Queue failed"); }
+    finally { setBusy(false); }
+  }
+  return (
+    <Modal title="Generate audit packet" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <Field label="Scope">
+          <select className="x3i" value={form.scope||"full"} onChange={(e)=>setForm({...form,scope:e.target.value})}>
+            <option value="full">Full audit (recommended)</option>
+            <option value="dq_files_only">DQ Files only</option>
+            <option value="drug_alcohol_only">Drug & Alcohol only</option>
+            <option value="csa_only">CSA / Inspections / Accidents only</option>
+          </select>
+        </Field>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="From"><input type="date" className="x3i" value={form.date_range_start||""} onChange={(e)=>setForm({...form,date_range_start:e.target.value})} /></Field>
+          <Field label="To"><input type="date" className="x3i" value={form.date_range_end||""} onChange={(e)=>setForm({...form,date_range_end:e.target.value})} /></Field>
+        </div>
+        <p className="text-[11px] text-white/55">Leaving dates blank = all-time. Packet generation is queued; you&apos;ll see status update to <strong>ready</strong> when the ZIP is downloadable.</p>
+        {error && <Err msg={error} />}
+        <ModalActions onClose={onClose} busy={busy} submitLabel="Queue export" />
+      </form>
+    </Modal>
   );
 }

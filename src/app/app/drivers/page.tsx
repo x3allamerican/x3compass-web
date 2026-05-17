@@ -1,259 +1,225 @@
-import Link from "next/link";
+"use client";
+import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
-import PageGuide from "@/components/PageGuide";
-import DataSourceCard from "@/components/DataSourceCard";
-
-type DriverStatus = "clean" | "warn" | "expired";
+import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
 type Driver = {
-  id: string;
-  name: string;
-  initials: string;
-  cdl: string;
-  cdlClass: string;
-  home: string;
-  cdlExpiry: string;
-  medExpiry: string;
-  mvrLast: string;
-  lastSeen: string;
-  status: DriverStatus;
-  statusLabel: string;
-  flags: number;
+  id: string; carrier_id: string;
+  first_name: string; middle_name: string | null; last_name: string;
+  email: string | null; phone: string | null;
+  cdl_state: string | null; cdl_number: string | null;
+  cdl_class: string | null; cdl_expires_on: string | null;
+  hire_date: string | null; termination_date: string | null;
+  status: string;
+  medical_card_expires_on: string | null;
+  last_mvr_pulled_on: string | null;
+  last_drug_test_on: string | null;
+  bg_check_status: string | null;
+  created_at: string;
 };
 
-const DRIVERS: Driver[] = [
-  { id: "jmartinez",  name: "Jared Martinez",   initials: "JM", cdl: "TX-DL-8847291",  cdlClass: "A · H · X", home: "Houston, TX",    cdlExpiry: "2027-08-14", medExpiry: "2026-11-02", mvrLast: "2026-04-18", lastSeen: "12 min ago",  status: "clean",   statusLabel: "Clean",          flags: 0 },
-  { id: "rtorres",    name: "Ricardo Torres",   initials: "RT", cdl: "TX-DL-8901442",  cdlClass: "A · N",     home: "Dallas, TX",     cdlExpiry: "2027-02-19", medExpiry: "2026-05-28", mvrLast: "2026-03-10", lastSeen: "2 hr ago",    status: "warn",    statusLabel: "Med cert · 14d", flags: 3 },
-  { id: "sjohnson",   name: "Sarah Johnson",    initials: "SJ", cdl: "AR-DL-7724913",  cdlClass: "A",         home: "Little Rock, AR",cdlExpiry: "2028-03-22", medExpiry: "2027-01-09", mvrLast: "2025-05-11", lastSeen: "Yesterday",   status: "expired", statusLabel: "MVR · overdue 3d", flags: 1 },
-  { id: "mkowalski",  name: "Mike Kowalski",    initials: "MK", cdl: "OK-DL-3382711",  cdlClass: "A · H",     home: "Tulsa, OK",      cdlExpiry: "2026-06-08", medExpiry: "2026-09-14", mvrLast: "2026-02-22", lastSeen: "Just now",    status: "clean",   statusLabel: "Clean",          flags: 0 },
-  { id: "epark",      name: "Emma Park",        initials: "EP", cdl: "NM-DL-5571220",  cdlClass: "A",         home: "Las Cruces, NM", cdlExpiry: "2027-11-30", medExpiry: "2027-03-04", mvrLast: "2025-12-08", lastSeen: "4 hr ago",    status: "warn",    statusLabel: "Training · due", flags: 1 },
-  { id: "dramirez",   name: "Diego Ramirez",    initials: "DR", cdl: "FL-DL-9982310",  cdlClass: "A · X",     home: "Miami, FL",      cdlExpiry: "2028-01-15", medExpiry: "2026-12-19", mvrLast: "2026-04-02", lastSeen: "30 min ago",  status: "clean",   statusLabel: "Clean",          flags: 0 },
-  { id: "acarter",    name: "Alex Carter",      initials: "AC", cdl: "TX-DL-6710038",  cdlClass: "B",         home: "El Paso, TX",    cdlExpiry: "2027-05-11", medExpiry: "2026-10-25", mvrLast: "2026-01-14", lastSeen: "5 hr ago",    status: "clean",   statusLabel: "Clean",          flags: 0 },
-  { id: "lwilson",    name: "Linda Wilson",     initials: "LW", cdl: "GA-DL-4471188",  cdlClass: "A · N",     home: "Atlanta, GA",    cdlExpiry: "2028-09-02", medExpiry: "2026-07-30", mvrLast: "2025-11-20", lastSeen: "Yesterday",   status: "warn",    statusLabel: "MVR · 60d",      flags: 0 },
-  { id: "rmehta",     name: "Raj Mehta",        initials: "RM", cdl: "CA-DL-3389002",  cdlClass: "A · H · X", home: "Long Beach, CA", cdlExpiry: "2027-07-14", medExpiry: "2026-08-21", mvrLast: "2026-04-29", lastSeen: "12 min ago",  status: "clean",   statusLabel: "Clean",          flags: 0 },
-  { id: "kjackson",   name: "Kim Jackson",      initials: "KJ", cdl: "TN-DL-7892130",  cdlClass: "A",         home: "Memphis, TN",    cdlExpiry: "2026-04-22", medExpiry: "2026-06-15", mvrLast: "2025-08-30", lastSeen: "2 days ago",  status: "expired", statusLabel: "CDL · expired",  flags: 2 },
-];
-
-const STATUS_PILL: Record<DriverStatus, string> = {
-  clean:   "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  warn:    "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-  expired: "bg-rose-500/15 text-rose-300 border border-rose-500/30",
+const STATUS_COLORS: Record<string, "green" | "amber" | "red" | "gray" | "violet"> = {
+  active: "green", pending_hire: "amber", inactive: "gray", on_leave: "violet", terminated: "red",
 };
-
-const AVATAR_GRAD: Record<string, string> = {
-  JM: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-  RT: "linear-gradient(135deg, #8B5CF6, #22D3EE)",
-  SJ: "linear-gradient(135deg, #F59E0B, #EF4444)",
-  MK: "linear-gradient(135deg, #22D3EE, #10B981)",
-  EP: "linear-gradient(135deg, #EF4444, #8B5CF6)",
-  DR: "linear-gradient(135deg, #10B981, #22D3EE)",
-  AC: "linear-gradient(135deg, #FBBF24, #10B981)",
-  LW: "linear-gradient(135deg, #22D3EE, #F59E0B)",
-  RM: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-  KJ: "linear-gradient(135deg, #06B6D4, #3B82F6)",
-};
+const CDL_CLASSES = ["A", "B", "C", "none"];
+const STATUSES = ["active", "pending_hire", "on_leave", "inactive", "terminated"];
 
 export default function DriversPage() {
-  const total = DRIVERS.length;
-  const clean = DRIVERS.filter(d => d.status === "clean").length;
-  const warn = DRIVERS.filter(d => d.status === "warn").length;
-  const expired = DRIVERS.filter(d => d.status === "expired").length;
+  const { carrier } = useUser();
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [editDriver, setEditDriver] = useState<Driver | null>(null);
+
+  async function refresh() {
+    if (!carrier) return;
+    setLoading(true);
+    const { data, error } = await getSupabase().from("compass_drivers")
+      .select("*").eq("carrier_id", carrier.id).order("last_name", { ascending: true });
+    if (!error) setDrivers((data as Driver[]) || []);
+    setLoading(false);
+  }
+  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return drivers.filter(d => {
+      if (statusFilter && d.status !== statusFilter) return false;
+      if (!q) return true;
+      return `${d.first_name} ${d.last_name} ${d.cdl_number} ${d.email}`.toLowerCase().includes(q);
+    });
+  }, [drivers, search, statusFilter]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const in60 = new Date(Date.now() + 60*86400000).toISOString().slice(0, 10);
+  const isExpiring = (d?: string | null) => !!(d && d >= today && d <= in60);
+  const isExpired = (d?: string | null) => !!(d && d < today);
 
   return (
-    <AppShell
-      title="Drivers"
-      crumbs="MAIN · DQ FILES BRAIN · 49 CFR § 391"
-      actions={
-        <>
-          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
-            ⬆ Import CSV
-          </button>
-          <Link
-            href="#"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
-          >
-            + Add driver
-          </Link>
-        </>
-      }
-    >
-      <div className="px-6 py-8 space-y-6">
-        {/* HOW THIS PAGE WORKS */}
-        <PageGuide
-          cfr="49 CFR § 391.51"
-          what="Your roster of every driver, with CDL status, qualifications, license expiration, and a one-glance compliance health score per driver."
-          who="Every motor carrier — this is the spine of your DQF program. New entrants must build it during the first 90 days of operation. Established carriers should maintain it continuously."
-          howTo={[
-            { n: 1, title: "Sync from your ATS / HR (Tenstreet, Gusto, Rippling)", detail: "If you already manage applicants in Tenstreet or payroll in Gusto, OAuth pulls the driver roster automatically. Daily sync keeps it current as you onboard/terminate." },
-            { n: 2, title: "Or upload your driver list CSV", detail: "Use the X3 drivers template: name, CDL #, CDL state, class, expiration, hire date, status. Compass cross-checks each driver against MVR + Clearinghouse + DQF presence." },
-            { n: 3, title: "Or add drivers one at a time", detail: "+ Add driver — useful when you bring on a single new hire or run a small fleet of 1-5. Same data, same compliance score." },
-            { n: 4, title: "Each driver becomes a profile", detail: "Click any driver to see their DQF status (which of the 12 § 391.51 documents are present), MVR history, training completions, recent inspections, and any open compliance flags." },
+    <AppShell crumbs="DRIVERS" title="Drivers"
+      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add driver</button>}>
+      <div className="p-6">
+        {/* Filter bar */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <input
+            value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, CDL #, email…"
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]"
+          />
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm">
+            <option value="">All statuses</option>
+            {STATUSES.map(s => <option key={s} value={s}>{s.replace("_"," ")}</option>)}
+          </select>
+          <div className="text-[12px] text-white/55">{filtered.length} of {drivers.length}</div>
+        </div>
+
+        <TenantTable<Driver>
+          rows={filtered} loading={loading}
+          emptyTitle={drivers.length ? "No matches" : "No drivers yet"}
+          emptyDesc={drivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
+          emptyAction={drivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>+ Add first driver</button> : undefined}
+          onRowClick={(d) => setEditDriver(d)}
+          columns={[
+            { key: "name", label: "Driver", render: (d) =>
+              <div>
+                <div className="text-white font-semibold">{d.last_name}, {d.first_name}</div>
+                <div className="text-[11px] text-white/55">{d.email || d.phone || "—"}</div>
+              </div> },
+            { key: "cdl", label: "CDL", hideOnMobile: true, render: (d) =>
+              d.cdl_number ? <div><div className="text-white">{d.cdl_state} · {d.cdl_class}</div><div className="text-[11px] text-white/55">{d.cdl_number}</div></div> : <span className="text-white/35">—</span> },
+            { key: "cdl_expires_on", label: "CDL expires", hideOnMobile: true, render: (d) =>
+              !d.cdl_expires_on ? <span className="text-white/35">—</span> :
+              isExpired(d.cdl_expires_on) ? <Badge color="red">{fmtDate(d.cdl_expires_on)}</Badge> :
+              isExpiring(d.cdl_expires_on) ? <Badge color="amber">{fmtDate(d.cdl_expires_on)}</Badge> :
+              <span className="text-white/85">{fmtDate(d.cdl_expires_on)}</span> },
+            { key: "medical_card_expires_on", label: "Medical", hideOnMobile: true, render: (d) =>
+              !d.medical_card_expires_on ? <span className="text-white/35">—</span> :
+              isExpired(d.medical_card_expires_on) ? <Badge color="red">{fmtDate(d.medical_card_expires_on)}</Badge> :
+              isExpiring(d.medical_card_expires_on) ? <Badge color="amber">{fmtDate(d.medical_card_expires_on)}</Badge> :
+              <span className="text-white/85">{fmtDate(d.medical_card_expires_on)}</span> },
+            { key: "status", label: "Status", render: (d) => <Badge color={STATUS_COLORS[d.status] || "gray"}>{d.status.replace("_"," ")}</Badge> },
           ]}
-          weeklyHabits={["Review drivers flagged 'action needed' — those have an expiring CDL, medical, or annual review within 30 days", "Confirm all new hires from the past week have a complete pre-employment workflow (PSP query, prior-employer inquiry, MVR, drug test)"]}
-          auditTraps={["Drivers in your CRM/payroll that don't have a DQF — auditors compare your roster against your DQ files", "Drivers showing as active but with an expired medical card — § 391.45 violation if they drove", "Terminated drivers whose records were destroyed too early (3-year retention after termination per § 391.51)"]}
-          askCompassLinks={[{ label: "What's required in a DQF? (§ 391.51)", query: "What's required in a DQF" }, { label: "Personnel file vs DQ file — what goes where?", query: "Personnel file vs DQ file what goes where" }, { label: "Re-up DQF for returning driver after 18 months", query: "Returning driver DQF re-qualification" }]}
         />
-
-        {/* DATA SOURCE */}
-        <DataSourceCard
-          trackerLabel="Drivers"
-          cfr="49 CFR § 391.51"
-          initialStatus="imported"
-          lastSync="12 min ago"
-          recordCount={72}
-          vendors={[
-            { name: "Tenstreet", blurb: "Driver applicant + roster sync (most used in motor carriage)", badge: "Recommended", status: "live", cost: "Included with Tenstreet" },
-            { name: "Drive My Way", blurb: "ATS export · daily roster sync", badge: "API key", status: "live", cost: "Included" },
-            { name: "Gusto", blurb: "HR system roster sync · DOT-tagged employees only", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Rippling", blurb: "HR system roster sync", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Paycom", blurb: "Payroll roster export", status: "manual-pull", cost: "$0.10/driver/mo" },
-            { name: "ADP RUN", blurb: "Daily roster sync", status: "manual-pull", cost: "$0.10/driver/mo" },
-          ]}
-          csvTemplate={{
-            name: "x3-compass-drivers-template.csv",
-            columns: ["first_name", "last_name", "cdl_number", "cdl_state", "cdl_class", "cdl_expires", "dob", "hire_date", "status"],
-          }}
-          manualLabel="Add driver"
-        />
-
-        {/* Stat strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { l: "Total drivers", v: total,   c: "#22D3EE" },
-            { l: "Clean",          v: clean,   c: "#10B981" },
-            { l: "Action needed",  v: warn,    c: "#FBBF24" },
-            { l: "Overdue / expired", v: expired, c: "#F87171" },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-white/50 mb-1">{s.l}</div>
-              <div className="text-[28px] font-black leading-none" style={{ color: s.c }}>{s.v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Search + filter row */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex-1 min-w-[240px] relative">
-            <input
-              type="search"
-              placeholder="Search drivers by name, CDL #, or state…"
-              className="w-full bg-[#15233D] border border-[#1E3556] rounded-full pl-10 pr-4 py-2.5 text-[14px] text-white placeholder:text-white/40 focus:border-[#22D3EE] focus:outline-none focus:ring-2 focus:ring-[#22D3EE]/20"
-            />
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-[14px]">🔍</span>
-          </div>
-          {["All 10", "Active 8", "OTR 5", "Regional 3", "Hazmat-endorsed 4"].map((f, i) => (
-            <button
-              key={i}
-              className={`text-[12px] font-semibold px-3 py-2 rounded-full border ${
-                i === 0
-                  ? "bg-[#22D3EE]/15 border-[#22D3EE]/40 text-[#22D3EE]"
-                  : "border-[#1E3556] text-white/70 hover:border-[#22D3EE]/40 hover:text-white"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {/* Drivers table */}
-        <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
-          <div className="px-5 py-4 border-b border-[#1E3556] flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-[15px] font-extrabold text-white">Driver roster</h3>
-            <span className="text-[11px] font-mono text-[#22D3EE]/70">49 CFR § 391.51</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead className="bg-[#0F1C32]/60">
-                <tr className="text-left text-[10px] tracking-[.14em] uppercase font-bold text-white/45">
-                  <th className="py-3 px-4">Driver</th>
-                  <th className="py-3 px-3">CDL #</th>
-                  <th className="py-3 px-3">Class</th>
-                  <th className="py-3 px-3">CDL expires</th>
-                  <th className="py-3 px-3">Med expires</th>
-                  <th className="py-3 px-3">MVR last</th>
-                  <th className="py-3 px-3">Last seen</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3556]">
-                {DRIVERS.map((d) => (
-                  <tr key={d.id} className="hover:bg-[#22D3EE]/5 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-9 h-9 rounded-full grid place-items-center font-extrabold text-[12px] text-[#0A1929] flex-shrink-0"
-                          style={{ background: AVATAR_GRAD[d.initials] }}
-                        >
-                          {d.initials}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-bold text-white truncate">{d.name}</div>
-                          <div className="text-white/45 text-[11px]">{d.home}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 font-mono text-white/80 text-[12px]">{d.cdl}</td>
-                    <td className="py-3 px-3 text-white/80">{d.cdlClass}</td>
-                    <td className="py-3 px-3 text-white/80">{d.cdlExpiry}</td>
-                    <td className="py-3 px-3 text-white/80">{d.medExpiry}</td>
-                    <td className="py-3 px-3 text-white/80">{d.mvrLast}</td>
-                    <td className="py-3 px-3 text-white/55 text-[12px]">{d.lastSeen}</td>
-                    <td className="py-3 px-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ${STATUS_PILL[d.status]}`}>
-                          {d.statusLabel}
-                        </span>
-                        {d.flags > 0 && (
-                          <span className="text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 rounded-full px-2 py-1">
-                            {d.flags} flags
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link href={`/app/drivers/${d.id}`} className="text-[12px] font-bold text-[#22D3EE] hover:text-[#67E8F9]">
-                        Open →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-5 py-3 border-t border-[#1E3556] flex items-center justify-between text-[12px] text-white/55">
-            <span>Showing 10 of 72 drivers</span>
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1 rounded border border-[#1E3556] hover:border-[#22D3EE]/40">‹</button>
-              <span className="text-white/80 font-semibold">1 / 8</span>
-              <button className="px-3 py-1 rounded border border-[#1E3556] hover:border-[#22D3EE]/40">›</button>
-            </div>
-          </div>
-        </div>
-
-        {/* How to import data callout */}
-        <div className="rounded-2xl p-5 border border-[#22D3EE]/30 flex items-start gap-4" style={{ background: "linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(15, 28, 50, 0.6))" }}>
-          <div className="text-[22px]">📥</div>
-          <div className="flex-1">
-            <div className="text-white font-bold text-[14px] mb-1">How to get your drivers into X3 Compass</div>
-            <div className="text-white/70 text-[13px] mb-3">Three ways — pick whichever feels right:</div>
-            <ul className="text-[13px] text-white/80 space-y-1.5 mb-4 list-disc list-inside">
-              <li><strong className="text-white">Upload our CSV template</strong> — one row per driver, 24 columns covering every § 391 field.</li>
-              <li><strong className="text-white">Add drivers one at a time</strong> — fill in the form, we auto-seed every required DQ slot.</li>
-              <li><strong className="text-white">Send data via API</strong> — endpoint URL + key in Settings. Webhook on every change.</li>
-            </ul>
-            <div className="flex gap-2 flex-wrap">
-              <button className="px-3 py-1.5 rounded-full text-[12px] font-bold text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>
-                Download CSV template
-              </button>
-              <button className="px-3 py-1.5 rounded-full text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">
-                Open API docs
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {(showAdd || editDriver) && <DriverFormModal carrier_id={carrier!.id} driver={editDriver} onClose={() => { setShowAdd(false); setEditDriver(null); }} onSaved={() => { refresh(); setShowAdd(false); setEditDriver(null); }} />}
     </AppShell>
   );
+}
+
+function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id: string; driver: Driver | null; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<Driver>>(driver || { status: "active" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function set<K extends keyof Driver>(k: K, v: Driver[K] | string) {
+    setForm((prev) => ({ ...prev, [k]: v === "" ? null : v as Driver[K] }));
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault(); setBusy(true); setError(null);
+    try {
+      const sb = getSupabase();
+      const payload = { ...form, carrier_id };
+      if (driver?.id) {
+        const { error } = await sb.from("compass_drivers").update(payload).eq("id", driver.id);
+        if (error) throw error;
+      } else {
+        if (!form.first_name?.trim() || !form.last_name?.trim()) throw new Error("First and last name required");
+        const { error } = await sb.from("compass_drivers").insert([payload]);
+        if (error) throw error;
+      }
+      onSaved();
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+
+  async function handleDelete() {
+    if (!driver?.id) return;
+    if (!confirm(`Remove ${driver.first_name} ${driver.last_name}? This cannot be undone.`)) return;
+    setBusy(true);
+    const { error } = await getSupabase().from("compass_drivers").delete().eq("id", driver.id);
+    if (error) { setError(error.message); setBusy(false); return; }
+    onSaved();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
+      <div className="bg-[#0F1C32] border border-[#1E3556] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[#1E3556] flex items-center justify-between sticky top-0 bg-[#0F1C32]">
+          <h2 className="text-white font-extrabold text-lg">{driver ? `Edit ${driver.first_name} ${driver.last_name}` : "Add driver"}</h2>
+          <button onClick={onClose} className="text-white/55 hover:text-white text-xl">×</button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <Section title="Identity">
+            <Row>
+              <Field label="First name *"><Input value={form.first_name||""} onChange={(v)=>set("first_name",v)} required /></Field>
+              <Field label="Middle"><Input value={form.middle_name||""} onChange={(v)=>set("middle_name",v)} /></Field>
+              <Field label="Last name *"><Input value={form.last_name||""} onChange={(v)=>set("last_name",v)} required /></Field>
+            </Row>
+            <Row>
+              <Field label="Email"><Input type="email" value={form.email||""} onChange={(v)=>set("email",v)} /></Field>
+              <Field label="Phone"><Input value={form.phone||""} onChange={(v)=>set("phone",v)} /></Field>
+            </Row>
+          </Section>
+
+          <Section title="CDL">
+            <Row>
+              <Field label="State"><Input value={form.cdl_state||""} onChange={(v)=>set("cdl_state",v.toUpperCase())} maxLength={2} /></Field>
+              <Field label="Class"><Select value={form.cdl_class||""} onChange={(v)=>set("cdl_class",v)} options={["",...CDL_CLASSES]} /></Field>
+              <Field label="Number"><Input value={form.cdl_number||""} onChange={(v)=>set("cdl_number",v)} /></Field>
+            </Row>
+            <Row>
+              <Field label="CDL expires"><Input type="date" value={form.cdl_expires_on||""} onChange={(v)=>set("cdl_expires_on",v)} /></Field>
+              <Field label="Medical card expires"><Input type="date" value={form.medical_card_expires_on||""} onChange={(v)=>set("medical_card_expires_on",v)} /></Field>
+            </Row>
+          </Section>
+
+          <Section title="Employment">
+            <Row>
+              <Field label="Hire date"><Input type="date" value={form.hire_date||""} onChange={(v)=>set("hire_date",v)} /></Field>
+              <Field label="Termination"><Input type="date" value={form.termination_date||""} onChange={(v)=>set("termination_date",v)} /></Field>
+              <Field label="Status"><Select value={form.status||"active"} onChange={(v)=>set("status",v)} options={STATUSES} /></Field>
+            </Row>
+          </Section>
+
+          <Section title="Compliance dates">
+            <Row>
+              <Field label="Last MVR pulled"><Input type="date" value={form.last_mvr_pulled_on||""} onChange={(v)=>set("last_mvr_pulled_on",v)} /></Field>
+              <Field label="Last drug test"><Input type="date" value={form.last_drug_test_on||""} onChange={(v)=>set("last_drug_test_on",v)} /></Field>
+            </Row>
+          </Section>
+
+          {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+          <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[#0F1C32] py-2">
+            <div>{driver && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete driver</button>}</div>
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-white/65 hover:text-white text-sm border border-[#1E3556]">Cancel</button>
+              <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[#0A1929]" style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}>{busy ? "Saving…" : driver ? "Save changes" : "Add driver"}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return <div><div className="text-[10px] tracking-[.16em] uppercase text-[#22D3EE] font-extrabold mb-2">{title}</div><div className="space-y-2">{children}</div></div>;
+}
+function Row({ children }: { children: React.ReactNode }) { return <div className="grid grid-cols-2 md:grid-cols-3 gap-3">{children}</div>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block"><div className="text-[10px] tracking-[.14em] uppercase text-white/55 font-bold mb-1">{label}</div>{children}</label>;
+}
+function Input(p: { value: string; onChange: (v: string)=>void; type?: string; required?: boolean; maxLength?: number }) {
+  return <input type={p.type||"text"} value={p.value} onChange={(e)=>p.onChange(e.target.value)} required={p.required} maxLength={p.maxLength}
+    className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm focus:outline-none focus:border-[#22D3EE]" />;
+}
+function Select({ value, onChange, options }: { value: string; onChange: (v: string)=>void; options: string[] }) {
+  return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[#0A1929] border border-[#1E3556] text-white text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")||"—"}</option>)}</select>;
 }
