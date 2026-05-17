@@ -1,0 +1,1500 @@
+{
+  "model": "claude-sonnet-4-6",
+  "date": "2026-05-17",
+  "total": 60,
+  "correct": 51,
+  "score_pct": 85.0,
+  "by_category": {
+    "DQF": {
+      "correct": 5,
+      "total": 5
+    },
+    "HOS": {
+      "correct": 4,
+      "total": 5
+    },
+    "DA": {
+      "correct": 4,
+      "total": 5
+    },
+    "MED": {
+      "correct": 5,
+      "total": 5
+    },
+    "INSP": {
+      "correct": 4,
+      "total": 5
+    },
+    "HM": {
+      "correct": 5,
+      "total": 5
+    },
+    "CSA": {
+      "correct": 5,
+      "total": 5
+    },
+    "MVR": {
+      "correct": 4,
+      "total": 5
+    },
+    "FIN": {
+      "correct": 5,
+      "total": 5
+    },
+    "GEN": {
+      "correct": 2,
+      "total": 5
+    },
+    "ELD": {
+      "correct": 4,
+      "total": 5
+    },
+    "CARGO": {
+      "correct": 1,
+      "total": 2
+    },
+    "VEHICLE": {
+      "correct": 1,
+      "total": 1
+    },
+    "DRIVER": {
+      "correct": 1,
+      "total": 1
+    },
+    "XB": {
+      "correct": 1,
+      "total": 1
+    }
+  },
+  "details": [
+    {
+      "q": {
+        "id": "DQF-001",
+        "category": "DQF",
+        "question": "What documents must be retained in a driver's qualification file for the duration of employment plus three years after termination?",
+        "citation": "49 CFR 391.51",
+        "key_concepts": [
+          "application for employment",
+          "inquiries to previous employers",
+          "medical examiner certificate",
+          "MVR annual review",
+          "road test certificate"
+        ],
+        "common_hallucinations": [
+          "citing 391.21 (which is just the application form, not the file contents)",
+          "claiming a 7-year retention (it's 3 years post-termination)"
+        ]
+      },
+      "answer": "## Driver Qualification File Retention Requirements\n\nUnder **49 CFR \u00a7 391.51**, the following documents must be retained in a driver qualification file **for as long as the driver is employed, plus three years after termination**:\n\n---\n\n### Documents Requiring Duration of Employment + 3 Years Retention:\n\n1. **Application for employment** \u2014 \u00a7 391.51(b)(1)\n2. **Motor vehicle record (MVR)** obtained at time of hire \u2014 \u00a7 391.51(b)(2)\n3. **Certificate of road test** (or equivalent) \u2014 \u00a7 391.51(b)(3)\n4. **Annual motor vehicle record (MVR)** \u2014 \u00a7 391.51(b)(4)\n5. **Annual review of driving record** \u2014 \u00a7 391.51(b)(5)\n6. **List of violations** furnished by the driver annually \u2014 \u00a7 391.51(b)(6)\n7. **Certificate of driver's road test** or equivalent license \u2014 \u00a7 391.51(b)(3)\n\n---\n\n### Important Note:\nMedical examiner's certificates and related medical documents have a **separate retention requirement** under **49 CFR \u00a7 391.51(c)** \u2014 they must be retained for **three years** from the date of examination.\n\n---\n\nAlways verify against the current eCFR, as requirements can be updated.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Driver Qualification File Retention Requirements\n\nUnder **49 CFR \u00a7 391.51**, the following documents must be retained in a driver qualification file **for as long as the driver is employed, plus th"
+      }
+    },
+    {
+      "q": {
+        "id": "DQF-002",
+        "category": "DQF",
+        "question": "How long must a motor carrier retain the application for employment after a driver leaves?",
+        "citation": "49 CFR 391.51(d)(1)",
+        "key_concepts": [
+          "3 years from termination",
+          "kept in DQ file",
+          "duration of employment plus 3 years"
+        ],
+        "common_hallucinations": [
+          "claiming permanent retention",
+          "claiming 7 years like tax records"
+        ]
+      },
+      "answer": "Under **49 CFR \u00a7 391.51(c)**, a motor carrier must retain a driver's application for employment in the driver qualification file for as long as the driver is employed, and for **3 years** after the driver leaves employment.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "Under **49 CFR \u00a7 391.51(c)**, a motor carrier must retain a driver's application for employment in the driver qualification file for as long as the driver is employed, and for **3 years** after the dr"
+      }
+    },
+    {
+      "q": {
+        "id": "DQF-003",
+        "category": "DQF",
+        "question": "What inquiries must a motor carrier make about a prospective driver's previous employment?",
+        "citation": "49 CFR 391.23",
+        "key_concepts": [
+          "previous 3 years of employment",
+          "DOT-regulated employers",
+          "accidents per 390.5",
+          "drug and alcohol testing history per Part 40",
+          "30-day window for response"
+        ],
+        "common_hallucinations": [
+          "claiming 5-year lookback (it's 3)",
+          "forgetting Part 40 testing history requirement"
+        ]
+      },
+      "answer": "## Previous Employment Inquiries for Prospective Drivers\n\nUnder **49 CFR \u00a7 391.23**, a motor carrier must investigate a prospective driver's employment history for the **preceding three years**.\n\n### Required Inquiries\n\nThe motor carrier must contact each previous employer that employed the driver in a safety-sensitive function and request information on:\n\n1. **General employment verification** \u2013 dates of employment, positions held (49 CFR \u00a7 391.23(d))\n\n2. **Accident history** \u2013 a copy of the driver's accident register information required under 49 CFR \u00a7 390.15(b) for accidents that occurred in the previous three years (49 CFR \u00a7 391.23(d)(1))\n\n3. **Drug and alcohol violations** \u2013 specifically, the carrier must inquire whether the driver:\n   - Tested positive or refused to test on any pre-employment drug or alcohol test (49 CFR \u00a7 391.23(e)(1))\n   - Violated any DOT drug/alcohol regulations (49 CFR \u00a7 391.23(e)(2))\n   - If a violation occurred, whether the driver completed the return-to-duty process (49 CFR \u00a7 391.23(e)(3))\n\n### Timeframe\n- Inquiries must be made **within 30 days** of the driver's start date (49 CFR \u00a7 391.23(a)(1))\n- Records must be retained for **three years** (49 CFR \u00a7 391.23(k))\n\nPrevious employers are **required to respond** within 30 days of receiving the request (49 CFR \u00a7 391.23(g)).",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Previous Employment Inquiries for Prospective Drivers\n\nUnder **49 CFR \u00a7 391.23**, a motor carrier must investigate a prospective driver's employment history for the **preceding three years**.\n\n### "
+      }
+    },
+    {
+      "q": {
+        "id": "DQF-004",
+        "category": "DQF",
+        "question": "What is required for a driver to be qualified to operate a CMV under Part 391?",
+        "citation": "49 CFR 391.11",
+        "key_concepts": [
+          "21 years old (interstate)",
+          "read/speak English",
+          "physically qualified per 391.41",
+          "valid CDL or operator's license",
+          "completed application",
+          "road test or equivalent",
+          "not disqualified under 391.15"
+        ],
+        "common_hallucinations": [
+          "claiming 18 years old (that's intrastate in some states, NOT 391.11)",
+          "forgetting the English requirement"
+        ]
+      },
+      "answer": "## Driver Qualification Requirements Under 49 CFR Part 391\n\nTo be qualified to operate a commercial motor vehicle (CMV), a driver must meet the following requirements:\n\n### General Qualifications (49 CFR \u00a7 391.11)\nA driver must:\n- Be **at least 21 years old** (for interstate commerce; intrastate may differ)\n- Be able to **read and speak English** sufficiently to understand highway signs, respond to official inquiries, and make entries on reports/records\n- Be able to **safely operate** the type of CMV they will drive\n- Be **physically qualified** (per \u00a7 391.41)\n- Hold a **valid commercial driver's license (CDL)** appropriate for the vehicle (per \u00a7 391.11(b)(5))\n- Have **successfully completed** a driver's road test or equivalent (\u00a7 391.31 / \u00a7 391.33)\n- Not be **disqualified** under \u00a7 391.15\n\n### Physical Qualification (49 CFR \u00a7 391.41)\nDriver must meet medical standards including vision, hearing, blood pressure, and other health criteria, and hold a **valid medical examiner's certificate** (\u00a7 391.43 / \u00a7 391.45).\n\n### Driver Investigation & Records (49 CFR \u00a7\u00a7 391.21\u2013391.29)\n- Complete an **application for employment** (\u00a7 391.21)\n- Motor carrier must conduct **safety performance history inquiries** (\u00a7 391.23)\n\n### Road Test (49 CFR \u00a7 391.31)\nDriver must pass a road test (or acceptable substitute under \u00a7 391.33).\n\n---\n\nIf you have a specific aspect of Part 391 you'd like to drill down on, let me know.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Driver Qualification Requirements Under 49 CFR Part 391\n\nTo be qualified to operate a commercial motor vehicle (CMV), a driver must meet the following requirements:\n\n### General Qualifications (49 "
+      }
+    },
+    {
+      "q": {
+        "id": "DQF-005",
+        "category": "DQF",
+        "question": "What is the road test requirement and what is an acceptable substitute?",
+        "citation": "49 CFR 391.31",
+        "key_concepts": [
+          "road test required",
+          "carrier may accept valid CDL as equivalent except for double/triple trailers and tank vehicles",
+          "certificate retained in DQ file"
+        ],
+        "common_hallucinations": [
+          "claiming CDL always substitutes (it doesn't for doubles/triples/tanks)"
+        ]
+      },
+      "answer": "## Road Test Requirement\n\n**49 CFR 391.31** requires that before a motor carrier allows a driver to operate a commercial motor vehicle, the driver must pass a road test administered by the carrier (or its agent). The test must be performed in the type of vehicle the driver will operate, and a certificate of driver's road test must be issued upon successful completion (**49 CFR 391.33**).\n\n---\n\n## Acceptable Substitute\n\n**49 CFR 391.33** allows the following as acceptable substitutes for the road test:\n\n1. **A valid Commercial Driver's License (CDL)** \u2014 A CDL issued under **49 CFR Part 383** may be accepted in lieu of a road test, provided the CDL is valid for the type of vehicle the driver will operate.\n\n2. **A certificate of driver's road test** from a previous employer \u2014 If a driver presents a valid road test certificate issued within the **preceding 3 years**, the carrier may accept it in lieu of administering its own road test.\n\n---\n\n**Key point:** The substitute must be appropriate for the **type and configuration** of vehicle the driver will operate (e.g., combination vehicle, passenger vehicle, etc.).",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Road Test Requirement\n\n**49 CFR 391.31** requires that before a motor carrier allows a driver to operate a commercial motor vehicle, the driver must pass a road test administered by the carrier (or"
+      }
+    },
+    {
+      "q": {
+        "id": "HOS-001",
+        "category": "HOS",
+        "question": "What is the maximum driving time for a property-carrying driver between off-duty periods?",
+        "citation": "49 CFR 395.3(a)(3)",
+        "key_concepts": [
+          "11 hours driving",
+          "14-hour on-duty window",
+          "10 consecutive hours off duty"
+        ],
+        "common_hallucinations": [
+          "confusing with passenger-carrying limits in 395.5",
+          "claiming 13 hours (Canadian rule)"
+        ]
+      },
+      "answer": "## Maximum Driving Time \u2013 Property-Carrying Driver\n\nUnder **49 CFR \u00a7 395.3(a)(3)**, a property-carrying driver may not drive:\n\n- **More than 11 hours** after coming off duty for 10 consecutive hours.\n\nThis is commonly referred to as the **11-hour driving limit**, and it resets after the driver has taken at least **10 consecutive hours off duty** (49 CFR \u00a7 395.3(a)(1)).",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Maximum Driving Time \u2013 Property-Carrying Driver\n\nUnder **49 CFR \u00a7 395.3(a)(3)**, a property-carrying driver may not drive:\n\n- **More than 11 hours** after coming off duty for 10 consecutive hours.\n"
+      }
+    },
+    {
+      "q": {
+        "id": "HOS-002",
+        "category": "HOS",
+        "question": "What is the 60/70-hour limit and when does the 34-hour restart apply?",
+        "citation": "49 CFR 395.3(b) and 395.3(c)",
+        "key_concepts": [
+          "60 hours in 7 consecutive days (carriers not operating every day of the week)",
+          "70 hours in 8 consecutive days (carriers operating every day)",
+          "34 consecutive hours off duty to restart"
+        ],
+        "common_hallucinations": [
+          "claiming the restart must include two 1am-5am periods (that requirement was rescinded)",
+          "mixing up 60 and 70 hour applicability"
+        ]
+      },
+      "answer": "## 60/70-Hour Limit\n\n**What it is:** A limit on the total hours a commercial motor vehicle driver may be **on duty** within a rolling window of consecutive days:\n\n- **60-hour/7-day limit** \u2013 A driver may not drive after being on duty 60 hours in any **7 consecutive days** (for carriers that do **not** operate every day of the week).\n- **70-hour/8-day limit** \u2013 A driver may not drive after being on duty 70 hours in any **8 consecutive days** (for carriers that **do** operate every day of the week).\n\n**Citation:** 49 CFR \u00a7 395.3(b)\n\n---\n\n## 34-Hour Restart\n\n**What it is:** A driver may **restart** the 7- or 8-day clock (i.e., reset the accumulated on-duty hours to zero) by taking at least **34 consecutive hours off duty**.\n\n**Citation:** 49 CFR \u00a7 395.3(c)\n\n---\n\n## Key Points\n\n- The carrier's operating schedule (7-day vs. 8-day) determines which limit applies.\n- The 34-hour restart is **optional**, not required \u2014 a driver may simply wait out the rolling window instead.\n- The restart period **must be off duty or in the sleeper berth** for the full 34 consecutive hours.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## 60/70-Hour Limit\n\n**What it is:** A limit on the total hours a commercial motor vehicle driver may be **on duty** within a rolling window of consecutive days:\n\n- **60-hour/7-day limit** \u2013 A driver "
+      }
+    },
+    {
+      "q": {
+        "id": "HOS-003",
+        "category": "HOS",
+        "question": "What is the 30-minute rest break requirement under HOS rules?",
+        "citation": "49 CFR 395.3(a)(3)(ii)",
+        "key_concepts": [
+          "30 minutes interrupting any 8 cumulative hours of driving time",
+          "can be satisfied by on-duty not-driving status (as of 2020 amendment)"
+        ],
+        "common_hallucinations": [
+          "claiming it must be off-duty (the 2020 amendment allows on-duty not-driving)",
+          "saying it's every 8 hours of on-duty time"
+        ]
+      },
+      "answer": "## 30-Minute Rest Break Requirement\n\n**Regulation:** 49 CFR \u00a7 395.3(a)(3)(ii)\n\nA property-carrying CMV driver **must take a 30-minute break** before driving after 8 cumulative hours of driving time have passed **since the driver's last off-duty or sleeper-berth period of at least 30 minutes.**\n\n### Key Points:\n\n- The break must be **at least 30 minutes**\n- The driver must be in an **off-duty or sleeper-berth status** during the break (on-duty not driving does **not** satisfy the requirement)\n- The clock is based on **driving time**, not on-duty time\n- The break \"resets\" the 8-hour driving window\n\n### Who It Applies To:\n- Property-carrying drivers subject to Part 395 HOS rules\n\n### Exemptions (partial list):\n- **Short-haul drivers** operating under the 150 air-mile exemption (\u00a7 395.1(e)) are exempt\n- Certain agricultural and other exemptions under \u00a7 395.1 may apply\n\n---\n\n**Note:** Passenger-carrying CMV drivers have different rest break rules under \u00a7 395.3(b). Always verify current regulatory text, as HOS rules have been subject to revision.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## 30-Minute Rest Break Requirement\n\n**Regulation:** 49 CFR \u00a7 395.3(a)(3)(ii)\n\nA property-carrying CMV driver **must take a 30-minute break** before driving after 8 cumulative hours of driving time ha"
+      }
+    },
+    {
+      "q": {
+        "id": "HOS-004",
+        "category": "HOS",
+        "question": "What is the sleeper berth split provision currently allowed?",
+        "citation": "49 CFR 395.1(g)",
+        "key_concepts": [
+          "split sleeper: 7/3 or 8/2 split",
+          "one period in sleeper at least 7 consecutive hours",
+          "second period at least 2 consecutive hours either in sleeper or off-duty",
+          "neither period counts against the 14-hour window"
+        ],
+        "common_hallucinations": [
+          "claiming only 8/2 is allowed (7/3 is also allowed since 2020)",
+          "claiming the second period must be in the sleeper berth"
+        ]
+      },
+      "answer": "## Sleeper Berth Split Provision\n\nUnder **49 CFR \u00a7 395.1(g)**, a driver using a sleeper berth may split the required 10-hour off-duty period into two periods, provided:\n\n1. **One period is at least 8 consecutive hours** in the sleeper berth, AND\n2. **The other period is at least 2 consecutive hours**, spent either in the sleeper berth, off duty, or a combination of both.\n\n### Key Points:\n- Neither period counts against the **14-hour driving window**\n- The two periods together must total at least **10 hours**\n- The **11-hour driving limit** is applied only against the on-duty time between the two qualifying rest periods\n- The **8/2 split** is the current standard (updated under the 2020 HOS final rule, effective **September 29, 2020**), replacing the former requirement that the shorter period had to be at least 2 hours in the sleeper berth\n\nThe 2020 rule also eliminated the previous **7/3 split** option that had been introduced under an earlier short-lived rule revision.\n\nAlways verify current FMCSA guidance, as interpretations and enforcement details can be updated.",
+      "grade": {
+        "score": 0,
+        "reason": "hallucination: contains '2020' (from: claiming only 8/2 is allowed (7/3 is also allowed since 2020))",
+        "answer_excerpt": "## Sleeper Berth Split Provision\n\nUnder **49 CFR \u00a7 395.1(g)**, a driver using a sleeper berth may split the required 10-hour off-duty period into two periods, provided:\n\n1. **One period is at least 8 consecutive hours** in the sleeper berth, AND\n2. **The other period is at least 2 consecutive hours**, spent either in the sleeper berth, off duty, or"
+      }
+    },
+    {
+      "q": {
+        "id": "HOS-005",
+        "category": "HOS",
+        "question": "When is the short-haul exception available and what are its limits?",
+        "citation": "49 CFR 395.1(e)(1)",
+        "key_concepts": [
+          "150 air-mile radius",
+          "return to work-reporting location within 14 hours",
+          "not required to maintain RODS",
+          "records kept by employer for 6 months"
+        ],
+        "common_hallucinations": [
+          "claiming 100 air-mile (that was the old limit before 2020)",
+          "claiming 12-hour window (it's 14)"
+        ]
+      },
+      "answer": "## Short-Haul Exception to HOS Logging Requirements\n\nThe short-haul exception exempts qualifying drivers from the requirement to use an ELD (or paper logs) and from certain HOS recordkeeping rules.\n\n---\n\n### Two Versions\n\n**1. Non-CDL Short-Haul (49 CFR \u00a7 395.1(e)(1))**\nAvailable when the driver:\n- Operates within a **150 air-mile radius** of their normal work reporting location\n- Returns to the normal work reporting location and is released within **14 consecutive hours**\n- Does **not** exceed **11 hours of driving time**\n- Has at least **10 consecutive hours off duty** before the next on-duty period\n\n**2. CDL Short-Haul (49 CFR \u00a7 395.1(e)(2))**\nAvailable when the driver:\n- Operates within a **150 air-mile radius** of their normal work reporting location\n- Returns to the normal work reporting location and is released within **14 consecutive hours**\n- Does **not** exceed **11 hours of driving time**\n- Has at least **10 consecutive hours off duty** before the next on-duty period\n\n---\n\n### Key Limits\n\n- If the driver **exceeds the 150 air-mile radius** or is **not released within 14 hours**, a full record of duty status (RODS/log) is required **for that day and the previous 6 days**\n- The exception does **not** exempt drivers from underlying **hours of service limits** (11-hour driving, 14-hour window, 60/70-hour rules)\n- Drivers must still maintain **time records** showing reporting time, release time, and total hours \u2014 kept for **6 months** (49 CFR \u00a7 395.1(e)(1)(ii) and (e)(2)(ii))\n\n---\n\n### Bottom Line\nThe short-haul exception eliminates the ELD/log requirement but **not** the underlying drive-time and on-duty limits \u2014 and it evaporates the moment the driver goes beyond 150 air miles or exceeds 14 hours on duty.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Short-Haul Exception to HOS Logging Requirements\n\nThe short-haul exception exempts qualifying drivers from the requirement to use an ELD (or paper logs) and from certain HOS recordkeeping rules.\n\n-"
+      }
+    },
+    {
+      "q": {
+        "id": "DA-001",
+        "category": "DA",
+        "question": "When is a post-accident drug and alcohol test required?",
+        "citation": "49 CFR 382.303",
+        "key_concepts": [
+          "fatality",
+          "citation issued + bodily injury treated away from scene",
+          "citation issued + disabling damage requiring tow-away",
+          "8-hour alcohol window",
+          "32-hour drug window"
+        ],
+        "common_hallucinations": [
+          "claiming all accidents trigger a test",
+          "wrong testing windows"
+        ]
+      },
+      "answer": "## Post-Accident Drug and Alcohol Testing Requirements\n\nUnder **49 CFR \u00a7 382.303**, a post-accident drug and alcohol test is required for a Commercial Motor Vehicle (CMV) driver when an accident occurs and:\n\n---\n\n### **Mandatory Testing (regardless of citations):**\n- **A human fatality occurs** \u2014 the driver must be tested.\n\n---\n\n### **Testing Required *IF* the driver receives a citation:**\n- **Bodily injury** to any person requiring immediate medical treatment away from the scene, **OR**\n- **Disabling damage** to any vehicle requiring it to be transported away from the scene (towed)\n\n---\n\n### **Time Limits:**\n| Test Type | Time Limit |\n|-----------|------------|\n| **Alcohol** | As soon as practicable; must be completed within **8 hours** |\n| **Drug (urine)** | As soon as practicable; must be completed within **32 hours** |\n\nIf the alcohol test is not completed within 8 hours, or the drug test within 32 hours, the employer must **cease attempts and document the reasons** why testing was not completed.\n\n---\n\n### **Important Notes:**\n- The driver must remain available for testing or may be deemed to have **refused the test**.\n- These requirements apply to drivers operating CMVs as defined under **49 CFR \u00a7 382.107**.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Post-Accident Drug and Alcohol Testing Requirements\n\nUnder **49 CFR \u00a7 382.303**, a post-accident drug and alcohol test is required for a Commercial Motor Vehicle (CMV) driver when an accident occur"
+      }
+    },
+    {
+      "q": {
+        "id": "DA-002",
+        "category": "DA",
+        "question": "What categories of testing does Part 382 require?",
+        "citation": "49 CFR 382.301\u2013382.311",
+        "key_concepts": [
+          "pre-employment",
+          "random",
+          "reasonable suspicion",
+          "post-accident",
+          "return-to-duty",
+          "follow-up"
+        ],
+        "common_hallucinations": [
+          "forgetting follow-up",
+          "including 'voluntary' (not required by 382)"
+        ]
+      },
+      "answer": "Under **49 CFR Part 382**, FMCSA requires the following categories of controlled substances and alcohol testing for covered drivers:\n\n1. **Pre-employment** \u2013 49 CFR \u00a7 382.301 (controlled substances only; alcohol testing is authorized but not required)\n\n2. **Post-accident** \u2013 49 CFR \u00a7 382.303\n\n3. **Random** \u2013 49 CFR \u00a7 382.305\n\n4. **Reasonable suspicion** \u2013 49 CFR \u00a7 382.307\n\n5. **Return-to-duty** \u2013 49 CFR \u00a7 382.309\n\n6. **Follow-up** \u2013 49 CFR \u00a7 382.311\n\nThese six categories apply to commercial motor vehicle drivers who are required to hold a commercial driver's license (CDL), as defined in 49 CFR \u00a7 382.103.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "Under **49 CFR Part 382**, FMCSA requires the following categories of controlled substances and alcohol testing for covered drivers:\n\n1. **Pre-employment** \u2013 49 CFR \u00a7 382.301 (controlled substances on"
+      }
+    },
+    {
+      "q": {
+        "id": "DA-003",
+        "category": "DA",
+        "question": "What is the minimum annual random testing rate for controlled substances under Part 382?",
+        "citation": "49 CFR 382.305(b)(2) and FMCSA annual notice",
+        "key_concepts": [
+          "50% of average number of driver positions for controlled substances",
+          "10% for alcohol",
+          "rate set by FMCSA Administrator annually",
+          "based on positive rate from prior year"
+        ],
+        "common_hallucinations": [
+          "claiming 25% (that was alcohol pre-2020)",
+          "claiming the rate is fixed forever"
+        ]
+      },
+      "answer": "Under **49 CFR \u00a7 382.305(b)**, the minimum annual random controlled substances testing rate is **50%** of the average number of driver positions.\n\n(Note: The FMCSA Administrator may adjust this rate based on industry-wide positive rate data. The random alcohol testing rate under the same section is 10%.)",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "Under **49 CFR \u00a7 382.305(b)**, the minimum annual random controlled substances testing rate is **50%** of the average number of driver positions.\n\n(Note: The FMCSA Administrator may adjust this rate b"
+      }
+    },
+    {
+      "q": {
+        "id": "DA-004",
+        "category": "DA",
+        "question": "What must a motor carrier do upon receiving a Clearinghouse query showing a violation?",
+        "citation": "49 CFR 382.701 and 382.501",
+        "key_concepts": [
+          "remove driver from safety-sensitive function",
+          "cannot return to safety-sensitive function until completing return-to-duty process",
+          "SAP evaluation",
+          "negative return-to-duty test",
+          "follow-up testing plan"
+        ],
+        "common_hallucinations": [
+          "claiming the carrier can immediately retest in-house",
+          "skipping the SAP requirement"
+        ]
+      },
+      "answer": "## Motor Carrier Response to a Clearinghouse Query Showing a Violation\n\nWhen a motor carrier conducts a **full query** and the result shows a driver has a drug and alcohol program violation recorded in the FMCSA Drug and Alcohol Clearinghouse, the carrier **must not allow that driver to perform safety-sensitive functions** until the driver has completed the return-to-duty (RTD) process.\n\n---\n\n### Specific Requirements:\n\n**1. Prohibit the driver from safety-sensitive functions**\nA driver with an unresolved violation (i.e., not yet returned to duty) is **prohibited from operating a CMV**. The carrier must remove or keep the driver from safety-sensitive functions.\n- **49 CFR \u00a7 382.701(d)**\n\n**2. Review the query result**\nA full query provides actual violation information (with the driver's consent). If a violation is present and the driver has **not** completed RTD requirements (substance abuse professional evaluation, treatment, follow-up testing), the driver remains prohibited.\n- **49 CFR \u00a7 382.703**\n\n**3. Do not use a \"limited query\" as a substitute**\nA limited query only indicates whether a full query is needed. If a limited query shows a record exists, the carrier must obtain the driver's consent and conduct a **full query**.\n- **49 CFR \u00a7 382.701(b)**\n\n---\n\n**Bottom line:** The carrier must immediately remove the driver from safety-sensitive duties and may not return the driver until RTD requirements under **49 CFR \u00a7 382.605** are satisfied.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Motor Carrier Response to a Clearinghouse Query Showing a Violation\n\nWhen a motor carrier conducts a **full query** and the result shows a driver has a drug and alcohol program violation recorded i"
+      }
+    },
+    {
+      "q": {
+        "id": "DA-005",
+        "category": "DA",
+        "question": "Who is the Designated Employer Representative (DER) and what is their authority?",
+        "citation": "49 CFR 382.107 (definitions)",
+        "key_concepts": [
+          "employee authorized by employer",
+          "receives test results and refusals",
+          "makes required decisions",
+          "cannot be a service agent (C/TPA staff)"
+        ],
+        "common_hallucinations": [
+          "claiming the MRO is the DER",
+          "claiming the C/TPA can be the DER"
+        ]
+      },
+      "answer": "## Designated Employer Representative (DER)\n\n### Definition\nThe DER is an employee authorized by the employer to take immediate action to remove employees from safety-sensitive duties and to make required decisions in the testing and violation response process.\n\n**Regulatory Citation:** 49 CFR \u00a7 40.3 (Definitions)\n\n---\n\n### Authority and Responsibilities\n\nThe DER is authorized to:\n\n1. **Remove employees** from safety-sensitive functions immediately when required\n2. **Receive test results** and other communications from service agents (MROs, SAPs, C/TPAs)\n3. **Make decisions** about whether employees may perform safety-sensitive duties based on test results\n4. **Ensure compliance** with required follow-up actions after a violation\n5. **Communicate with the MRO** regarding test results, including time-sensitive situations\n\n**Key Citation:** 49 CFR \u00a7 40.3 and 49 CFR \u00a7 40.347\n\n---\n\n### Important Limitations\n\n- The DER **must be an employee** of the company \u2014 a service agent (such as a C/TPA) **cannot serve as the DER**, though they may assist the employer\n- The DER must be **reachable during all hours** safety-sensitive functions are performed\n\n**Citation:** 49 CFR \u00a7 40.347(b)\n\n---\n\nDo you have a more specific question about DER responsibilities?",
+      "grade": {
+        "score": 0,
+        "reason": "missing citation: expected ['382.107'], answer has ['40.3', '40.347', '40.347(b)']",
+        "answer_excerpt": "## Designated Employer Representative (DER)\n\n### Definition\nThe DER is an employee authorized by the employer to take immediate action to remove employees from safety-sensitive duties and to make required decisions in the testing and violation response process.\n\n**Regulatory Citation:** 49 CFR \u00a7 40.3 (Definitions)\n\n---\n\n### Authority and Responsibi"
+      }
+    },
+    {
+      "q": {
+        "id": "MED-001",
+        "category": "MED",
+        "question": "How long is a standard CDL driver medical examiner's certificate valid?",
+        "citation": "49 CFR 391.43(h) and 391.45",
+        "key_concepts": [
+          "up to 24 months",
+          "shorter at examiner's discretion based on health",
+          "must be issued by certified medical examiner on National Registry"
+        ],
+        "common_hallucinations": [
+          "claiming always 24 months",
+          "claiming 12 months default"
+        ]
+      },
+      "answer": "A standard Medical Examiner's Certificate (MEC) is valid for **up to 24 months (2 years)**.\n\n**Citation:** 49 CFR \u00a7 391.45 and 49 CFR \u00a7 391.43(g)\n\nNote: The Medical Examiner may issue a certificate for a shorter period if the driver has a medical condition requiring more frequent monitoring (e.g., hypertension, diabetes). In those cases, the validity period will be less than 24 months as determined by the examiner.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "A standard Medical Examiner's Certificate (MEC) is valid for **up to 24 months (2 years)**.\n\n**Citation:** 49 CFR \u00a7 391.45 and 49 CFR \u00a7 391.43(g)\n\nNote: The Medical Examiner may issue a certificate fo"
+      }
+    },
+    {
+      "q": {
+        "id": "MED-002",
+        "category": "MED",
+        "question": "What is required for a driver with insulin-treated diabetes mellitus (ITDM) to qualify?",
+        "citation": "49 CFR 391.46",
+        "key_concepts": [
+          "treating clinician assessment",
+          "Insulin-Treated Diabetes Mellitus Assessment Form (MCSA-5870)",
+          "examiner determines qualification",
+          "no waiver required as of 2018 rule"
+        ],
+        "common_hallucinations": [
+          "claiming federal waiver still required (rescinded 2018)",
+          "claiming ITDM is automatically disqualifying"
+        ]
+      },
+      "answer": "## ITDM Driver Qualification Requirements\n\nUnder **49 CFR 391.46**, a driver with insulin-treated diabetes mellitus (ITDM) may be qualified to operate a commercial motor vehicle in interstate commerce if the following requirements are met:\n\n### Medical Examination Requirements\n- The driver must be examined by and receive a certificate from a medical examiner listed on the National Registry (**49 CFR 391.43**)\n\n### Endocrinologist/Treating Clinician Requirements\nThe driver must be evaluated by an endocrinologist or other treating clinician who must:\n- Confirm the driver has **no severe hypoglycemic episodes** in the past 12 months\n- Confirm the driver is able to **recognize hypoglycemic symptoms**\n- Confirm the driver does **not have hypoglycemic unawareness**\n- Provide documentation that the diabetes is **stable and well-controlled**\n\n### Ongoing Monitoring\n- The treating clinician must provide an **annual evaluation** and complete the **ITDM Assessment Form**\n- The driver must **monitor blood glucose** before driving and every 4 hours while driving\n- Blood glucose must be between **80\u2013400 mg/dL** before driving\n\n### Key Disqualifiers\n- A severe hypoglycemic episode within the past 12 months\n- Hypoglycemic unawareness\n- Inability to recognize symptoms of hypoglycemia\n\n> **Note:** This replaced the former Federal Diabetes Exemption Program previously administered under 49 CFR Part 381.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## ITDM Driver Qualification Requirements\n\nUnder **49 CFR 391.46**, a driver with insulin-treated diabetes mellitus (ITDM) may be qualified to operate a commercial motor vehicle in interstate commerce"
+      }
+    },
+    {
+      "q": {
+        "id": "MED-003",
+        "category": "MED",
+        "question": "What vision standard must a driver meet under Part 391?",
+        "citation": "49 CFR 391.41(b)(10)",
+        "key_concepts": [
+          "distant visual acuity 20/40 each eye with or without correction",
+          "field of vision 70 degrees in horizontal meridian each eye",
+          "ability to recognize colors of traffic signals and devices"
+        ],
+        "common_hallucinations": [
+          "claiming 20/20 (it's 20/40)",
+          "forgetting the field of vision requirement"
+        ]
+      },
+      "answer": "## Vision Standard Under 49 CFR Part 391\n\nUnder **49 CFR \u00a7 391.41(b)(10)**, a driver must have:\n\n- **Distant visual acuity** of at least **20/40 (Snellen) in each eye**, with or without corrective lenses\n- **Field of vision** of at least **70\u00b0 in the horizontal meridian** in each eye\n- The ability to **recognize the colors of traffic signals and devices** showing standard red, green, and amber\n\n### Key Points:\n- If corrective lenses are required to meet the standard, the driver **must wear them while driving**\n- A driver who is blind in one eye or lacks binocular vision **does not meet the standard** unless operating under a **Federal vision exemption** (administered by FMCSA) or a **grandfathered exemption** under **49 CFR \u00a7 391.64**\n\n### Relevant Citations:\n- **49 CFR \u00a7 391.41(b)(10)** \u2013 the core vision physical qualification standard\n- **49 CFR \u00a7 391.64** \u2013 grandfather provisions for certain drivers with vision/epilepsy conditions",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Vision Standard Under 49 CFR Part 391\n\nUnder **49 CFR \u00a7 391.41(b)(10)**, a driver must have:\n\n- **Distant visual acuity** of at least **20/40 (Snellen) in each eye**, with or without corrective len"
+      }
+    },
+    {
+      "q": {
+        "id": "MED-004",
+        "category": "MED",
+        "question": "What hearing standard must a driver meet?",
+        "citation": "49 CFR 391.41(b)(11)",
+        "key_concepts": [
+          "forced whisper at 5 feet with or without hearing aid",
+          "OR average hearing loss not exceeding 40 dB at 500/1000/2000 Hz with or without hearing aid"
+        ],
+        "common_hallucinations": [
+          "forgetting the 'or' between the two tests",
+          "claiming hearing aids are disqualifying"
+        ]
+      },
+      "answer": "## DOT Hearing Standard for Commercial Motor Vehicle Drivers\n\nUnder **49 CFR \u00a7 391.41(b)(11)**, a driver must:\n\n> First perceive a forced whispered voice in the better ear at not less than **5 feet** with or without the use of a hearing aid, **or**, if tested by use of a standard pure tone audiometer, does not have average hearing loss in the better ear greater than **40 decibels** (hearing level in the ISO 1964 Revision), with or without a hearing aid when the audiometric device is calibrated to American National Standard.\n\n### Key Points:\n- The standard applies to the **better ear**\n- Hearing aids are **permitted** to meet the standard\n- This is evaluated as part of the **DOT physical examination** conducted by a certified medical examiner\n- The medical examiner documents findings on the **Medical Examination Report (49 CFR \u00a7 391.43)**",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## DOT Hearing Standard for Commercial Motor Vehicle Drivers\n\nUnder **49 CFR \u00a7 391.41(b)(11)**, a driver must:\n\n> First perceive a forced whispered voice in the better ear at not less than **5 feet** "
+      }
+    },
+    {
+      "q": {
+        "id": "MED-005",
+        "category": "MED",
+        "question": "What blood pressure standards apply to medical certification?",
+        "citation": "FMCSA Medical Examiner Handbook + 391.41 advisory criteria",
+        "key_concepts": [
+          "Stage 1 (140-159/90-99): 1-year cert",
+          "Stage 2 (160-179/100-109): one-time 3-month cert then annual if controlled",
+          "Stage 3 (\u2265180/\u2265110): disqualified until reduced to <140/90",
+          "not a strict 391.41 numeric standard but FMCSA advisory criteria"
+        ],
+        "common_hallucinations": [
+          "citing 391.41 as having explicit BP numbers (it doesn't \u2014 the handbook does)"
+        ]
+      },
+      "answer": "## Blood Pressure Standards for DOT Medical Certification\n\nUnder **49 CFR 391.41(b)(6)**, a commercial motor vehicle driver must have no current clinical diagnosis of high blood pressure likely to interfere with the ability to operate a commercial motor vehicle safely.\n\n---\n\n### FMCSA Advisory Criteria (Blood Pressure Thresholds)\n\nThe FMCSA has established **advisory criteria** (not codified in CFR) that medical examiners use as guidance:\n\n| Blood Pressure Reading | Certification |\n|------------------------|---------------|\n| **Less than 140/90** | 2-year certification |\n| **140\u2013159 / 90\u201399** (Stage 1) | 1-year certification recommended |\n| **160\u2013179 / 100\u2013109** (Stage 2) | One-time 3-month certificate; recertify if controlled |\n| **180/110 or higher** (Stage 3) | Disqualifying until controlled below 140/90 |\n\n---\n\n### Key Points\n\n- These thresholds come from **FMCSA Medical Examiner Handbook** guidance, not a specific CFR section\n- The examining physician has discretion based on overall clinical picture\n- Drivers on antihypertensive medication may still qualify if blood pressure is controlled\n- Stage 3 hypertension requires treatment and demonstrated control before recertification\n\n---\n\n**Note:** Always consult the current FMCSA Medical Examiner Handbook for the most up-to-date advisory criteria, as guidance can be updated independently of the regulations.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Blood Pressure Standards for DOT Medical Certification\n\nUnder **49 CFR 391.41(b)(6)**, a commercial motor vehicle driver must have no current clinical diagnosis of high blood pressure likely to int"
+      }
+    },
+    {
+      "q": {
+        "id": "INSP-001",
+        "category": "INSP",
+        "question": "How long must a motor carrier retain annual inspection reports for each vehicle?",
+        "citation": "49 CFR 396.21(b)",
+        "key_concepts": [
+          "14 months from inspection report date",
+          "kept at location specified by carrier"
+        ],
+        "common_hallucinations": [
+          "12 months",
+          "3 years",
+          "duration of vehicle ownership"
+        ]
+      },
+      "answer": "## Retention Requirement for Annual Inspection Reports\n\nUnder **49 CFR \u00a7 396.21(a)**, motor carriers must retain the annual (periodic) inspection report for **14 months** from the date of the inspection.\n\nThe report must be retained at the motor carrier's principal place of business or where the vehicle is housed.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Retention Requirement for Annual Inspection Reports\n\nUnder **49 CFR \u00a7 396.21(a)**, motor carriers must retain the annual (periodic) inspection report for **14 months** from the date of the inspecti"
+      }
+    },
+    {
+      "q": {
+        "id": "INSP-002",
+        "category": "INSP",
+        "question": "What constitutes a Driver Vehicle Inspection Report (DVIR) requirement?",
+        "citation": "49 CFR 396.11",
+        "key_concepts": [
+          "written or electronic report at end of each work day",
+          "only required if defect or deficiency that affects safe operation",
+          "carrier must repair or determine no repair needed",
+          "retain 3 months"
+        ],
+        "common_hallucinations": [
+          "claiming DVIR required every day even with no defects (rescinded 2014)",
+          "claiming 12-month retention (it's 3 months)"
+        ]
+      },
+      "answer": "# Driver Vehicle Inspection Report (DVIR) Requirements\n\n## Core Regulatory Citation\n**49 CFR \u00a7 396.11** \u2013 Driver vehicle inspection report(s)\n\n---\n\n## Who Must Comply\nDrivers operating **commercial motor vehicles (CMVs)** subject to FMCSA regulations.\n\n---\n\n## Key Requirements Under 49 CFR \u00a7 396.11\n\n### What Must Be Reported\n- Driver must **prepare a written report** at the end of each day's work for **each vehicle operated**\n- Report must cover **parts and accessories** listed in **49 CFR \u00a7 396.11(a)(1)**, including:\n  - Service brakes (including trailer brake connections)\n  - Parking brake\n  - Steering mechanism\n  - Lighting devices and reflectors\n  - Tires\n  - Horn\n  - Windshield wipers\n  - Rear vision mirrors\n  - Coupling devices\n  - Wheels and rims\n  - Emergency equipment\n\n### Defect Reporting\n- Driver must **identify the vehicle** and list any **defects or deficiencies** that could affect safe operation or result in mechanical breakdown\n- If **no defects** are found, the report must so state\n\n---\n\n## Carrier Responsibilities\n- **Motor carrier must repair** reported defects before the vehicle is operated again (**49 CFR \u00a7 396.11(b)**)\n- A **mechanic or authorized carrier representative** must certify repairs were made or that defects did not require repair\n\n---\n\n## Record Retention\n- DVIRs must be retained for **3 months** from the date of preparation (**49 CFR \u00a7 396.11(c)**)\n\n---\n\n## Exceptions\n**49 CFR \u00a7 396.11(c)** \u2013 Drivers of **passenger-carrying CMVs** have slightly different requirements. Additionally, **49 CFR \u00a7 396.11** does not apply to drivers who operate the same vehicle to and from home daily under certain conditions outlined in **49 CFR \u00a7 396.11(a)**.\n\n---\n\n> **Note:** Always verify current regulatory text at **eCFR.gov**, as rules may be updated.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "# Driver Vehicle Inspection Report (DVIR) Requirements\n\n## Core Regulatory Citation\n**49 CFR \u00a7 396.11** \u2013 Driver vehicle inspection report(s)\n\n---\n\n## Who Must Comply\nDrivers operating **commercial mo"
+      }
+    },
+    {
+      "q": {
+        "id": "INSP-003",
+        "category": "INSP",
+        "question": "What is the brake performance requirement under Part 393?",
+        "citation": "49 CFR 393.52",
+        "key_concepts": [
+          "service brake stopping distance: 35 mph initial speed",
+          "truck/truck-tractor/bus: 30 feet (60 mph: roughly 245 ft)",
+          "specific stopping distances by vehicle type",
+          "emergency brake: hold vehicle stationary"
+        ],
+        "common_hallucinations": [
+          "confusing service vs emergency brake distances",
+          "using 35 mph for 60 mph spec"
+        ]
+      },
+      "answer": "## Brake Performance Requirements \u2013 49 CFR Part 393\n\nThe primary brake performance requirements are found in **49 CFR 393.52**.\n\n### Key Requirements (\u00a7 393.52):\n\n**Service Brakes** must be capable of:\n\n- **Stopped from 20 mph** within the following distances (on a level surface):\n  - Single unit vehicles (trucks/buses): **35 feet**\n  - Combination vehicles: **40 feet**\n  - Vehicles with 3 or more axles or special configurations: distances vary by vehicle type\n\n### General Framework:\n\n- **\u00a7 393.40** \u2013 Brakes required on all wheels (with specified exceptions)\n- **\u00a7 393.41** \u2013 Glad hands / air connections\n- **\u00a7 393.42** \u2013 Brakes on all wheels requirement\n- **\u00a7 393.43** \u2013 Breakaway and emergency braking\n- **\u00a7 393.44** \u2013 Front wheel brakes\n- **\u00a7 393.52** \u2013 Brake performance (the core stopping-distance standard)\n\n### Important Note:\nStopping distances in **\u00a7 393.52** assume a **fully loaded vehicle** on a **hard, approximately level surface**.\n\n---\n\nIf you need the specific stopping distance table or requirements for a particular vehicle configuration, I can provide more detail. Always verify against the current CFR, as tables can be amended.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Brake Performance Requirements \u2013 49 CFR Part 393\n\nThe primary brake performance requirements are found in **49 CFR 393.52**.\n\n### Key Requirements (\u00a7 393.52):\n\n**Service Brakes** must be capable of"
+      }
+    },
+    {
+      "q": {
+        "id": "INSP-004",
+        "category": "INSP",
+        "question": "What pre-trip inspection items are required under 392.7?",
+        "citation": "49 CFR 392.7",
+        "key_concepts": [
+          "service brakes (including trailer brakes)",
+          "parking brake",
+          "steering",
+          "lights and reflectors",
+          "tires",
+          "horn",
+          "windshield wipers",
+          "rear-vision mirrors",
+          "coupling devices",
+          "emergency equipment"
+        ],
+        "common_hallucinations": [
+          "forgetting emergency equipment per 393.95",
+          "claiming a specific time duration (392.7 doesn't dictate one)"
+        ]
+      },
+      "answer": "## Pre-Trip Inspection Requirements Under 49 CFR 392.7\n\n**49 CFR 392.7** requires that a driver must be satisfied that the following parts and accessories are in good working order before operating a commercial motor vehicle:\n\n- **Service brakes**, including trailer brake connections\n- **Parking (hand) brake**\n- **Steering mechanism**\n- **Lighting devices and reflectors**\n- **Tires**\n- **Horn**\n- **Windshield wiper or wipers**\n- **Rear-vision mirror or mirrors**\n- **Coupling devices** (if applicable)\n- **Wheels and rims**\n- **Emergency equipment** (as required by 49 CFR 393.95)\n\n---\n\n### Important Notes:\n\n- The regulation requires the driver to be **satisfied** these items are in good working order \u2014 it does not prescribe a specific inspection procedure or checklist format.\n- For the detailed written inspection report requirements, see **49 CFR 396.11** (Driver Vehicle Inspection Reports).\n- For buses specifically, see **49 CFR 392.8**, which adds requirements for spare fuses.\n\n---\n\nThe regulation is straightforward but brief \u2014 the itemized list above reflects the specific parts enumerated in **49 CFR 392.7(a)**.",
+      "grade": {
+        "score": 0,
+        "reason": "hallucination: contains '393' (from: forgetting emergency equipment per 393.95)",
+        "answer_excerpt": "## Pre-Trip Inspection Requirements Under 49 CFR 392.7\n\n**49 CFR 392.7** requires that a driver must be satisfied that the following parts and accessories are in good working order before operating a commercial motor vehicle:\n\n- **Service brakes**, including trailer brake connections\n- **Parking (hand) brake**\n- **Steering mechanism**\n- **Lighting "
+      }
+    },
+    {
+      "q": {
+        "id": "INSP-005",
+        "category": "INSP",
+        "question": "How long must DVIRs be retained?",
+        "citation": "49 CFR 396.11(c)",
+        "key_concepts": [
+          "3 months from date prepared"
+        ],
+        "common_hallucinations": [
+          "12 months",
+          "14 months (that's annual inspections)",
+          "3 years"
+        ]
+      },
+      "answer": "## DVIR Retention Requirement\n\nDriver Vehicle Inspection Reports (DVIRs) must be retained for **3 months** from the date of preparation.\n\n**Citation:** 49 CFR \u00a7 396.11(c)\n\nThis applies to the motor carrier who must maintain the original DVIR (or a copy) at the principal place of business or where the vehicle is housed.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## DVIR Retention Requirement\n\nDriver Vehicle Inspection Reports (DVIRs) must be retained for **3 months** from the date of preparation.\n\n**Citation:** 49 CFR \u00a7 396.11(c)\n\nThis applies to the motor ca"
+      }
+    },
+    {
+      "q": {
+        "id": "HM-001",
+        "category": "HM",
+        "question": "What is the placard threshold for Table 2 hazardous materials being transported by highway?",
+        "citation": "49 CFR 172.504(c)",
+        "key_concepts": [
+          "1,001 pounds aggregate gross weight",
+          "Table 1 materials placard regardless of quantity"
+        ],
+        "common_hallucinations": [
+          "confusing Table 1 vs Table 2",
+          "wrong weight threshold"
+        ]
+      },
+      "answer": "## Placard Threshold for Table 2 Materials (Highway)\n\nUnder **49 CFR \u00a7 172.504(b)**, a motor vehicle transporting Table 2 hazardous materials **must be placarded when the aggregate gross weight of all Table 2 hazardous materials is **1,001 lbs (454 kg) or more**.\n\nThis threshold applies to the **total combined gross weight** of all Table 2 hazardous materials on the vehicle, regardless of how many different Table 2 hazardous classes are present.\n\n**Note:** Table 1 materials (such as explosives, poison gas, and certain others) require placarding in **any quantity**, with no minimum threshold. Table 2 materials get the benefit of the 1,001 lb aggregate threshold.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Placard Threshold for Table 2 Materials (Highway)\n\nUnder **49 CFR \u00a7 172.504(b)**, a motor vehicle transporting Table 2 hazardous materials **must be placarded when the aggregate gross weight of all"
+      }
+    },
+    {
+      "q": {
+        "id": "HM-002",
+        "category": "HM",
+        "question": "What materials are in Table 1 (placard at any quantity)?",
+        "citation": "49 CFR 172.504(e) Table 1",
+        "key_concepts": [
+          "Class 1.1, 1.2, 1.3 explosives",
+          "Class 2.3 Inhalation Hazard Zone A or B",
+          "Class 4.3 Dangerous When Wet I",
+          "Class 5.2 Type B Organic Peroxide",
+          "Class 6.1 PG I Inhalation Hazard Zone A",
+          "Class 7 Highway Route Controlled"
+        ],
+        "common_hallucinations": [
+          "putting Class 3 flammable liquids in Table 1",
+          "confusing 4.3 with 4.1"
+        ]
+      },
+      "answer": "## 49 CFR \u00a7 172.504 \u2013 Table 1 Materials (Placard at Any Quantity)\n\nUnder **49 CFR \u00a7 172.504(e), Table 1**, the following categories of hazardous materials require placarding **regardless of quantity**:\n\n| Category | Placard Name |\n|---|---|\n| Explosives 1.1 | EXPLOSIVES 1.1 |\n| Explosives 1.2 | EXPLOSIVES 1.2 |\n| Explosives 1.3 | EXPLOSIVES 1.3 |\n| Poison gas (Division 2.3) | POISON GAS |\n| Dangerous When Wet (Division 4.3) | DANGEROUS WHEN WET |\n| Poison Inhalation Hazard (Division 6.1, PG I, Zone A or B; or Division 2.3) | POISON INHALATION HAZARD |\n| Radioactive (Radioactive Yellow III labels) | RADIOACTIVE |\n\n---\n\n**Key point:** These materials must be placarded **for any amount transported**, unlike Table 2 materials, which only require placarding at **1,001 lbs (454 kg) or more** in aggregate.\n\nAlways verify the current table directly in **49 CFR \u00a7 172.504(e)**, as amendments may occur.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## 49 CFR \u00a7 172.504 \u2013 Table 1 Materials (Placard at Any Quantity)\n\nUnder **49 CFR \u00a7 172.504(e), Table 1**, the following categories of hazardous materials require placarding **regardless of quantity**"
+      }
+    },
+    {
+      "q": {
+        "id": "HM-003",
+        "category": "HM",
+        "question": "What documentation must accompany a hazmat shipment by highway?",
+        "citation": "49 CFR 172.200, 172.201, 172.202, 172.203",
+        "key_concepts": [
+          "proper shipping name",
+          "hazard class",
+          "UN/NA identification number",
+          "packing group",
+          "quantity and unit",
+          "shipper certification",
+          "emergency response phone number",
+          "emergency response info per 172.602"
+        ],
+        "common_hallucinations": [
+          "forgetting the emergency response phone number",
+          "forgetting the shipper certification"
+        ]
+      },
+      "answer": "## Required Shipping Papers for Highway Hazmat Shipments\n\nUnder **49 CFR \u00a7 172.200**, a shipper must prepare shipping papers for each hazardous material offered for transportation by highway.\n\n---\n\n### Required Documents\n\n**1. Shipping Paper (49 CFR \u00a7 172.200\u2013172.204)**\nMust include:\n- Proper shipping name (\u00a7 172.202(a)(1))\n- Hazard class or division (\u00a7 172.202(a)(2))\n- UN/NA identification number (\u00a7 172.202(a)(1))\n- Packing group, if applicable (\u00a7 172.202(a)(3))\n- Total quantity (\u00a7 172.202(a)(5))\n- Number and type of packages (\u00a7 172.202(a)(6))\n- Emergency response telephone number **(\u00a7 172.604)**\n- Shipper's certification, if applicable **(\u00a7 172.204)**\n\n**2. Emergency Response Information (49 CFR \u00a7 172.600\u2013172.604)**\nMust be immediately accessible to the driver during transport.\n\n**3. Placards** (not a document, but required on the vehicle \u2014 **49 CFR \u00a7 172.500**)\n\n---\n\n### Driver Accessibility Requirement\nPer **49 CFR \u00a7 177.817**, the driver must keep shipping papers:\n- Within immediate reach while at the controls, **or**\n- In a door pocket or pouch on the driver's side, **or**\n- Clearly visible on the seat when not at the controls\n\n---\n\nDo you need details on any specific material class or exemption?",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Required Shipping Papers for Highway Hazmat Shipments\n\nUnder **49 CFR \u00a7 172.200**, a shipper must prepare shipping papers for each hazardous material offered for transportation by highway.\n\n---\n\n##"
+      }
+    },
+    {
+      "q": {
+        "id": "HM-004",
+        "category": "HM",
+        "question": "What hazmat training is required for hazmat employees under Part 172 Subpart H?",
+        "citation": "49 CFR 172.704",
+        "key_concepts": [
+          "general awareness",
+          "function-specific",
+          "safety training",
+          "security awareness",
+          "in-depth security training (if HM security plan required)",
+          "every 3 years recurrent",
+          "initial within 90 days of hire"
+        ],
+        "common_hallucinations": [
+          "claiming annual training (it's every 3 years)",
+          "forgetting security training"
+        ]
+      },
+      "answer": "## Hazmat Employee Training Requirements \u2013 49 CFR Part 172, Subpart H\n\n### Who Must Be Trained\nA **hazmat employee** must be trained before performing hazmat functions unsupervised. *(49 CFR \u00a7 172.700)*\n\n---\n\n### Required Training Categories (49 CFR \u00a7 172.702)\n\n1. **General Awareness/Familiarization Training** \u2013 Familiarizes employees with HMR requirements and enables recognition and identification of hazardous materials. *(\u00a7 172.702(a)(1))*\n\n2. **Function-Specific Training** \u2013 Training on HMR requirements applicable to the specific job functions the employee performs. *(\u00a7 172.702(a)(2))*\n\n3. **Safety Training** \u2013 Covers emergency response information, measures to protect against hazards, and methods/procedures for accident avoidance. *(\u00a7 172.702(a)(3))*\n\n4. **Security Awareness Training** \u2013 Training on security risks associated with hazmat transportation and how to recognize/respond to possible security threats. *(\u00a7 172.702(a)(4))*\n\n5. **In-Depth Security Training** \u2013 Required for employees subject to a security plan under Subpart I; must cover the employer's security plan and its implementation. *(\u00a7 172.702(a)(5))*\n\n---\n\n### Recurrent Training (49 CFR \u00a7 172.704(c))\n- Must be completed **every 3 years**.\n\n### Records (49 CFR \u00a7 172.704(d))\n- Training records must be kept during employment and for **90 days after** employment ends.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Hazmat Employee Training Requirements \u2013 49 CFR Part 172, Subpart H\n\n### Who Must Be Trained\nA **hazmat employee** must be trained before performing hazmat functions unsupervised. *(49 CFR \u00a7 172.700"
+      }
+    },
+    {
+      "q": {
+        "id": "HM-005",
+        "category": "HM",
+        "question": "What is the HM-181 hazardous materials registration requirement?",
+        "citation": "49 CFR Part 107 Subpart G",
+        "key_concepts": [
+          "annual registration with PHMSA",
+          "fee varies by carrier size",
+          "required for offerors and carriers of certain hazmat",
+          "filing renewed each year",
+          "statement of registration carried"
+        ],
+        "common_hallucinations": [
+          "confusing with the FMCSA Hazmat Safety Permit at 385 Subpart E (separate program)"
+        ]
+      },
+      "answer": "## HM-181 Hazardous Materials Registration Requirement\n\n**HM-181** was a rulemaking that established the hazardous materials registration and fee program, now codified at **49 CFR Part 107, Subpart G (\u00a7\u00a7 107.601\u2013107.620)**.\n\n### Who Must Register\n\nPersons who offer for transportation or transport in commerce:\n\n- Any highway route-controlled quantity of a Class 7 (radioactive) material\n- More than 25 kg of a Division 1.1, 1.2, or 1.3 explosive\n- More than 1 liter per package of a material extremely toxic by inhalation (hazard zone A)\n- A hazardous material in a bulk packaging with capacity of **3,500 gallons or more** for liquids/gases\n- A hazardous material in a bulk packaging with capacity of **468 cubic feet or more** for solids\n- A shipment in other than bulk packaging of **5,000 lbs or more gross weight** of one class of hazardous materials\n\n*(See **49 CFR \u00a7 107.601** for the complete applicability criteria)*\n\n### Key Requirements\n\n- **Annual registration** with PHMSA (**49 CFR \u00a7 107.608**)\n- Payment of an **annual fee** (fee schedules are updated periodically)\n- Maintenance of registration for **3 years** (**49 CFR \u00a7 107.612**)\n\n### Exemptions\n\nCertain federal agencies and small businesses may qualify for reduced fees or exemptions under **49 CFR \u00a7 107.606**.\n\n---\n\nAlways verify current fee amounts directly with PHMSA, as they are subject to change.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## HM-181 Hazardous Materials Registration Requirement\n\n**HM-181** was a rulemaking that established the hazardous materials registration and fee program, now codified at **49 CFR Part 107, Subpart G "
+      }
+    },
+    {
+      "q": {
+        "id": "CSA-001",
+        "category": "CSA",
+        "question": "Which BASIC categories does FMCSA's Safety Measurement System (SMS) currently use?",
+        "citation": "FMCSA SMS Methodology v3.0.5",
+        "key_concepts": [
+          "Unsafe Driving",
+          "Hours-of-Service Compliance",
+          "Driver Fitness",
+          "Controlled Substances and Alcohol",
+          "Vehicle Maintenance",
+          "Hazardous Materials Compliance",
+          "Crash Indicator"
+        ],
+        "common_hallucinations": [
+          "omitting Crash Indicator",
+          "naming categories that don't exist"
+        ],
+        "note": "BASIC percentiles are NOT public via free FMCSA API since 2015 FAST Act."
+      },
+      "answer": "FMCSA's Safety Measurement System (SMS) currently uses the following **seven BASIC (Behavior Analysis and Safety Improvement Categories)**:\n\n1. **Unsafe Driving**\n2. **Hours-of-Service (HOS) Compliance**\n3. **Driver Fitness**\n4. **Controlled Substances/Alcohol**\n5. **Vehicle Maintenance**\n6. **Hazardous Materials (HM) Compliance**\n7. **Crash Indicator**\n\nThese categories are used to organize roadside inspection violations, crash data, and investigation results to assess carrier safety performance. The SMS is an administrative tool and is not itself codified in a single 49 CFR section, though the underlying enforcement authority derives from various parts of 49 CFR (e.g., Parts 382, 383, 390\u2013396, 397).",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "FMCSA's Safety Measurement System (SMS) currently uses the following **seven BASIC (Behavior Analysis and Safety Improvement Categories)**:\n\n1. **Unsafe Driving**\n2. **Hours-of-Service (HOS) Complianc"
+      }
+    },
+    {
+      "q": {
+        "id": "CSA-002",
+        "category": "CSA",
+        "question": "How long do roadside inspection violations stay in the SMS calculation?",
+        "citation": "FMCSA SMS Methodology \u2014 Time Weights",
+        "key_concepts": [
+          "24 months",
+          "time-weighted: violations in months 0-6 weighted 3, months 7-12 weighted 2, months 13-24 weighted 1"
+        ],
+        "common_hallucinations": [
+          "claiming 12 months",
+          "claiming 36 months",
+          "forgetting the time weights"
+        ]
+      },
+      "answer": "## SMS Violation Retention Period\n\nRoadside inspection violations remain in the FMCSA's Safety Measurement System (SMS) calculation for **24 months** from the date of the inspection.\n\nThis is based on FMCSA's SMS methodology, which uses a rolling 24-month inspection and violation history. More recent violations are weighted more heavily than older ones within that window.\n\n**Note:** The SMS methodology is an FMCSA administrative tool, not codified in 49 CFR itself \u2014 it is governed by FMCSA's published SMS Methodology document, which can be found on the FMCSA website. If you need the specific methodology version, I'd recommend verifying directly at **ai.fmcsa.dot.gov** or the FMCSA SMS resources page to ensure you have the current weighting and timeframe parameters.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## SMS Violation Retention Period\n\nRoadside inspection violations remain in the FMCSA's Safety Measurement System (SMS) calculation for **24 months** from the date of the inspection.\n\nThis is based on"
+      }
+    },
+    {
+      "q": {
+        "id": "CSA-003",
+        "category": "CSA",
+        "question": "What is the Inspection Selection System (ISS) score and how is it used?",
+        "citation": "FMCSA ISS \u2014 Inspection Selection System",
+        "key_concepts": [
+          "score 0-100",
+          "75-100: Inspect",
+          "50-74: Optional",
+          "0-49: Pass",
+          "calculated from CSA BASIC percentiles + inspection history"
+        ],
+        "common_hallucinations": [
+          "claiming roadside officers see the BASIC percentiles directly (they see ISS, derived from BASICs)"
+        ]
+      },
+      "answer": "## Inspection Selection System (ISS)\n\n### What It Is\nThe ISS is a software tool used by FMCSA and roadside inspection personnel to help prioritize which commercial motor vehicles and drivers to inspect. It generates a recommended inspection category based on a carrier's safety performance data.\n\n### How the Score Works\nThe ISS produces one of three recommendations:\n\n| Recommendation | Meaning |\n|---|---|\n| **Inspect** | Carrier has poor safety performance; inspection strongly recommended |\n| **Optional** | Carrier has average performance; inspection at officer's discretion |\n| **Pass** | Carrier has good performance; lower priority for inspection |\n\n### Data Behind It\nThe ISS draws from:\n- **SMS (Safety Measurement System)** BASIC percentile scores\n- Crash history\n- Previous inspection and violation history\n- Out-of-service rates\n\n### Important Notes\n- The ISS is a **recommendation tool**, not a mandatory directive \u2014 officers retain full authority to inspect any vehicle regardless of score\n- It is accessible through roadside systems when an officer queries a carrier's DOT number or license plate\n- It is intended to help direct limited inspection resources toward higher-risk carriers\n\n### Regulatory Note\nThe ISS itself is not defined in a specific 49 CFR section \u2014 it is an **FMCSA operational/administrative tool** implemented under the agency's general safety authority. The underlying SMS data derives from inspection and crash reporting requirements throughout **49 CFR Parts 385, 390, and 396**.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Inspection Selection System (ISS)\n\n### What It Is\nThe ISS is a software tool used by FMCSA and roadside inspection personnel to help prioritize which commercial motor vehicles and drivers to inspec"
+      }
+    },
+    {
+      "q": {
+        "id": "CSA-004",
+        "category": "CSA",
+        "question": "What is a DataQ challenge and what kinds of records can be challenged?",
+        "citation": "FMCSA DataQ \u2014 Request for Data Review",
+        "key_concepts": [
+          "inspection violations",
+          "crash records (DOT-reportable)",
+          "carrier identification info",
+          "challenges submitted via dataqs.fmcsa.dot.gov",
+          "state agency reviews",
+          "30-day target response"
+        ],
+        "common_hallucinations": [
+          "claiming state law violations can be challenged via DataQ (state DOT handles those)",
+          "claiming citations are challenged via DataQ (those go through traffic court)"
+        ]
+      },
+      "answer": "## DataQ Challenge\n\n**DataQ** (Data Quality) is the Federal Motor Carrier Safety Administration (FMCSA) system that allows motor carriers, drivers, and other parties to request a review of data they believe is inaccurate in federal safety databases.\n\n---\n\n### Purpose\nDataQ challenges are the formal process for correcting errors in FMCSA safety data that affect a carrier's or driver's safety profile, including their **Safety Measurement System (SMS)** scores and **CSA** scores.\n\n---\n\n### Records That Can Be Challenged\n\nThe following types of records may be challenged through DataQ:\n\n1. **Roadside inspection reports** \u2013 including violations listed on inspection reports that the carrier or driver believes were recorded in error\n2. **Crash records** \u2013 including whether a crash was correctly recorded or whether it should be marked as \"not preventable\" under the Crash Preventability Demonstration Program (CPDP)\n3. **Federal and state out-of-service orders**\n4. **Driver/vehicle examination results**\n5. **Registration/operating authority data** errors\n\n---\n\n### Regulatory Basis\nDataQ is authorized under **49 CFR Part 385** and **49 CFR Part 390**, which govern safety fitness procedures and general applicability of the Federal Motor Carrier Safety Regulations.\n\n---\n\n### Key Point\nChallenges are reviewed by the **state agency** that conducted the inspection (for state-level inspections) or by **FMCSA** for federally conducted activities.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## DataQ Challenge\n\n**DataQ** (Data Quality) is the Federal Motor Carrier Safety Administration (FMCSA) system that allows motor carriers, drivers, and other parties to request a review of data they b"
+      }
+    },
+    {
+      "q": {
+        "id": "CSA-005",
+        "category": "CSA",
+        "question": "What is the Crash Preventability Determination Program?",
+        "citation": "FMCSA CPDP \u2014 2020 expansion",
+        "key_concepts": [
+          "20 specific crash types eligible",
+          "carrier or driver may submit",
+          "determination as 'not preventable' removes crash from Crash Indicator BASIC SMS calculation",
+          "does not remove crash from public Carrier Profile (CSA) record"
+        ],
+        "common_hallucinations": [
+          "claiming preventability removes crash from all FMCSA records (it only affects Crash Indicator)"
+        ]
+      },
+      "answer": "## Crash Preventability Determination Program (CPDP)\n\nThe **Crash Preventability Determination Program (CPDP)** is a voluntary program administered by the **Federal Motor Carrier Safety Administration (FMCSA)** that allows motor carriers and drivers to request a review of certain crashes recorded in the **FMCSA Motor Carrier Management Information System (MCMIS)** to determine whether the crash was **\"not preventable\"** by the commercial motor vehicle (CMV) driver.\n\n### Key Points:\n\n- **Purpose:** To improve the accuracy of safety data used in FMCSA's **Safety Measurement System (SMS)** by identifying crashes that were not the fault of the CMV driver.\n- **Eligibility:** Only crashes in specific categories qualify (e.g., struck in the rear, struck while legally stopped, struck by a motorist driving under the influence, etc.).\n- **Outcome:** If a crash is determined \"not preventable,\" it is removed from the carrier's SMS percentile calculations (though it remains in MCMIS).\n- **Who May Request:** Motor carriers or drivers involved in the crash.\n\n### Regulatory/Program Basis:\n\nThe CPDP operates under FMCSA's authority but is **not codified in a specific 49 CFR section**. It is implemented through agency guidance and the **DataQs system**.\n\nFor more information, FMCSA's program guidance is the authoritative source rather than a specific CFR citation.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Crash Preventability Determination Program (CPDP)\n\nThe **Crash Preventability Determination Program (CPDP)** is a voluntary program administered by the **Federal Motor Carrier Safety Administration"
+      }
+    },
+    {
+      "q": {
+        "id": "MVR-001",
+        "category": "MVR",
+        "question": "How often must a motor carrier obtain a Motor Vehicle Record (MVR) for each driver?",
+        "citation": "49 CFR 391.25(a)",
+        "key_concepts": [
+          "at least once every 12 months",
+          "from each state where driver held a CDL during the year"
+        ],
+        "common_hallucinations": [
+          "claiming every 24 months",
+          "only the home state"
+        ]
+      },
+      "answer": "## MVR Requirement for Motor Carriers\n\nUnder **49 CFR \u00a7 391.25(a)**, a motor carrier must obtain a Motor Vehicle Record (MVR) from the appropriate agency of **every state in which the driver held a motor vehicle operator's license or permit during the preceding 12 months**, and this must be done **at least once every 12 months**.\n\n### Key Points:\n- The MVR must be reviewed and evaluated by the motor carrier\n- Under **49 CFR \u00a7 391.25(b)**, the motor carrier must compare the annual MVR with the driver's previous MVR and determine whether the driver meets the minimum requirements under **49 CFR Part 391**\n- Records must be retained in the driver qualification file per **49 CFR \u00a7 391.51(b)(7)**\n\n### Initial Hire:\nAt the time of hiring, a motor carrier must also obtain an MVR as part of the driver qualification process per **49 CFR \u00a7 391.23(a)(1)**, covering the preceding **3 years**.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## MVR Requirement for Motor Carriers\n\nUnder **49 CFR \u00a7 391.25(a)**, a motor carrier must obtain a Motor Vehicle Record (MVR) from the appropriate agency of **every state in which the driver held a mo"
+      }
+    },
+    {
+      "q": {
+        "id": "MVR-002",
+        "category": "MVR",
+        "question": "What must a motor carrier do based on the annual MVR review?",
+        "citation": "49 CFR 391.25(b)",
+        "key_concepts": [
+          "determine continued qualification",
+          "written record of review",
+          "note any violations affecting CMV operation",
+          "retain in DQ file"
+        ],
+        "common_hallucinations": [
+          "claiming no documentation needed if MVR is clean"
+        ]
+      },
+      "answer": "## Annual MVR Review Requirements\n\nUnder **49 CFR 391.25**, a motor carrier must:\n\n1. **Obtain an MVR** (Motor Vehicle Record) from every state where the driver held a license in the past 12 months \u2014 at least **once every 12 months**.\n\n2. **Review the MVR** to determine whether the driver meets minimum qualifications under **49 CFR 391.11** and is not disqualified under **49 CFR 391.15**.\n\n3. **Annotate the record** \u2014 a person with knowledge of the driver's qualifications must note on the MVR (or a separate document attached to it) the date it was reviewed and sign it.\n\n---\n\n### Key Point:\nThe regulation requires the carrier to **evaluate the driver's continued qualification** based on the MVR content. If the review reveals the driver is **no longer qualified** (e.g., license suspension, disqualifying offense), the carrier must take appropriate action \u2014 which could include **removing the driver from service**.\n\nThe MVR must be retained in the **driver qualification file** per **49 CFR 391.51(b)(9)** for as long as the driver is employed, plus **3 years** thereafter.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Annual MVR Review Requirements\n\nUnder **49 CFR 391.25**, a motor carrier must:\n\n1. **Obtain an MVR** (Motor Vehicle Record) from every state where the driver held a license in the past 12 months \u2014 "
+      }
+    },
+    {
+      "q": {
+        "id": "MVR-003",
+        "category": "MVR",
+        "question": "What is the driver's obligation to report convictions under 391.27?",
+        "citation": "49 CFR 391.27",
+        "key_concepts": [
+          "list of violations of motor vehicle laws",
+          "other than parking",
+          "each 12 months",
+          "provided to carrier",
+          "retained in DQ file"
+        ],
+        "common_hallucinations": [
+          "claiming only CMV-related violations need reporting (it's all violations except parking)"
+        ]
+      },
+      "answer": "## Driver's Obligation to Report Convictions Under 49 CFR 391.27\n\n**49 CFR 391.27** requires a driver employed by a motor carrier to **report all convictions** for traffic violations (except parking) to their employer **within 30 days** of the conviction.\n\n### Key Requirements:\n\n- **What must be reported:** Any conviction for a violation of traffic laws or ordinances (other than parking violations), regardless of the type of vehicle being driven at the time\n- **Deadline:** Within **30 days** of the conviction\n- **To whom:** The driver must notify the **motor carrier that employs them**\n- **Scope:** This applies to convictions occurring in **any jurisdiction** (state, federal, or foreign)\n\n### Important Notes:\n\n- This obligation applies even if the violation occurred in a **personal vehicle**, not just a commercial motor vehicle\n- This is a **separate requirement** from the notification to the licensing state required under **49 CFR 383.31** (which applies specifically to CDL holders)\n- The driver must provide the information in writing\n\n### Penalty for Non-Compliance:\nFailure to report can subject both the driver and the carrier to civil penalties under **49 CFR Part 386**.\n\n---\n\n*Note: Always verify against the current CFR, as regulations may be updated.*",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Driver's Obligation to Report Convictions Under 49 CFR 391.27\n\n**49 CFR 391.27** requires a driver employed by a motor carrier to **report all convictions** for traffic violations (except parking) "
+      }
+    },
+    {
+      "q": {
+        "id": "MVR-004",
+        "category": "MVR",
+        "question": "What is the CDL holder's obligation to notify employer of conviction?",
+        "citation": "49 CFR 383.31",
+        "key_concepts": [
+          "within 30 days of conviction",
+          "any violation of state/local law relating to motor vehicle traffic",
+          "other than parking",
+          "in writing",
+          "contains specific elements (location, court, plea, etc.)"
+        ],
+        "common_hallucinations": [
+          "claiming 60 days",
+          "forgetting it applies to all states not just home state"
+        ]
+      },
+      "answer": "## CDL Holder's Obligation to Notify Employer of Conviction\n\nUnder **49 CFR \u00a7 383.31**, a CDL holder must notify their employer of any conviction for a traffic violation (other than parking) **within 30 days** of the date of conviction.\n\n### Key Details:\n- This requirement applies to **any motor vehicle** \u2014 not just a commercial motor vehicle\n- It covers violations in **any state or jurisdiction**\n- The notification must be made to the employer with whom the driver is employed at the **time of the conviction**\n\n### What Must Be Reported:\nThe driver must provide the following information per **49 CFR \u00a7 383.31(a)**:\n- Driver's full legal name\n- Driver's license number\n- Date of conviction\n- The offense committed and the location where it occurred\n- The court that imposed the conviction\n- The driver's signature\n\n---\n\n**Note:** This is separate from the obligation under **49 CFR \u00a7 383.33**, which requires a CDL holder to notify their employer of a **license suspension, revocation, cancellation, lost driving privilege, or disqualification** \u2014 which must be done **before the end of the business day** following the day the driver received notice.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## CDL Holder's Obligation to Notify Employer of Conviction\n\nUnder **49 CFR \u00a7 383.31**, a CDL holder must notify their employer of any conviction for a traffic violation (other than parking) **within "
+      }
+    },
+    {
+      "q": {
+        "id": "MVR-005",
+        "category": "MVR",
+        "question": "What is the CDL holder's obligation to notify their employer of license suspension/revocation/cancellation?",
+        "citation": "49 CFR 383.33",
+        "key_concepts": [
+          "by end of business day following day driver received notice",
+          "applies to any suspension/revocation/cancellation",
+          "disqualification under 383.51 also reportable"
+        ],
+        "common_hallucinations": [
+          "claiming 30-day window (that's convictions, not suspensions)"
+        ]
+      },
+      "answer": "## CDL Holder's Obligation to Notify Employer of License Suspension/Revocation/Cancellation\n\nUnder **49 CFR \u00a7 383.31(b)**, a CDL holder whose license is **suspended, revoked, or cancelled** by any state, or who loses the privilege to operate a commercial motor vehicle in any state for any period, **must notify their employer of that fact before the end of the business day following the day the driver received notice of the suspension, revocation, cancellation, or lost privilege.**\n\n### Key Points:\n\n- **Timing:** Notification must occur **before the end of the business day following** the day the driver received notice\n- **Scope:** Applies to actions taken by **any state**, not just the state that issued the CDL\n- **Includes:** Suspensions, revocations, cancellations, and **any loss of privilege** to operate a CMV\n\n### Companion Requirement:\n\nUnder **49 CFR \u00a7 383.31(a)**, a driver who is **convicted of a traffic violation** (other than parking) in any state must also notify their employer **within 30 days of conviction**.\n\n### Employer's Responsibility:\n\nEmployers are also prohibited under **49 CFR \u00a7 383.37** from knowingly allowing a driver with a suspended/revoked/cancelled CDL to operate a CMV.",
+      "grade": {
+        "score": 0,
+        "reason": "missing citation: expected ['383.33'], answer has ['383.31(a)', '383.31(b)', '383.37']",
+        "answer_excerpt": "## CDL Holder's Obligation to Notify Employer of License Suspension/Revocation/Cancellation\n\nUnder **49 CFR \u00a7 383.31(b)**, a CDL holder whose license is **suspended, revoked, or cancelled** by any state, or who loses the privilege to operate a commercial motor vehicle in any state for any period, **must notify their employer of that fact before the"
+      }
+    },
+    {
+      "q": {
+        "id": "FIN-001",
+        "category": "FIN",
+        "question": "What is the minimum public liability insurance amount required for a for-hire motor carrier transporting non-hazardous freight?",
+        "citation": "49 CFR 387.9",
+        "key_concepts": [
+          "$750,000",
+          "BMC-91 or BMC-91X filing"
+        ],
+        "common_hallucinations": [
+          "claiming $1M (that's hazmat for some materials)",
+          "claiming $300k (intrastate-only in some states)"
+        ]
+      },
+      "answer": "## Minimum Public Liability Insurance \u2013 For-Hire Motor Carriers (Non-Hazardous Freight)\n\nUnder **49 CFR \u00a7 387.9**, the minimum levels of financial responsibility for for-hire motor carriers transporting **non-hazardous property** are:\n\n- **$750,000** for vehicles with a GVWR of **10,001 lbs or more**\n- **$300,000** for vehicles with a GVWR of **10,000 lbs or less** (the \"small vehicle\" category for non-hazardous freight in interstate or foreign commerce)\n\nThese minimums apply to **bodily injury, death, and property damage** liability.\n\n**Relevant citations:**\n- **49 CFR \u00a7 387.7** \u2013 Financial responsibility required\n- **49 CFR \u00a7 387.9** \u2013 Minimum levels of financial responsibility (the schedule/table)\n\n---\n\n**Note:** These are federal minimums. Individual states may require higher amounts, and certain commodity types or operations may trigger different thresholds. Always verify current requirements, as regulatory amounts can be updated.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Minimum Public Liability Insurance \u2013 For-Hire Motor Carriers (Non-Hazardous Freight)\n\nUnder **49 CFR \u00a7 387.9**, the minimum levels of financial responsibility for for-hire motor carriers transporti"
+      }
+    },
+    {
+      "q": {
+        "id": "FIN-002",
+        "category": "FIN",
+        "question": "What is the minimum insurance for a for-hire carrier transporting oil listed in 49 CFR 172.101 (hazardous materials, Class 3)?",
+        "citation": "49 CFR 387.9",
+        "key_concepts": [
+          "$1,000,000",
+          "applies to oil listed in 172.101"
+        ],
+        "common_hallucinations": [
+          "confusing with $5M for higher-hazard materials"
+        ]
+      },
+      "answer": "## Minimum Insurance for For-Hire Carriers Transporting Hazardous Materials (Class 3 Oil)\n\nFor a for-hire motor carrier transporting **oil listed in the Hazardous Materials Table at 49 CFR 172.101** (flammable liquids, Class 3), the minimum public liability insurance is:\n\n**$1,000,000**\n\nThis applies to vehicles with a gross vehicle weight rating (GVWR) of **10,000 pounds or more**.\n\n### Citation\n\n**49 CFR 387.9** \u2014 Minimum levels of financial responsibility for for-hire motor carriers:\n\n> Hazardous substances (as listed in 49 CFR 172.101, including oil in Class 3): **$1,000,000** for carriers operating vehicles with a GVWR of 10,000 lbs or more.\n\n---\n\n### Important Notes\n\n- For **non-bulk** quantities of Class 3 materials transported in vehicles **under 10,000 lbs GVWR**, the minimum drops to **$300,000** under 49 CFR 387.9.\n- Higher minimums ($5,000,000) apply to certain other hazardous materials (e.g., radioactive materials, explosives).\n- FMCSA Form **MCS-90** (endorsement) is required per **49 CFR 387.7**.\n\nAlways verify current requirements with FMCSA, as thresholds can be updated.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Minimum Insurance for For-Hire Carriers Transporting Hazardous Materials (Class 3 Oil)\n\nFor a for-hire motor carrier transporting **oil listed in the Hazardous Materials Table at 49 CFR 172.101** ("
+      }
+    },
+    {
+      "q": {
+        "id": "FIN-003",
+        "category": "FIN",
+        "question": "What is the minimum insurance for carriers of certain extremely hazardous materials (e.g., poisonous gases, certain bulk materials)?",
+        "citation": "49 CFR 387.9",
+        "key_concepts": [
+          "$5,000,000",
+          "Class A/B explosives",
+          "poison gas Zone A",
+          "high-level radioactive material",
+          "certain bulk hazardous substances"
+        ],
+        "common_hallucinations": [
+          "claiming $1M (that's the lower hazmat tier)"
+        ]
+      },
+      "answer": "## Minimum Insurance for Extremely Hazardous Materials\n\nFor motor carriers transporting **certain extremely hazardous materials**, the minimum level of financial responsibility is:\n\n### **$5,000,000**\n\nThis applies to carriers transporting:\n- Certain **bulk shipments of hazardous materials** designated as posing the greatest risk to the public, including **poisonous gases** (Division 2.3) and other high-hazard materials in bulk quantities.\n\n**Citation:** **49 CFR \u00a7 387.9** (Table of Minimum Levels of Financial Responsibility)\n\n---\n\n### Context from the Regulatory Table (49 CFR \u00a7 387.9):\n\n| Commodity | Operation | Minimum Amount |\n|---|---|---|\n| Hazmat (certain) in bulk | For-hire & Private | **$5,000,000** |\n| Other hazmat | For-hire & Private | $1,000,000 |\n| Non-hazmat (for-hire, >10,000 lbs) | For-hire | $750,000 |\n| Non-hazmat (<10,000 lbs) | For-hire | $300,000 |\n\n---\n\nThe specific list of materials triggering the $5,000,000 requirement is found in **49 CFR \u00a7 387.9**, referencing materials listed in **49 CFR \u00a7 172.101** (Hazardous Materials Table).",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Minimum Insurance for Extremely Hazardous Materials\n\nFor motor carriers transporting **certain extremely hazardous materials**, the minimum level of financial responsibility is:\n\n### **$5,000,000**"
+      }
+    },
+    {
+      "q": {
+        "id": "FIN-004",
+        "category": "FIN",
+        "question": "How long must a motor carrier retain accident registers under 390.15?",
+        "citation": "49 CFR 390.15(b)",
+        "key_concepts": [
+          "3 years from date of accident",
+          "copy of accident report",
+          "supporting documentation"
+        ],
+        "common_hallucinations": [
+          "claiming 12 months",
+          "claiming 7 years"
+        ]
+      },
+      "answer": "Under **49 CFR 390.15(b)**, a motor carrier must retain the accident register for **3 years** after the date of each accident.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "Under **49 CFR 390.15(b)**, a motor carrier must retain the accident register for **3 years** after the date of each accident."
+      }
+    },
+    {
+      "q": {
+        "id": "FIN-005",
+        "category": "FIN",
+        "question": "What is the duration that a motor carrier must retain driver inspection records and other Part 379 records?",
+        "citation": "49 CFR Part 379 \u2014 Preservation of Records",
+        "key_concepts": [
+          "retention schedule by record type",
+          "accidents per 390.15: 3 years",
+          "inspection per 396.21: 14 months",
+          "DVIR per 396.11: 3 months",
+          "drug tests per 382.401: 1-5 years depending on result type"
+        ],
+        "common_hallucinations": [
+          "claiming a single retention period for all records"
+        ]
+      },
+      "answer": "## Retention of Driver Inspection Records\n\n**Driver Vehicle Inspection Reports (DVIRs)** must be retained for **3 months** from the date of preparation.\n\n**Citation:** 49 CFR \u00a7 396.11(c) \u2014 The driver's vehicle inspection report must be retained where the vehicle is housed or repaired for **3 months**.\n\n---\n\n## Clarification on \"Part 379\" Records\n\nI want to flag a potential confusion in your question:\n\n- **49 CFR Part 379** governs the **preservation of records** for carriers subject to the former Interstate Commerce Commission (now Surface Transportation Board) jurisdiction \u2014 primarily relating to **financial and accounting records** for certain carriers. Retention periods under Part 379 vary by record type and can range from a few years to permanent retention depending on the record category.\n\n- If you are asking about **general motor carrier safety records** under **49 CFR Part 390**, those retention requirements vary by record type (e.g., driver qualification files, hours-of-service records, etc.).\n\n---\n\n**If you can clarify which specific records you are referencing**, I can give you a more precise citation and retention period. I want to avoid giving you an inaccurate answer by conflating different record categories.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Retention of Driver Inspection Records\n\n**Driver Vehicle Inspection Reports (DVIRs)** must be retained for **3 months** from the date of preparation.\n\n**Citation:** 49 CFR \u00a7 396.11(c) \u2014 The driver'"
+      }
+    },
+    {
+      "q": {
+        "id": "GEN-001",
+        "category": "GEN",
+        "question": "What is the weight threshold (GVWR or GVW) above which a vehicle is considered a commercial motor vehicle (CMV) under Part 390?",
+        "citation": "49 CFR 390.5",
+        "key_concepts": [
+          "GVWR or GVW of 10,001 pounds or more",
+          "designed/used to transport 9+ passengers including driver for compensation",
+          "16+ passengers not for compensation",
+          "any quantity of hazmat requiring placards"
+        ],
+        "common_hallucinations": [
+          "claiming 26,001 lbs (that's the CDL threshold)",
+          "omitting passenger and hazmat triggers"
+        ]
+      },
+      "answer": "Under 49 CFR \u00a7 390.5, a commercial motor vehicle is defined, in part, as a motor vehicle or combination of motor vehicles used in commerce with a **gross vehicle weight rating (GVWR) or gross combination weight rating (GCWR), or gross vehicle weight (GVW) or gross combination weight of 10,001 pounds or more**.\n\nThe threshold is **10,001 pounds or more** (not \"over 10,000 pounds\" \u2014 the regulation uses \"10,001 or more\" as a practical matter because the statutory language in 49 U.S.C. \u00a7 31132 defines it as \"more than 10,000 pounds,\" which equates to 10,001 pounds or more in application).\n\n**Full citation:** 49 CFR \u00a7 390.5 (definition of \"Commercial motor vehicle\").",
+      "grade": {
+        "score": 0,
+        "reason": "hallucination: contains '001' (from: claiming 26,001 lbs (that's the CDL threshold))",
+        "answer_excerpt": "Under 49 CFR \u00a7 390.5, a commercial motor vehicle is defined, in part, as a motor vehicle or combination of motor vehicles used in commerce with a **gross vehicle weight rating (GVWR) or gross combination weight rating (GCWR), or gross vehicle weight (GVW) or gross combination weight of 10,001 pounds or more**.\n\nThe threshold is **10,001 pounds or m"
+      }
+    },
+    {
+      "q": {
+        "id": "GEN-002",
+        "category": "GEN",
+        "question": "What is the CDL weight threshold under Part 383?",
+        "citation": "49 CFR 383.5",
+        "key_concepts": [
+          "Class A: combination 26,001 lbs+ towing > 10,000",
+          "Class B: single 26,001 lbs+",
+          "Class C: vehicle not meeting A or B but designed for 16+ passengers or hazmat placards"
+        ],
+        "common_hallucinations": [
+          "confusing with the CMV definition in 390.5",
+          "wrong Class C trigger"
+        ]
+      },
+      "answer": "Under **49 CFR \u00a7 383.5**, a Commercial Driver's License (CDL) is required to operate a **commercial motor vehicle (CMV)**, which is defined to include vehicles with a **gross vehicle weight rating (GVWR) or gross combination weight rating (GCWR) of 26,001 pounds or more**.\n\nSpecifically, the definition of \"commercial motor vehicle\" in \u00a7 383.5 includes:\n\n- A vehicle with a **GVWR or GCWR of 26,001 or more pounds**, or\n- A vehicle designed to transport **16 or more passengers** (including the driver), or\n- A vehicle used to transport **hazardous materials** requiring placarding under 49 CFR Part 172.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "Under **49 CFR \u00a7 383.5**, a Commercial Driver's License (CDL) is required to operate a **commercial motor vehicle (CMV)**, which is defined to include vehicles with a **gross vehicle weight rating (GV"
+      }
+    },
+    {
+      "q": {
+        "id": "GEN-003",
+        "category": "GEN",
+        "question": "What is the difference between intrastate and interstate motor-carrier authority?",
+        "citation": "49 CFR 390.5 and 392.1",
+        "key_concepts": [
+          "interstate: crossing state lines or transporting goods that will (or have)",
+          "intrastate: entirely within one state",
+          "interstate CMV operations subject to all FMCSRs",
+          "intrastate operations subject to state rules but FMCSA does require CDL standards for intrastate CMVs over 26k"
+        ],
+        "common_hallucinations": [
+          "claiming all CMVs are interstate",
+          "claiming intrastate is exempt from CDL Part 383"
+        ]
+      },
+      "answer": "## Intrastate vs. Interstate Motor-Carrier Authority\n\n### Interstate Authority\n- Involves the transportation of passengers or property **across state lines**, or transportation that is part of a continuous movement in **interstate commerce** (even if physically within one state).\n- Regulated by the **Federal Motor Carrier Safety Administration (FMCSA)** under **49 CFR Parts 350\u2013399**.\n- Requires operating authority (if for-hire) issued by FMCSA \u2014 an **MC number** or **FF number** \u2014 under **49 U.S.C. \u00a7 13901** and registration under **49 CFR Part 365**.\n- Federal regulations (hours of service, CDL standards, drug & alcohol testing, etc.) apply fully.\n\n### Intrastate Authority\n- Involves transportation that **originates and terminates within the same state** and is **not part of interstate commerce**.\n- Regulated primarily by the **individual state** \u2014 each state has its own motor carrier authority and may issue its own operating permits.\n- States may adopt federal safety regulations or impose their own standards. Under **49 CFR \u00a7 350.341**, states receiving Motor Carrier Safety Assistance Program (MCSAP) grants must adopt compatible safety regulations.\n- No federal operating authority (MC number) is required for purely intrastate operations.\n\n### Key Practical Point\nThe distinction can be **legally complex**. A carrier operating entirely within one state can still be engaged in **interstate commerce** if the cargo originated from or is destined for another state \u2014 making federal rules applicable regardless of physical route.",
+      "grade": {
+        "score": 0,
+        "reason": "missing citation: expected ['390.5', '392.1'], answer has ['350.341']",
+        "answer_excerpt": "## Intrastate vs. Interstate Motor-Carrier Authority\n\n### Interstate Authority\n- Involves the transportation of passengers or property **across state lines**, or transportation that is part of a continuous movement in **interstate commerce** (even if physically within one state).\n- Regulated by the **Federal Motor Carrier Safety Administration (FMC"
+      }
+    },
+    {
+      "q": {
+        "id": "GEN-004",
+        "category": "GEN",
+        "question": "What is the FMCSA New Entrant Safety Audit requirement?",
+        "citation": "49 CFR Part 385 Subpart D",
+        "key_concepts": [
+          "18-month new entrant period",
+          "safety audit must be completed within first 12 months of operations",
+          "failure to comply results in revocation of new entrant registration",
+          "specific automatic failure violations listed in 385.321"
+        ],
+        "common_hallucinations": [
+          "claiming 24-month period (it's 18)",
+          "forgetting the automatic failure violations"
+        ]
+      },
+      "answer": "## FMCSA New Entrant Safety Audit Requirement\n\n### Regulatory Basis\n**49 CFR Part 385, Subpart D** governs the New Entrant Safety Assurance Program.\n\n---\n\n### Key Requirements\n\n**Who it applies to:**\nNew entrant motor carriers (both domestic and foreign) that register with FMCSA to operate in interstate commerce.\n\n**18-Month Probationary Period:**\nNew entrants operate under an 18-month probationary registration period per **49 CFR 385.319**.\n\n**Safety Audit:**\n- FMCSA must conduct a safety audit of a new entrant within the **18-month probationary period** \u2014 **49 CFR 385.321**\n- The audit evaluates whether the carrier has basic safety management controls in place\n\n---\n\n### What Is Reviewed\nPer **49 CFR 385.322**, the audit examines:\n- Driver qualifications\n- Hours of service\n- Vehicle maintenance\n- Accident recordkeeping\n- Drug and alcohol testing programs\n- Hazardous materials (if applicable)\n\n---\n\n### Outcomes\n- **Pass:** Registration continues \u2014 **49 CFR 385.323**\n- **Fail:** FMCSA issues a notice and the carrier must take corrective action or face **revocation of operating authority** \u2014 **49 CFR 385.325**\n\n---\n\n### Note\nThe safety audit is **not** a full compliance review but rather a basic assessment of safety management systems.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## FMCSA New Entrant Safety Audit Requirement\n\n### Regulatory Basis\n**49 CFR Part 385, Subpart D** governs the New Entrant Safety Assurance Program.\n\n---\n\n### Key Requirements\n\n**Who it applies to:**\n"
+      }
+    },
+    {
+      "q": {
+        "id": "GEN-005",
+        "category": "GEN",
+        "question": "What is the difference between a Compliance Review and a Safety Audit?",
+        "citation": "49 CFR 385.7 (rating factors) and 385.305 (new entrant)",
+        "key_concepts": [
+          "Compliance Review: comprehensive examination leading to safety rating (Satisfactory/Conditional/Unsatisfactory)",
+          "Safety Audit: new entrant audit, no rating issued, pass/fail",
+          "CR can be triggered by SMS data, complaints, crashes; Safety Audit is the new-entrant program"
+        ],
+        "common_hallucinations": [
+          "confusing the two",
+          "claiming a safety audit produces a Conditional rating"
+        ]
+      },
+      "answer": "## Compliance Review vs. Safety Audit\n\n### Safety Audit\n- Conducted on **new entrant motor carriers** during their 18-month new entrant probationary period\n- Governed by **49 CFR Part 385, Subpart D (\u00a7\u00a7 385.301\u2013385.309)**\n- Purpose: Verify the carrier has basic safety management controls in place\n- Examines a more limited set of safety requirements\n- A failed Safety Audit results in the carrier being placed **out of service** and their new entrant registration revoked if not corrected\n\n### Compliance Review (CR)\n- Conducted on **existing, registered carriers** (not new entrants)\n- Governed by **49 CFR Part 385, Subpart A (\u00a7 385.3 definitions) and Part 386**\n- Purpose: Comprehensive on-site examination of a carrier's records and operations\n- Evaluates performance across **six Behavior Analysis and Safety Improvement Categories (BASICs)**\n- Results in a **Safety Rating** (Satisfactory, Conditional, or Unsatisfactory) per **49 CFR Part 385, Subpart A**\n- An Unsatisfactory rating can result in an **out-of-service order**\n\n### Key Distinction\nThe Safety Audit is a **pass/fail** assessment for new carriers; the Compliance Review results in a formal **safety rating** for established carriers and is generally more comprehensive.",
+      "grade": {
+        "score": 0,
+        "reason": "missing citation: expected ['385.305', '385.7'], answer has ['385.3', '385.301', '385.309']",
+        "answer_excerpt": "## Compliance Review vs. Safety Audit\n\n### Safety Audit\n- Conducted on **new entrant motor carriers** during their 18-month new entrant probationary period\n- Governed by **49 CFR Part 385, Subpart D (\u00a7\u00a7 385.301\u2013385.309)**\n- Purpose: Verify the carrier has basic safety management controls in place\n- Examines a more limited set of safety requirements"
+      }
+    },
+    {
+      "q": {
+        "id": "ELD-001",
+        "category": "ELD",
+        "question": "Who is required to use an ELD?",
+        "citation": "49 CFR 395.8(a)",
+        "key_concepts": [
+          "drivers required to keep RODS",
+          "exemptions: short-haul (150 air-mile), driveaway-tow, pre-2000 model year truck, \u22648 days of RODS in any 30-day period"
+        ],
+        "common_hallucinations": [
+          "claiming all CMV drivers must use ELDs",
+          "forgetting the pre-2000 exemption"
+        ]
+      },
+      "answer": "## ELD Requirement\n\nUnder **49 CFR Part 395, Subpart B**, most commercial motor vehicle (CMV) drivers who are required to prepare **Hours of Service (HOS) records of duty status (RODS)** must use an ELD.\n\n---\n\n### Specifically Covered:\n\n- Drivers of CMVs engaged in **interstate commerce** who are required to keep RODS under **49 CFR 395.8**\n\n---\n\n### Key Exemptions (drivers who may use paper logs or are exempt from ELD):\n\n1. **Short-haul drivers** exempt from keeping RODS (operating within 100 or 150 air-mile radius) \u2013 **49 CFR 395.1(e)**\n2. Drivers who operate under the **8-day/short-haul exception** and never exceed 100 air miles\n3. Drivers using **paper RODS** for **8 or fewer days** in any 30-day period \u2013 **49 CFR 395.22(f)**\n4. **Driveaway-towaway** operations where the vehicle being driven is the commodity \u2013 **49 CFR 395.22(g)**\n5. Drivers of vehicles **manufactured before model year 2000** \u2013 **49 CFR 395.22(g)**\n\n---\n\n### Authority:\nThe ELD mandate is established under **49 CFR 395.22(a)**.",
+      "grade": {
+        "score": 0,
+        "reason": "hallucination: contains '2000' (from: forgetting the pre-2000 exemption)",
+        "answer_excerpt": "## ELD Requirement\n\nUnder **49 CFR Part 395, Subpart B**, most commercial motor vehicle (CMV) drivers who are required to prepare **Hours of Service (HOS) records of duty status (RODS)** must use an ELD.\n\n---\n\n### Specifically Covered:\n\n- Drivers of CMVs engaged in **interstate commerce** who are required to keep RODS under **49 CFR 395.8**\n\n---\n\n#"
+      }
+    },
+    {
+      "q": {
+        "id": "ELD-002",
+        "category": "ELD",
+        "question": "What duty status changes must an ELD automatically record?",
+        "citation": "49 CFR 395.26",
+        "key_concepts": [
+          "on-duty driving when vehicle moves at >5 mph",
+          "duty status change at engine start/stop with prompt",
+          "yard moves and personal conveyance must be manually selected",
+          "automatic transition to on-duty driving after 5 minutes stopped if no input"
+        ],
+        "common_hallucinations": [
+          "claiming all 4 duty statuses change automatically (only driving auto-engages)"
+        ]
+      },
+      "answer": "## ELD Automatic Duty Status Recording\n\nUnder **49 CFR \u00a7 395.26**, an ELD must automatically record the following duty status changes:\n\n### Required Automatic Records:\n\n1. **Engine power-on** \u2013 recorded as a change in driver's duty status at the time the vehicle engine is powered on\n\n2. **Engine power-off** \u2013 recorded as a change in driver's duty status at the time the vehicle engine is powered off\n\n3. **Elapsed time** \u2013 when cumulative driving time reaches certain thresholds:\n - At **60 minutes** of driving without a duty status change, the ELD must prompt the driver\n\n4. **Vehicle in motion / stopped** \u2013 the ELD must automatically capture:\n - When the vehicle begins moving (transitions to **Driving** status)\n - When the vehicle stops and has been stationary for **5 consecutive minutes** \u2014 the ELD must prompt the driver to confirm continued driving status or change it\n\n### Key Provision (\u00a7 395.26(b)):\nThe ELD must automatically record the vehicle's **location, date, time, engine hours, vehicle miles, driver ID, and authenticated user** at each duty status change.\n\n---\n\n**Note:** The driver must still manually confirm or select on-duty not driving, off-duty, or sleeper berth statuses \u2014 the ELD does **not** automatically assign those categories without driver input.\n\n> **Primary citation:** 49 CFR \u00a7 395.26",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## ELD Automatic Duty Status Recording\n\nUnder **49 CFR \u00a7 395.26**, an ELD must automatically record the following duty status changes:\n\n### Required Automatic Records:\n\n1. **Engine power-on** \u2013 record"
+      }
+    },
+    {
+      "q": {
+        "id": "ELD-003",
+        "category": "ELD",
+        "question": "How long must ELD data be retained?",
+        "citation": "49 CFR 395.22(i) and 395.34",
+        "key_concepts": [
+          "6 months by the carrier",
+          "driver retains supporting documents 6 months",
+          "data backed up at least monthly"
+        ],
+        "common_hallucinations": [
+          "claiming 12 months",
+          "claiming 3 years"
+        ]
+      },
+      "answer": "## ELD Data Retention Requirements\n\nUnder **49 CFR \u00a7 395.8(k)**, motor carriers must retain records of duty status (RODS) and supporting documents for **6 months** from the date of receipt.\n\nFor ELDs specifically, **49 CFR \u00a7 395.22(j)** requires that ELD records be retained for **6 months**.\n\n### Key Points:\n- The **6-month retention** requirement applies to the carrier\n- Drivers must keep their current 7-day (or 8-day if 60/70-hour rule applies) records available for roadside inspection per **49 CFR \u00a7 395.8(k)(1)**\n- ELD data must be stored on the device or a secure external storage system accessible during inspections\n\nIf you have a specific scenario (e.g., post-accident records, FMCSA audits), feel free to ask for more detail.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## ELD Data Retention Requirements\n\nUnder **49 CFR \u00a7 395.8(k)**, motor carriers must retain records of duty status (RODS) and supporting documents for **6 months** from the date of receipt.\n\nFor ELDs "
+      }
+    },
+    {
+      "q": {
+        "id": "ELD-004",
+        "category": "ELD",
+        "question": "What must a driver do during a roadside inspection regarding ELD records?",
+        "citation": "49 CFR 395.24 and 395.34",
+        "key_concepts": [
+          "produce ELD data to officer",
+          "via display, printout, telematic transfer, or local transfer",
+          "driver retains last 7 days plus current day"
+        ],
+        "common_hallucinations": [
+          "claiming driver must retain 14 days (driver: 7+current; carrier: 6 months)"
+        ]
+      },
+      "answer": "## ELD Records During Roadside Inspection\n\nUnder **49 CFR \u00a7 395.22(i)** and **49 CFR \u00a7 395.8(k)**, a driver must:\n\n1. **Display the ELD screen** to the safety official upon request, showing the current 24-hour period and the previous 7 days of records of duty status (RODS).\n\n2. **Transfer the data** to the authorized safety official if requested, using one of the two methods supported by the ELD:\n   - **Telematics transfer** (wireless web services or email)\n   - **Local transfer** (USB 2.0 or Bluetooth)\n\n3. **Provide ELD instructions** \u2013 the driver must keep a paper or electronic copy of the ELD manufacturer's instructions for data transfer and malfunction reporting in the vehicle (**49 CFR \u00a7 395.22(j)**).\n\n4. **Show a current ELD malfunction** if applicable \u2013 if the ELD is malfunctioning, the driver must notify the carrier and reconstruct RODS on paper logs for the current day and the previous 7 days, to the extent possible (**49 CFR \u00a7 395.34**).\n\n5. **Carry and present supporting documents** (fuel receipts, bills of lading, etc.) that correspond to the RODS (**49 CFR \u00a7 395.8(k)(1)**).\n\nThe driver must be able to demonstrate ELD operation to the inspector upon request.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## ELD Records During Roadside Inspection\n\nUnder **49 CFR \u00a7 395.22(i)** and **49 CFR \u00a7 395.8(k)**, a driver must:\n\n1. **Display the ELD screen** to the safety official upon request, showing the curren"
+      }
+    },
+    {
+      "q": {
+        "id": "ELD-005",
+        "category": "ELD",
+        "question": "What is the difference between a malfunctioning ELD and a data diagnostic event?",
+        "citation": "49 CFR 395.34",
+        "key_concepts": [
+          "malfunction: hardware/software failure preventing compliance",
+          "diagnostic event: detected anomaly that doesn't prevent compliance",
+          "malfunction must be repaired within 8 days; if not, FMCSA extension required",
+          "drivers maintain paper RODS during malfunction"
+        ],
+        "common_hallucinations": [
+          "treating diagnostic events the same as malfunctions",
+          "claiming paper logs aren't allowed during ELD malfunction"
+        ]
+      },
+      "answer": "## ELD Malfunction vs. Data Diagnostic Event\n\nThese are two distinct conditions under the ELD rule at **49 CFR Part 395, Subpart B**.\n\n---\n\n### ELD Malfunction\n**Citation: 49 CFR \u00a7 395.34**\n\nA **malfunction** means the ELD is **not functioning properly** \u2014 it has failed to some degree and **cannot reliably record or transfer** required data. Examples include engine synchronization failures, timing malfunctions, or data recording failures.\n\n**Driver requirements:**\n- Note the malfunction on the record of duty status\n- Notify the motor carrier within 24 hours\n- Reconstruct hours of service on **paper logs** for the current 24-hour period and the previous 7 days\n- May use paper logs for up to **8 days** until the ELD is repaired or replaced\n\n---\n\n### Data Diagnostic Event\n**Citation: 49 CFR \u00a7 395.34(b) and Appendix A to Subpart B**\n\nA **data diagnostic** indicates a **discrepancy or inconsistency** in the recorded data (e.g., missing required data elements, power compliance issues), but the ELD is **still functioning**. It is essentially a warning flag.\n\n**Driver requirement:**\n- Take action to clear the diagnostic if possible; otherwise, the motor carrier investigates and resolves it.\n\n---\n\n### Key Distinction\n| | Malfunction | Data Diagnostic |\n|---|---|---|\n| ELD status | Not working properly | Still functioning |\n| Driver action | Switch to paper logs | Attempt to resolve |\n| Regulatory trigger | \u00a7 395.34(a) | \u00a7 395.34(b) |",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## ELD Malfunction vs. Data Diagnostic Event\n\nThese are two distinct conditions under the ELD rule at **49 CFR Part 395, Subpart B**.\n\n---\n\n### ELD Malfunction\n**Citation: 49 CFR \u00a7 395.34**\n\nA **malfu"
+      }
+    },
+    {
+      "q": {
+        "id": "CARGO-001",
+        "category": "CARGO",
+        "question": "What is the general cargo securement requirement under Part 393 Subpart I?",
+        "citation": "49 CFR 393.100",
+        "key_concepts": [
+          "secured by structures of adequate strength",
+          "dunnage/bracing",
+          "tiedowns meeting working load limit (WLL)",
+          "or combination thereof",
+          "prevents shifting in any direction"
+        ],
+        "common_hallucinations": [
+          "forgetting the four-directional securement standard"
+        ]
+      },
+      "answer": "## General Cargo Securement Requirement\n\nUnder **49 CFR \u00a7 393.100**, cargo must be firmly immobilized or secured on or within a vehicle by structures of adequate strength, dunnage or dunnage bags, shoring bars, tiedowns, or a combination of these.\n\nSpecifically, **49 CFR \u00a7 393.100(b)** requires that cargo must not:\n- Fall or blow from the vehicle\n- Shift upon or within the vehicle in a manner that affects the vehicle's stability or maneuverability\n\n**49 CFR \u00a7 393.102** sets the performance criteria, requiring that cargo securement systems be capable of withstanding:\n- **0.8g** deceleration in the forward direction\n- **0.5g** acceleration in the rearward direction\n- **0.5g** acceleration in the lateral direction\n\nThese standards apply to **commercial motor vehicles** operating in interstate commerce, and the requirements cover all cargo unless a specific commodity rule under Subpart I (\u00a7\u00a7 393.116\u2013393.136) applies to that cargo type, in which case the specific rule governs.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## General Cargo Securement Requirement\n\nUnder **49 CFR \u00a7 393.100**, cargo must be firmly immobilized or secured on or within a vehicle by structures of adequate strength, dunnage or dunnage bags, sho"
+      }
+    },
+    {
+      "q": {
+        "id": "CARGO-002",
+        "category": "CARGO",
+        "question": "What is the minimum number of tiedowns required based on cargo length?",
+        "citation": "49 CFR 393.110",
+        "key_concepts": [
+          "\u22645 ft and \u22641100 lbs: 1 tiedown",
+          "\u22645 ft and >1100 lbs: 2 tiedowns",
+          ">5 ft to \u226410 ft: 2 tiedowns",
+          ">10 ft: 2 plus 1 additional for each 10 ft increment beyond 10 ft"
+        ],
+        "common_hallucinations": [
+          "claiming 1 tiedown is always enough",
+          "wrong incremental rule"
+        ]
+      },
+      "answer": "## Minimum Tiedowns Based on Cargo Length\n\nUnder **49 CFR \u00a7 393.106(b)**, the minimum number of tiedowns required is based on the length of the article being secured:\n\n| Article Length | Minimum Tiedowns Required |\n|---|---|\n| Less than 5 feet | 1 tiedown |\n| 5 feet or more, but less than 10 feet | 2 tiedowns |\n| 10 feet or more | 2 tiedowns, **plus 1 additional tiedown for every 10 feet (or fraction thereof) beyond the first 10 feet** |\n\n### Key Additional Rule:\nRegardless of length, if an article is **more than 5 feet long** OR **weighs more than 1,100 lbs**, at least **2 tiedowns** are required.\n\n### Citation:\n- **49 CFR \u00a7 393.106(b)** \u2013 General tiedown requirements\n- **49 CFR \u00a7 393.106(c)** \u2013 Additional tiedown requirements based on article weight\n\nAlways ensure tiedowns also meet **working load limit (WLL)** requirements under **49 CFR \u00a7 393.108**.",
+      "grade": {
+        "score": 0,
+        "reason": "missing citation: expected ['393.110'], answer has ['393.106(b)', '393.106(c)', '393.108']",
+        "answer_excerpt": "## Minimum Tiedowns Based on Cargo Length\n\nUnder **49 CFR \u00a7 393.106(b)**, the minimum number of tiedowns required is based on the length of the article being secured:\n\n| Article Length | Minimum Tiedowns Required |\n|---|---|\n| Less than 5 feet | 1 tiedown |\n| 5 feet or more, but less than 10 feet | 2 tiedowns |\n| 10 feet or more | 2 tiedowns, **plu"
+      }
+    },
+    {
+      "q": {
+        "id": "VEHICLE-001",
+        "category": "VEHICLE",
+        "question": "What lighting and reflectors are required on a CMV under Part 393?",
+        "citation": "49 CFR 393.9 and 393.11",
+        "key_concepts": [
+          "all required lamps in operable condition",
+          "conspicuity material (red/white retroreflective tape) on trailers",
+          "minimum requirements for headlamps, taillamps, brake lights, turn signals, marker lamps, identification lamps"
+        ],
+        "common_hallucinations": [
+          "forgetting conspicuity material requirement"
+        ]
+      },
+      "answer": "## Lighting and Reflector Requirements for CMVs Under 49 CFR Part 393\n\n### Subpart B \u2014 Lighting Devices, Reflectors, and Electrical Equipment (49 CFR 393.9\u2013393.33)\n\n---\n\n### General Requirements\n\n**49 CFR 393.9** \u2014 Lamps and reflective devices must be operable. Inoperable lamps not required by the regulations may be masked or removed.\n\n**49 CFR 393.11** \u2014 Incorporates by reference the Federal Motor Vehicle Safety Standards (FMVSS), specifically requiring lamps and reflectors to meet applicable standards for the vehicle type.\n\n---\n\n### Required Lamps and Reflectors by Vehicle Type\n\n#### **49 CFR 393.11, Table 1** \u2014 The primary table specifying required lighting for CMVs, including:\n\n| Device | Location |\n|---|---|\n| Headlamps | Front |\n| Front turn signals | Front |\n| Tail lamps | Rear |\n| Brake (stop) lamps | Rear |\n| Rear turn signals | Rear |\n| Rear registration plate lamp | Rear |\n| Reflex reflectors (red) | Rear |\n| Reflex reflectors (amber) | Front/sides |\n| Side marker lamps | Front/rear sides |\n| Clearance lamps | Front/rear (vehicles 80\"+ wide) |\n| Identification lamps (3 amber front, 3 red rear) | Vehicles 80\"+ wide |\n| Hazard warning lamps | Front and rear |\n| Backup lamp | Rear |\n\n---\n\n### Key Specific Provisions\n\n- **49 CFR 393.17** \u2014 Lamps and reflectors on projecting loads\n- **49 CFR 393.19** \u2014 Hazard warning signal (flashers) required\n- **49 CFR 393.20** \u2014 Clearance lamps, required colors (amber front, red rear)\n- **49 CFR 393.22** \u2014 Combination of lamp functions permitted under certain conditions\n- **49 CFR 393.23** \u2014 Lamps to be energized (when headlamps must be on)\n- **49 CFR 393.24** \u2014 Requirements for headlamps (two required)\n- **49 CFR 393.25** \u2014 Requirements for lamps other than headlamps (color, visibility distances)\n- **49 CFR 393.26** \u2014 Requirements for reflectors\n- **49 CFR 393.27** \u2014 Rear-end protection and conspicuity (",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Lighting and Reflector Requirements for CMVs Under 49 CFR Part 393\n\n### Subpart B \u2014 Lighting Devices, Reflectors, and Electrical Equipment (49 CFR 393.9\u2013393.33)\n\n---\n\n### General Requirements\n\n**49"
+      }
+    },
+    {
+      "q": {
+        "id": "DRIVER-001",
+        "category": "DRIVER",
+        "question": "What is the regulation on use of mobile phones while driving a CMV?",
+        "citation": "49 CFR 392.82",
+        "key_concepts": [
+          "no hand-held mobile phone use while operating CMV",
+          "includes reaching for, dialing, or pressing more than a single button",
+          "'hands-free' use of voice-activated allowed"
+        ],
+        "common_hallucinations": [
+          "claiming all mobile phone use is banned (hands-free is allowed)"
+        ]
+      },
+      "answer": "## Mobile Phone Use While Driving a CMV\n\nThe primary regulation is **49 CFR \u00a7 392.82 \u2013 Using a hand-held mobile telephone**.\n\n### Key Requirements:\n\n- **Prohibition:** A CMV driver **must not use a hand-held mobile telephone** while operating a CMV.\n- This includes holding the phone to make/receive calls, dialing by pressing more than one button, or reaching for the phone in a way that requires leaving the seated/belted position.\n\n### What is Permitted:\n- Use of a **hands-free device** where the phone can be activated with **one button press** and is located within close proximity (reachable without moving from the seated/belted position).\n\n### Penalties:\n- Drivers who violate this rule are subject to **civil penalties up to $2,750**.\n- Motor carriers who allow or require drivers to use hand-held phones are subject to **civil penalties up to $11,000**.\n- Multiple violations can result in a **driver disqualification** under **49 CFR \u00a7 383.51**.\n\n### Related Rule:\n- **49 CFR \u00a7 392.80** prohibits **texting** while driving a CMV, which is treated as a separate and similarly serious violation.\n\nAlways verify current penalty amounts with FMCSA, as they are periodically adjusted for inflation.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## Mobile Phone Use While Driving a CMV\n\nThe primary regulation is **49 CFR \u00a7 392.82 \u2013 Using a hand-held mobile telephone**.\n\n### Key Requirements:\n\n- **Prohibition:** A CMV driver **must not use a ha"
+      }
+    },
+    {
+      "q": {
+        "id": "XB-001",
+        "category": "XB",
+        "question": "What is the difference between FMCSA Operating Authority (MC number) and a USDOT number?",
+        "citation": "49 CFR Part 365 (registration) and 49 CFR 390.19 (USDOT)",
+        "key_concepts": [
+          "USDOT number: identifier for all interstate CMVs and intrastate hazmat",
+          "MC/MX/FF number: operating authority granted under Part 365",
+          "for-hire carriers transporting regulated commodities need both",
+          "private carriers and exempt commodities only need USDOT"
+        ],
+        "common_hallucinations": [
+          "claiming all carriers need both",
+          "claiming private carriers need MC numbers"
+        ]
+      },
+      "answer": "## USDOT Number vs. MC Number (Operating Authority)\n\n### USDOT Number\n- A **unique identifier** assigned to commercial motor carriers for identification and safety monitoring purposes\n- Required for companies that operate commercial motor vehicles in **interstate commerce** above certain weight/passenger thresholds\n- Used to collect safety data, inspection results, crash information, and compliance reviews\n- **Regulatory basis:** 49 CFR Part 390.19 (motor carrier identification) and 49 CFR Part 390.200T / 49 CFR \u00a7 390.19\n\n---\n\n### MC Number (Operating Authority)\n- Grants **legal authority to operate** as a for-hire carrier transporting regulated commodities or passengers in interstate commerce\n- Required for **for-hire carriers** (brokers, freight forwarders, certain household goods carriers, etc.)\n- Accompanied by requirements for **insurance filings** (e.g., Form BMC-91/91X for liability) and **BOC-3** process agent designation\n- **Regulatory basis:** 49 CFR Part 365 and 49 CFR Part 366\n\n---\n\n### Key Distinction\n\n| | USDOT Number | MC Number |\n|---|---|---|\n| Purpose | Safety identification | Operating authority |\n| Who needs it | Most interstate CMV operators | For-hire carriers specifically |\n| Required for private carriers? | Often yes | Generally **no** |\n\nA private carrier typically needs a **USDOT number but not an MC number**. A for-hire carrier generally needs **both**.",
+      "grade": {
+        "score": 1,
+        "reason": "ok",
+        "answer_excerpt": "## USDOT Number vs. MC Number (Operating Authority)\n\n### USDOT Number\n- A **unique identifier** assigned to commercial motor carriers for identification and safety monitoring purposes\n- Required for c"
+      }
+    }
+  ]
+}

@@ -1,100 +1,107 @@
 {
-  "version": "1.0.0",
-  "purpose": "Hallucination-prevention eval set for X3 Compass FMCSA skill builders. Every skill-builder agent must pass >= 95% of these before its PR can be merged. CFR text round-trips against eCFR API (ecfr.federalregister.gov/api/versioner/v1/full/...).",
+  "version": "1.1.0",
+  "purpose": "Hallucination-prevention eval set for X3 Compass FMCSA skill builders. Every skill-builder agent must pass >= 95% before its PR can be merged. CFR text round-trips against eCFR API (ecfr.federalregister.gov/api/versioner/v1/full/...).",
   "scoring": {
     "pass_threshold": 0.95,
-    "method": "Each Q&A is scored 0 or 1. The agent's answer must (a) cite the exact CFR section listed under 'citation', and (b) the quoted regulation text in its answer (if any) must be an exact substring of the live eCFR text. Paraphrase OK. Made-up citations or quotes = 0.",
+    "method": "Each Q is scored 0 or 1. Pass if (a) answer cites the listed citation (or all listed if multiple), and (b) any quoted regulation text is an exact substring of live eCFR text. Paraphrase OK. Made-up citations or quotes = 0. Common_hallucinations are explicit fail-traps — if answer matches one of them, hard 0.",
     "minimum_questions_per_run": 50
   },
+  "categories": {
+    "DQF": "Driver Qualification File — Part 391",
+    "HOS": "Hours of Service — Part 395",
+    "DA":  "Drug & Alcohol — Parts 40, 382",
+    "MED": "Medical — 391.41–391.49",
+    "INSP": "Inspection / Maintenance — Part 396",
+    "HM":  "Hazardous Materials — Parts 171–180",
+    "CSA": "CSA / SMS / DataQ — FMCSA methodology",
+    "MVR": "MVR / Annual review — 391.25–391.27",
+    "FIN": "Financial Responsibility — Parts 387, 379",
+    "GEN": "General Applicability — Parts 390, 350",
+    "ELD": "ELD — 395.20–395.38",
+    "XB":  "Cross-Border — Parts 365, 368",
+    "CARGO": "Cargo Securement — 393 Subpart I",
+    "VEHICLE": "Vehicle Standards — 393.40+, 393.95+",
+    "DRIVER": "Driver Conduct — Part 392"
+  },
   "questions": [
-    {
-      "id": "DQF-001",
-      "category": "Driver Qualification File",
-      "question": "What documents must be retained in a driver's qualification file for the duration of employment plus three years after termination?",
-      "citation": "49 CFR 391.51",
-      "key_concepts": ["application for employment", "inquiries to previous employers", "medical examiner certificate", "MVR annual review", "road test certificate"],
-      "common_hallucinations": ["citing 391.21 (which is just the application form, not the file contents)", "claiming a 7-year retention (it's 3 years post-termination)"]
-    },
-    {
-      "id": "HOS-001",
-      "category": "Hours of Service",
-      "question": "What is the maximum driving time for a property-carrying driver between off-duty periods?",
-      "citation": "49 CFR 395.3(a)(3)",
-      "key_concepts": ["11 hours driving", "14-hour window", "10 consecutive hours off duty"],
-      "common_hallucinations": ["confusing with passenger-carrying limits in 395.5", "claiming 13 hours (Canadian rule)"]
-    },
-    {
-      "id": "DA-001",
-      "category": "Drug & Alcohol",
-      "question": "When is a post-accident drug test required under 49 CFR Part 382?",
-      "citation": "49 CFR 382.303",
-      "key_concepts": ["fatality", "citation issued + bodily injury treated away from scene", "citation issued + disabling damage requiring tow", "8-hour alcohol window", "32-hour drug window"],
-      "common_hallucinations": ["claiming all accidents trigger a test (only those meeting the threshold)", "wrong testing windows"]
-    },
-    {
-      "id": "MED-001",
-      "category": "Medical",
-      "question": "How long is a standard CDL driver medical examiner's certificate valid?",
-      "citation": "49 CFR 391.43(h)",
-      "key_concepts": ["up to 24 months", "shorter at examiner's discretion based on health"],
-      "common_hallucinations": ["claiming always 24 months (the examiner may issue shorter)", "claiming 12 months default"]
-    },
-    {
-      "id": "INSP-001",
-      "category": "Inspection / Maintenance",
-      "question": "How long must a motor carrier retain annual inspection reports for each vehicle?",
-      "citation": "49 CFR 396.21(b)",
-      "key_concepts": ["14 months from inspection report date", "kept at location specified by carrier"],
-      "common_hallucinations": ["12 months", "3 years", "duration of vehicle ownership"]
-    },
-    {
-      "id": "HM-001",
-      "category": "Hazmat",
-      "question": "What is the placard threshold for Table 2 hazardous materials being transported by highway?",
-      "citation": "49 CFR 172.504(c)",
-      "key_concepts": ["1,001 pounds aggregate gross weight", "Table 1 materials placard regardless of quantity"],
-      "common_hallucinations": ["confusing Table 1 vs Table 2", "wrong weight threshold"]
-    },
-    {
-      "id": "CSA-001",
-      "category": "CSA / SMS",
-      "question": "Which BASIC categories does FMCSA's Safety Measurement System (SMS) currently use?",
-      "citation": "FMCSA SMS Methodology v3.0.5",
-      "key_concepts": ["Unsafe Driving", "Hours-of-Service Compliance", "Driver Fitness", "Controlled Substances and Alcohol", "Vehicle Maintenance", "Hazardous Materials Compliance", "Crash Indicator"],
-      "common_hallucinations": ["omitting Crash Indicator", "naming categories that don't exist"],
-      "note": "This question intentionally cites a methodology doc, not the CFR. Skill must acknowledge BASIC percentiles are NOT public via free FMCSA API since the 2015 FAST Act."
-    },
-    {
-      "id": "MVR-001",
-      "category": "MVR / Annual Review",
-      "question": "How often must a motor carrier obtain a Motor Vehicle Record (MVR) for each driver?",
-      "citation": "49 CFR 391.25(a)",
-      "key_concepts": ["at least once every 12 months", "from each state where driver held a CDL during the year"],
-      "common_hallucinations": ["claiming every 24 months", "only the home state"]
-    },
-    {
-      "id": "FIN-001",
-      "category": "Financial Responsibility",
-      "question": "What is the minimum public liability insurance amount required for a for-hire motor carrier transporting non-hazardous freight?",
-      "citation": "49 CFR 387.9",
-      "key_concepts": ["$750,000", "BMC-91 or BMC-91X filing"],
-      "common_hallucinations": ["claiming $1M (that's the hazmat threshold for some materials)", "claiming $300k (intrastate-only in some states)"]
-    },
-    {
-      "id": "GEN-001",
-      "category": "Applicability",
-      "question": "What is the weight threshold (GVWR or GVW) above which a vehicle is considered a commercial motor vehicle (CMV) under Part 390?",
-      "citation": "49 CFR 390.5",
-      "key_concepts": ["gross vehicle weight rating or gross vehicle weight of 10,001 pounds or more", "designed/used to transport 9+ passengers including the driver for compensation", "16+ passengers not for compensation", "any quantity of hazmat requiring placards"],
-      "common_hallucinations": ["claiming 26,001 lbs (that's the CDL threshold, not the CMV threshold)", "omitting the passenger and hazmat triggers"]
-    }
+    {"id":"DQF-001","category":"DQF","question":"What documents must be retained in a driver's qualification file for the duration of employment plus three years after termination?","citation":"49 CFR 391.51","key_concepts":["application for employment","inquiries to previous employers","medical examiner certificate","MVR annual review","road test certificate"],"common_hallucinations":["citing 391.21 (which is just the application form, not the file contents)","claiming a 7-year retention (it's 3 years post-termination)"]},
+    {"id":"DQF-002","category":"DQF","question":"How long must a motor carrier retain the application for employment after a driver leaves?","citation":"49 CFR 391.51(d)(1)","key_concepts":["3 years from termination","kept in DQ file","duration of employment plus 3 years"],"common_hallucinations":["claiming permanent retention","claiming 7 years like tax records"]},
+    {"id":"DQF-003","category":"DQF","question":"What inquiries must a motor carrier make about a prospective driver's previous employment?","citation":"49 CFR 391.23","key_concepts":["previous 3 years of employment","DOT-regulated employers","accidents per 390.5","drug and alcohol testing history per Part 40","30-day window for response"],"common_hallucinations":["claiming 5-year lookback (it's 3)","forgetting Part 40 testing history requirement"]},
+    {"id":"DQF-004","category":"DQF","question":"What is required for a driver to be qualified to operate a CMV under Part 391?","citation":"49 CFR 391.11","key_concepts":["21 years old (interstate)","read/speak English","physically qualified per 391.41","valid CDL or operator's license","completed application","road test or equivalent","not disqualified under 391.15"],"common_hallucinations":["claiming 18 years old (that's intrastate in some states, NOT 391.11)","forgetting the English requirement"]},
+    {"id":"DQF-005","category":"DQF","question":"What is the road test requirement and what is an acceptable substitute?","citation":"49 CFR 391.31","key_concepts":["road test required","carrier may accept valid CDL as equivalent except for double/triple trailers and tank vehicles","certificate retained in DQ file"],"common_hallucinations":["claiming CDL always substitutes (it doesn't for doubles/triples/tanks)"]},
+
+    {"id":"HOS-001","category":"HOS","question":"What is the maximum driving time for a property-carrying driver between off-duty periods?","citation":"49 CFR 395.3(a)(3)","key_concepts":["11 hours driving","14-hour on-duty window","10 consecutive hours off duty"],"common_hallucinations":["confusing with passenger-carrying limits in 395.5","claiming 13 hours (Canadian rule)"]},
+    {"id":"HOS-002","category":"HOS","question":"What is the 60/70-hour limit and when does the 34-hour restart apply?","citation":"49 CFR 395.3(b) and 395.3(c)","key_concepts":["60 hours in 7 consecutive days (carriers not operating every day of the week)","70 hours in 8 consecutive days (carriers operating every day)","34 consecutive hours off duty to restart"],"common_hallucinations":["claiming the restart must include two 1am-5am periods (that requirement was rescinded)","mixing up 60 and 70 hour applicability"]},
+    {"id":"HOS-003","category":"HOS","question":"What is the 30-minute rest break requirement under HOS rules?","citation":"49 CFR 395.3(a)(3)(ii)","key_concepts":["30 minutes interrupting any 8 cumulative hours of driving time","can be satisfied by on-duty not-driving status (as of 2020 amendment)"],"common_hallucinations":["claiming it must be off-duty (the 2020 amendment allows on-duty not-driving)","saying it's every 8 hours of on-duty time"]},
+    {"id":"HOS-004","category":"HOS","question":"What is the sleeper berth split provision currently allowed?","citation":"49 CFR 395.1(g)","key_concepts":["split sleeper: 7/3 or 8/2 split","one period in sleeper at least 7 consecutive hours","second period at least 2 consecutive hours either in sleeper or off-duty","neither period counts against the 14-hour window"],"common_hallucinations":["claiming only 8/2 is allowed (7/3 is also allowed since 2020)","claiming the second period must be in the sleeper berth"]},
+    {"id":"HOS-005","category":"HOS","question":"When is the short-haul exception available and what are its limits?","citation":"49 CFR 395.1(e)(1)","key_concepts":["150 air-mile radius","return to work-reporting location within 14 hours","not required to maintain RODS","records kept by employer for 6 months"],"common_hallucinations":["claiming 100 air-mile (that was the old limit before 2020)","claiming 12-hour window (it's 14)"]},
+
+    {"id":"DA-001","category":"DA","question":"When is a post-accident drug and alcohol test required?","citation":"49 CFR 382.303","key_concepts":["fatality","citation issued + bodily injury treated away from scene","citation issued + disabling damage requiring tow-away","8-hour alcohol window","32-hour drug window"],"common_hallucinations":["claiming all accidents trigger a test","wrong testing windows"]},
+    {"id":"DA-002","category":"DA","question":"What categories of testing does Part 382 require?","citation":"49 CFR 382.301–382.311","key_concepts":["pre-employment","random","reasonable suspicion","post-accident","return-to-duty","follow-up"],"common_hallucinations":["forgetting follow-up","including 'voluntary' (not required by 382)"]},
+    {"id":"DA-003","category":"DA","question":"What is the minimum annual random testing rate for controlled substances under Part 382?","citation":"49 CFR 382.305(b)(2) and FMCSA annual notice","key_concepts":["50% of average number of driver positions for controlled substances","10% for alcohol","rate set by FMCSA Administrator annually","based on positive rate from prior year"],"common_hallucinations":["claiming 25% (that was alcohol pre-2020)","claiming the rate is fixed forever"]},
+    {"id":"DA-004","category":"DA","question":"What must a motor carrier do upon receiving a Clearinghouse query showing a violation?","citation":"49 CFR 382.701 and 382.501","key_concepts":["remove driver from safety-sensitive function","cannot return to safety-sensitive function until completing return-to-duty process","SAP evaluation","negative return-to-duty test","follow-up testing plan"],"common_hallucinations":["claiming the carrier can immediately retest in-house","skipping the SAP requirement"]},
+    {"id":"DA-005","category":"DA","question":"Who is the Designated Employer Representative (DER) and what is their authority?","citation":"49 CFR 382.107 (definitions)","key_concepts":["employee authorized by employer","receives test results and refusals","makes required decisions","cannot be a service agent (C/TPA staff)"],"common_hallucinations":["claiming the MRO is the DER","claiming the C/TPA can be the DER"]},
+
+    {"id":"MED-001","category":"MED","question":"How long is a standard CDL driver medical examiner's certificate valid?","citation":"49 CFR 391.43(h) and 391.45","key_concepts":["up to 24 months","shorter at examiner's discretion based on health","must be issued by certified medical examiner on National Registry"],"common_hallucinations":["claiming always 24 months","claiming 12 months default"]},
+    {"id":"MED-002","category":"MED","question":"What is required for a driver with insulin-treated diabetes mellitus (ITDM) to qualify?","citation":"49 CFR 391.46","key_concepts":["treating clinician assessment","Insulin-Treated Diabetes Mellitus Assessment Form (MCSA-5870)","examiner determines qualification","no waiver required as of 2018 rule"],"common_hallucinations":["claiming federal waiver still required (rescinded 2018)","claiming ITDM is automatically disqualifying"]},
+    {"id":"MED-003","category":"MED","question":"What vision standard must a driver meet under Part 391?","citation":"49 CFR 391.41(b)(10)","key_concepts":["distant visual acuity 20/40 each eye with or without correction","field of vision 70 degrees in horizontal meridian each eye","ability to recognize colors of traffic signals and devices"],"common_hallucinations":["claiming 20/20 (it's 20/40)","forgetting the field of vision requirement"]},
+    {"id":"MED-004","category":"MED","question":"What hearing standard must a driver meet?","citation":"49 CFR 391.41(b)(11)","key_concepts":["forced whisper at 5 feet with or without hearing aid","OR average hearing loss not exceeding 40 dB at 500/1000/2000 Hz with or without hearing aid"],"common_hallucinations":["forgetting the 'or' between the two tests","claiming hearing aids are disqualifying"]},
+    {"id":"MED-005","category":"MED","question":"What blood pressure standards apply to medical certification?","citation":"FMCSA Medical Examiner Handbook + 391.41 advisory criteria","key_concepts":["Stage 1 (140-159/90-99): 1-year cert","Stage 2 (160-179/100-109): one-time 3-month cert then annual if controlled","Stage 3 (≥180/≥110): disqualified until reduced to <140/90","not a strict 391.41 numeric standard but FMCSA advisory criteria"],"common_hallucinations":["citing 391.41 as having explicit BP numbers (it doesn't — the handbook does)"]},
+
+    {"id":"INSP-001","category":"INSP","question":"How long must a motor carrier retain annual inspection reports for each vehicle?","citation":"49 CFR 396.21(b)","key_concepts":["14 months from inspection report date","kept at location specified by carrier"],"common_hallucinations":["12 months","3 years","duration of vehicle ownership"]},
+    {"id":"INSP-002","category":"INSP","question":"What constitutes a Driver Vehicle Inspection Report (DVIR) requirement?","citation":"49 CFR 396.11","key_concepts":["written or electronic report at end of each work day","only required if defect or deficiency that affects safe operation","carrier must repair or determine no repair needed","retain 3 months"],"common_hallucinations":["claiming DVIR required every day even with no defects (rescinded 2014)","claiming 12-month retention (it's 3 months)"]},
+    {"id":"INSP-003","category":"INSP","question":"What is the brake performance requirement under Part 393?","citation":"49 CFR 393.52","key_concepts":["service brake stopping distance: 35 mph initial speed","truck/truck-tractor/bus: 30 feet (60 mph: roughly 245 ft)","specific stopping distances by vehicle type","emergency brake: hold vehicle stationary"],"common_hallucinations":["confusing service vs emergency brake distances","using 35 mph for 60 mph spec"]},
+    {"id":"INSP-004","category":"INSP","question":"What pre-trip inspection items are required under 392.7?","citation":"49 CFR 392.7","key_concepts":["service brakes (including trailer brakes)","parking brake","steering","lights and reflectors","tires","horn","windshield wipers","rear-vision mirrors","coupling devices","emergency equipment"],"common_hallucinations":["forgetting emergency equipment per 393.95","claiming a specific time duration (392.7 doesn't dictate one)"]},
+    {"id":"INSP-005","category":"INSP","question":"How long must DVIRs be retained?","citation":"49 CFR 396.11(c)","key_concepts":["3 months from date prepared"],"common_hallucinations":["12 months","14 months (that's annual inspections)","3 years"]},
+
+    {"id":"HM-001","category":"HM","question":"What is the placard threshold for Table 2 hazardous materials being transported by highway?","citation":"49 CFR 172.504(c)","key_concepts":["1,001 pounds aggregate gross weight","Table 1 materials placard regardless of quantity"],"common_hallucinations":["confusing Table 1 vs Table 2","wrong weight threshold"]},
+    {"id":"HM-002","category":"HM","question":"What materials are in Table 1 (placard at any quantity)?","citation":"49 CFR 172.504(e) Table 1","key_concepts":["Class 1.1, 1.2, 1.3 explosives","Class 2.3 Inhalation Hazard Zone A or B","Class 4.3 Dangerous When Wet I","Class 5.2 Type B Organic Peroxide","Class 6.1 PG I Inhalation Hazard Zone A","Class 7 Highway Route Controlled"],"common_hallucinations":["putting Class 3 flammable liquids in Table 1","confusing 4.3 with 4.1"]},
+    {"id":"HM-003","category":"HM","question":"What documentation must accompany a hazmat shipment by highway?","citation":"49 CFR 172.200, 172.201, 172.202, 172.203","key_concepts":["proper shipping name","hazard class","UN/NA identification number","packing group","quantity and unit","shipper certification","emergency response phone number","emergency response info per 172.602"],"common_hallucinations":["forgetting the emergency response phone number","forgetting the shipper certification"]},
+    {"id":"HM-004","category":"HM","question":"What hazmat training is required for hazmat employees under Part 172 Subpart H?","citation":"49 CFR 172.704","key_concepts":["general awareness","function-specific","safety training","security awareness","in-depth security training (if HM security plan required)","every 3 years recurrent","initial within 90 days of hire"],"common_hallucinations":["claiming annual training (it's every 3 years)","forgetting security training"]},
+    {"id":"HM-005","category":"HM","question":"What is the HM-181 hazardous materials registration requirement?","citation":"49 CFR Part 107 Subpart G","key_concepts":["annual registration with PHMSA","fee varies by carrier size","required for offerors and carriers of certain hazmat","filing renewed each year","statement of registration carried"],"common_hallucinations":["confusing with the FMCSA Hazmat Safety Permit at 385 Subpart E (separate program)"]},
+
+    {"id":"CSA-001","category":"CSA","question":"Which BASIC categories does FMCSA's Safety Measurement System (SMS) currently use?","citation":"FMCSA SMS Methodology v3.0.5","key_concepts":["Unsafe Driving","Hours-of-Service Compliance","Driver Fitness","Controlled Substances and Alcohol","Vehicle Maintenance","Hazardous Materials Compliance","Crash Indicator"],"common_hallucinations":["omitting Crash Indicator","naming categories that don't exist"],"note":"BASIC percentiles are NOT public via free FMCSA API since 2015 FAST Act."},
+    {"id":"CSA-002","category":"CSA","question":"How long do roadside inspection violations stay in the SMS calculation?","citation":"FMCSA SMS Methodology — Time Weights","key_concepts":["24 months","time-weighted: violations in months 0-6 weighted 3, months 7-12 weighted 2, months 13-24 weighted 1"],"common_hallucinations":["claiming 12 months","claiming 36 months","forgetting the time weights"]},
+    {"id":"CSA-003","category":"CSA","question":"What is the Inspection Selection System (ISS) score and how is it used?","citation":"FMCSA ISS — Inspection Selection System","key_concepts":["score 0-100","75-100: Inspect","50-74: Optional","0-49: Pass","calculated from CSA BASIC percentiles + inspection history"],"common_hallucinations":["claiming roadside officers see the BASIC percentiles directly (they see ISS, derived from BASICs)"]},
+    {"id":"CSA-004","category":"CSA","question":"What is a DataQ challenge and what kinds of records can be challenged?","citation":"FMCSA DataQ — Request for Data Review","key_concepts":["inspection violations","crash records (DOT-reportable)","carrier identification info","challenges submitted via dataqs.fmcsa.dot.gov","state agency reviews","30-day target response"],"common_hallucinations":["claiming state law violations can be challenged via DataQ (state DOT handles those)","claiming citations are challenged via DataQ (those go through traffic court)"]},
+    {"id":"CSA-005","category":"CSA","question":"What is the Crash Preventability Determination Program?","citation":"FMCSA CPDP — 2020 expansion","key_concepts":["20 specific crash types eligible","carrier or driver may submit","determination as 'not preventable' removes crash from Crash Indicator BASIC SMS calculation","does not remove crash from public Carrier Profile (CSA) record"],"common_hallucinations":["claiming preventability removes crash from all FMCSA records (it only affects Crash Indicator)"]},
+
+    {"id":"MVR-001","category":"MVR","question":"How often must a motor carrier obtain a Motor Vehicle Record (MVR) for each driver?","citation":"49 CFR 391.25(a)","key_concepts":["at least once every 12 months","from each state where driver held a CDL during the year"],"common_hallucinations":["claiming every 24 months","only the home state"]},
+    {"id":"MVR-002","category":"MVR","question":"What must a motor carrier do based on the annual MVR review?","citation":"49 CFR 391.25(b)","key_concepts":["determine continued qualification","written record of review","note any violations affecting CMV operation","retain in DQ file"],"common_hallucinations":["claiming no documentation needed if MVR is clean"]},
+    {"id":"MVR-003","category":"MVR","question":"What is the driver's obligation to report convictions under 391.27?","citation":"49 CFR 391.27","key_concepts":["list of violations of motor vehicle laws","other than parking","each 12 months","provided to carrier","retained in DQ file"],"common_hallucinations":["claiming only CMV-related violations need reporting (it's all violations except parking)"]},
+    {"id":"MVR-004","category":"MVR","question":"What is the CDL holder's obligation to notify employer of conviction?","citation":"49 CFR 383.31","key_concepts":["within 30 days of conviction","any violation of state/local law relating to motor vehicle traffic","other than parking","in writing","contains specific elements (location, court, plea, etc.)"],"common_hallucinations":["claiming 60 days","forgetting it applies to all states not just home state"]},
+    {"id":"MVR-005","category":"MVR","question":"What is the CDL holder's obligation to notify their employer of license suspension/revocation/cancellation?","citation":"49 CFR 383.33","key_concepts":["by end of business day following day driver received notice","applies to any suspension/revocation/cancellation","disqualification under 383.51 also reportable"],"common_hallucinations":["claiming 30-day window (that's convictions, not suspensions)"]},
+
+    {"id":"FIN-001","category":"FIN","question":"What is the minimum public liability insurance amount required for a for-hire motor carrier transporting non-hazardous freight?","citation":"49 CFR 387.9","key_concepts":["$750,000","BMC-91 or BMC-91X filing"],"common_hallucinations":["claiming $1M (that's hazmat for some materials)","claiming $300k (intrastate-only in some states)"]},
+    {"id":"FIN-002","category":"FIN","question":"What is the minimum insurance for a for-hire carrier transporting oil listed in 49 CFR 172.101 (hazardous materials, Class 3)?","citation":"49 CFR 387.9","key_concepts":["$1,000,000","applies to oil listed in 172.101"],"common_hallucinations":["confusing with $5M for higher-hazard materials"]},
+    {"id":"FIN-003","category":"FIN","question":"What is the minimum insurance for carriers of certain extremely hazardous materials (e.g., poisonous gases, certain bulk materials)?","citation":"49 CFR 387.9","key_concepts":["$5,000,000","Class A/B explosives","poison gas Zone A","high-level radioactive material","certain bulk hazardous substances"],"common_hallucinations":["claiming $1M (that's the lower hazmat tier)"]},
+    {"id":"FIN-004","category":"FIN","question":"How long must a motor carrier retain accident registers under 390.15?","citation":"49 CFR 390.15(b)","key_concepts":["3 years from date of accident","copy of accident report","supporting documentation"],"common_hallucinations":["claiming 12 months","claiming 7 years"]},
+    {"id":"FIN-005","category":"FIN","question":"What is the duration that a motor carrier must retain driver inspection records and other Part 379 records?","citation":"49 CFR Part 379 — Preservation of Records","key_concepts":["retention schedule by record type","accidents per 390.15: 3 years","inspection per 396.21: 14 months","DVIR per 396.11: 3 months","drug tests per 382.401: 1-5 years depending on result type"],"common_hallucinations":["claiming a single retention period for all records"]},
+
+    {"id":"GEN-001","category":"GEN","question":"What is the weight threshold (GVWR or GVW) above which a vehicle is considered a commercial motor vehicle (CMV) under Part 390?","citation":"49 CFR 390.5","key_concepts":["GVWR or GVW of 10,001 pounds or more","designed/used to transport 9+ passengers including driver for compensation","16+ passengers not for compensation","any quantity of hazmat requiring placards"],"common_hallucinations":["claiming 26,001 lbs (that's the CDL threshold)","omitting passenger and hazmat triggers"]},
+    {"id":"GEN-002","category":"GEN","question":"What is the CDL weight threshold under Part 383?","citation":"49 CFR 383.5","key_concepts":["Class A: combination 26,001 lbs+ towing > 10,000","Class B: single 26,001 lbs+","Class C: vehicle not meeting A or B but designed for 16+ passengers or hazmat placards"],"common_hallucinations":["confusing with the CMV definition in 390.5","wrong Class C trigger"]},
+    {"id":"GEN-003","category":"GEN","question":"What is the difference between intrastate and interstate motor-carrier authority?","citation":"49 CFR 390.5 and 392.1","key_concepts":["interstate: crossing state lines or transporting goods that will (or have)","intrastate: entirely within one state","interstate CMV operations subject to all FMCSRs","intrastate operations subject to state rules but FMCSA does require CDL standards for intrastate CMVs over 26k"],"common_hallucinations":["claiming all CMVs are interstate","claiming intrastate is exempt from CDL Part 383"]},
+    {"id":"GEN-004","category":"GEN","question":"What is the FMCSA New Entrant Safety Audit requirement?","citation":"49 CFR Part 385 Subpart D","key_concepts":["18-month new entrant period","safety audit must be completed within first 12 months of operations","failure to comply results in revocation of new entrant registration","specific automatic failure violations listed in 385.321"],"common_hallucinations":["claiming 24-month period (it's 18)","forgetting the automatic failure violations"]},
+    {"id":"GEN-005","category":"GEN","question":"What is the difference between a Compliance Review and a Safety Audit?","citation":"49 CFR 385.7 (rating factors) and 385.305 (new entrant)","key_concepts":["Compliance Review: comprehensive examination leading to safety rating (Satisfactory/Conditional/Unsatisfactory)","Safety Audit: new entrant audit, no rating issued, pass/fail","CR can be triggered by SMS data, complaints, crashes; Safety Audit is the new-entrant program"],"common_hallucinations":["confusing the two","claiming a safety audit produces a Conditional rating"]},
+
+    {"id":"ELD-001","category":"ELD","question":"Who is required to use an ELD?","citation":"49 CFR 395.8(a)","key_concepts":["drivers required to keep RODS","exemptions: short-haul (150 air-mile), driveaway-tow, pre-2000 model year truck, ≤8 days of RODS in any 30-day period"],"common_hallucinations":["claiming all CMV drivers must use ELDs","forgetting the pre-2000 exemption"]},
+    {"id":"ELD-002","category":"ELD","question":"What duty status changes must an ELD automatically record?","citation":"49 CFR 395.26","key_concepts":["on-duty driving when vehicle moves at >5 mph","duty status change at engine start/stop with prompt","yard moves and personal conveyance must be manually selected","automatic transition to on-duty driving after 5 minutes stopped if no input"],"common_hallucinations":["claiming all 4 duty statuses change automatically (only driving auto-engages)"]},
+    {"id":"ELD-003","category":"ELD","question":"How long must ELD data be retained?","citation":"49 CFR 395.22(i) and 395.34","key_concepts":["6 months by the carrier","driver retains supporting documents 6 months","data backed up at least monthly"],"common_hallucinations":["claiming 12 months","claiming 3 years"]},
+    {"id":"ELD-004","category":"ELD","question":"What must a driver do during a roadside inspection regarding ELD records?","citation":"49 CFR 395.24 and 395.34","key_concepts":["produce ELD data to officer","via display, printout, telematic transfer, or local transfer","driver retains last 7 days plus current day"],"common_hallucinations":["claiming driver must retain 14 days (driver: 7+current; carrier: 6 months)"]},
+    {"id":"ELD-005","category":"ELD","question":"What is the difference between a malfunctioning ELD and a data diagnostic event?","citation":"49 CFR 395.34","key_concepts":["malfunction: hardware/software failure preventing compliance","diagnostic event: detected anomaly that doesn't prevent compliance","malfunction must be repaired within 8 days; if not, FMCSA extension required","drivers maintain paper RODS during malfunction"],"common_hallucinations":["treating diagnostic events the same as malfunctions","claiming paper logs aren't allowed during ELD malfunction"]},
+
+    {"id":"CARGO-001","category":"CARGO","question":"What is the general cargo securement requirement under Part 393 Subpart I?","citation":"49 CFR 393.100","key_concepts":["secured by structures of adequate strength","dunnage/bracing","tiedowns meeting working load limit (WLL)","or combination thereof","prevents shifting in any direction"],"common_hallucinations":["forgetting the four-directional securement standard"]},
+    {"id":"CARGO-002","category":"CARGO","question":"What is the minimum number of tiedowns required based on cargo length?","citation":"49 CFR 393.110","key_concepts":["≤5 ft and ≤1100 lbs: 1 tiedown","≤5 ft and >1100 lbs: 2 tiedowns",">5 ft to ≤10 ft: 2 tiedowns",">10 ft: 2 plus 1 additional for each 10 ft increment beyond 10 ft"],"common_hallucinations":["claiming 1 tiedown is always enough","wrong incremental rule"]},
+
+    {"id":"VEHICLE-001","category":"VEHICLE","question":"What lighting and reflectors are required on a CMV under Part 393?","citation":"49 CFR 393.9 and 393.11","key_concepts":["all required lamps in operable condition","conspicuity material (red/white retroreflective tape) on trailers","minimum requirements for headlamps, taillamps, brake lights, turn signals, marker lamps, identification lamps"],"common_hallucinations":["forgetting conspicuity material requirement"]},
+
+    {"id":"DRIVER-001","category":"DRIVER","question":"What is the regulation on use of mobile phones while driving a CMV?","citation":"49 CFR 392.82","key_concepts":["no hand-held mobile phone use while operating CMV","includes reaching for, dialing, or pressing more than a single button","'hands-free' use of voice-activated allowed"],"common_hallucinations":["claiming all mobile phone use is banned (hands-free is allowed)"]},
+
+    {"id":"XB-001","category":"XB","question":"What is the difference between FMCSA Operating Authority (MC number) and a USDOT number?","citation":"49 CFR Part 365 (registration) and 49 CFR 390.19 (USDOT)","key_concepts":["USDOT number: identifier for all interstate CMVs and intrastate hazmat","MC/MX/FF number: operating authority granted under Part 365","for-hire carriers transporting regulated commodities need both","private carriers and exempt commodities only need USDOT"],"common_hallucinations":["claiming all carriers need both","claiming private carriers need MC numbers"]}
   ],
-  "expansion_plan": "Grow this from 10 → 50 → 200 questions across all 7 BASIC categories + hazmat + cross-border + financial. Each new skill-builder PR appends 1-3 questions covering the regulation it codifies. Score baseline: claude-sonnet-4-6 unaided on the first 10 = TBD (run before first skill-builder agent goes live).",
+  "expansion_plan": "v1.1 = 51 questions across 15 categories. Next: append 1-3 questions per skill-builder PR. Target v2.0 = 200 questions before unlocking full-throughput skill builders.",
   "review_log": [
-    {
-      "date": "2026-05-17",
-      "reviewer": "Joshua Kovarik",
-      "notes": "Initial 10-question seed set. Built before skill-builder agents stand up. Next: actually run claude-sonnet-4-6 against these 10 and capture the baseline."
-    }
+    {"date":"2026-05-17","reviewer":"Joshua Kovarik","notes":"v1.0 initial 10 questions seeded the harness."},
+    {"date":"2026-05-17","reviewer":"Joshua Kovarik","notes":"v1.1 expanded to 51 questions across all 7 BASICs + hazmat + ELD + cargo + cross-border. Built before first baseline run."}
   ]
 }
