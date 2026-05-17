@@ -43,7 +43,7 @@ export default function DocsPage() {
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">Documentation</div>
             <h1 className="text-[40px] sm:text-[48px] md:text-[56px] font-extrabold tracking-tight leading-[1.05] mb-4">
               Docs.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>Built like the product.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>Built like the product.</span>
             </h1>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl">
               Practical, terse, CFR-cited. We don&apos;t pad docs with onboarding stories — get to the API, get to the integration, get back to work.

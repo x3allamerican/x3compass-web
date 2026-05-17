@@ -77,7 +77,7 @@ export default function FAQ() {
           </div>
           <h1 className="text-[44px] sm:text-[60px] font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] mb-4">
             Short answers.{" "}
-            <span className="serif-italic" style={{ color: "#22D3EE" }}>Real ones.</span>
+            <span className="serif-italic" style={{ color: "var(--accent)" }}>Real ones.</span>
           </h1>
             <p className="text-[17px] text-[var(--fg-muted)]">
               Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[var(--accent)] font-bold">Email us</Link> or{" "}
@@ -125,7 +125,7 @@ export default function FAQ() {
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[32px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-4 leading-tight">
               Still have questions?{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>Ask Compass.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>Ask Compass.</span>
             </h2>
             <p className="text-[16px] text-[var(--fg-muted)] mb-6">
               No signup needed. Try the demo brain — answers in seconds, cited to the CFR.

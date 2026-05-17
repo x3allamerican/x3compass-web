@@ -403,16 +403,16 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
       </div>
 
       <div style={{ background: "var(--surface-2)", padding: 14, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
-        <strong style={{ color: "#22D3EE" }}>Triage signals:</strong> {t.signals.join(" · ") || "—"}
+        <strong style={{ color: "var(--accent)" }}>Triage signals:</strong> {t.signals.join(" · ") || "—"}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "8px 14px", fontSize: 13, marginBottom: 20 }}>
         <Label>Email</Label>
-        <div><a href={`mailto:${row.email}`} style={{ color: "#22D3EE" }}>{row.email}</a></div>
+        <div><a href={`mailto:${row.email}`} style={{ color: "var(--accent)" }}>{row.email}</a></div>
         <Label>Phone</Label>
         <div>{row.phone || "—"}</div>
         <Label>LinkedIn</Label>
-        <div>{row.linkedin ? <a href={row.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "#22D3EE" }}>{row.linkedin}</a> : "—"}</div>
+        <div>{row.linkedin ? <a href={row.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>{row.linkedin}</a> : "—"}</div>
         <Label>Years</Label>
         <div>{row.years || "—"}</div>
         <Label>Clients</Label>
@@ -527,7 +527,7 @@ function Label({ children }: { children: React.ReactNode }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ color: "#22D3EE", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>{title}</div>
+      <div style={{ color: "var(--accent)", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>{title}</div>
       <div style={{ background: "var(--bg-3)", padding: 14, borderRadius: 8, fontSize: 13, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{children}</div>
     </div>
   );

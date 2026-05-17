@@ -23,7 +23,7 @@ export default function TrustPage() {
               Trust & Transparency
             </div>
             <h1 className="font-extrabold tracking-tight leading-[1.05] text-[40px] sm:text-[56px] md:text-[64px] mb-5">
-              Every claim. <span className="serif-italic" style={{ color: "#22D3EE" }}>Verifiable.</span>
+              Every claim. <span className="serif-italic" style={{ color: "var(--accent)" }}>Verifiable.</span>
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl mx-auto leading-relaxed">
               We&apos;re a new product. We don&apos;t have a logo wall of pretend customers. What we have instead

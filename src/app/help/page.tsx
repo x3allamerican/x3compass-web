@@ -41,7 +41,7 @@ export default function HelpPage() {
           <div className="max-w-5xl mx-auto px-6 py-16">
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">Help &amp; Support</div>
             <h1 className="text-[40px] sm:text-[48px] md:text-[56px] font-extrabold tracking-tight leading-[1.05] mb-4">
-              Stuck? <span className="serif-italic" style={{ color: "#22D3EE" }}>Real answers.</span> No chatbot maze.
+              Stuck? <span className="serif-italic" style={{ color: "var(--accent)" }}>Real answers.</span> No chatbot maze.
             </h1>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-5">
               These are the 12 questions carriers ask before signing up. If yours isn&apos;t below, email{" "}

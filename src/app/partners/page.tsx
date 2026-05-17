@@ -97,7 +97,7 @@ export default function PartnersPage() {
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[64px] mb-6">
                 You run the carriers.
                 <br />
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>We run the platform.</span>
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>We run the platform.</span>
               </h1>
               <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
                 A white-label AI compliance platform for independent safety consultants. Your brand on the dashboard. Your carriers log into <em>your</em> tool. Powered by 300 published FMCSA skills + 12 specialized brains, sitting invisibly behind your business.
@@ -126,7 +126,7 @@ export default function PartnersPage() {
               { n: "60 days", desc: "From sign-up to your first paying carrier (median across beta Partners)" },
             ].map((s, i) => (
               <div key={i} className="text-center md:text-left">
-                <div className="text-[64px] sm:text-[72px] font-black leading-none" style={{ color: "#22D3EE" }}>{s.n}</div>
+                <div className="text-[64px] sm:text-[72px] font-black leading-none" style={{ color: "var(--accent)" }}>{s.n}</div>
                 <div className="serif-italic text-[var(--fg-muted)] text-[17px] mt-2 leading-snug">{s.desc}</div>
               </div>
             ))}
@@ -142,7 +142,7 @@ export default function PartnersPage() {
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">01 · WHO COMPASS PARTNER IS FOR</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             If you advise carriers,{" "}
-            <span className="serif-italic" style={{ color: "#22D3EE" }}>Compass becomes your stack.</span>
+            <span className="serif-italic" style={{ color: "var(--accent)" }}>Compass becomes your stack.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
             We built Compass Partner for the consultants who already do the work — and need a platform that doesn&apos;t have a competitor&apos;s name plastered across it.
@@ -172,7 +172,7 @@ export default function PartnersPage() {
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · WHAT&apos;S INSIDE COMPASS PARTNER</div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               12 components.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>One subscription.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
               Each component, valued at retail what an independent consultant would pay to acquire it separately — combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for a single 30% revenue share (no base fee, no minimum, no caps).
@@ -181,7 +181,7 @@ export default function PartnersPage() {
               {COMPONENTS.map((c) => (
                 <div key={c.n} className={`${cardDark} p-6`}>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-[28px] font-black" style={{ color: "#22D3EE" }}>{c.n}</div>
+                    <div className="text-[28px] font-black" style={{ color: "var(--accent)" }}>{c.n}</div>
                     <span className="text-[9.5px] font-extrabold tracking-wider text-[var(--bg)] bg-[var(--accent)] px-2 py-1 rounded-full">{c.badge}</span>
                   </div>
                   <h3 className="text-[17px] font-bold text-[var(--fg)] mb-2 leading-snug">{c.title}</h3>
@@ -204,7 +204,7 @@ export default function PartnersPage() {
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · YOUR ECONOMICS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             The math.{" "}
-            <span className="serif-italic" style={{ color: "#22D3EE" }}>Plain and honest.</span>
+            <span className="serif-italic" style={{ color: "var(--accent)" }}>Plain and honest.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
             What a typical Year-1 vs Year-3 Partner looks like financially. No fluff.
@@ -278,7 +278,7 @@ export default function PartnersPage() {
             </div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-4 leading-tight">
               Ready to white-label{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>your safety consultancy?</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>your safety consultancy?</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] mb-8">
               Submit your application. We&apos;ll review within 3 business days and schedule a 30-minute interview to confirm fit. Live Partner accounts typically activated within 5-10 business days of application.

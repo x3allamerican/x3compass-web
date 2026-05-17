@@ -68,7 +68,7 @@ export default function BackgroundChecksPage() {
       </div>
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px", display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)", gap: 20 }}>
         <div>
-          <div style={{ fontSize: 11, color: "#22D3EE", fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Order a new check</div>
+          <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Order a new check</div>
           <p style={{ color: "#94A3B8", fontSize: 13, marginBottom: 16 }}>Enter the driver&apos;s name + email. Checkr emails them a secure link to provide SSN, DOB, consent — you never touch PII.</p>
           <div style={{ background: "white", borderRadius: 12, minHeight: 480, padding: 4, overflow: "hidden" }}>
             <div id="x3-checkr-new-invitation" ref={newInviteRef} />
@@ -82,7 +82,7 @@ export default function BackgroundChecksPage() {
           )}
         </div>
         <div>
-          <div style={{ fontSize: 11, color: "#22D3EE", fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>All reports</div>
+          <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>All reports</div>
           <p style={{ color: "#94A3B8", fontSize: 13, marginBottom: 16 }}>Every screening status with adverse-action timing, dispute status, Assess outcomes.</p>
           <div style={{ background: "white", borderRadius: 12, minHeight: 560, padding: 4, overflow: "hidden" }}>
             <div id="x3-checkr-reports-overview" ref={reportsRef} />
@@ -92,7 +92,7 @@ export default function BackgroundChecksPage() {
       </div>
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px 40px" }}>
         <div style={{ background: "var(--bg-3)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, fontSize: 12, color: "#94A3B8", lineHeight: 1.6 }}>
-          <strong style={{ color: "white" }}>FCRA reminder:</strong> Before ordering a consumer report, provide the candidate a clear/conspicuous disclosure + obtain written authorization. The Checkr embed handles both. Follow pre-adverse + post-adverse procedures on &quot;consider&quot; results. See <a href="/faq" style={{ color: "#22D3EE" }}>FAQ</a> and 15 U.S.C. § 1681b.
+          <strong style={{ color: "white" }}>FCRA reminder:</strong> Before ordering a consumer report, provide the candidate a clear/conspicuous disclosure + obtain written authorization. The Checkr embed handles both. Follow pre-adverse + post-adverse procedures on &quot;consider&quot; results. See <a href="/faq" style={{ color: "var(--accent)" }}>FAQ</a> and 15 U.S.C. § 1681b.
         </div>
       </div>
     </div>

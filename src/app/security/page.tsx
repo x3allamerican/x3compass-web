@@ -20,7 +20,7 @@ export default function SecurityPage() {
             </div>
             <h1 className="text-[44px] sm:text-[56px] md:text-[64px] font-extrabold tracking-tight leading-[1.05] mb-4">
               Defense in depth.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>Transparency in everything.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>Transparency in everything.</span>
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl">
               This is the deeper read. The summary version lives on the <Link href="/trust" className="text-[var(--accent)] font-bold hover:underline">Trust page</Link>.

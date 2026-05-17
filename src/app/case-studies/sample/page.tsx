@@ -24,7 +24,7 @@ export default function SampleCaseStudyPage() {
               Sample audit walkthrough · Synthetic carrier
             </div>
             <h1 className="text-[44px] sm:text-[56px] md:text-[60px] font-extrabold tracking-tight leading-[1.05] mb-5">
-              47 trucks. <span className="serif-italic" style={{ color: "#22D3EE" }}>One audit.</span> Six days.
+              47 trucks. <span className="serif-italic" style={{ color: "var(--accent)" }}>One audit.</span> Six days.
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl leading-relaxed mb-3">
               We don&apos;t have customer case studies yet — we&apos;re pre-revenue. But the product is real, and the work

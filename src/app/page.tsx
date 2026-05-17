@@ -92,7 +92,7 @@ export default function Home() {
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[60px] md:text-[72px] mb-6">
                 An AI Safety Director.
                 <br />
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>Or a real one.</span>{" "}
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>Or a real one.</span>{" "}
                 Both work.
               </h1>
               <p className="text-[20px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-3 leading-relaxed">
@@ -125,7 +125,7 @@ export default function Home() {
               { count: 25,  prefix: "$", suffix: "", desc: "per driver, DIY · or $50 done-for-you",      key: "price" },
             ].map((s, i) => (
               <div key={i} className="text-center md:text-left">
-                <div className="text-[64px] sm:text-[80px] font-black leading-none" style={{ color: "#22D3EE" }}>
+                <div className="text-[64px] sm:text-[80px] font-black leading-none" style={{ color: "var(--accent)" }}>
                   <NumberCounter to={s.count} prefix={s.prefix} suffix={s.suffix} sessionKey={s.key} />
                 </div>
                 <div className="serif-italic text-[var(--fg-muted)] text-[18px] mt-2">{s.desc}</div>
@@ -144,7 +144,7 @@ export default function Home() {
           </div>
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">01 · TWELVE BRAINS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-            Twelve brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One subscription.</span>
+            Twelve brains. <span className="serif-italic" style={{ color: "var(--accent)" }}>One subscription.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
             One brain per regulation. Open the actual CFR part — not a generic vault that makes you learn a new filing system.
@@ -159,7 +159,7 @@ export default function Home() {
               <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · THE DASHBOARD</div>
               <h2 className="font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-[1.1] text-[28px] sm:text-[34px] md:text-[40px] lg:text-[44px] whitespace-normal lg:whitespace-nowrap">
                 The screen you live in.{" "}
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>Every signal, one page.</span>
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>Every signal, one page.</span>
               </h2>
               <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mx-auto mb-8">
                 Sidebar of drivers. KPI strip up top. CSA BASICs, expirations, inspections — all on one screen. Your AI Safety Director sits in the lower right and tells you exactly what to do next.
@@ -186,7 +186,7 @@ export default function Home() {
             <div className="text-center mb-8">
               <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02.5 · TASTE THE PRODUCT</div>
               <h2 className="font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-[1.1] text-[32px] sm:text-[40px] md:text-[48px]">
-                Ask one. <span className="serif-italic" style={{ color: "#22D3EE" }}>See the answer.</span>
+                Ask one. <span className="serif-italic" style={{ color: "var(--accent)" }}>See the answer.</span>
               </h2>
               <p className="text-[16px] text-[var(--fg-muted)] max-w-2xl mx-auto">
                 Type any FMCSA compliance question. Every CFR citation in the answer is checked against the live eCFR.gov
@@ -208,7 +208,7 @@ export default function Home() {
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 300 PUBLISHED SKILLS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Ask any FMCSA question.{" "}
-            <span className="serif-italic" style={{ color: "#22D3EE" }}>Get a CFR-cited answer.</span>
+            <span className="serif-italic" style={{ color: "var(--accent)" }}>Get a CFR-cited answer.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
             Every skill is a published, version-controlled prompt. <strong className="text-[var(--fg)]">Click any skill to see a real CFR-cited sample answer</strong> — no signup needed for the preview.
@@ -240,7 +240,7 @@ export default function Home() {
               </div>
               <h2 className="text-[36px] sm:text-[44px] lg:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
                 100 hazmat skills.{" "}
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>One Placard Wizard.</span>
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>One Placard Wizard.</span>
               </h2>
               <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8">
                 Class 1 explosives through Class 9 miscellaneous. Plus security plans, segregation, and the TSA-H clock.
@@ -269,7 +269,7 @@ export default function Home() {
           </div>
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">05 · HOW IT WORKS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-            Live in the next <span className="serif-italic" style={{ color: "#22D3EE" }}>lunch break.</span>
+            Live in the next <span className="serif-italic" style={{ color: "var(--accent)" }}>lunch break.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
             Connect what you already have, import what you don&apos;t, log events as they happen, read the morning digest. That&apos;s the whole job.
@@ -319,7 +319,7 @@ export default function Home() {
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">06 · PRICING</div>
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               Drive it yourself.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>Or let us drive it for you.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>Or let us drive it for you.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-3">
               Every tier includes all 12 brains and all 300 skills. The only difference is who&apos;s holding the wheel.
@@ -379,7 +379,7 @@ export default function Home() {
               <div>
                 <div className="text-[11px] tracking-wider uppercase font-bold text-[var(--accent)] mb-1">★ ADD-ON</div>
                 <div className="text-[18px] font-extrabold text-[var(--fg)]">
-                  Hazmat Center · <span style={{ color: "#22D3EE" }}>+$99/mo</span>
+                  Hazmat Center · <span style={{ color: "var(--accent)" }}>+$99/mo</span>
                 </div>
                 <p className="text-[14px] text-[var(--fg-muted)] mt-1">
                   Placard Wizard, 100 hazmat-only skills, segregation engine, ERG lookup, TSA-H clock. Pairs with any tier.
@@ -398,7 +398,7 @@ export default function Home() {
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-4 leading-tight">
               Stop running compliance from a{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>spreadsheet.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>spreadsheet.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] mb-8">
               Twelve brains. Three hundred skills. One subscription. 7-day free trial, no credit card.

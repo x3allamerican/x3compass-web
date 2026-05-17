@@ -109,7 +109,7 @@ export default function Hazmat() {
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[68px] mb-6">
                 Hazmat compliance,
                 <br />
-                <span className="serif-italic" style={{ color: "#22D3EE" }}>grounded in 49 CFR.</span>
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>grounded in 49 CFR.</span>
               </h1>
               <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
                 Classes 1 through 9. Placard math, segregation tables, TSA-H clock, shipping-paper validator. Built by people who&apos;ve actually shipped a Class 3 load and had to call the IC at 2am.
@@ -157,7 +157,7 @@ export default function Hazmat() {
             <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               Tell us what you&apos;re hauling.
               <br />
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>We&apos;ll tell you what to placard.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>We&apos;ll tell you what to placard.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8">
               Type a UN number or substance name. Compass looks it up against 80+ common hazmat substances, renders the actual DOT placard, and computes placarding (§ 172.504), segregation (§ 177.848), and ERG guide on the fly.
@@ -179,7 +179,7 @@ export default function Hazmat() {
           </div>
           <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · HAZMAT BRAINS</div>
           <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-            Six brains. <span className="serif-italic" style={{ color: "#22D3EE" }}>One hazmat shipment.</span>
+            Six brains. <span className="serif-italic" style={{ color: "var(--accent)" }}>One hazmat shipment.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
             Every brain reads from the actual regulation. No interpretive shortcuts.
@@ -209,7 +209,7 @@ export default function Hazmat() {
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 100 HAZMAT-ONLY SKILLS</div>
             <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               Every hazmat question.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>One CFR away.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>One CFR away.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
               Tap any chip to converse with the brain that owns it. Twelve representative skills shown — full list available in-app.
@@ -234,7 +234,7 @@ export default function Hazmat() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · PLACARD LIBRARY</div>
             <h2 className="text-[28px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-2 leading-tight">
-              Every <span className="serif-italic" style={{ color: "#22D3EE" }}>real placard.</span>
+              Every <span className="serif-italic" style={{ color: "var(--accent)" }}>real placard.</span>
             </h2>
             <p className="text-[15px] text-[var(--fg-muted)] max-w-2xl mb-10">
               40 authentic placard images — every DOT hazard class, every GHS pictogram, the NFPA 704 diamond. Sourced from Wikimedia Commons (public-domain U.S. government works under 49 CFR § 172).
@@ -309,7 +309,7 @@ export default function Hazmat() {
           <div className="max-w-3xl mx-auto px-6 text-center relative">
             <h2 className="text-[28px] sm:text-[36px] font-extrabold text-[var(--fg)] mb-3 leading-tight">
               Hazmat add-on:{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>+$99/mo.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>+$99/mo.</span>
             </h2>
             <p className="text-[16px] text-[var(--fg-muted)] mb-6">
               Pairs with any tier. Placard Wizard, 100 hazmat-only skills, segregation engine, ERG, TSA-H clock.

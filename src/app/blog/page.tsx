@@ -45,7 +45,7 @@ export default function BlogIndex() {
               Notes from the Compass
             </div>
             <h1 className="text-[44px] sm:text-[56px] md:text-[64px] font-extrabold tracking-tight leading-[1.05] mb-4">
-              We build it. <span className="serif-italic" style={{ color: "#22D3EE" }}>Then we write about it.</span>
+              We build it. <span className="serif-italic" style={{ color: "var(--accent)" }}>Then we write about it.</span>
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl">
               FMCSA compliance is hard, AI hallucinates, and we&apos;re building both at once. Below is the inside view —

@@ -16,7 +16,7 @@ export default function NotFound() {
           </div>
           <h1 className="text-[32px] sm:text-[44px] font-extrabold tracking-tight leading-tight mb-4">
             We took a wrong turn.{" "}
-            <span className="serif-italic" style={{ color: "#22D3EE" }}>You didn&apos;t.</span>
+            <span className="serif-italic" style={{ color: "var(--accent)" }}>You didn&apos;t.</span>
           </h1>
           <p className="text-[16px] text-[var(--fg-muted)] mb-8">
             The page you&apos;re looking for either moved or never existed. Here are the routes most carriers

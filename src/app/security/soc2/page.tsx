@@ -55,7 +55,7 @@ export default function SOC2StatusPage() {
             </div>
             <h1 className="text-[44px] sm:text-[56px] md:text-[64px] font-extrabold tracking-tight leading-[1.05] mb-4">
               SOC 2 Type II.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>Honest progress.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>Honest progress.</span>
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl">
               We are in active preparation for a SOC 2 Type II attestation against the Security Trust Services Criteria.

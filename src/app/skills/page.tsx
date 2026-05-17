@@ -105,7 +105,7 @@ export default function SkillsCatalogPage() {
             </div>
             <h1 className="text-[36px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
               All 300 FMCSA skills.{" "}
-              <span className="serif-italic" style={{ color: "#22D3EE" }}>One library.</span>
+              <span className="serif-italic" style={{ color: "var(--accent)" }}>One library.</span>
             </h1>
             <p className="text-[16px] text-[var(--fg-muted)] max-w-3xl mb-8">
               Every Compass skill is a published, version-controlled prompt with the actual CFR section it answers from. All {totalPublished} live now in {catBuckets.length} categories.{" "}

@@ -46,7 +46,7 @@ export default function ROICalculator() {
           <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--accent)]">ROI calculator</div>
           <div className="ml-auto text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-faint)]">No signup · drag the slider</div>
         </div>
-        <h3 className="text-[20px] font-bold text-[var(--fg)] mb-5">What does Compass cost <span className="serif-italic" style={{ color: "#22D3EE" }}>your</span> fleet?</h3>
+        <h3 className="text-[20px] font-bold text-[var(--fg)] mb-5">What does Compass cost <span className="serif-italic" style={{ color: "var(--accent)" }}>your</span> fleet?</h3>
 
         {/* Slider */}
         <div className="mb-5">
