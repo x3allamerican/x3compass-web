@@ -49,6 +49,41 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         {children}
+        <Script id="x3-error-capture" strategy="afterInteractive">{`
+          (function(){
+            var sent = 0;
+            function send(payload){
+              if(sent > 10) return; sent++;
+              try {
+                fetch('/api/errors', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                  keepalive: true,
+                }).catch(function(){});
+              } catch(e){}
+            }
+            window.addEventListener('error', function(ev){
+              send({
+                message: String(ev.message||''),
+                source: String(ev.filename||''),
+                line: ev.lineno||0, col: ev.colno||0,
+                stack: ev.error && ev.error.stack ? String(ev.error.stack) : '',
+                url: location.href,
+                user_agent: navigator.userAgent,
+              });
+            });
+            window.addEventListener('unhandledrejection', function(ev){
+              var r = ev.reason || {};
+              send({
+                message: 'unhandledrejection: ' + (r.message || String(r)),
+                stack: r.stack ? String(r.stack) : '',
+                url: location.href,
+                user_agent: navigator.userAgent,
+              });
+            });
+          })();
+        `}</Script>
         {CF_BEACON_TOKEN && (
           <Script src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`}

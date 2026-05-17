@@ -46,7 +46,9 @@ type Submission = {
 const REQUIRED = ["name", "email", "company", "state", "services", "why"] as const;
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const cors = {
+    const _rl = rateLimit(ctx.request, { key: "partners-apply", max: 5, windowSec: 60 });
+  if (_rl) return _rl;
+const cors = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -338,3 +340,4 @@ ${s.tools ? `Current tools:\n${s.tools}\n\n` : ""}${s.credentials ? `Credentials
 Submitted ${now} from x3compass.com/partners/apply
 Reply to this email to respond to the applicant.`;
 }
+import { rateLimit } from "../../_shared/rate-limit";

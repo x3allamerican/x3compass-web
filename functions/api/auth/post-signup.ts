@@ -1,4 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { rateLimit } from "../../_shared/rate-limit";
 import { sendEmail, welcomeEmail } from "../../_shared/emails";
 
 interface Env {
@@ -14,6 +15,8 @@ const json = (data: unknown, status = 200) =>
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // Master try/catch — guarantees JSON response even if something unexpected throws.
   try {
+    const _rl = rateLimit(ctx.request, { key: "post-signup", max: 10, windowSec: 60 });
+    if (_rl) return _rl;
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);
     if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
