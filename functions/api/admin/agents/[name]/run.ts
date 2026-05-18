@@ -40,11 +40,15 @@ export const onRequestPost: PagesFunction<AdminEnv> = async (ctx) => {
   })) as Array<{ id: string }>;
   const runId = runRow[0]?.id;
 
-  // 3. execute
+  // 3. parse optional inputs body for on-demand agents
+  let inputs: Record<string, unknown> | undefined;
+  try { inputs = await ctx.request.json() as Record<string, unknown>; } catch { /* empty body is fine */ }
+
+  // 4. execute
   let result: AgentResult;
   const t0 = Date.now();
   try {
-    result = await runAgent(name, ctx.env);
+    result = await runAgent(name, ctx.env, inputs);
   } catch (e) {
     result = { status: "error", summary: e instanceof Error ? e.message : String(e) };
   }
