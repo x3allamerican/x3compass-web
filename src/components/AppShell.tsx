@@ -45,6 +45,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
 // X3 Admin section — only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
 const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: true, items: [
   { href: "/app/control-center", label: "Control Center",  icon: "🎛" },
+  { href: "/app/finance-team",   label: "AI Finance Team", icon: "💰" },
   { href: "/app/finance",        label: "Finance",         icon: "💵" },
   { href: "/app/marketing",      label: "Marketing",       icon: "📣" },
   { href: "/app/notifications",  label: "Notifications",   icon: "🔔" },
