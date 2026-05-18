@@ -66,6 +66,9 @@ begin
     (_cid, 'hireright',    'mvr',           'available', '{"docs":"https://www.hireright.com/api"}'),
     (_cid, 'samba_safety', 'mvr',           'available', '{"docs":"https://www.sambasafety.com/api"}'),
     (_cid, 'checkr',       'background',    'available', '{"docs":"https://docs.checkr.com"}'),
+    (_cid, 'samsara',      'eld',           'available', '{"docs":"https://developers.samsara.com"}'),
+    (_cid, 'motive',       'eld',           'available', '{"docs":"https://developer.gomotive.com/"}'),
+    (_cid, 'geotab',       'eld',           'available', '{"docs":"https://geotab.github.io/sdk/"}'),
     (_cid, 'manual_api',   'other',         'available', '{"docs":"/api/drivers/import"}')
   on conflict (carrier_id, vendor) do nothing;
 end$$;

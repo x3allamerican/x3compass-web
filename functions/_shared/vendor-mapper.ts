@@ -295,3 +295,264 @@ export async function markVendorSync(
     // best-effort; don't break the sync itself if the tracker write fails
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VEHICLE PATH — parallel structure to the driver path above.
+// Common Normalized shape + per-vendor adapters + single upsertVehicles().
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface NormalizedVehicle {
+  // Strongly recommended (used as conflict key when paired with carrier_id)
+  vin?: string | null;
+
+  // Identity
+  license_plate?: string | null;
+  license_plate_state?: string | null;
+  year?: number | null;
+  make?: string | null;
+  model?: string | null;
+
+  // Specs
+  gvwr_lbs?: number | null;
+  vehicle_type?: string | null;   // 'tractor' | 'straight_truck' | 'trailer' | 'tank' | 'dump' | 'bus' | 'other'
+  fuel_type?: string | null;
+  current_odometer?: number | null;
+
+  // Lifecycle
+  in_service_date?: string | null;
+  out_of_service_date?: string | null;
+  status?: "active" | "out_of_service" | "sold" | "totaled";
+
+  // Compliance dates
+  last_dot_inspection_on?: string | null;
+  next_dot_inspection_due?: string | null;
+
+  // Provenance
+  source_vendor?: string;
+  source_id?: string;
+}
+
+const VEHICLE_CSV_ALIASES: Record<string, keyof NormalizedVehicle | "ignore"> = {
+  // Canonical
+  vin: "vin",
+  license_plate: "license_plate",
+  license_plate_state: "license_plate_state",
+  year: "year",
+  make: "make",
+  model: "model",
+  gvwr_lbs: "gvwr_lbs",
+  vehicle_type: "vehicle_type",
+  fuel_type: "fuel_type",
+  current_odometer: "current_odometer",
+  in_service_date: "in_service_date",
+  out_of_service_date: "out_of_service_date",
+  status: "status",
+  last_dot_inspection_on: "last_dot_inspection_on",
+  next_dot_inspection_due: "next_dot_inspection_due",
+
+  // Common shorthand from the project's /app/import template
+  unit_number: "ignore",  // we key on VIN; unit numbers vary by fleet convention
+  gvwr: "gvwr_lbs",
+  annual_inspection_date: "last_dot_inspection_on",
+  pm_due_date: "next_dot_inspection_due",
+  next_pm_due_at: "next_dot_inspection_due",
+  next_inspection_due: "next_dot_inspection_due",
+  plate: "license_plate",
+  plate_state: "license_plate_state",
+  odometer: "current_odometer",
+  mileage: "current_odometer",
+};
+
+const ALLOWED_VEHICLE_TYPES = new Set(["tractor","straight_truck","trailer","tank","dump","bus","other"]);
+const ALLOWED_VEHICLE_STATUSES = new Set(["active","out_of_service","sold","totaled"]);
+
+function toIntOrNull(v: string): number | null {
+  if (v == null || v === "") return null;
+  const cleaned = v.toString().replace(/[^\d-]/g, "");
+  if (!cleaned) return null;
+  const n = parseInt(cleaned, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function mapCsvVehicleRow(headers: string[], row: string[]): NormalizedVehicle | null {
+  const out: NormalizedVehicle = {};
+  for (let i = 0; i < headers.length; i++) {
+    const headerKey = headers[i]?.trim().toLowerCase();
+    const target = VEHICLE_CSV_ALIASES[headerKey];
+    if (!target || target === "ignore") continue;
+    const v = (row[i] ?? "").trim();
+    if (!v) continue;
+    if (target === "year" || target === "gvwr_lbs" || target === "current_odometer") {
+      const n = toIntOrNull(v);
+      if (n !== null) (out as unknown as Record<string, unknown>)[target] = n;
+      continue;
+    }
+    if (target === "vehicle_type") {
+      const s = v.toLowerCase().replace(/\s+/g, "_");
+      if (ALLOWED_VEHICLE_TYPES.has(s)) out.vehicle_type = s;
+      continue;
+    }
+    if (target === "status") {
+      const s = v.toLowerCase().replace(/\s+/g, "_");
+      if (ALLOWED_VEHICLE_STATUSES.has(s)) out.status = s as NormalizedVehicle["status"];
+      continue;
+    }
+    if (target === "license_plate_state") {
+      out.license_plate_state = v.toUpperCase().slice(0, 2);
+      continue;
+    }
+    (out as unknown as Record<string, unknown>)[target] = v;
+  }
+  // Need at minimum a VIN or a plate to identify a vehicle.
+  if (!out.vin && !out.license_plate) return null;
+  out.source_vendor = "csv";
+  return out;
+}
+
+// Samsara — telematics + ELD. The Samsara fleet API returns vehicles via
+// GET /fleet/vehicles. We support the v2 JSON shape; older clients can map
+// upstream and pass through .rows[].
+type SamsaraVehicle = {
+  id?: string | number;
+  name?: string;            // unit number; we drop unless they put VIN here
+  vin?: string;
+  licensePlate?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  gvwr?: number;
+  vehicleType?: string;
+};
+export function mapSamsara(vehicles: SamsaraVehicle[]): NormalizedVehicle[] {
+  return vehicles
+    .filter(v => v.vin || v.licensePlate)
+    .map(v => ({
+      vin: v.vin || null,
+      license_plate: v.licensePlate || null,
+      year: typeof v.year === "number" ? v.year : null,
+      make: v.make || null,
+      model: v.model || null,
+      gvwr_lbs: typeof v.gvwr === "number" ? v.gvwr : null,
+      vehicle_type: ((): NormalizedVehicle["vehicle_type"] => {
+        const t = (v.vehicleType || "").toLowerCase();
+        if (t === "truck") return "straight_truck";
+        if (t === "tractor") return "tractor";
+        if (t === "trailer") return "trailer";
+        return null;
+      })(),
+      status: "active" as NormalizedVehicle["status"],
+      source_vendor: "samsara",
+      source_id: v.id != null ? String(v.id) : undefined,
+    }));
+}
+
+// Motive (formerly KeepTruckin) — also a telematics provider, similar shape
+type MotiveVehicle = {
+  id?: string | number;
+  number?: string;
+  vin?: string;
+  license_plate_number?: string;
+  license_plate_state?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  status?: string;
+};
+export function mapMotive(vehicles: MotiveVehicle[]): NormalizedVehicle[] {
+  return vehicles
+    .filter(v => v.vin || v.license_plate_number)
+    .map(v => ({
+      vin: v.vin || null,
+      license_plate: v.license_plate_number || null,
+      license_plate_state: v.license_plate_state || null,
+      year: typeof v.year === "number" ? v.year : null,
+      make: v.make || null,
+      model: v.model || null,
+      status: v.status === "deactivated" ? "out_of_service" : "active",
+      source_vendor: "motive",
+      source_id: v.id != null ? String(v.id) : undefined,
+    }));
+}
+
+export async function upsertVehicles(
+  env: SupaEnv,
+  carrierId: string,
+  rows: NormalizedVehicle[],
+): Promise<UpsertResult> {
+  const result: UpsertResult = { inserted: 0, updated: 0, skipped: 0, errors: [] };
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) {
+    result.errors.push({ row: -1, reason: "Server missing SUPABASE_URL / SUPABASE_SERVICE_ROLE" });
+    return result;
+  }
+  const base = env.SUPABASE_URL.replace(/\/$/, "");
+  const sr = env.SUPABASE_SERVICE_ROLE;
+  const BATCH = 50;
+
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const slice = rows.slice(i, i + BATCH).map((r, j) => {
+      if (!r.vin && !r.license_plate) {
+        result.errors.push({ row: i + j, reason: "missing vin or license_plate" });
+        return null;
+      }
+      return {
+        carrier_id: carrierId,
+        vin: r.vin || null,
+        license_plate: r.license_plate || null,
+        license_plate_state: r.license_plate_state || null,
+        year: r.year || null,
+        make: r.make || null,
+        model: r.model || null,
+        gvwr_lbs: r.gvwr_lbs || null,
+        vehicle_type: r.vehicle_type || null,
+        fuel_type: r.fuel_type || null,
+        current_odometer: r.current_odometer || null,
+        in_service_date: r.in_service_date || null,
+        out_of_service_date: r.out_of_service_date || null,
+        status: r.status || "active",
+        last_dot_inspection_on: r.last_dot_inspection_on || null,
+        next_dot_inspection_due: r.next_dot_inspection_due || null,
+      };
+    }).filter(Boolean);
+    if (slice.length === 0) {
+      result.skipped += rows.slice(i, i + BATCH).length;
+      continue;
+    }
+
+    try {
+      const r = await fetch(`${base}/rest/v1/compass_vehicles?on_conflict=carrier_id,vin`, {
+        method: "POST",
+        headers: {
+          apikey: sr,
+          Authorization: `Bearer ${sr}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
+        body: JSON.stringify(slice),
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        if (r.status === 400 && text.includes("constraint")) {
+          const r2 = await fetch(`${base}/rest/v1/compass_vehicles`, {
+            method: "POST",
+            headers: { apikey: sr, Authorization: `Bearer ${sr}`, "Content-Type": "application/json", Prefer: "return=representation" },
+            body: JSON.stringify(slice),
+          });
+          if (r2.ok) {
+            const ins = (await r2.json()) as unknown[];
+            result.inserted += ins.length;
+          } else {
+            result.errors.push({ row: i, reason: `batch insert ${r2.status}: ${(await r2.text()).slice(0, 200)}` });
+          }
+          continue;
+        }
+        result.errors.push({ row: i, reason: `batch ${r.status}: ${text.slice(0, 200)}` });
+        continue;
+      }
+      const ins = (await r.json()) as unknown[];
+      result.inserted += ins.length;
+    } catch (err) {
+      result.errors.push({ row: i, reason: `batch exception: ${err instanceof Error ? err.message : String(err)}` });
+    }
+  }
+  return result;
+}

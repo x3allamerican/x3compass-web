@@ -40,7 +40,22 @@ const VENDOR_META: Record<string, { label: string; description: string; supports
   },
   manual_api: {
     label: "Custom API",
-    description: "Build your own integration against POST /api/drivers/import. Send JSON or CSV body and we'll upsert.",
+    description: "Build your own integration against POST /api/drivers/import or /api/vehicles/import. Send JSON or CSV body and we'll upsert.",
+    supports_sync: false,
+  },
+  samsara: {
+    label: "Samsara",
+    description: "ELD + telematics. Pulls your fleet vehicles (VIN, plate, year/make/model) directly into compass_vehicles.",
+    supports_sync: true,
+  },
+  motive: {
+    label: "Motive (KeepTruckin)",
+    description: "ELD + fleet management. Vehicle roster + status sync into compass_vehicles.",
+    supports_sync: true,
+  },
+  geotab: {
+    label: "Geotab",
+    description: "Telematics + fleet management. Vehicle data sync coming soon.",
     supports_sync: false,
   },
 };
@@ -58,10 +73,16 @@ export function VendorConnectModal({
   carrierId,
   onClose,
   onImported,
+  categories,
+  title,
+  subtitle,
 }: {
   carrierId: string;
   onClose: () => void;
   onImported: () => void;
+  categories?: string[];
+  title?: string;
+  subtitle?: string;
 }) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,14 +94,18 @@ export function VendorConnectModal({
       try {
         const r = await fetch(`/api/vendors/list?carrier_id=${carrierId}`, { cache: "no-store" });
         const body = await r.json() as { vendors: Vendor[] };
-        setVendors(body.vendors || []);
+        const all = body.vendors || [];
+        const filtered = categories && categories.length > 0
+          ? all.filter(v => categories.includes(v.category))
+          : all;
+        setVendors(filtered);
       } catch {
         setVendors([]);
       } finally {
         setLoading(false);
       }
     })();
-  }, [carrierId]);
+  }, [carrierId, categories]);
 
   async function syncVendor(vendor: string) {
     setSyncing(vendor); setSyncResult(null);
@@ -112,8 +137,8 @@ export function VendorConnectModal({
       <div className="bg-[var(--surface-2)] rounded-2xl border border-[var(--border)] max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <h2 className="text-[20px] font-extrabold text-[var(--fg)]">Connect a vendor</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mt-1">Pull drivers automatically from your ATS or background-check provider.</p>
+            <h2 className="text-[20px] font-extrabold text-[var(--fg)]">{title || "Connect a vendor"}</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mt-1">{subtitle || "Pull data automatically from your existing systems."}</p>
           </div>
           <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>
