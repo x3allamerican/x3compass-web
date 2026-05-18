@@ -79,7 +79,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     }
 
     const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa] = await Promise.all([
-      pgSelect(SUPABASE_URL, SR, "compass_carriers", `select=name,usdot_number,mc_number,safety_rating&id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_carriers", `select=name,usdot_number,mc_number&id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status,hire_date&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,vehicle_type,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,driver_id,doc_type,expires_on&carrier_id=eq.${carrierId}&order=expires_on.asc.nullslast&limit=500`),
