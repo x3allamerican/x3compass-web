@@ -394,11 +394,14 @@ async function agentFmcsaScraper(env: Env, inputs?: { dot_numbers?: string[] }):
       const html = await r.text();
       // Lightweight regex extract — SAFER HTML is consistent
       const get = (label: string) => { const m = html.match(new RegExp(label + "[^<]*<[^>]*>\\s*([^<]+)<", "i")); return m ? m[1].trim() : ""; };
-      const legalName  = (html.match(/<th[^>]*>\s*Legal Name:?\s*<\/th>\s*<td[^>]*>\s*([^<]+)<\/td>/i)?.[1] || "").trim();
-      const state      = (html.match(/<th[^>]*>\s*Physical Address:?[\s\S]{0,300}?,\s*([A-Z]{2})\s*\d{5}/i)?.[1] || "").trim();
-      const powerUnits = parseInt((html.match(/<th[^>]*>\s*Power Units:?\s*<\/th>\s*<td[^>]*>\s*([\d,]+)<\/td>/i)?.[1] || "0").replace(/,/g, ""), 10) || null;
-      const drivers    = parseInt((html.match(/<th[^>]*>\s*Drivers:?\s*<\/th>\s*<td[^>]*>\s*([\d,]+)<\/td>/i)?.[1] || "0").replace(/,/g, ""), 10) || null;
-      const safety     = (html.match(/<b>\s*Safety Rating:?\s*<\/b>\s*([^<]+)</i)?.[1] || "").trim();
+      // SAFER HTML uses uppercase tags and label-anchor wrappers. Extract by anchor name.
+      const grab = (anchor: string) => (html.match(new RegExp(`#${anchor}["\']?[^>]*>[^<]*<\\/A>[^<]*<\\/TH>\\s*<TD[^>]*>([\\s\\S]*?)<\\/TD>`, "i"))?.[1] || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+      const legalName  = grab("Carrier");
+      const physAddr   = grab("PhysicalAddress");
+      const state      = (physAddr.match(/,\s*([A-Z]{2})\s+\d{5}/)?.[1] || "").trim();
+      const powerUnits = parseInt(grab("PowerUnits").replace(/[^\d]/g, ""), 10) || null;
+      const drivers    = parseInt(grab("Drivers").replace(/[^\d]/g, ""), 10) || null;
+      const safety     = grab("SafetyRating") || (html.match(/Carrier Safety Rating:[^<]*<\/A>\s*<br>\s*<b>\s*<font[^>]*>([^<]+)</i)?.[1] || "").replace(/&nbsp;/g, " ").trim();
       if (!legalName) { errors++; log.warn(`[fmcsa-scraper] DOT ${dot}: SAFER HTML did not parse — likely an invalid DOT or layout change`); continue; }
       await supa.insert("compass_fmcsa_snapshots", { dot_number: dot, legal_name: legalName, safety_rating: safety, power_units: powerUnits, drivers: drivers, state, raw: { source: "safer_html_scrape", parsed_at: new Date().toISOString() } });
       ingested++;
