@@ -305,6 +305,7 @@ export default function FinanceTeamPage() {
             </p>
           </div>
         </div>
+      </div>
 
       {/* Modals */}
       <AgentLogsModal open={!!logsFor} agentName={logsFor || ""} onClose={() => setLogsFor(null)} />
