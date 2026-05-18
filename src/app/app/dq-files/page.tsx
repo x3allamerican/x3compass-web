@@ -38,6 +38,10 @@ export default function DQFilesPage() {
     setDocs((data as Doc[]) || []); setLoading(false);
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
+  useEffect(() => {
+    // Auto-select the first driver so the visual 12-box DQ grid shows by default.
+    if (!filterDriver && drivers.length > 0) setFilterDriver(drivers[0].id);
+  }, [drivers, filterDriver]);
 
   const filtered = useMemo(() => filterDriver ? docs.filter(d => d.driver_id === filterDriver) : docs, [docs, filterDriver]);
   const selectedDriver = useMemo(() => drivers.find(d => d.id === filterDriver), [drivers, filterDriver]);

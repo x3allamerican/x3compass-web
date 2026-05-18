@@ -47,7 +47,7 @@ export function useUser() {
       const { data: rows, error } = await supabase
         .from("compass_carrier_users")
         .select("carrier_id, role, compass_carriers!inner(id, name, usdot_number, service_tier, hazmat_addon, subscription_status, trial_ends_at)")
-        .eq("user_id", user.id).limit(1);
+        .eq("user_id", user.id).order("created_at", { ascending: false }).limit(1);
 
       if (error) {
         // Auth is fine; carrier lookup failed. Let user into the app — onboarding may not have run yet.
