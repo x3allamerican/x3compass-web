@@ -1,6 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import { useUser } from "@/lib/useUser";
 import {
   DEMO_CARRIER, DEMO_FLEET, COMPLIANCE_BARS, CSA_BASICS, ACTION_ITEMS,
   DRIVER_STATUS, CDL_BUCKETS, VEHICLE_TYPES, MAINTENANCE_KPIS,
@@ -36,9 +38,49 @@ function StatusDot({ kind }: { kind: "overdue" | "warn" | "info" | "ok" }) {
 }
 
 // ---------- page ----------
+type ApiData = {
+  carrier?: { name: string; dot_number: string; mc_number: string; safety_rating: string };
+  fleet?: typeof DEMO_FLEET;
+  compliance_bars?: typeof COMPLIANCE_BARS;
+  csa_basics?: typeof CSA_BASICS | null;
+  action_items?: typeof ACTION_ITEMS;
+  driver_status?: typeof DRIVER_STATUS;
+  cdl_buckets?: typeof CDL_BUCKETS;
+  vehicle_types?: typeof VEHICLE_TYPES;
+  maintenance_kpis?: typeof MAINTENANCE_KPIS;
+};
+
 export default function DashboardPage() {
+  const { carrier: userCarrier } = useUser();
+  const [api, setApi] = useState<ApiData | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const qs = userCarrier?.id ? `?carrier_id=${userCarrier.id}` : "";
+        const r = await fetch(`/api/dashboard${qs}`, { cache: "no-store" });
+        if (!r.ok) return;
+        const body = await r.json() as { ok?: boolean; demo?: boolean; data?: ApiData };
+        if (!cancelled && body?.data) setApi(body.data);
+      } catch { /* keep demo */ }
+    })();
+    return () => { cancelled = true; };
+  }, [userCarrier?.id]);
+
+  // Live values overlay demo data — if API returned a field, use it; else demo.
+  const CARRIER = api?.carrier ? { ...DEMO_CARRIER, name: api.carrier.name, dot_number: api.carrier.dot_number, mc_number: api.carrier.mc_number, safety_rating: api.carrier.safety_rating } : DEMO_CARRIER;
+  const FLEET = api?.fleet ? { ...DEMO_FLEET, ...api.fleet } : DEMO_FLEET;
+  const BARS = api?.compliance_bars && api.compliance_bars.length > 0 ? api.compliance_bars : COMPLIANCE_BARS;
+  const BASICS = api?.csa_basics && api.csa_basics.length > 0 ? api.csa_basics : CSA_BASICS;
+  const ACTIONS = api?.action_items ? { ...ACTION_ITEMS, ...api.action_items } : ACTION_ITEMS;
+  const DRIVERS_STATUS = api?.driver_status && api.driver_status.length > 0 ? api.driver_status : DRIVER_STATUS;
+  const CDLS = api?.cdl_buckets && api.cdl_buckets.length > 0 ? api.cdl_buckets : CDL_BUCKETS;
+  const VEHICLES = api?.vehicle_types && api.vehicle_types.length > 0 ? api.vehicle_types : VEHICLE_TYPES;
+  const MAINT = api?.maintenance_kpis && api.maintenance_kpis.length > 0 ? api.maintenance_kpis : MAINTENANCE_KPIS;
+
   return (
-    <AppShell title="Compliance Command Center" crumbs={`${DEMO_CARRIER.name} · DOT #${DEMO_CARRIER.dot_number}`}>
+    <AppShell title="Compliance Command Center" crumbs={`${CARRIER.name} · DOT #${CARRIER.dot_number}`}>
       <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
         {/* Header strip */}
         <div className="x3-card p-5 flex items-center justify-between gap-4 flex-wrap">
@@ -46,11 +88,11 @@ export default function DashboardPage() {
             <div className="w-11 h-11 rounded-lg grid place-items-center font-black text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>X3</div>
             <div>
               <div className="text-[19px] font-extrabold text-[var(--fg)]">Compliance Command Center</div>
-              <div className="text-[12px] text-[var(--fg-muted)]">{DEMO_CARRIER.name} · DOT #{DEMO_CARRIER.dot_number}</div>
+              <div className="text-[12px] text-[var(--fg-muted)]">{CARRIER.name} · DOT #{CARRIER.dot_number}</div>
             </div>
           </div>
           <div className="text-right">
-            <span className="inline-block px-3 py-1 rounded-full text-[11px] tracking-[.12em] uppercase font-bold bg-[var(--success)]/15 text-[var(--success)]">{DEMO_FLEET.compliance_pct}% Compliance health</span>
+            <span className="inline-block px-3 py-1 rounded-full text-[11px] tracking-[.12em] uppercase font-bold bg-[var(--success)]/15 text-[var(--success)]">{FLEET.compliance_pct}% Compliance health</span>
             <div className="text-[11px] text-[var(--fg-muted)] mt-1">Refreshed 8:16 PM</div>
           </div>
         </div>
@@ -58,12 +100,12 @@ export default function DashboardPage() {
         {/* KPI strip — 6 cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
-            { tone: "accent",  label: "ACTIVE DRIVERS", value: DEMO_FLEET.active_drivers,  sub: `of ${DEMO_FLEET.drivers_on_roster} on roster`, icon: "👤" },
-            { tone: "success", label: "POWER UNITS",    value: DEMO_FLEET.power_units,     sub: "across fleet",                                  icon: "🚛" },
-            { tone: "danger",  label: "OPEN ALERTS",    value: DEMO_FLEET.open_alerts,     sub: `${DEMO_FLEET.open_alerts_urgent} urgent`,        icon: "⚠" },
-            { tone: "danger",  label: "CDLS EXPIRED",   value: DEMO_FLEET.cdls_expired,    sub: "needs action",                                  icon: "✕" },
-            { tone: "success", label: "MECS ≤30D",      value: DEMO_FLEET.mecs_expiring_30d, sub: "expiring soon",                              icon: "♡" },
-            { tone: "warning", label: "DQ SCORE",       value: `${DEMO_FLEET.dq_score_pct}%`, sub: `${DEMO_FLEET.dq_docs_present} of ${DEMO_FLEET.dq_docs_total} docs`, icon: "★" },
+            { tone: "accent",  label: "ACTIVE DRIVERS", value: FLEET.active_drivers,  sub: `of ${FLEET.drivers_on_roster} on roster`, icon: "👤" },
+            { tone: "success", label: "POWER UNITS",    value: FLEET.power_units,     sub: "across fleet",                                  icon: "🚛" },
+            { tone: "danger",  label: "OPEN ALERTS",    value: FLEET.open_alerts,     sub: `${FLEET.open_alerts_urgent} urgent`,        icon: "⚠" },
+            { tone: "danger",  label: "CDLS EXPIRED",   value: FLEET.cdls_expired,    sub: "needs action",                                  icon: "✕" },
+            { tone: "success", label: "MECS ≤30D",      value: FLEET.mecs_expiring_30d, sub: "expiring soon",                              icon: "♡" },
+            { tone: "warning", label: "DQ SCORE",       value: `${FLEET.dq_score_pct}%`, sub: `${FLEET.dq_docs_present} of ${FLEET.dq_docs_total} docs`, icon: "★" },
           ].map((k, i) => (
             <div key={i} className="x3-card p-4">
               <div className="flex items-center justify-between mb-2">
@@ -85,17 +127,17 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-6 flex-wrap">
               <div className="relative">
-                <Donut data={[{ label: "good", count: DEMO_FLEET.compliance_pct, color: "var(--warning)" }, { label: "gap", count: 100 - DEMO_FLEET.compliance_pct, color: "var(--surface-2)" }]} />
+                <Donut data={[{ label: "good", count: FLEET.compliance_pct, color: "var(--warning)" }, { label: "gap", count: 100 - FLEET.compliance_pct, color: "var(--surface-2)" }]} />
                 <div className="absolute inset-0 grid place-items-center">
                   <div className="text-center">
-                    <div className="text-[32px] font-black text-[var(--fg)] leading-none">{DEMO_FLEET.compliance_pct}%</div>
+                    <div className="text-[32px] font-black text-[var(--fg)] leading-none">{FLEET.compliance_pct}%</div>
                     <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mt-1">OVERALL</div>
                     <div className="text-[11px] text-[var(--warning)] font-semibold mt-1">Action needed</div>
                   </div>
                 </div>
               </div>
               <div className="flex-1 min-w-[280px] space-y-2.5">
-                {COMPLIANCE_BARS.map((b) => (
+                {BARS.map((b) => (
                   <div key={b.label}>
                     <div className="flex justify-between text-[12px] text-[var(--fg-muted)] mb-1">
                       <span className="font-semibold text-[var(--fg)]">{b.label}</span><span>{b.pct}%</span>
@@ -114,7 +156,7 @@ export default function DashboardPage() {
               <div className="text-[11px] text-[var(--fg-muted)]">BASIC measures — lower is better</div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {CSA_BASICS.map((c) => {
+              {BASICS.map((c) => {
                 const tone = c.status === "alert" ? "var(--danger)" : c.status === "warn" ? "var(--warning)" : "var(--success)";
                 const bg   = c.status === "alert" ? "rgba(220,38,38,.10)" : c.status === "warn" ? "rgba(180,83,9,.10)" : "rgba(4,120,87,.08)";
                 return (
@@ -173,8 +215,8 @@ export default function DashboardPage() {
           <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 text-[12px]">
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Safety Rating</div>
-              <div className="text-[15px] text-[var(--success)] font-extrabold">{DEMO_CARRIER.safety_rating}</div>
-              <div className="text-[10px] text-[var(--fg-muted)]">As of {DEMO_CARRIER.rating_date} · {DEMO_CARRIER.rating_type}</div>
+              <div className="text-[15px] text-[var(--success)] font-extrabold">{CARRIER.safety_rating}</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">As of {CARRIER.rating_date} · {CARRIER.rating_type}</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Operating Authority</div>
@@ -183,17 +225,17 @@ export default function DashboardPage() {
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Annual Miles</div>
-              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.annual_miles.toLocaleString()}</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{CARRIER.annual_miles.toLocaleString()}</div>
               <div className="text-[10px] text-[var(--fg-muted)]">In 2025</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Power Units</div>
-              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.reported_power_units.toLocaleString()}</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{CARRIER.reported_power_units.toLocaleString()}</div>
               <div className="text-[10px] text-[var(--fg-muted)]">Reported on MCS-150</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Drivers</div>
-              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.reported_drivers.toLocaleString()}</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{CARRIER.reported_drivers.toLocaleString()}</div>
               <div className="text-[10px] text-[var(--fg-muted)]">Reported on MCS-150</div>
             </div>
           </div>
@@ -202,32 +244,32 @@ export default function DashboardPage() {
           <div className="border-t border-[var(--border)] mt-4 pt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-[12px]">
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--accent)] mb-1">Your X3 Fleet</div>
-              <div className="flex items-baseline gap-1.5"><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.power_units - DEMO_FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">POWER UNITS</div></div>
+              <div className="flex items-baseline gap-1.5"><div className="text-[20px] text-[var(--fg)] font-extrabold">{FLEET.power_units - FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">POWER UNITS</div></div>
               <div className="text-[10px] text-[var(--fg-muted)]">Active only · Manage →</div>
             </div>
-            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.tractors}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Tractors</div></div>
-            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.straight_trucks}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Straight trucks</div></div>
-            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Trailers</div></div>
-            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.active_drivers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Active drivers</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{FLEET.tractors}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Tractors</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{FLEET.straight_trucks}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Straight trucks</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Trailers</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{FLEET.active_drivers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Active drivers</div></div>
           </div>
 
           <div className="border-t border-[var(--border)] mt-4 pt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">BIPD Insurance</div>
-              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.bipd_insurance}</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{FLEET.bipd_insurance}</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Cargo Insurance</div>
-              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.cargo_insurance}</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{FLEET.cargo_insurance}</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">24-mo Crashes</div>
-              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.crashes_24mo_total} total · {DEMO_FLEET.crashes_24mo_fatal} fatal · {DEMO_FLEET.crashes_24mo_injury} injury</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{FLEET.crashes_24mo_total} total · {FLEET.crashes_24mo_fatal} fatal · {FLEET.crashes_24mo_injury} injury</div>
             </div>
             <div>
               <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">OOS Rates</div>
-              <div className="text-[12px] text-[var(--fg)] font-semibold">Driver {DEMO_FLEET.driver_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {DEMO_FLEET.driver_oos_national_pct}%)</span></div>
-              <div className="text-[12px] text-[var(--fg)] font-semibold">Vehicle {DEMO_FLEET.vehicle_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {DEMO_FLEET.vehicle_oos_national_pct}%)</span></div>
+              <div className="text-[12px] text-[var(--fg)] font-semibold">Driver {FLEET.driver_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {FLEET.driver_oos_national_pct}%)</span></div>
+              <div className="text-[12px] text-[var(--fg)] font-semibold">Vehicle {FLEET.vehicle_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {FLEET.vehicle_oos_national_pct}%)</span></div>
             </div>
           </div>
         </div>
@@ -239,7 +281,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-6 flex-wrap">
               <Donut data={DRIVER_STATUS} />
               <ul className="text-[12px] space-y-1.5">
-                {DRIVER_STATUS.map((d) => (
+                {DRIVERS_STATUS.map((d) => (
                   <li key={d.label} className="flex items-center gap-2"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: d.color }} /> <span className="text-[var(--fg)] font-semibold">{d.label}</span> <span className="text-[var(--fg-muted)]">{d.count}</span></li>
                 ))}
               </ul>
@@ -251,8 +293,8 @@ export default function DashboardPage() {
               <div className="text-[10px] text-[var(--fg-muted)]">Active drivers</div>
             </div>
             <div className="grid grid-cols-5 gap-2 items-end h-[180px]">
-              {CDL_BUCKETS.map((b) => {
-                const max = Math.max(...CDL_BUCKETS.map(x => x.count));
+              {CDLS.map((b) => {
+                const max = Math.max(...CDLS.map(x => x.count));
                 const h = Math.max(2, (b.count / max) * 100);
                 const color = b.label === "Expired" ? "var(--danger)" : b.label === "Over 90 days" ? "var(--success)" : "var(--warning)";
                 return (
@@ -277,7 +319,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-6 flex-wrap">
               <Donut data={VEHICLE_TYPES} />
               <ul className="text-[12px] space-y-1.5">
-                {VEHICLE_TYPES.map((d) => (
+                {VEHICLES.map((d) => (
                   <li key={d.label} className="flex items-center gap-2"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: d.color }} /> <span className="text-[var(--fg)] font-semibold">{d.label}</span> <span className="text-[var(--fg-muted)]">{d.count}</span></li>
                 ))}
               </ul>
@@ -286,7 +328,7 @@ export default function DashboardPage() {
           <div className="x3-card p-5">
             <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">Maintenance & inspection</div>
             <div className="grid grid-cols-2 gap-3">
-              {MAINTENANCE_KPIS.map((k) => {
+              {MAINT.map((k) => {
                 const toneColor = k.tone === "red" ? "var(--danger)" : k.tone === "yellow" ? "var(--warning)" : "var(--success)";
                 const bg = k.tone === "red" ? "rgba(220,38,38,.08)" : k.tone === "yellow" ? "rgba(180,83,9,.08)" : "rgba(4,120,87,.08)";
                 return (
