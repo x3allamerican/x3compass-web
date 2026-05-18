@@ -81,7 +81,7 @@ export function mapCsvRow(headers: string[], row: string[]): NormalizedDriver | 
       }
       continue;
     }
-    (out as Record<string, unknown>)[target] = v;
+    (out as unknown as Record<string, unknown>)[target] = v;
   }
   if (!out.first_name || !out.last_name) return null;
   out.source_vendor = "csv";
