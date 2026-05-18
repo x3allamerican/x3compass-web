@@ -1,198 +1,267 @@
 "use client";
+
 import { useMemo, useState } from "react";
-import AppShell from "@/components/AppShell";
-import { X3AdminHero, X3KPITile, X3AdminTabs } from "@/components/X3AdminHero";
-import { Toast } from "@/components/AdminModals";
-import { useFinance, monthLabel, listMonths, type Entry } from "@/lib/useFinance";
+import Link from "next/link";
+import AdminGuard from "@/components/AdminGuard";
+import { useFinance } from "@/lib/useFinance";
 
-const MONTHS = listMonths(12);
-const TYPE_LABEL: Record<Entry["type"], string> = { money_in: "Money in", vendor: "Vendor cost", overhead: "Software & overhead", refund: "Refund", owed: "Owed to us" };
-const TYPE_TONE:  Record<Entry["type"], string> = { money_in: "bg-[var(--success)]/15 text-[var(--success)]", vendor: "bg-[var(--danger)]/15 text-[var(--danger)]", overhead: "bg-[var(--danger)]/15 text-[var(--danger)]", refund: "bg-[var(--warning)]/15 text-[var(--warning)]", owed: "bg-[#FACC15]/15 text-[#B45309]" };
+const TIER_LABEL: Record<string, string> = { diy: "DIY $25/driver", dfy: "DFY $50/driver", enterprise: "Enterprise" };
 
-function fmt(cents: number): string {
-  const dollars = cents / 100;
-  const sign = dollars < 0 ? "-" : "";
-  return `${sign}$${Math.abs(dollars).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function fmt(cents: number) {
+  return (cents / 100).toLocaleString(undefined, { style: "currency", currency: "USD" });
+}
+function relTime(iso: string | null): string {
+  if (!iso) return "never";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60_000) return "just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  return new Date(iso).toLocaleString();
+}
+
+function lastTwelveMonths(): string[] {
+  const out: string[] = []; const d = new Date();
+  for (let i = 0; i < 12; i++) { out.push(d.toISOString().slice(0, 7)); d.setMonth(d.getMonth() - 1); }
+  return out;
 }
 
 export default function FinancePage() {
-  const [month, setMonth] = useState(MONTHS[0]);
-  const [tab, setTab] = useState("all");
-  const [toast, setToast] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<"all" | Entry["type"]>("all");
-  const [vendorFilter, setVendorFilter] = useState("all");
-  const [carrierFilter, setCarrierFilter] = useState("all");
+  const months = lastTwelveMonths();
+  const [month, setMonth] = useState(months[0]);
+  const [tab, setTab] = useState<"clients" | "ledger" | "owed" | "add">("clients");
+  const { entries, kpis, clientRows, clientTotals, lastSyncAt, syncedNow, loading, error, refresh, addEntry, exportCsv } = useFinance(month);
 
-  // Add-entry form state
-  const [draftType,   setDraftType]   = useState<Entry["type"]>("money_in");
-  const [draftCarrier,setDraftCarrier]= useState("");
-  const [draftCategory,setDraftCategory]= useState("");
-  const [draftVendor, setDraftVendor] = useState("");
-  const [draftDesc,   setDraftDesc]   = useState("");
-  const [draftAmount, setDraftAmount] = useState("");
-  const [draftPaid,   setDraftPaid]   = useState(false);
+  // Add-entry form
+  const [form, setForm] = useState({ entry_date: new Date().toISOString().slice(0, 10), type: "overhead", carrier_name: "", vendor: "", category: "", description: "", amount: "", paid: true });
+  const [busy, setBusy] = useState(false);
+  const [flash, setFlash] = useState<string | null>(null);
 
-  const { entries, kpis, loading, error, refresh, addEntry, syncStripe, exportCsv } = useFinance(month);
-
-  const filtered = useMemo(() => {
-    return entries.filter((e) => {
-      if (tab === "owed" && e.type !== "owed") return false;
-      if (typeFilter !== "all" && e.type !== typeFilter) return false;
-      if (vendorFilter !== "all" && e.vendor !== vendorFilter) return false;
-      if (carrierFilter !== "all" && e.carrier_name !== carrierFilter) return false;
-      return true;
-    });
-  }, [entries, tab, typeFilter, vendorFilter, carrierFilter]);
-
-  const vendorList  = useMemo(() => Array.from(new Set(entries.map((e) => e.vendor).filter(Boolean))) as string[], [entries]);
-  const carrierList = useMemo(() => Array.from(new Set(entries.map((e) => e.carrier_name).filter(Boolean))) as string[], [entries]);
-
-  async function handleAddEntry() {
-    const amt = Math.round(parseFloat(draftAmount) * 100);
-    if (!amt || isNaN(amt)) { setToast("Enter a non-zero amount"); return; }
+  const submit = async () => {
+    const cents = Math.round(parseFloat(form.amount || "0") * 100);
+    if (!cents) { setFlash("Amount must be > 0"); return; }
+    setBusy(true);
     try {
-      await addEntry({ entry_date: new Date().toISOString().slice(0, 10), type: draftType, carrier_name: draftCarrier || null, vendor: draftVendor || null, category: draftCategory || null, description: draftDesc || null, amount_cents: amt, paid: draftPaid });
-      setToast("Entry saved");
-      setDraftCarrier(""); setDraftCategory(""); setDraftVendor(""); setDraftDesc(""); setDraftAmount(""); setDraftPaid(false);
-      setTab("all");
-    } catch (e) { setToast("Save failed: " + (e instanceof Error ? e.message : String(e))); }
-  }
+      await addEntry({ entry_date: form.entry_date, type: form.type as "money_in" | "vendor" | "overhead" | "refund" | "owed", carrier_name: form.carrier_name || null, vendor: form.vendor || null, category: form.category || null, description: form.description || null, amount_cents: cents, paid: form.paid });
+      setForm({ ...form, amount: "", description: "" }); setFlash("Saved."); setTab("ledger");
+    } catch (e) { setFlash(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
+  };
 
-  async function handleSyncStripe() {
-    try {
-      const r = await syncStripe();
-      setToast(`Stripe sync: ${r.inserted} new · ${r.skipped} already imported · ${r.considered} considered`);
-    } catch (e) { setToast("Sync failed: " + (e instanceof Error ? e.message : String(e))); }
-  }
+  const sortedClients = useMemo(() => {
+    const arr = [...clientRows];
+    arr.sort((a, b) => b.actual_revenue_cents - a.actual_revenue_cents);
+    return arr;
+  }, [clientRows]);
 
   return (
-    <AppShell title="Finance Tracker" crumbs="X3 Admin · Internal ledger">
-      <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
-        <X3AdminHero eyebrow="Finance" title="Every dollar in, every dollar out." intro="X3's internal ledger. Subscriptions + vendor pass-through + software overhead — across every carrier." />
-
-        {/* Month picker + sync button */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="text-[20px] font-extrabold text-[var(--fg)]">{monthLabel(month)}{loading && <span className="text-[12px] text-[var(--fg-muted)] ml-2">loading…</span>}</div>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] text-[var(--fg-muted)]">Showing month:</span>
-            <select value={month} onChange={(e) => setMonth(e.target.value)} className="px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[13px] font-bold text-[var(--fg)]">
-              {MONTHS.map((m) => <option key={m} value={m}>{monthLabel(m)}</option>)}
+    <AdminGuard>
+      <div className="p-6 lg:p-10 max-w-[1400px] mx-auto">
+        <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
+          <div>
+            <Link href="/app/admin" className="text-[12px] text-[var(--accent)] hover:underline">← Admin home</Link>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Finance</h1>
+            <p className="text-[14px] text-[var(--fg-muted)] mt-1">
+              Per-client revenue, fees, and owed. Stripe auto-syncs · last sync <strong>{relTime(lastSyncAt)}</strong>
+              {syncedNow ? <span> · pulled <strong>{syncedNow.inserted}</strong> new charge{syncedNow.inserted === 1 ? "" : "s"}</span> : null}
+            </p>
+          </div>
+          <div className="flex gap-2 items-center">
+            <select value={month} onChange={(e) => setMonth(e.target.value)} className="px-3 py-2 rounded bg-[var(--bg-elev-1)] border border-[var(--border)] text-sm">
+              {months.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
-            <button onClick={refresh} className="px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-2)]">↻ Refresh</button>
-            <button onClick={handleSyncStripe} className="px-3 py-1.5 rounded-lg font-extrabold text-[12px] text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>⇣ Sync Stripe</button>
+            <button onClick={() => refresh()} className="px-3 py-2 text-sm rounded border border-[var(--border)] hover:bg-[var(--bg-elev-1)]">Refresh</button>
+            <button onClick={exportCsv} className="px-3 py-2 text-sm rounded bg-[var(--accent)] text-black font-medium">Export CSV</button>
           </div>
         </div>
 
-        {error && <div className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 p-3 text-[12px] text-[var(--danger)] font-semibold">⚠ {error}</div>}
+        {error ? <div className="mb-4 p-3 rounded border border-red-500/40 bg-red-500/10 text-sm">{error}</div> : null}
+        {flash ? <div className="mb-4 p-3 rounded border border-[var(--accent)]/40 bg-[var(--accent)]/10 text-sm">{flash}</div> : null}
 
-        {/* 5 KPI tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <X3KPITile label="Money in"            value={fmt(kpis.money_in_cents)}      sub="Subscriptions + add-ons" tone="green" />
-          <X3KPITile label="Paid to vendors"     value={fmt(kpis.paid_vendors_cents)}  sub="MVR · D&A · Checkr"      tone="red"   />
-          <X3KPITile label="Software & overhead" value={fmt(kpis.overhead_cents)}      sub="Hosting · AI · DB"        tone="red"   />
-          <X3KPITile label="What's left"         value={fmt(kpis.whats_left_cents)}    sub="in – costs – overhead"    tone="navy"  />
-          <X3KPITile label="Customers owe us"    value={fmt(kpis.owed_to_us_cents)}    sub="Invoiced, not paid yet"   tone="navy"  />
+        {/* KPI tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <Tile label="Active clients"     value={`${clientTotals.active_carriers}`} sub={`${clientTotals.trialing_carriers} trialing`} />
+          <Tile label="Total drivers"      value={clientTotals.drivers.toLocaleString()} sub={`across ${clientTotals.carriers} carriers`} />
+          <Tile label="Expected MRR"       value={fmt(clientTotals.expected_mrr_cents)} sub="drivers × tier rate" />
+          <Tile label="Actual revenue"     value={fmt(clientTotals.actual_revenue_cents)} sub={`fees ${fmt(clientTotals.est_fees_cents)}`} />
+          <Tile label="Owed to us"         value={fmt(clientTotals.owed_cents)} sub="below expected MRR" emphasis={clientTotals.owed_cents > 0 ? "warn" : undefined} />
         </div>
 
-        <X3AdminTabs active={tab} onChange={setTab} tabs={[
-          { key: "all",   label: "📂 All transactions" },
-          { key: "trend", label: "📊 12-month trend"  },
-          { key: "owed",  label: "📔 Owed to us (pass-throughs)" },
-          { key: "add",   label: "+ Add entry" },
-        ]} />
+        {/* Tabs */}
+        <div className="flex gap-1 border-b border-[var(--border)] mb-4">
+          {(["clients","ledger","owed","add"] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm border-b-2 -mb-px ${tab === t ? "border-[var(--accent)] text-[var(--fg)]" : "border-transparent text-[var(--fg-muted)] hover:text-[var(--fg)]"}`}>
+              {t === "clients" ? "By Client" : t === "ledger" ? "All Entries" : t === "owed" ? `Owed (${clientRows.filter((r) => r.status === "owed").length})` : "Add Entry"}
+            </button>
+          ))}
+        </div>
 
-        {(tab === "all" || tab === "owed") && (
-          <div className="x3-card overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] flex-wrap">
-              <label className="text-[11px] font-bold text-[var(--fg-muted)] tracking-[.12em] uppercase">Type</label>
-              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as typeof typeFilter)} className="px-2 py-1 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[12px]">
-                <option value="all">All types</option>
-                {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-              <label className="text-[11px] font-bold text-[var(--fg-muted)] tracking-[.12em] uppercase">Vendor</label>
-              <select value={vendorFilter} onChange={(e) => setVendorFilter(e.target.value)} className="px-2 py-1 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[12px]">
-                <option value="all">All vendors</option>
-                {vendorList.map((v) => <option key={v} value={v}>{v}</option>)}
-              </select>
-              <label className="text-[11px] font-bold text-[var(--fg-muted)] tracking-[.12em] uppercase">Carrier</label>
-              <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)} className="px-2 py-1 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[12px]">
-                <option value="all">All carriers</option>
-                {carrierList.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <span className="ml-auto text-[11px] text-[var(--fg-muted)]">{filtered.length} of {entries.length}</span>
-              <button onClick={exportCsv} className="px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-2)]">↓ Export CSV</button>
-            </div>
-            <table className="w-full text-[13px]">
-              <thead className="bg-[var(--surface-2)] text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)]">
-                <tr><th className="text-left px-4 py-2 font-bold">Date</th><th className="text-left px-4 py-2 font-bold">Type</th><th className="text-left px-4 py-2 font-bold">Carrier</th><th className="text-left px-4 py-2 font-bold">Category</th><th className="text-left px-4 py-2 font-bold">Description</th><th className="text-left px-4 py-2 font-bold">Vendor</th><th className="text-right px-4 py-2 font-bold">Amount</th><th className="text-left px-4 py-2 font-bold">Paid</th></tr>
+        {loading ? <div className="py-10 text-center text-[var(--fg-muted)]">Loading + syncing Stripe…</div> : null}
+
+        {!loading && tab === "clients" ? (
+          <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+            <table className="w-full text-sm">
+              <thead className="bg-[var(--bg-elev-1)] text-[var(--fg-muted)]">
+                <tr>
+                  <th className="text-left p-3">Client</th>
+                  <th className="text-left p-3">Tier</th>
+                  <th className="text-right p-3">Drivers</th>
+                  <th className="text-right p-3">Expected MRR</th>
+                  <th className="text-right p-3">Actual revenue</th>
+                  <th className="text-right p-3">Stripe fees</th>
+                  <th className="text-right p-3">Net</th>
+                  <th className="text-right p-3">Δ</th>
+                  <th className="text-left p-3">Status</th>
+                </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-6 text-center text-[var(--fg-faint)]">{loading ? "Loading…" : "No entries for this filter. Use the + Add entry tab or click ⇣ Sync Stripe to import this month's revenue."}</td></tr>
-                ) : filtered.map((e) => {
-                  const display = (e.type === "money_in" || e.type === "owed") ? e.amount_cents : -e.amount_cents;
-                  return (
-                    <tr key={e.id} className="border-t border-[var(--border)]">
-                      <td className="px-4 py-2.5 text-[var(--fg-muted)] whitespace-nowrap">{e.entry_date}</td>
-                      <td className="px-4 py-2.5"><span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${TYPE_TONE[e.type]}`}>{TYPE_LABEL[e.type]}</span></td>
-                      <td className="px-4 py-2.5 text-[var(--fg)] font-semibold">{e.carrier_name || "—"}</td>
-                      <td className="px-4 py-2.5 text-[var(--fg-muted)]">{e.category || "—"}</td>
-                      <td className="px-4 py-2.5 text-[var(--fg-muted)]">{e.description || "—"}</td>
-                      <td className="px-4 py-2.5 text-[var(--fg-muted)]">{e.vendor || "—"}</td>
-                      <td className={`px-4 py-2.5 text-right tabular-nums font-bold ${display >= 0 ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>{fmt(display)}</td>
-                      <td className="px-4 py-2.5">{e.paid ? <span className="text-[var(--success)] text-[12px]">✓</span> : <span className="text-[var(--warning)] text-[11px] font-bold">PENDING</span>}</td>
-                    </tr>
-                  );
-                })}
+                {sortedClients.map((r) => (
+                  <tr key={r.carrier_id} className="border-t border-[var(--border)]">
+                    <td className="p-3">
+                      <div className="font-medium">{r.name}</div>
+                      <div className="text-[11px] text-[var(--fg-muted)]">{r.primary_contact_email || "—"}</div>
+                    </td>
+                    <td className="p-3">
+                      <div>{TIER_LABEL[r.tier] || r.tier}</div>
+                      {r.hazmat_addon ? <div className="text-[11px] text-[var(--accent)]">+ Hazmat $99</div> : null}
+                    </td>
+                    <td className="p-3 text-right tabular-nums">{r.drivers}</td>
+                    <td className="p-3 text-right tabular-nums">{fmt(r.expected_mrr_cents)}</td>
+                    <td className="p-3 text-right tabular-nums font-medium">{fmt(r.actual_revenue_cents)}</td>
+                    <td className="p-3 text-right tabular-nums text-[var(--fg-muted)]">{fmt(r.est_fees_cents)}</td>
+                    <td className="p-3 text-right tabular-nums font-semibold">{fmt(r.net_cents)}</td>
+                    <td className={`p-3 text-right tabular-nums ${r.delta_cents < -500 ? "text-red-400" : r.delta_cents > 500 ? "text-emerald-400" : ""}`}>{r.delta_cents === 0 ? "—" : fmt(r.delta_cents)}</td>
+                    <td className="p-3"><StatusPill status={r.status} /></td>
+                  </tr>
+                ))}
+                {sortedClients.length === 0 ? <tr><td colSpan={9} className="p-6 text-center text-[var(--fg-muted)]">No carriers in this month — once a customer signs up they'll appear here automatically.</td></tr> : null}
+              </tbody>
+              <tfoot className="bg-[var(--bg-elev-1)] font-semibold">
+                <tr className="border-t-2 border-[var(--border)]">
+                  <td className="p-3" colSpan={2}>Totals</td>
+                  <td className="p-3 text-right tabular-nums">{clientTotals.drivers}</td>
+                  <td className="p-3 text-right tabular-nums">{fmt(clientTotals.expected_mrr_cents)}</td>
+                  <td className="p-3 text-right tabular-nums">{fmt(clientTotals.actual_revenue_cents)}</td>
+                  <td className="p-3 text-right tabular-nums">{fmt(clientTotals.est_fees_cents)}</td>
+                  <td className="p-3 text-right tabular-nums">{fmt(clientTotals.net_cents)}</td>
+                  <td className="p-3 text-right tabular-nums">{fmt(clientTotals.actual_revenue_cents - clientTotals.expected_mrr_cents)}</td>
+                  <td className="p-3"></td>
+                </tr>
+              </tfoot>
+            </table>
+            <div className="p-3 text-[11px] text-[var(--fg-muted)] border-t border-[var(--border)]">
+              Stripe fees estimated at 2.9% + $0.30/charge. KPI tiles above (Money In, Vendor Costs, Overhead, Refunds) are also tracked — see <em>All Entries</em>.
+            </div>
+          </div>
+        ) : null}
+
+        {!loading && tab === "ledger" ? (
+          <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+            <table className="w-full text-sm">
+              <thead className="bg-[var(--bg-elev-1)] text-[var(--fg-muted)]">
+                <tr><th className="text-left p-3">Date</th><th className="text-left p-3">Type</th><th className="text-left p-3">Carrier / Vendor</th><th className="text-left p-3">Description</th><th className="text-right p-3">Amount</th></tr>
+              </thead>
+              <tbody>
+                {entries.map((e) => (
+                  <tr key={e.id} className="border-t border-[var(--border)]">
+                    <td className="p-3 tabular-nums">{e.entry_date}</td>
+                    <td className="p-3"><TypePill type={e.type} /></td>
+                    <td className="p-3">{e.carrier_name || e.vendor || "—"}</td>
+                    <td className="p-3 text-[var(--fg-muted)]">{e.description || e.category || ""}</td>
+                    <td className={`p-3 text-right tabular-nums ${e.type === "money_in" ? "text-emerald-400" : "text-red-400"}`}>{e.type === "money_in" ? "+" : "−"}{fmt(e.amount_cents)}</td>
+                  </tr>
+                ))}
+                {entries.length === 0 ? <tr><td colSpan={5} className="p-6 text-center text-[var(--fg-muted)]">No entries this month.</td></tr> : null}
               </tbody>
             </table>
-          </div>
-        )}
-
-        {tab === "trend" && (
-          <div className="x3-card p-5 text-[13px] text-[var(--fg-muted)]">12-month trend will land here once we have ≥3 months of data. The query is a simple group-by-month over compass_finance_entries.</div>
-        )}
-
-        {tab === "add" && (
-          <div className="x3-card p-5 space-y-3">
-            <div className="text-[15px] font-extrabold text-[var(--fg)]">Add new transaction</div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Type</div>
-                <select value={draftType} onChange={(e) => setDraftType(e.target.value as Entry["type"])} className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]">
-                  {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
-              </div>
-              <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Carrier</div>
-                <input value={draftCarrier} onChange={(e) => setDraftCarrier(e.target.value)} placeholder="e.g. Apex Logistics" className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]" />
-              </div>
-              <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Category</div>
-                <input value={draftCategory} onChange={(e) => setDraftCategory(e.target.value)} placeholder="e.g. Subscription, Background check, Hosting" className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]" />
-              </div>
-              <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Vendor</div>
-                <input value={draftVendor} onChange={(e) => setDraftVendor(e.target.value)} placeholder="e.g. Stripe, Checkr, Anthropic" className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]" />
-              </div>
-              <div className="sm:col-span-2">
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Description</div>
-                <input value={draftDesc} onChange={(e) => setDraftDesc(e.target.value)} placeholder="One-line context" className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]" />
-              </div>
-              <div>
-                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Amount (USD)</div>
-                <input type="number" step="0.01" value={draftAmount} onChange={(e) => setDraftAmount(e.target.value)} placeholder="0.00" className="w-full px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[13px]" />
-              </div>
-              <label className="flex items-center gap-2 text-[13px] text-[var(--fg-muted)] pt-7">
-                <input type="checkbox" checked={draftPaid} onChange={(e) => setDraftPaid(e.target.checked)} /> Mark as paid
-              </label>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 p-3 bg-[var(--bg-elev-1)] text-sm border-t border-[var(--border)]">
+              <Mini label="Money in"   value={fmt(kpis.money_in_cents)} />
+              <Mini label="Vendors"    value={fmt(kpis.paid_vendors_cents)} />
+              <Mini label="Overhead"   value={fmt(kpis.overhead_cents)} />
+              <Mini label="Refunds"    value={fmt(kpis.refunds_cents)} />
+              <Mini label="What's left" value={fmt(kpis.whats_left_cents)} emphasis />
             </div>
-            <button onClick={handleAddEntry} className="px-4 py-2 rounded-lg font-extrabold text-[13px] text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Save entry</button>
           </div>
-        )}
+        ) : null}
 
-        <Toast message={toast} onDismiss={() => setToast(null)} />
+        {!loading && tab === "owed" ? (
+          <div className="space-y-3">
+            {sortedClients.filter((r) => r.status === "owed").map((r) => (
+              <div key={r.carrier_id} className="p-4 rounded border border-red-500/40 bg-red-500/5 flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{r.name}</div>
+                  <div className="text-[12px] text-[var(--fg-muted)]">{r.drivers} drivers × {fmt(r.tier_rate_cents)}/mo = {fmt(r.expected_mrr_cents)} expected · actual {fmt(r.actual_revenue_cents)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-red-400 font-semibold">{fmt(-r.delta_cents)} owed</div>
+                  <div className="text-[11px] text-[var(--fg-muted)]">{r.primary_contact_email || "no contact"}</div>
+                </div>
+              </div>
+            ))}
+            {sortedClients.filter((r) => r.status === "owed").length === 0 ? (
+              <div className="p-6 text-center text-[var(--fg-muted)]">No clients owe money this month. ✓</div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!loading && tab === "add" ? (
+          <div className="rounded-lg border border-[var(--border)] p-5 max-w-2xl">
+            <h2 className="font-semibold mb-4">Add a manual entry (vendor cost, overhead, refund, etc.)</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Date"><input type="date" value={form.entry_date} onChange={(e) => setForm({ ...form, entry_date: e.target.value })} className="input" /></Field>
+              <Field label="Type">
+                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="input">
+                  <option value="overhead">Overhead</option><option value="vendor">Vendor cost</option><option value="refund">Refund</option><option value="owed">Owed</option><option value="money_in">Money in (manual)</option>
+                </select>
+              </Field>
+              <Field label="Carrier (if customer-related)"><input value={form.carrier_name} onChange={(e) => setForm({ ...form, carrier_name: e.target.value })} className="input" placeholder="Carrier name…" /></Field>
+              <Field label="Vendor"><input value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} className="input" placeholder="Cloudflare, Supabase, …" /></Field>
+              <Field label="Category"><input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="input" placeholder="Hosting, AI, Email…" /></Field>
+              <Field label="Amount (USD)"><input type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="input" placeholder="0.00" /></Field>
+              <Field label="Description" className="col-span-2"><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input" placeholder="Optional note" /></Field>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setTab("clients")} className="px-4 py-2 text-sm rounded border border-[var(--border)]">Cancel</button>
+              <button disabled={busy} onClick={submit} className="px-4 py-2 text-sm rounded bg-[var(--accent)] text-black font-medium disabled:opacity-50">{busy ? "Saving…" : "Save entry"}</button>
+            </div>
+          </div>
+        ) : null}
+        <style jsx>{`.input { width: 100%; padding: 8px 10px; background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--fg); }`}</style>
       </div>
-    </AppShell>
+    </AdminGuard>
   );
+}
+
+function Tile({ label, value, sub, emphasis }: { label: string; value: string; sub?: string; emphasis?: "warn" }) {
+  return (
+    <div className={`rounded-lg border p-4 ${emphasis === "warn" ? "border-red-500/40 bg-red-500/5" : "border-[var(--border)] bg-[var(--bg-elev-1)]"}`}>
+      <div className="text-[11px] uppercase tracking-wide text-[var(--fg-muted)]">{label}</div>
+      <div className="text-2xl font-extrabold mt-1 tabular-nums">{value}</div>
+      {sub ? <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div> : null}
+    </div>
+  );
+}
+function Mini({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-[var(--fg-muted)]">{label}</div>
+      <div className={`tabular-nums ${emphasis ? "font-bold" : ""}`}>{value}</div>
+    </div>
+  );
+}
+function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+  return <label className={`block ${className || ""}`}><div className="text-[11px] uppercase tracking-wide text-[var(--fg-muted)] mb-1">{label}</div>{children}</label>;
+}
+function TypePill({ type }: { type: string }) {
+  const map: Record<string, string> = { money_in: "bg-emerald-500/20 text-emerald-300", vendor: "bg-orange-500/20 text-orange-300", overhead: "bg-blue-500/20 text-blue-300", refund: "bg-red-500/20 text-red-300", owed: "bg-yellow-500/20 text-yellow-300" };
+  return <span className={`px-2 py-0.5 rounded text-[11px] ${map[type] || "bg-gray-500/20 text-gray-300"}`}>{type.replace("_", " ")}</span>;
+}
+function StatusPill({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    on_track:    { label: "On track",    cls: "bg-emerald-500/20 text-emerald-300" },
+    owed:        { label: "Owed",        cls: "bg-red-500/20 text-red-300" },
+    overpaid:    { label: "Overpaid",    cls: "bg-blue-500/20 text-blue-300" },
+    no_revenue:  { label: "No revenue",  cls: "bg-yellow-500/20 text-yellow-300" },
+    trial:       { label: "Trial",       cls: "bg-cyan-500/20 text-cyan-300" },
+  };
+  const s = map[status] || { label: status, cls: "bg-gray-500/20 text-gray-300" };
+  return <span className={`px-2 py-0.5 rounded text-[11px] ${s.cls}`}>{s.label}</span>;
 }
