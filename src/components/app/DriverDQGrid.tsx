@@ -108,11 +108,42 @@ function statusFor(req: Requirement, driver: DriverLike, docs: Doc[]): { status:
 }
 
 const STATUS_COLOR: Record<Status, { bg: string; border: string; text: string; pill: string; symbol: string }> = {
-  valid:    { bg: "bg-emerald-500/20", border: "border-emerald-500/60", text: "text-emerald-100", pill: "bg-emerald-500/30 text-emerald-100 border-emerald-400/70", symbol: "✓" },
-  expiring: { bg: "bg-amber-500/20",   border: "border-amber-500/60",   text: "text-amber-100",   pill: "bg-amber-500/30 text-amber-100 border-amber-400/70",     symbol: "⚠" },
-  expired:  { bg: "bg-rose-500/20",    border: "border-rose-500/60",    text: "text-rose-100",    pill: "bg-rose-500/30 text-rose-100 border-rose-400/70",         symbol: "✗" },
-  missing:  { bg: "bg-rose-500/20",    border: "border-rose-500/60",    text: "text-rose-100",    pill: "bg-rose-500/30 text-rose-100 border-rose-400/70",         symbol: "○" },
-  na:       { bg: "bg-[var(--surface-3)]", border: "border-[var(--border)]", text: "text-[var(--fg)]",       pill: "bg-[var(--surface-2)] text-[var(--fg)] border-[var(--border)]", symbol: "–" },
+  valid:    {
+    bg:     "bg-green-100 dark:bg-emerald-500/20",
+    border: "border-green-700 dark:border-emerald-500/60",
+    text:   "text-green-900 dark:text-emerald-100",
+    pill:   "bg-green-700 text-white border-green-800 dark:bg-emerald-500/30 dark:text-emerald-100 dark:border-emerald-400/70",
+    symbol: "✓",
+  },
+  expiring: {
+    bg:     "bg-amber-100 dark:bg-amber-500/20",
+    border: "border-amber-700 dark:border-amber-500/60",
+    text:   "text-amber-900 dark:text-amber-100",
+    pill:   "bg-amber-600 text-white border-amber-700 dark:bg-amber-500/30 dark:text-amber-100 dark:border-amber-400/70",
+    symbol: "⚠",
+  },
+  expired:  {
+    // American-flag red: bg-red-100 + red-700 border + red-700 pill (#B91C1C ~ flag red)
+    bg:     "bg-red-100 dark:bg-rose-500/20",
+    border: "border-red-700 dark:border-rose-500/60",
+    text:   "text-red-900 dark:text-rose-100",
+    pill:   "bg-red-700 text-white border-red-800 dark:bg-rose-500/30 dark:text-rose-100 dark:border-rose-400/70",
+    symbol: "✗",
+  },
+  missing:  {
+    bg:     "bg-red-100 dark:bg-rose-500/20",
+    border: "border-red-700 dark:border-rose-500/60",
+    text:   "text-red-900 dark:text-rose-100",
+    pill:   "bg-red-700 text-white border-red-800 dark:bg-rose-500/30 dark:text-rose-100 dark:border-rose-400/70",
+    symbol: "○",
+  },
+  na:       {
+    bg:     "bg-slate-100 dark:bg-[var(--surface-3)]",
+    border: "border-slate-300 dark:border-[var(--border)]",
+    text:   "text-slate-700 dark:text-[var(--fg)]",
+    pill:   "bg-slate-200 text-slate-700 border-slate-300 dark:bg-[var(--surface-2)] dark:text-[var(--fg)] dark:border-[var(--border)]",
+    symbol: "–",
+  },
 };
 
 export function DriverDQGrid({
@@ -187,7 +218,7 @@ export function DriverDQGrid({
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
-                  <div className="text-[15px] font-extrabold text-white leading-tight">{req.label}</div>
+                  <div className="text-[15px] font-extrabold text-black dark:text-white leading-tight">{req.label}</div>
                   <div className="text-[12px] font-mono text-[var(--fg-muted)] mt-1 font-bold">{req.cfr}</div>
                 </div>
                 <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${c.pill} flex-shrink-0`}>
@@ -196,7 +227,7 @@ export function DriverDQGrid({
               </div>
               <div className={`text-[13px] ${c.text} font-bold mt-3`}>{detail}</div>
               {expiresOn && status === "expiring" && (
-                <div className="text-[12px] text-white/80 mt-1 font-bold">
+                <div className="text-[12px] text-black/80 dark:text-white/80 mt-1 font-bold">
                   {Math.ceil((new Date(expiresOn).getTime() - Date.now()) / 86_400_000)} days remaining
                 </div>
               )}
