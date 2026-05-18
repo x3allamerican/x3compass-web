@@ -201,12 +201,13 @@ create policy "super_admin_all_vinv"  on compass_vendor_invoices   for all using
 create policy "super_admin_all_close" on compass_period_closes     for all using (is_super_admin());
 
 -- Seed the 5 AI Finance Team agents ─────────────────────────────────────────
-insert into compass_agents (name, kind, cron_expr, enabled, mode, notes) values
-  ('agent-control-manager',    'scheduled', '15 2 * * *',   true, 'realtime', 'Daily 02:15 UTC — bank/CC reconciliation + journal balance check'),
-  ('agent-revenue-manager',    'scheduled', '*/30 * * * *', true, 'realtime', 'Every 30 min — Stripe sync, dunning, trial conversion, churn risk'),
-  ('agent-reporting-manager',  'scheduled', '0 6 1 * *',    true, 'realtime', 'Monthly 1st @ 06:00 UTC — P&L, BS, CF + email statements'),
-  ('agent-fpa-manager',        'scheduled', '0 7 * * 1',    true, 'realtime', 'Weekly Mon 07:00 UTC — MRR forecast, variance, cohort retention'),
-  ('agent-finance-workflow',   'scheduled', '0 3 * * *',    true, 'realtime', 'Daily 03:00 UTC — orchestrates the other 4 agents, enforces close calendar')
+insert into compass_agents (name, kind, cron_expr, enabled, cadence, description) values
+  ('agent-control-manager',    'scheduled', '15 2 * * *',   true, 'Daily 02:15 UTC',  'Bank/CC reconciliation + journal balance integrity check + anomaly flag'),
+  ('agent-revenue-manager',    'scheduled', '*/30 * * * *', true, 'Every 30 minutes', 'Stripe sync to journal · dunning v2 (T+1/3/7/14) · trial conversion · churn risk'),
+  ('agent-reporting-manager',  'scheduled', '0 6 1 * *',    true, 'Monthly on the 1st @ 06:00 UTC', 'Generates P&L, Balance Sheet, Cash Flow statements + emails Joshua'),
+  ('agent-fpa-manager',        'scheduled', '0 7 * * 1',    true, 'Weekly Monday @ 07:00 UTC', 'MRR forecast (3/6/12 mo), variance vs plan, cohort retention, runway'),
+  ('agent-finance-workflow',   'scheduled', '0 3 * * *',    true, 'Daily 03:00 UTC',  'Orchestrator — runs revenue+control daily, reporting on 1st, FP&A on Mondays')
 on conflict (name) do update set
-  cron_expr = excluded.cron_expr,
-  notes     = excluded.notes;
+  cron_expr   = excluded.cron_expr,
+  cadence     = excluded.cadence,
+  description = excluded.description;
