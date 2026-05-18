@@ -65,8 +65,9 @@ export default function ControlCenterPage() {
     setToast(`${name} ${!currentEnabled ? "enabled" : "paused"}`);
   };
 
-  const handleRunConfirm = (name: string, mode: "ok" | "skipped" | "error") => {
-    runAgentNow(name, mode);
+  const handleRunConfirm = async (name: string) => {
+    setToast(`${name} firing…`);
+    await runAgentNow(name);
     setToast(`${name} ran — see Activity tab`);
   };
 
@@ -255,7 +256,7 @@ export default function ControlCenterPage() {
         {/* Modals */}
         <AgentLogsModal open={!!logsFor} onClose={() => setLogsFor(null)} agentName={logsFor || ""} />
         <AgentEditModal open={!!editFor && !!editTarget} onClose={() => setEditFor(null)} agentName={editFor || ""} currentCadence={(editTarget && "cadence" in editTarget ? editTarget.cadence : "Every hour")} currentEnabled={editTarget?.enabled ?? true} onSave={(patch) => editFor && handleEditSave(editFor, patch)} />
-        <AgentRunNowModal open={!!runFor} onClose={() => setRunFor(null)} agentName={runFor || ""} onConfirm={(mode) => runFor && handleRunConfirm(runFor, mode)} />
+        <AgentRunNowModal open={!!runFor} onClose={() => setRunFor(null)} agentName={runFor || ""} onConfirm={() => runFor && handleRunConfirm(runFor)} />
         <Toast message={toast} onDismiss={() => setToast(null)} />
       </div>
     </AppShell>

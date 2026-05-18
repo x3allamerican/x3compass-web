@@ -159,10 +159,10 @@ export function AgentEditModal({ open, onClose, agentName, currentCadence, curre
 }
 
 // ---------- Run Now confirm modal ----------
-export function AgentRunNowModal({ open, onClose, agentName, onConfirm }: { open: boolean; onClose: () => void; agentName: string; onConfirm: (mode: "ok" | "skipped" | "error") => void }) {
+export function AgentRunNowModal({ open, onClose, agentName, onConfirm }: { open: boolean; onClose: () => void; agentName: string; onConfirm: () => void }) {
   return (
     <Modal open={open} onClose={onClose} title={`Run now · ${agentName}`} width={520}
-      footer={<><button onClick={onClose} className="px-3 py-1.5 rounded-lg font-bold text-[13px] text-[var(--fg)] border border-[var(--border)]">Cancel</button><button onClick={() => { onConfirm("ok"); onClose(); }} className="px-4 py-1.5 rounded-lg font-extrabold text-[13px] text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Run now</button></>}
+      footer={<><button onClick={onClose} className="px-3 py-1.5 rounded-lg font-bold text-[13px] text-[var(--fg)] border border-[var(--border)]">Cancel</button><button onClick={() => { onConfirm(); onClose(); }} className="px-4 py-1.5 rounded-lg font-extrabold text-[13px] text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Run now</button></>}
     >
       <div className="p-5 space-y-3 text-[13px] text-[var(--fg-muted)] leading-relaxed">
         <div>This will fire <code className="font-mono text-[var(--accent)]">{agentName}</code> immediately outside its normal cadence. The run uses the same service-role JWT and writes the result to the activity log.</div>
