@@ -206,8 +206,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 
     const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa] = await Promise.all([
       pgSelect(SUPABASE_URL, SR, "compass_carriers", `select=name,usdot_number&id=eq.${carrierId}`),
-      pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_at,medical_expires_at,status&carrier_id=eq.${carrierId}`),
-      pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,unit_number,status,next_pm_due_at&carrier_id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status&carrier_id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,doc_type,expires_at,driver_id&carrier_id=eq.${carrierId}&order=expires_at.asc&limit=200`),
       pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=captured_at.desc&limit=1`),
     ]);
@@ -259,11 +259,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     // ── EXPIR (next 5 docs/drivers expiring soonest)
     const allUpcoming: Array<{ when: number; raw: string; who: string; what: string; cfr: string }> = [];
 
-    type DrvRow = { first_name?: string; last_name?: string; cdl_expires_at?: string; medical_expires_at?: string };
+    type DrvRow = { first_name?: string; last_name?: string; cdl_expires_on?: string; medical_card_expires_on?: string };
     for (const d of drivers.rows as DrvRow[]) {
       const name = `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver";
-      if (d.cdl_expires_at) allUpcoming.push({ when: new Date(d.cdl_expires_at).getTime(), raw: d.cdl_expires_at, who: name, what: "CDL", cfr: "§ 383.93" });
-      if (d.medical_expires_at) allUpcoming.push({ when: new Date(d.medical_expires_at).getTime(), raw: d.medical_expires_at, who: name, what: "Med cert", cfr: "§ 391.43" });
+      if (d.cdl_expires_on) allUpcoming.push({ when: new Date(d.cdl_expires_on).getTime(), raw: d.cdl_expires_on, who: name, what: "CDL", cfr: "§ 383.93" });
+      if (d.medical_card_expires_on) allUpcoming.push({ when: new Date(d.medical_card_expires_on).getTime(), raw: d.medical_card_expires_on, who: name, what: "Med cert", cfr: "§ 391.43" });
     }
     type DocRow = { doc_type?: string; expires_at?: string; driver_id?: string };
     for (const doc of dqDocs.rows as DocRow[]) {
@@ -283,25 +283,25 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       .filter(d => d.expires_at && new Date(d.expires_at).getTime() < Date.now())
       .slice(0, 5);
     const overdueCdls = (drivers.rows as DrvRow[])
-      .filter(d => d.cdl_expires_at && new Date(d.cdl_expires_at).getTime() < Date.now())
+      .filter(d => d.cdl_expires_on && new Date(d.cdl_expires_on).getTime() < Date.now())
       .slice(0, 5);
     const overdueMeds = (drivers.rows as DrvRow[])
-      .filter(d => d.medical_expires_at && new Date(d.medical_expires_at).getTime() < Date.now())
+      .filter(d => d.medical_card_expires_on && new Date(d.medical_card_expires_on).getTime() < Date.now())
       .slice(0, 5);
-    type VehRow = { unit_number?: string; next_pm_due_at?: string };
+    type VehRow = { license_plate?: string; next_dot_inspection_due?: string };
     const overduePm = (vehicles.rows as VehRow[])
-      .filter(v => v.next_pm_due_at && new Date(v.next_pm_due_at).getTime() < Date.now())
+      .filter(v => v.next_dot_inspection_due && new Date(v.next_dot_inspection_due).getTime() < Date.now())
       .slice(0, 5);
 
     const actions: DashboardAction[] = [
       { icon: "📁", title: "DQ Documents Expiring", cfr: "49 CFR § 391.51", foot: "Open DQ files →", href: "/app/dq-files",
         items: overdueDocs.length ? overdueDocs.map(d => ({ l: d.doc_type || "Document", meta: d.driver_id ? `Driver ${d.driver_id.slice(0, 8)} · ${fmtExpiresLabel(d.expires_at || null)}` : fmtExpiresLabel(d.expires_at || null), pill: fmtOverduePill(d.expires_at || null) })) : [] },
       { icon: "🪪", title: "CDL Expirations", cfr: "49 CFR § 383", foot: "Open drivers →", href: "/app/drivers",
-        items: overdueCdls.length ? overdueCdls.map(d => ({ l: `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver", meta: fmtExpiresLabel(d.cdl_expires_at || null), pill: fmtOverduePill(d.cdl_expires_at || null) })) : [] },
+        items: overdueCdls.length ? overdueCdls.map(d => ({ l: `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver", meta: fmtExpiresLabel(d.cdl_expires_on || null), pill: fmtOverduePill(d.cdl_expires_on || null) })) : [] },
       { icon: "🩺", title: "Medical Certificates", cfr: "49 CFR § 391.45", foot: "Upload new cert →", href: "/app/dq-files",
-        items: overdueMeds.length ? overdueMeds.map(d => ({ l: `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver", meta: fmtExpiresLabel(d.medical_expires_at || null), pill: fmtOverduePill(d.medical_expires_at || null) })) : [] },
+        items: overdueMeds.length ? overdueMeds.map(d => ({ l: `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver", meta: fmtExpiresLabel(d.medical_card_expires_on || null), pill: fmtOverduePill(d.medical_card_expires_on || null) })) : [] },
       { icon: "🔧", title: "Preventive Maintenance", cfr: "49 CFR § 396.3 / § 396.17", foot: "Open vehicles →", href: "/app/vehicles",
-        items: overduePm.length ? overduePm.map(v => ({ l: v.unit_number ? `Unit ${v.unit_number}` : "Unit", meta: `PM due ${fmtExpiresLabel(v.next_pm_due_at || null).replace("Expires ", "")}`, pill: fmtOverduePill(v.next_pm_due_at || null) })) : [] },
+        items: overduePm.length ? overduePm.map(v => ({ l: v.license_plate ? `Unit ${v.license_plate}` : "Unit", meta: `PM due ${fmtExpiresLabel(v.next_dot_inspection_due || null).replace("Expires ", "")}`, pill: fmtOverduePill(v.next_dot_inspection_due || null) })) : [] },
     ];
 
     return json({
