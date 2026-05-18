@@ -2,6 +2,8 @@
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
 import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
+import { DriverImportModal } from "@/components/app/DriverImportModal";
+import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 
@@ -34,6 +36,8 @@ export default function DriversPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [showAdd, setShowAdd] = useState(false);
   const [editDriver, setEditDriver] = useState<Driver | null>(null);
+  const [showImport, setShowImport] = useState(false);
+  const [showVendor, setShowVendor] = useState(false);
 
   async function refresh() {
     if (!carrier) return;
@@ -54,15 +58,40 @@ export default function DriversPage() {
     });
   }, [drivers, search, statusFilter]);
 
+
+  // KPI counters for the top stat-card row
   const today = new Date().toISOString().slice(0, 10);
+  const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const kpis = useMemo(() => {
+    let active = 0, pending = 0, cdlExp30 = 0, medExp30 = 0;
+    for (const d of drivers) {
+      if (d.status === "active") active++;
+      if (d.status === "pending_hire") pending++;
+      if (d.cdl_expires_on && d.cdl_expires_on <= in30) cdlExp30++;
+      if (d.medical_card_expires_on && d.medical_card_expires_on <= in30) medExp30++;
+    }
+    return { active, pending, cdlExp30, medExp30 };
+  }, [drivers, in30]);
   const in60 = new Date(Date.now() + 60*86400000).toISOString().slice(0, 10);
   const isExpiring = (d?: string | null) => !!(d && d >= today && d <= in60);
   const isExpired = (d?: string | null) => !!(d && d < today);
 
   return (
     <AppShell crumbs="DRIVERS" title="Drivers"
-      actions={<button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>}>
+      actions={<>
+        <button onClick={() => setShowVendor(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">🔌 Vendor sync</button>
+        <button onClick={() => setShowImport(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">📥 Import CSV</button>
+        <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>
+      </>}>
       <div className="p-6">
+        {/* KPI stat cards — top row, classic-app style */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <KpiCard label="Active drivers"           value={kpis.active}    sub={`${drivers.length} on roster`} />
+          <KpiCard label="Pending hires"            value={kpis.pending}   sub="In onboarding pipeline" tone={kpis.pending > 0 ? "info" : "muted"} />
+          <KpiCard label="CDL expiring ≤30d"        value={kpis.cdlExp30}  sub="Renew before driver-down" tone={kpis.cdlExp30 > 0 ? "warn" : "ok"} />
+          <KpiCard label="Med card expiring ≤30d"   value={kpis.medExp30}  sub="49 CFR § 391.45" tone={kpis.medExp30 > 0 ? "warn" : "ok"} />
+        </div>
+
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input
@@ -108,6 +137,8 @@ export default function DriversPage() {
       </div>
 
       {(showAdd || editDriver) && <DriverFormModal carrier_id={carrier!.id} driver={editDriver} onClose={() => { setShowAdd(false); setEditDriver(null); }} onSaved={() => { refresh(); setShowAdd(false); setEditDriver(null); }} />}
+      {showImport && carrier && <DriverImportModal carrierId={carrier.id} onClose={() => setShowImport(false)} onImported={refresh} />}
+      {showVendor && carrier && <VendorConnectModal carrierId={carrier.id} onClose={() => setShowVendor(false)} onImported={refresh} />}
     </AppShell>
   );
 }
@@ -223,3 +254,15 @@ function Input(p: { value: string; onChange: (v: string)=>void; type?: string; r
 function Select({ value, onChange, options }: { value: string; onChange: (v: string)=>void; options: string[] }) {
   return <select value={value} onChange={(e)=>onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">{options.map(o => <option key={o} value={o}>{o.replace("_"," ")||"—"}</option>)}</select>;
 }
+
+function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: number | string; sub?: string; tone?: "ok" | "warn" | "info" | "muted" }) {
+  const accent = tone === "warn" ? "var(--warning, #FBBF24)" : tone === "info" ? "var(--accent)" : tone === "muted" ? "var(--fg-muted)" : "var(--accent)";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-4">
+      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{label}</div>
+      <div className="text-[28px] font-black leading-none text-[var(--fg)]" style={{ color: tone === "warn" && typeof value === "number" && value > 0 ? accent : undefined }}>{value}</div>
+      {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div>}
+    </div>
+  );
+}
+
