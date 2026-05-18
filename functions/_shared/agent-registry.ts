@@ -576,14 +576,41 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   const supa = supaFetch(env);
   const carrierId = inputs?.carrier_id;
   if (!carrierId) return { status: "error", summary: "Missing inputs.carrier_id", log: log.text() };
+
+  // Look up the carrier's USDOT so we can hit CarrierOk
+  const carrierRow = (await supa.select("compass_carriers", `select=id,name,usdot_number&id=eq.${carrierId}`)) as Array<{ id: string; name: string; usdot_number: string | null }>;
+  const carrier = carrierRow[0];
+  if (!carrier) return { status: "error", summary: `Carrier ${carrierId} not found`, log: log.text() };
+
+  // ─── Path A: CarrierOk (real CSA / SMS data) ─────────────────────────
+  const env2 = env as Env & { CARRIEROK_API_KEY?: string; CARRIEROK_BASE_URL?: string };
+  if (env2.CARRIEROK_API_KEY && carrier.usdot_number) {
+    try {
+      const { fetchCarrierOk, mapToSnapshot } = await import("./carrierok");
+      const payload = await fetchCarrierOk(env2, carrier.usdot_number);
+      if (payload.ok && payload.sms) {
+        const snap = mapToSnapshot(carrierId, payload);
+        await supa.insert("compass_csa_snapshots", snap);
+        log.info(`[csa-baseline] carrier ${carrier.name} (DOT ${carrier.usdot_number}): CarrierOk snapshot written`);
+        return { status: "ok", summary: `CarrierOk snapshot written for ${carrier.name} (DOT ${carrier.usdot_number})`, log: log.text() };
+      }
+      log.warn(`[csa-baseline] CarrierOk soft-failed: ${payload.errors.join("; ")} — falling back to inspection approximation`);
+    } catch (e) {
+      log.warn(`[csa-baseline] CarrierOk threw: ${e instanceof Error ? e.message : String(e)} — falling back`);
+    }
+  } else if (!env2.CARRIEROK_API_KEY) {
+    log.info("[csa-baseline] CARRIEROK_API_KEY not set — using inspection approximation");
+  } else if (!carrier.usdot_number) {
+    log.info(`[csa-baseline] carrier ${carrier.name} has no usdot_number on file — using inspection approximation`);
+  }
+
+  // ─── Path B: Inspection-based approximation (no key, or CarrierOk failed) ──
   const inspections = await supa.select("compass_inspections", `select=id,inspection_date,violation_count,oos_driver,oos_vehicle&carrier_id=eq.${carrierId}&inspection_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; violation_count: number | null; oos_driver: boolean | null; oos_vehicle: boolean | null }>;
   const accidents = await supa.select("compass_accidents", `select=id,accident_date,recordable,fatalities,injuries&carrier_id=eq.${carrierId}&accident_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; recordable: boolean | null; fatalities: number | null; injuries: number | null }>;
-  // Until CarrierOk is wired, we approximate BASIC scores as count-of-relevant-violations / inspection_count
-  // This is intentionally rough — it's a "computed_from_inspections" snapshot, not an official MSR.
   const snap = { carrier_id: carrierId, source: "computed_from_inspections", raw: { inspections: inspections.length, accidents: accidents.length, computed_at: new Date().toISOString() }, unsafe_driving: 0, crash_indicator: accidents.length * 0.5, hos_compliance: 0, vehicle_maint: 0, hazmat: 0, driver_fitness: 0, ctrl_substances: 0 };
   await supa.insert("compass_csa_snapshots", snap);
   log.info(`[csa-baseline] carrier ${carrierId}: ${inspections.length} inspections · ${accidents.length} accidents`);
-  return { status: "ok", summary: `Baseline snapshot written for carrier ${carrierId} (${inspections.length} inspections, ${accidents.length} accidents over 24 months) · approximate scores until CarrierOk is wired`, log: log.text() };
+  return { status: "ok", summary: `Baseline snapshot written for carrier ${carrierId} (${inspections.length} inspections, ${accidents.length} accidents · approximation until CarrierOk key is set)`, log: log.text() };
 }
 
 // ============================================================================
