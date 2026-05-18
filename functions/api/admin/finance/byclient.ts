@@ -14,7 +14,7 @@ import { supaFetch } from "../../../_shared/supabase-admin";
 const TIER_RATE_CENTS: Record<string, number> = { diy: 2500, dfy: 5000, enterprise: 0 };
 const HAZMAT_ADDON_CENTS = 9900;
 
-export const onRequestGet: PagesFunction<AdminEnv> = async (ctx) => {
+export const onRequest: PagesFunction<AdminEnv> = async (ctx) => {
   const who = await requireSuperAdmin(ctx);
   if (!who) return unauthorized();
 
