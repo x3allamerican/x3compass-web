@@ -4,53 +4,60 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import { useUser } from "@/lib/useUser";
+import { useIsSuperAdmin } from "@/lib/superAdmin";
 
 type NavItem = { href: string; label: string; icon: string };
 
-const SECTIONS: { title: string; items: NavItem[] }[] = [
+type SectionDef = { title: string; superAdminOnly?: boolean; items: NavItem[] };
+const PUBLIC_SECTIONS: SectionDef[] = [
   { title: "Main", items: [
-    { href: "/app", label: "Dashboard", icon: "▦" },
-    { href: "/app/control-center", label: "Control Center", icon: "🎛" },
-    { href: "/app/csa", label: "CSA Scores", icon: "📊" },
-    { href: "/app/scorecards", label: "Safety Scorecards", icon: "🏆" },
-    { href: "/app/notifications", label: "Notifications", icon: "🔔" },
-  ]},
-  { title: "Fleet", items: [
-    { href: "/app/drivers", label: "Drivers", icon: "👤" },
-    { href: "/app/vehicles", label: "Vehicles", icon: "🚛" },
-    { href: "/app/dq-files", label: "DQ Files", icon: "📁" },
-    { href: "/app/accidents", label: "Accidents", icon: "🚨" },
-    { href: "/app/inspections", label: "Inspections", icon: "🔎" },
-    { href: "/app/drug-alcohol", label: "Drug & Alcohol", icon: "🧪" },
-    { href: "/app/hos", label: "HOS / ELD", icon: "⏱" },
-    { href: "/app/training", label: "Training", icon: "🎓" },
+    { href: "/app",                label: "Dashboard",       icon: "▦" },
+    { href: "/app/drivers",        label: "Drivers",         icon: "👤" },
+    { href: "/app/vehicles",       label: "Vehicles",        icon: "🚛" },
+    { href: "/app/dq-files",       label: "DQ Files",        icon: "📁" },
+    { href: "/app/accidents",      label: "Accidents",       icon: "🚨" },
+    { href: "/app/inspections",    label: "Inspections",     icon: "🔎" },
+    { href: "/app/drug-alcohol",   label: "Drug & Alcohol",  icon: "🧪" },
+    { href: "/app/hos",            label: "HOS / ELD",       icon: "⏱" },
+    { href: "/app/training",       label: "Training",        icon: "🎓" },
   ]},
   { title: "Compliance Trackers", items: [
-    { href: "/app/mvr", label: "MVR Tracker", icon: "🪪" },
-    { href: "/app/da-concierge", label: "D&A Concierge", icon: "🧬" },
-    { href: "/app/background-checks", label: "Background Checks", icon: "🛡" },
-    { href: "/app/ifta", label: "IFTA Concierge", icon: "⛽" },
-  ]},
-  { title: "Business", items: [
-    { href: "/app/finance", label: "Finance", icon: "💵" },
-    { href: "/app/marketing", label: "Marketing", icon: "📣" },
-    { href: "/app/prospects", label: "FMCSA Prospects", icon: "🎯" },
-    { href: "/app/audit-log", label: "Audit Log", icon: "📜" },
+    { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
+    { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
+    { href: "/app/background-checks",  label: "Background Tracker", icon: "🛡" },
+    { href: "/app/ifta",               label: "IFTA Concierge",     icon: "⛽" },
   ]},
   { title: "Advanced", items: [
-    { href: "/app/ask", label: "Ask Compass", icon: "∞" },
-    { href: "/app/import", label: "Bulk Import", icon: "⤴" },
-    { href: "/app/integrations", label: "Integrations", icon: "🔌" },
-    { href: "/hazmat", label: "Hazmat Center", icon: "⚠️" },
-    { href: "/app/audit-export", label: "Audit Export", icon: "📄" },
-    { href: "/app/settings", label: "Settings", icon: "⚙" },
+    { href: "/app/scorecards",      label: "Safety Scorecards", icon: "🏆" },
+    { href: "/app/csa",             label: "CSA Scores",        icon: "📊" },
+    { href: "/app/document-lookup", label: "Document Lookup",   icon: "🔍" },
+    { href: "/app/ask",             label: "Ask Compass",       icon: "∞" },
+    { href: "/hazmat",              label: "Hazmat Center",     icon: "⚠️" },
+    { href: "/app/audit-export",    label: "Audit Export",      icon: "📄" },
+  ]},
+  { title: "Client Admin", items: [
+    { href: "/app/settings",       label: "Settings",       icon: "⚙" },
+    { href: "/app/driver-invites", label: "Driver Invites", icon: "✉" },
+    { href: "/app/forms",          label: "Forms",          icon: "📋" },
+    { href: "/app/import",         label: "Bulk Import",    icon: "⤴" },
   ]},
 ];
+// X3 Admin section — only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
+const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: true, items: [
+  { href: "/app/control-center", label: "Control Center",  icon: "🎛" },
+  { href: "/app/finance",        label: "Finance",         icon: "💵" },
+  { href: "/app/marketing",      label: "Marketing",       icon: "📣" },
+  { href: "/app/notifications",  label: "Notifications",   icon: "🔔" },
+  { href: "/app/audit-log",      label: "Audit Log",       icon: "📜" },
+  { href: "/app/prospects",      label: "FMCSA Prospects", icon: "🎯" },
+  { href: "/app/integrations",   label: "Integrations",    icon: "🔌" },
+]};
 
 export default function AppShell({ children, title, crumbs, actions }: { children: React.ReactNode; title?: string; crumbs?: string; actions?: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, carrier, loading, signOut } = useUser();
+  const isSuperAdmin = useIsSuperAdmin();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -103,9 +110,9 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
             <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] px-2">Workspace</div>
           </div>
           <nav className="flex-1 px-2 py-3 space-y-5">
-            {SECTIONS.map((sec) => (
+            {[...PUBLIC_SECTIONS, ...(isSuperAdmin ? [SUPER_ADMIN_SECTION] : [])].map((sec) => (
               <div key={sec.title}>
-                <div className="px-3 pt-1 pb-2 text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)]/90 max-md:hidden">{sec.title}</div>
+                <div className={`px-3 pt-1 pb-2 text-[10px] tracking-[.16em] uppercase font-extrabold max-md:hidden ${sec.title === "X3 Admin" ? "text-[#FACC15]" : "text-[var(--accent)]/90"}`}>{sec.title}</div>
                 <div className="space-y-1">
                   {sec.items.map((it) => {
                     const active = pathname === it.href || (it.href !== "/app" && pathname?.startsWith(it.href));
@@ -120,6 +127,13 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
               </div>
             ))}
           </nav>
+          {isSuperAdmin && (
+            <div className="px-3 py-3 mx-3 mb-2 mt-1 rounded-lg border border-[#FACC15]/40 bg-[#FACC15]/10 max-md:hidden">
+              <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[#FACC15] mb-1">⚡ X3 Admin</div>
+              <div className="text-[10px] text-[var(--fg-muted)] mb-1">Viewing:</div>
+              <div className="text-[11px] text-[var(--fg)] font-mono truncate">{carrier?.name ?? "All carriers"}{carrier?.usdot_number ? ` · DOT ${carrier.usdot_number}` : ""}</div>
+            </div>
+          )}
           <div className="px-3 py-4 border-t border-[var(--border)]">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full grid place-items-center font-black text-[13px] flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", color: "var(--accent-fg)" }}>{initials}</div>
