@@ -271,3 +271,111 @@ export const INTEGRATIONS = [
   { vendor: "CarrierOk", purpose: "CSA scores + SAFER data",          status: "In trial",   badge: "Pending"  },
   { vendor: "FMCSA Clearinghouse", purpose: "Drug & alcohol federal registry", status: "Manual", badge: "Awaiting API" },
 ];
+
+// ============================================================================
+// X3 Internal Admin — Cross-tenant operations console
+// Mirrors app.x3fleetsafety.com/admin Control Center exactly.
+// ============================================================================
+
+export type ScheduledAgent = {
+  name: string;
+  cadence: string;
+  last_run: string;
+  result: "ok" | "partial" | "error" | "skipped" | "never";
+  enabled: boolean;
+  description: string;
+};
+
+export type OnDemandAgent = {
+  name: string;
+  trigger: string;
+  last_run: string;
+  result: "ok" | "partial" | "error";
+  enabled: boolean;
+  description: string;
+};
+
+export type AgentStub = { name: string; reason: string };
+
+export const SCHEDULED_AGENTS: ScheduledAgent[] = [
+  { name: "agent-billing-watchdog",          cadence: "Every 6 hours",                                       last_run: "Never",  result: "never",   enabled: true, description: "Polls Stripe for failed payments, near-expirations, and reconciliation drift. Pages Joshua on past-due >7d." },
+  { name: "agent-csa-snapshot-reminder",     cadence: "Monthly · 1st · 1pm UTC",                             last_run: "May 1",  result: "ok",      enabled: true, description: "Reminds carriers their monthly CSA snapshot is ready and pulls the latest CarrierOk feed (when live)." },
+  { name: "agent-data-retention-purge",      cadence: "Quarterly · 1st of Jan/Apr/Jul/Oct · 2pm UTC",        last_run: "Apr 27", result: "ok",      enabled: true, description: "Honors GDPR/CCPA + our DPA retention windows: purges expired driver PII, old MVR pulls, archived D&A results." },
+  { name: "agent-driver-doc-ingest",         cadence: "Every 10 minutes",                                    last_run: "9m ago", result: "skipped", enabled: true, description: "Watches each carrier's connected Drive/Box folder for new DQ documents and routes them to the right driver record." },
+  { name: "agent-driver-reminders",          cadence: "Daily · 11am UTC",                                    last_run: "14h ago",result: "ok",      enabled: true, description: "Sends CDL/MEC/MVR/D&A reminders to drivers via email + SMS following the carrier's notification rules." },
+  { name: "agent-email-result-catcher",      cadence: "Every 15 minutes",                                    last_run: "4m ago", result: "ok",      enabled: true, description: "Polls a shared inbox for inbound vendor results (lab reports, MVR PDFs, BG check artifacts) and attaches them to the right record." },
+  { name: "agent-financial-aggregator",      cadence: "Daily · 3am UTC",                                     last_run: "22h ago",result: "ok",      enabled: true, description: "Rolls Stripe + Checkr + MVR + D&A vendor charges into the daily Finance ledger." },
+  { name: "agent-financial-dunning",         cadence: "Daily · 1pm UTC",                                     last_run: "12h ago",result: "ok",      enabled: true, description: "Dunning workflow for overdue customer invoices: reminder → escalation → service-pause warning." },
+  { name: "agent-financial-monthly-close",   cadence: "Monthly · 1st · 5am UTC",                             last_run: "Never",  result: "never",   enabled: true, description: "Closes the prior month: tallies revenue, vendor pass-thru, overhead; locks the ledger; emails Joshua the close packet." },
+  { name: "agent-fmcsa-outreach",            cadence: "Weekly · Mon–Fri · 2pm UTC",                          last_run: "Never",  result: "never",   enabled: true, description: "Sends the prospect outreach email (new-entrant-intro or conditional-help) Tue/Wed/Thu, capped 50/day." },
+  { name: "agent-fmcsa-scraper",             cadence: "Weekly · Mon · 9am UTC",                              last_run: "Never",  result: "never",   enabled: true, description: "Pulls the FMCSA SAFER bulk census + Carrier Snapshot for the 5-state region (MI/OH/IN/IL/WI), filters to ICP, lands in fmcsa_prospects." },
+  { name: "agent-ifta-quarterly-reminder",   cadence: "Daily · 1pm UTC",                                     last_run: "May 1",  result: "ok",      enabled: true, description: "30-day, 14-day, 7-day reminders before each IFTA filing deadline (Apr 30 / Jul 31 / Oct 31 / Jan 31)." },
+  { name: "agent-inbox-triage",              cadence: "Every 15 minutes",                                    last_run: "4m ago", result: "ok",      enabled: true, description: "Triages incoming support@x3compass.com email: routes auto-replies, files driver-portal questions, escalates RED items to Joshua." },
+  { name: "agent-keepalive",                 cadence: "Daily · 12pm UTC",                                    last_run: "Never",  result: "never",   enabled: true, description: "Heartbeat that pings every connected vendor (Stripe, Checkr, Anthropic, Supabase, Resend, Twilio) — sanity check that creds still work." },
+  { name: "agent-monthly-client-report",     cadence: "Monthly · 1st · 6am UTC",                             last_run: "May 1",  result: "partial", enabled: true, description: "Generates each carrier's monthly compliance report PDF + emails the carrier admin. Partial = 2 carriers missing CarrierOk data." },
+  { name: "agent-ops-sheet-mirror",          cadence: "Every 5 minutes",                                     last_run: "4m ago", result: "ok",      enabled: true, description: "Mirrors carrier/driver/alert/job counts from Supabase to the X3 Operations Google Sheet for cross-tool reporting." },
+  { name: "agent-portfolio-brief",           cadence: "Daily · 10am UTC",                                    last_run: "15h ago",result: "ok",      enabled: true, description: "Generates the daily portfolio brief (across all carriers) and emails Joshua + Mike. Includes new alerts, churn risk, NPS." },
+  { name: "agent-regulatory-scanner",        cadence: "Weekly · Mon · 9am UTC",                              last_run: "6d ago", result: "error",   enabled: true, description: "Scans FMCSA + eCFR + Federal Register for changes affecting our skills. ERROR: eCFR API rate limit since Mon — needs key rotation." },
+  { name: "agent-topic-discovery",           cadence: "Weekly · Tue · 9am UTC",                              last_run: "5d ago", result: "error",   enabled: true, description: "Surfaces new skill topics from /api/ask logs + customer questions. ERROR: vector index quota hit — needs Pinecone upgrade." },
+];
+
+export const ONDEMAND_AGENTS: OnDemandAgent[] = [
+  { name: "agent-csa-baseline",       trigger: "Queued inputs", last_run: "Apr 23", result: "ok", enabled: true, description: "Computes a carrier's CSA baseline (last 24mo of inspections + crashes) on initial onboarding. Triggers on new carrier signup." },
+  { name: "agent-csa-monitor",        trigger: "Queued inputs", last_run: "Apr 23", result: "ok", enabled: true, description: "Watches SAFER + CarrierOk for any BASIC percentile crossing the carrier's threshold. Fires an alert + opens a DataQ workflow draft." },
+  { name: "agent-dataq-drafter",      trigger: "Queued inputs", last_run: "1m ago", result: "ok", enabled: true, description: "Drafts the FMCSA DataQ challenge form when a non-preventable accident or wrongly-attributed violation is flagged. Joshua signs off before submission." },
+  { name: "agent-research-topic",     trigger: "Queued inputs", last_run: "1m ago", result: "ok", enabled: true, description: "Researches a new compliance topic surfaced by topic-discovery: pulls CFR sections, FMCSA guidance memos, case law. Produces a markdown brief." },
+  { name: "agent-synthesize-form",    trigger: "Queued inputs", last_run: "1m ago", result: "ok", enabled: true, description: "Generates a new auto-fillable FCRA/CFR-anchored form template from the research-topic output. Lands in /app/forms once Joshua approves." },
+  { name: "agent-synthesize-training",trigger: "Queued inputs", last_run: "1m ago", result: "ok", enabled: true, description: "Generates a new ELDT-style training module (markdown + quiz) from the research-topic output. Lands in /app/training catalog." },
+];
+
+export const STUB_AGENTS: AgentStub[] = [
+  { name: "agent-onboarding-concierge", reason: "STUB — needs auth trigger wiring. Will run on every new carrier signup to walk them through the 5-step onboarding checklist via in-app + email." },
+];
+
+export const ADMIN_KPIS = {
+  agents_active: 25,
+  agents_total: 26,
+  agents_stubs: 1,
+  runs_24h: 1000,
+  runs_ok: 851,
+  runs_err: 1,
+  runs_other: 148,
+  open_alerts: 168,
+  open_blocker: 12,
+  open_urgent: 126,
+  last_close: "Pending",
+  last_close_next: "1st of month 1am ET",
+};
+
+export type CarrierPref = { name: string; dot: string; mode: "Realtime" | "Digest"; send_hour: string; monthly: boolean; reg: boolean; qbr: boolean; expiry: boolean; csa: boolean; ifta: boolean; inspect: boolean };
+
+export const CARRIER_PREFS: CarrierPref[] = [
+  { name: "DEMO · Apex",                dot: "8001247", mode: "Digest",   send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "DEMO · Beacon",              dot: "8002520", mode: "Realtime", send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "BigRigSafety",               dot: "1234567", mode: "Realtime", send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "DEMO · Cascade",             dot: "8003724", mode: "Realtime", send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "DEMO · Delta",               dot: "8004949", mode: "Realtime", send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "Domino's Pizza Distribution LLC", dot: "202173", mode: "Realtime", send_hour: "8am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: true,  inspect: true  },
+  { name: "DEMO · Echo",                dot: "8005611", mode: "Realtime", send_hour: "9am", monthly: true,  reg: true,  qbr: true,  expiry: true,  csa: true,  ifta: false, inspect: true  },
+  { name: "DEMO · Foxtrot",             dot: "8006284", mode: "Digest",   send_hour: "7am", monthly: true,  reg: true,  qbr: false, expiry: true,  csa: true,  ifta: true,  inspect: true  },
+];
+
+export type ActivityRow = { when: string; agent: string; status: "ok" | "skipped" | "error" | "partial"; duration: string; summary: string };
+
+export const ACTIVITY_LOG: ActivityRow[] = [
+  { when: "5/17/2026, 9:20:01 PM", agent: "agent-ops-sheet-mirror",     status: "ok",      duration:  "6.3s", summary: "Mirrored 28 carriers, 1000 drivers, 168 alerts, 200 jobs to X3 Operations sheet." },
+  { when: "5/17/2026, 9:20:00 PM", agent: "agent-driver-doc-ingest",    status: "skipped", duration: "15.3s", summary: "No new documents in any carrier's Drive inbox." },
+  { when: "5/17/2026, 9:20:00 PM", agent: "agent-synthesize-form",      status: "ok",      duration:  "0.0s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:20:00 PM", agent: "agent-dataq-drafter",        status: "ok",      duration:  "0.0s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:20:00 PM", agent: "agent-research-topic",       status: "ok",      duration:  "0.1s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:20:00 PM", agent: "agent-synthesize-training",  status: "ok",      duration:  "0.1s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:18:00 PM", agent: "agent-dataq-drafter",        status: "ok",      duration:  "0.1s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:18:00 PM", agent: "agent-research-topic",       status: "ok",      duration:  "0.1s", summary: "Nothing queued." },
+  { when: "5/17/2026, 9:15:00 PM", agent: "agent-ops-sheet-mirror",     status: "ok",      duration:  "5.9s", summary: "Mirrored 28 carriers, 1000 drivers, 167 alerts, 199 jobs." },
+  { when: "5/17/2026, 9:15:00 PM", agent: "agent-inbox-triage",         status: "ok",      duration:  "2.1s", summary: "Triaged 4 inbound emails: 2 auto-replied · 1 routed to driver portal · 1 escalated." },
+  { when: "5/17/2026, 9:10:00 PM", agent: "agent-driver-doc-ingest",    status: "skipped", duration: "14.8s", summary: "No new documents in any carrier's Drive inbox." },
+  { when: "5/17/2026, 9:05:00 PM", agent: "agent-ops-sheet-mirror",     status: "ok",      duration:  "6.1s", summary: "Mirrored 28 carriers, 1000 drivers, 167 alerts, 198 jobs." },
+  { when: "5/17/2026, 9:00:00 PM", agent: "agent-email-result-catcher", status: "ok",      duration:  "1.2s", summary: "Polled 28 inboxes. 0 new vendor results." },
+  { when: "5/17/2026, 9:00:00 PM", agent: "agent-driver-doc-ingest",    status: "skipped", duration: "14.6s", summary: "No new documents." },
+  { when: "5/17/2026, 8:50:00 PM", agent: "agent-driver-doc-ingest",    status: "skipped", duration: "15.1s", summary: "No new documents." },
+];
