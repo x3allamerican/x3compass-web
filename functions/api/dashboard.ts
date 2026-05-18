@@ -209,7 +209,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,doc_type,expires_at,driver_id&carrier_id=eq.${carrierId}&order=expires_at.asc&limit=200`),
-      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=captured_at.desc&limit=1`),
+      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
     ]);
 
     const carrier = (carrierRows[0] as { name?: string; usdot_number?: string } | undefined);
@@ -219,41 +219,71 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     const driverCount = drivers.count ?? drivers.rows.length;
     const vehicleCount = vehicles.count ?? vehicles.rows.length;
 
+    // ── Compute open alerts (overdue items across CDL/Med/PM/DQ) + compliance health
+    const now = Date.now();
+    let openAlerts = 0;
+    let alertWindowItems = 0;  // expiring within 30 days (counts as alert)
+    const in30 = now + 30 * 86_400_000;
+    for (const d of drivers.rows as { cdl_expires_on?: string; medical_card_expires_on?: string }[]) {
+      if (d.cdl_expires_on) {
+        const t = new Date(d.cdl_expires_on).getTime();
+        if (t < now) openAlerts++; else if (t < in30) alertWindowItems++;
+      }
+      if (d.medical_card_expires_on) {
+        const t = new Date(d.medical_card_expires_on).getTime();
+        if (t < now) openAlerts++; else if (t < in30) alertWindowItems++;
+      }
+    }
+    for (const v of vehicles.rows as { next_dot_inspection_due?: string }[]) {
+      if (v.next_dot_inspection_due) {
+        const t = new Date(v.next_dot_inspection_due).getTime();
+        if (t < now) openAlerts++; else if (t < in30) alertWindowItems++;
+      }
+    }
+    for (const doc of dqDocs.rows as { expires_at?: string }[]) {
+      if (doc.expires_at && new Date(doc.expires_at).getTime() < now) openAlerts++;
+    }
+    const totalAlerts = openAlerts + alertWindowItems;
+    // Rough compliance health: 100% minus % of (drivers × 2 trackers + vehicles) that are overdue/expiring
+    const totalTrackedItems = driverCount * 2 + vehicleCount;
+    const compliancePct = totalTrackedItems > 0
+      ? Math.max(0, Math.min(100, Math.round(100 - (openAlerts / totalTrackedItems) * 100)))
+      : 100;
+
     // ── Header
     const header = {
       greeting_name: "Joshua",
       carrier_label: `DASHBOARD · ${carrierName.toUpperCase()} · ${dot}`,
-      summary: `${driverCount} drivers · ${vehicleCount} power units · — compliance health · — open alerts`,
+      summary: `${driverCount} drivers · ${vehicleCount} power units · ${compliancePct}% compliance health · ${totalAlerts} open alerts`,
     };
 
     // ── BASICS (from latest CSA snapshot if present, else demo)
     type CsaRow = {
       unsafe_driving?: number; hos_compliance?: number; driver_fitness?: number;
-      controlled_substances?: number; vehicle_maintenance?: number; hazmat_compliance?: number;
-      crash_indicator?: number; smartway_percentile?: number;
+      ctrl_substances?: number; vehicle_maint?: number; hazmat?: number;
+      crash_indicator?: number;
+      raw?: { smartway_percentile?: number; clean_inspection_rate?: number; dataq_wins_ytd_cents?: number; audit_readiness?: number };
     };
     const latestCsa = csa.rows[0] as CsaRow | undefined;
     const basics: DashboardBasic[] = latestCsa ? [
       { name: "Unsafe driving",    value: latestCsa.unsafe_driving ?? 0 },
       { name: "HOS compliance",    value: latestCsa.hos_compliance ?? 0 },
       { name: "Driver fitness",    value: latestCsa.driver_fitness ?? 0 },
-      { name: "Controlled subs",   value: latestCsa.controlled_substances ?? 0 },
-      { name: "Vehicle maint",     value: latestCsa.vehicle_maintenance ?? 0 },
-      { name: "Hazmat compliance", value: latestCsa.hazmat_compliance ?? 0 },
+      { name: "Controlled subs",   value: latestCsa.ctrl_substances ?? 0 },
+      { name: "Vehicle maint",     value: latestCsa.vehicle_maint ?? 0 },
+      { name: "Hazmat compliance", value: latestCsa.hazmat ?? 0 },
       { name: "Crash indicator",   value: latestCsa.crash_indicator ?? 0 },
     ] : DEMO.basics;
 
     // ── KPIs (CSA percentile from snapshot if available; others "—" until wired)
+    const r = latestCsa?.raw || {};
+    const fmtPct = (v: number | undefined) => v != null ? `${v}%` : "—";
+    const fmtUsd = (cents: number | undefined) => cents != null ? `$${(cents/100/1000).toFixed(1)}k` : "—";
     const kpis: DashboardKpi[] = [
-      {
-        label: "CSA percentile",
-        value: latestCsa?.smartway_percentile != null ? `${latestCsa.smartway_percentile}th` : "—",
-        trend: "—", trendNeg: false,
-        spark: DEMO.kpis[0].spark,
-      },
-      { label: "Clean inspection rate", value: "—", trend: "—", trendNeg: false, spark: DEMO.kpis[1].spark },
-      { label: "DataQ wins · YTD",       value: "—", trend: "—", trendNeg: false, spark: DEMO.kpis[2].spark },
-      { label: "Audit readiness",        value: "—", trend: "—", trendNeg: false, spark: DEMO.kpis[3].spark },
+      { label: "CSA percentile",        value: r.smartway_percentile != null ? `${r.smartway_percentile}th` : "—", trend: "—", trendNeg: false, spark: DEMO.kpis[0].spark },
+      { label: "Clean inspection rate", value: fmtPct(r.clean_inspection_rate), trend: "—", trendNeg: false, spark: DEMO.kpis[1].spark },
+      { label: "DataQ wins · YTD",      value: fmtUsd(r.dataq_wins_ytd_cents),  trend: "—", trendNeg: false, spark: DEMO.kpis[2].spark },
+      { label: "Audit readiness",       value: fmtPct(r.audit_readiness),       trend: "—", trendNeg: false, spark: DEMO.kpis[3].spark },
     ];
 
     // ── EXPIR (next 5 docs/drivers expiring soonest)
