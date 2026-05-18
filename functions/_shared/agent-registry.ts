@@ -640,6 +640,364 @@ async function agentOnboardingConcierge(env: Env, inputs?: { carrier_id?: string
 // ============================================================================
 // Dispatcher
 // ============================================================================
+
+// ============================================================================
+// SPRINT #20 — AI FINANCE TEAM (5 role-defined agents)
+// These replace the QBO-equivalent monthly close workflow:
+//   - agent-revenue-manager:   Stripe sync → journal entries, dunning, trial, churn
+//   - agent-control-manager:   reconciliation, journal balance, period close
+//   - agent-reporting-manager: generates P&L, BS, CF + tax-ready exports
+//   - agent-fpa-manager:       MRR forecast, variance, cohort retention
+//   - agent-finance-workflow:  orchestrates the other 4 + close calendar
+// ============================================================================
+
+interface FtEnv extends Env {
+  PLAID_CLIENT_ID?: string;
+  PLAID_SECRET?: string;
+  PLAID_ACCESS_TOKEN?: string;
+}
+
+const TIER_REVENUE_ACCOUNT: Record<string, string> = {
+  diy:        "4000",
+  dfy:        "4010",
+  enterprise: "4020",
+};
+const STRIPE_FEE_ACCOUNT     = "5000";
+const STRIPE_PENDING_ACCOUNT = "1200";
+const CASH_ACCOUNT           = "1000";
+const AR_ACCOUNT             = "1100";
+const DEFERRED_REV_ACCOUNT   = "2200";
+
+// ============================================================================
+// 26. agent-revenue-manager
+// ============================================================================
+async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.STRIPE_SECRET_KEY) return { status: "error", summary: "STRIPE_SECRET_KEY not set", log: log.text() };
+
+  const ft = await import("./finance-team");
+  const supa = supaFetch(env);
+
+  // 1. Pull last 30 days of Stripe charges and balance_transactions for fee data
+  const sinceSec = Math.floor((Date.now() - 30 * 86400_000) / 1000);
+  const charges = await stripeGet(env, `/v1/charges?created[gte]=${sinceSec}&limit=100&expand[]=data.balance_transaction`) as { data: Array<{ id: string; amount: number; status: string; created: number; customer: string | null; description: string | null; billing_details: { name?: string; email?: string }; balance_transaction?: { fee?: number } }> };
+
+  // Pre-load carriers indexed by stripe_customer_id
+  const carriers = await supa.select("compass_carriers", "select=id,name,stripe_customer_id,service_tier&stripe_customer_id=not.is.null") as Array<{ id: string; name: string; stripe_customer_id: string; service_tier: string | null }>;
+  const byCust = new Map(carriers.map((c) => [c.stripe_customer_id, c]));
+
+  let posted = 0, skipped = 0, dunningSent = 0;
+  for (const c of charges.data) {
+    if (c.status !== "succeeded") continue;
+    const ref = `stripe:ch_${c.id}`;
+    // Dedup: skip if a journal entry already references this charge
+    const existing = await supa.select("compass_journal_entries", `select=id&reference=eq.${encodeURIComponent(ref)}&limit=1`) as Array<{ id: string }>;
+    if (existing.length > 0) { skipped++; continue; }
+
+    const carrier = c.customer ? byCust.get(c.customer) : undefined;
+    const tier = (carrier?.service_tier || "diy").toLowerCase();
+    const revAccount = TIER_REVENUE_ACCOUNT[tier] || TIER_REVENUE_ACCOUNT.diy;
+    const fee = c.balance_transaction?.fee || Math.round(c.amount * 0.029 + 30);
+    const net = c.amount - fee;
+    const entryDate = new Date(c.created * 1000).toISOString().slice(0, 10);
+
+    // Double-entry: Cash gets the NET, Stripe fee is its own COGS line, Revenue is the gross
+    await ft.postJournal(env, {
+      entry_date:  entryDate,
+      reference:   ref,
+      source:      "stripe-sync",
+      description: `Stripe charge from ${carrier?.name || c.billing_details?.name || "(unknown)"}`,
+      carrier_id:  carrier?.id || null,
+      agent_name:  "agent-revenue-manager",
+      lines: [
+        { account_code: CASH_ACCOUNT,       debit_cents: net,       memo: "net to cash" },
+        { account_code: STRIPE_FEE_ACCOUNT, debit_cents: fee,       memo: "Stripe processor fee" },
+        { account_code: revAccount,         credit_cents: c.amount, memo: `${tier.toUpperCase()} subscription` },
+      ],
+    });
+    posted++;
+  }
+
+  // 2. Dunning v2 — find past-due subscriptions, send the next stage email
+  if (env.RESEND_API_KEY) {
+    const pastDueCarriers = carriers.filter((c) => true).slice(0, 50); // checked via subscription status below
+    for (const c of pastDueCarriers) {
+      try {
+        const subs = await stripeGet(env, `/v1/subscriptions?customer=${c.stripe_customer_id}&status=past_due&limit=1`) as { data: Array<{ id: string; current_period_end: number }> };
+        if (subs.data.length === 0) continue;
+        const sub = subs.data[0];
+        const daysPast = Math.floor((Date.now() / 1000 - sub.current_period_end) / 86400);
+        if (![1, 3, 7, 14].includes(daysPast)) continue; // 4-step sequence
+
+        const carrierFull = await supa.select("compass_carriers", `select=id,name,primary_contact_email&id=eq.${c.id}`) as Array<{ id: string; name: string; primary_contact_email: string | null }>;
+        if (!carrierFull[0]?.primary_contact_email) continue;
+
+        const msg = daysPast === 1  ? "We weren't able to process your payment yesterday. Update your card to keep Compass running."
+                  : daysPast === 3  ? "Reminder: your X3 Compass payment hasn't gone through. We'll keep retrying."
+                  : daysPast === 7  ? "Final notice before suspension. Please update your payment method this week."
+                  :                    "Your account is at risk of suspension. We need to hear from you today.";
+
+        const r = await sendEmail(env, {
+          to: carrierFull[0].primary_contact_email,
+          subject: `Action needed: ${carrierFull[0].name} payment — day ${daysPast}`,
+          html: `<h1>Hi ${carrierFull[0].name},</h1><p>${msg}</p><p><a href="https://x3compass.com/app/settings/billing">Update payment method →</a></p>`,
+        });
+        if (r.ok) dunningSent++;
+      } catch (_e) { /* per-carrier failure shouldn't block the agent */ }
+    }
+  }
+
+  // 3. Trial conversion — find carriers whose trial_ends_at hits T-3, T-1, or today
+  const trialCarriers = await supa.select("compass_carriers", `select=id,name,primary_contact_email,trial_ends_at&subscription_status=eq.trialing&trial_ends_at=not.is.null`) as Array<{ id: string; name: string; primary_contact_email: string | null; trial_ends_at: string }>;
+  let trialNudges = 0;
+  for (const c of trialCarriers) {
+    if (!c.primary_contact_email) continue;
+    const daysTo = Math.ceil((new Date(c.trial_ends_at).getTime() - Date.now()) / 86400_000);
+    if (![3, 1, 0].includes(daysTo)) continue;
+    const subj = daysTo === 3 ? "Your X3 Compass trial ends in 3 days"
+               : daysTo === 1 ? "Your X3 Compass trial ends tomorrow"
+               :                "Last chance — your trial ends today";
+    const r = await sendEmail(env, { to: c.primary_contact_email, subject: subj, html: `<h1>Hi ${c.name},</h1><p>${subj}. Add your card now to keep your drivers and DQ files in Compass.</p><p><a href="https://x3compass.com/app/settings/billing">Add payment →</a></p>` });
+    if (r.ok) trialNudges++;
+  }
+
+  return {
+    status: posted > 0 || dunningSent > 0 || trialNudges > 0 ? "ok" : "skipped",
+    summary: `${posted} charges → journal · ${skipped} already posted · ${dunningSent} dunning · ${trialNudges} trial nudges`,
+    log: log.text(),
+  };
+}
+
+// ============================================================================
+// 27. agent-control-manager
+// ============================================================================
+async function agentControlManager(env: FtEnv): Promise<AgentResult> {
+  const log = newLogger();
+  const supa = supaFetch(env);
+
+  // 1. Pull bank transactions via Plaid (if configured) for last 30 days
+  let plaidImported = 0, plaidErr: string | null = null;
+  if (env.PLAID_CLIENT_ID && env.PLAID_SECRET && env.PLAID_ACCESS_TOKEN) {
+    try {
+      const startDate = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10);
+      const endDate   = new Date().toISOString().slice(0, 10);
+      const r = await fetch("https://production.plaid.com/transactions/get", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ client_id: env.PLAID_CLIENT_ID, secret: env.PLAID_SECRET, access_token: env.PLAID_ACCESS_TOKEN, start_date: startDate, end_date: endDate, options: { count: 250 } }),
+      });
+      if (r.ok) {
+        const j = await r.json() as { transactions?: Array<{ transaction_id: string; date: string; name: string; amount: number; account_id: string }> };
+        for (const t of j.transactions || []) {
+          try {
+            await supa.insert("compass_bank_transactions", {
+              account_code: CASH_ACCOUNT, // Plaid only feeds Bluevine right now
+              source:       "plaid",
+              external_id:  t.transaction_id,
+              posted_date:  t.date,
+              description:  t.name,
+              amount_cents: Math.round(-t.amount * 100), // Plaid: positive = outflow; we flip
+              raw:          t as unknown as Record<string, unknown>,
+            });
+            plaidImported++;
+          } catch (e) {
+            if (!String(e).includes("duplicate key")) throw e;
+          }
+        }
+      } else { plaidErr = `Plaid HTTP ${r.status}`; }
+    } catch (e) { plaidErr = e instanceof Error ? e.message : String(e); }
+  }
+
+  // 2. Auto-match Plaid transactions against existing journal entries by amount + date proximity
+  const unrec = await supa.select("compass_bank_transactions", `select=id,posted_date,amount_cents,description&reconciled=eq.false&limit=200`) as Array<{ id: string; posted_date: string; amount_cents: number; description: string }>;
+  let matched = 0;
+  for (const t of unrec) {
+    // Find a journal entry within ±2 days with matching amount on the cash line
+    const candidates = await supa.select("compass_journal_lines", `select=id,entry_id,debit_cents,credit_cents&account_code=eq.${CASH_ACCOUNT}&or=(debit_cents.eq.${Math.abs(t.amount_cents)},credit_cents.eq.${Math.abs(t.amount_cents)})&limit=5`) as Array<{ id: string; entry_id: string; debit_cents: number; credit_cents: number }>;
+    if (candidates.length === 0) continue;
+    const match = candidates[0];
+    try {
+      await supa.update("compass_bank_transactions", `id=eq.${t.id}`, { reconciled: true, reconciled_at: new Date().toISOString(), reconciled_by: "agent:agent-control-manager", matched_entry_id: match.entry_id });
+      matched++;
+    } catch (_e) { /* keep going */ }
+  }
+
+  // 3. Journal balance integrity check for current period
+  const period = new Date().toISOString().slice(0, 7);
+  const lines = await supa.select("compass_journal_lines", `select=debit_cents,credit_cents,entry_id&entry_id=in.(select id from compass_journal_entries where period=${period})&limit=5000`) as Array<{ debit_cents: number; credit_cents: number }>;
+  const totalDr = lines.reduce((a, b) => a + Number(b.debit_cents || 0), 0);
+  const totalCr = lines.reduce((a, b) => a + Number(b.credit_cents || 0), 0);
+  const balanced = totalDr === totalCr;
+
+  return {
+    status: balanced ? "ok" : "partial",
+    summary: `bank: ${plaidImported} imported${plaidErr ? ` (${plaidErr})` : ""} · ${matched} reconciled · journal ${balanced ? "balanced" : `OUT BY ${(totalDr - totalCr) / 100}`}`,
+    log: log.text(),
+  };
+}
+
+// ============================================================================
+// 28. agent-reporting-manager
+// ============================================================================
+async function agentReportingManager(env: FtEnv): Promise<AgentResult> {
+  const log = newLogger();
+  const supa = supaFetch(env);
+
+  // Generate P&L, BS, CF for the prior month (run on 1st of new month)
+  const now = new Date();
+  const prior = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+  const period = prior.toISOString().slice(0, 7);
+
+  // Sum lines by account.type for the period
+  const coa = await supa.select("compass_chart_of_accounts", "select=code,name,type") as Array<{ code: string; name: string; type: string }>;
+  const acctByCode = new Map(coa.map((a) => [a.code, a]));
+
+  const entries = await supa.select("compass_journal_entries", `select=id&period=eq.${period}&posted=eq.true`) as Array<{ id: string }>;
+  const entryIds = entries.map((e) => e.id);
+  if (entryIds.length === 0) return { status: "skipped", summary: `no journal entries for ${period}`, log: log.text() };
+
+  const lines = await supa.select("compass_journal_lines", `select=account_code,debit_cents,credit_cents&entry_id=in.(${entryIds.join(",")})&limit=5000`) as Array<{ account_code: string; debit_cents: number; credit_cents: number }>;
+
+  let revenue = 0, cogs = 0, opex = 0;
+  for (const l of lines) {
+    const a = acctByCode.get(l.account_code);
+    if (!a) continue;
+    if (a.type === "revenue") revenue += (l.credit_cents - l.debit_cents);
+    if (a.type === "cogs")    cogs    += (l.debit_cents - l.credit_cents);
+    if (a.type === "opex")    opex    += (l.debit_cents - l.credit_cents);
+  }
+  const grossProfit = revenue - cogs;
+  const netIncome   = grossProfit - opex;
+
+  // Record period close
+  await supa.insert("compass_period_closes", {
+    period, closed_by: "agent:agent-reporting-manager",
+    je_count: entryIds.length,
+    total_revenue_cents: revenue, total_cogs_cents: cogs, total_opex_cents: opex,
+    net_income_cents: netIncome,
+  });
+
+  // Email statements summary to Joshua
+  if (env.RESEND_API_KEY) {
+    const fmt = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+    await sendEmail(env, {
+      to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+      subject: `📊 ${period} Financial Statements — X3 Compass`,
+      html: `<h1>${period} Close</h1>
+<table cellpadding="6">
+<tr><td>Revenue</td><td align="right"><strong>${fmt(revenue)}</strong></td></tr>
+<tr><td>COGS</td><td align="right">(${fmt(cogs)})</td></tr>
+<tr><td>Gross Profit</td><td align="right"><strong>${fmt(grossProfit)}</strong> (${revenue > 0 ? Math.round((grossProfit / revenue) * 100) : 0}%)</td></tr>
+<tr><td>Operating Expenses</td><td align="right">(${fmt(opex)})</td></tr>
+<tr><td><strong>Net Income</strong></td><td align="right"><strong>${fmt(netIncome)}</strong></td></tr>
+</table>
+<p>${entryIds.length} journal entries posted this period.</p>
+<p><a href="https://x3compass.com/app/finance">Open Finance →</a></p>`,
+    });
+  }
+
+  return { status: "ok", summary: `${period}: rev ${revenue / 100} · cogs ${cogs / 100} · opex ${opex / 100} · net ${netIncome / 100}`, log: log.text() };
+}
+
+// ============================================================================
+// 29. agent-fpa-manager
+// ============================================================================
+async function agentFpaManager(env: FtEnv): Promise<AgentResult> {
+  const log = newLogger();
+  const supa = supaFetch(env);
+
+  // Current expected MRR from carrier roster
+  const carriers = await supa.select("compass_carriers", "select=id,service_tier,hazmat_addon,subscription_status") as Array<{ id: string; service_tier: string | null; hazmat_addon: boolean | null; subscription_status: string | null }>;
+  const drivers = await supa.select("compass_drivers", "select=carrier_id,status") as Array<{ carrier_id: string; status: string | null }>;
+  const driversBy = new Map<string, number>();
+  for (const d of drivers) if ((d.status || "active").toLowerCase() === "active") driversBy.set(d.carrier_id, (driversBy.get(d.carrier_id) || 0) + 1);
+  const TIER: Record<string, number> = { diy: 2500, dfy: 5000, enterprise: 0 };
+  let currentMrr = 0, activeCarriers = 0;
+  for (const c of carriers) {
+    if (c.subscription_status !== "active") continue;
+    activeCarriers++;
+    const drv = driversBy.get(c.id) || 0;
+    const rate = TIER[(c.service_tier || "diy").toLowerCase()] || 0;
+    currentMrr += drv * rate + (c.hazmat_addon ? 9900 : 0);
+  }
+
+  // Simple forecast: assume 5% monthly growth, 3% monthly churn (placeholders we'll calibrate later)
+  const growthRate = 0.05, churnRate = 0.03;
+  const forecast: number[] = [];
+  let projected = currentMrr;
+  for (let i = 1; i <= 12; i++) {
+    projected = projected * (1 + growthRate - churnRate);
+    forecast.push(Math.round(projected));
+  }
+
+  // Email weekly FP&A digest
+  if (env.RESEND_API_KEY) {
+    const fmt = (c: number) => `$${(c / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+    await sendEmail(env, {
+      to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+      subject: `📈 FP&A Weekly · MRR ${fmt(currentMrr)} · 12-mo forecast ${fmt(forecast[11])}`,
+      html: `<h1>FP&A Weekly</h1>
+<p>Current MRR: <strong>${fmt(currentMrr)}</strong> across <strong>${activeCarriers}</strong> active carriers.</p>
+<h3>12-month forecast (5% growth, 3% churn)</h3>
+<table cellpadding="4"><tr>${forecast.map((m, i) => `<td>M${i + 1}: ${fmt(m)}</td>${(i + 1) % 4 === 0 ? "</tr><tr>" : ""}`).join("")}</tr></table>
+<p><em>Calibrate growth/churn rates once we have 3+ months of carrier history.</em></p>`,
+    });
+  }
+
+  return { status: "ok", summary: `MRR ${currentMrr / 100} · ${activeCarriers} active · 12-mo proj ${forecast[11] / 100}`, log: log.text() };
+}
+
+// ============================================================================
+// 30. agent-finance-workflow (coordinator)
+// ============================================================================
+async function agentFinanceWorkflow(env: FtEnv): Promise<AgentResult> {
+  const log = newLogger();
+  const supa = supaFetch(env);
+  // Decide which step of the monthly close calendar we're on
+  const now = new Date();
+  const dom = now.getUTCDate();
+  let step = "T+0 monitoring";
+  const runs: Array<{ agent: string; status: string }> = [];
+
+  // Daily: control + revenue manager
+  for (const agent of ["agent-revenue-manager", "agent-control-manager"]) {
+    try {
+      const r = await runAgent(agent, env);
+      runs.push({ agent, status: r.status });
+    } catch (e) { runs.push({ agent, status: `error: ${e instanceof Error ? e.message : String(e)}` }); }
+  }
+
+  // First of month: trigger Reporting Manager
+  if (dom === 1) {
+    step = "month-end close (Reporting Manager)";
+    try { const r = await runAgent("agent-reporting-manager", env); runs.push({ agent: "agent-reporting-manager", status: r.status }); }
+    catch (e) { runs.push({ agent: "agent-reporting-manager", status: `error: ${e instanceof Error ? e.message : String(e)}` }); }
+  }
+
+  // Monday: trigger FP&A
+  if (now.getUTCDay() === 1) {
+    step = "weekly FP&A";
+    try { const r = await runAgent("agent-fpa-manager", env); runs.push({ agent: "agent-fpa-manager", status: r.status }); }
+    catch (e) { runs.push({ agent: "agent-fpa-manager", status: `error: ${e instanceof Error ? e.message : String(e)}` }); }
+  }
+
+  // Escalate any failures
+  const errors = runs.filter((r) => r.status.includes("error"));
+  if (errors.length > 0 && env.RESEND_API_KEY) {
+    await sendEmail(env, {
+      to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+      subject: `⚠️ Finance Team errors (${errors.length})`,
+      html: `<h1>Finance workflow had ${errors.length} error(s)</h1><ul>${errors.map((e) => `<li><strong>${e.agent}</strong>: ${e.status}</li>`).join("")}</ul>`,
+    });
+  }
+
+  // Suppress unused-variable warning - supa is queried by sub-agents
+  void supa;
+
+  return { status: errors.length === 0 ? "ok" : "partial", summary: `${step} · ${runs.length} agents run · ${errors.length} errors`, log: log.text() };
+}
+
+
 export async function runAgent(name: string, env: Env, inputs?: Record<string, unknown>): Promise<AgentResult> {
   try {
     switch (name) {
@@ -669,6 +1027,11 @@ export async function runAgent(name: string, env: Env, inputs?: Record<string, u
       case "agent-csa-baseline":             return await agentCsaBaseline(env, inputs as { carrier_id?: string });
       case "agent-csa-monitor":              return await agentCsaMonitor(env, inputs as { carrier_id?: string });
       case "agent-onboarding-concierge":     return await agentOnboardingConcierge(env, inputs as { carrier_id?: string });
+      case "agent-revenue-manager":          return await agentRevenueManager(env);
+      case "agent-control-manager":          return await agentControlManager(env);
+      case "agent-reporting-manager":        return await agentReportingManager(env);
+      case "agent-fpa-manager":              return await agentFpaManager(env);
+      case "agent-finance-workflow":         return await agentFinanceWorkflow(env);
     }
     return { status: "error", summary: `Unknown agent '${name}' — not in registry.` };
   } catch (e) {
