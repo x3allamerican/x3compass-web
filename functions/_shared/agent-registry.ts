@@ -95,7 +95,7 @@ async function agentKeepalive(env: Env): Promise<AgentResult> {
 async function agentPortfolioBrief(env: Env): Promise<AgentResult> {
   const log = newLogger();
   const supa = supaFetch(env);
-  const carriers   = await supa.select("compass_carriers",         "select=id,name,subscription_status&deleted_at=is.null") as Array<{ id: string; name: string; subscription_status: string }>;
+  const carriers   = await supa.select("compass_carriers",         "select=id,name,subscription_status") as Array<{ id: string; name: string; subscription_status: string }>;
   const drivers    = await supa.select("compass_drivers",          "select=id,status") as Array<{ id: string; status: string | null }>;
   const vehicles   = await supa.select("compass_vehicles",         "select=id") as unknown[];
   const dq         = await supa.select("compass_dq_documents",     `select=id,expiration_date&expiration_date=lte.${encodeURIComponent(new Date(Date.now()+30*86400_000).toISOString())}`) as Array<{ expiration_date: string }>;
