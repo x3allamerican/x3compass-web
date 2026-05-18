@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export interface FinanceEntry {
   id: string;
@@ -63,7 +63,7 @@ const EMPTY_KPIS: FinanceKpis = { money_in_cents: 0, paid_vendors_cents: 0, over
 const EMPTY_TOTALS: ClientTotals = { drivers: 0, expected_mrr_cents: 0, actual_revenue_cents: 0, est_fees_cents: 0, net_cents: 0, owed_cents: 0, carriers: 0, active_carriers: 0, trialing_carriers: 0 };
 
 async function authHeader(): Promise<Record<string, string>> {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await getSupabase().auth.getSession();
   return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
 }
 
