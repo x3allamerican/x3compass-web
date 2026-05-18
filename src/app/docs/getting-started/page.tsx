@@ -64,7 +64,7 @@ John,Doe,john@example.com,5555550100,K12345678,MI,2027-04-15,2026-09-30,2024-01-
 
       <H2 id="first-ask">3 · Ask Compass your first question</H2>
       <p>From any /app/ page the Ask Compass widget sits in the lower right (and the full-screen version is at
-      <Link href="/app/ask" className="text-[var(--accent)] hover:underline"> /app/ask</Link>). Type a question. Every CFR
+      <Link href="/ask" className="text-[var(--accent)] hover:underline"> /app/ask</Link>). Type a question. Every CFR
       citation in the answer is round-tripped against the live eCFR.gov registry — verified citations get a green ✓ chip, unverified
       get an amber ⚠.</p>
       <p>Try these to see the surface area:</p>

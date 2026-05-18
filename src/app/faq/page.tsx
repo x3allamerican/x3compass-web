@@ -81,7 +81,7 @@ export default function FAQ() {
           </h1>
             <p className="text-[17px] text-[var(--fg-muted)]">
               Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[var(--accent)] font-bold">Email us</Link> or{" "}
-              <Link href="/app/ask" className="text-[var(--accent)] font-bold">ask Compass directly</Link>.
+              <Link href="/ask" className="text-[var(--accent)] font-bold">ask Compass directly</Link>.
             </p>
           </div>
         </section>
@@ -131,7 +131,7 @@ export default function FAQ() {
               No signup needed. Try the demo brain — answers in seconds, cited to the CFR.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
-              <Link href="/app/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
+              <Link href="/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
                 style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
               >
                 ★ Ask Compass →

@@ -10,6 +10,12 @@ type NavItem = { href: string; label: string; icon: string };
 const SECTIONS: { title: string; items: NavItem[] }[] = [
   { title: "Main", items: [
     { href: "/app", label: "Dashboard", icon: "▦" },
+    { href: "/app/control-center", label: "Control Center", icon: "🎛" },
+    { href: "/app/csa", label: "CSA Scores", icon: "📊" },
+    { href: "/app/scorecards", label: "Safety Scorecards", icon: "🏆" },
+    { href: "/app/notifications", label: "Notifications", icon: "🔔" },
+  ]},
+  { title: "Fleet", items: [
     { href: "/app/drivers", label: "Drivers", icon: "👤" },
     { href: "/app/vehicles", label: "Vehicles", icon: "🚛" },
     { href: "/app/dq-files", label: "DQ Files", icon: "📁" },
@@ -25,8 +31,16 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     { href: "/app/background-checks", label: "Background Checks", icon: "🛡" },
     { href: "/app/ifta", label: "IFTA Concierge", icon: "⛽" },
   ]},
+  { title: "Business", items: [
+    { href: "/app/finance", label: "Finance", icon: "💵" },
+    { href: "/app/marketing", label: "Marketing", icon: "📣" },
+    { href: "/app/prospects", label: "FMCSA Prospects", icon: "🎯" },
+    { href: "/app/audit-log", label: "Audit Log", icon: "📜" },
+  ]},
   { title: "Advanced", items: [
     { href: "/app/ask", label: "Ask Compass", icon: "∞" },
+    { href: "/app/import", label: "Bulk Import", icon: "⤴" },
+    { href: "/app/integrations", label: "Integrations", icon: "🔌" },
     { href: "/hazmat", label: "Hazmat Center", icon: "⚠️" },
     { href: "/app/audit-export", label: "Audit Export", icon: "📄" },
     { href: "/app/settings", label: "Settings", icon: "⚙" },

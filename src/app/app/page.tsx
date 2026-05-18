@@ -1,208 +1,482 @@
 "use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { useUser } from "@/lib/useUser";
-import { getSupabase } from "@/lib/supabase";
+import {
+  DEMO_CARRIER, DEMO_FLEET, COMPLIANCE_BARS, CSA_BASICS, ACTION_ITEMS,
+  DRIVER_STATUS, CDL_BUCKETS, VEHICLE_TYPES, MAINTENANCE_KPIS,
+  INSPECTIONS_BARS, DA_TESTS_BY_TYPE, DA_MONTHLY, HOS_METRICS, DOC_EXPIRATIONS, TRAINING_TOPICS,
+} from "@/lib/demoData";
 
-type Counts = {
-  drivers: number; drivers_active: number; cdl_expiring_60d: number; medical_expiring_60d: number;
-  vehicles: number; vehicles_oos: number; inspection_due_30d: number;
-  inspections_recent: number; oos_recent: number;
-  accidents_recent: number;
-  mvr_pending: number;
-  da_tests_recent: number;
-  dq_docs_total: number;
-  training_records_total: number;
-};
-
-const ZERO: Counts = {
-  drivers: 0, drivers_active: 0, cdl_expiring_60d: 0, medical_expiring_60d: 0,
-  vehicles: 0, vehicles_oos: 0, inspection_due_30d: 0,
-  inspections_recent: 0, oos_recent: 0, accidents_recent: 0,
-  mvr_pending: 0, da_tests_recent: 0, dq_docs_total: 0, training_records_total: 0,
-};
-
-export default function DashboardPage() {
-  const { carrier, user } = useUser();
-  const [counts, setCounts] = useState<Counts>(ZERO);
-  const [loading, setLoading] = useState(true);
-  const [recentDrivers, setRecentDrivers] = useState<Array<{id:string;first_name:string;last_name:string;status:string;cdl_state:string|null;cdl_expires_on:string|null}>>([]);
-
-  useEffect(() => {
-    if (!carrier) return;
-    let cancelled = false;
-    const sb = getSupabase();
-    const today = new Date();
-    const in60 = new Date(today.getTime() + 60*86400000).toISOString().slice(0,10);
-    const todayStr = today.toISOString().slice(0,10);
-    const ago90 = new Date(today.getTime() - 90*86400000).toISOString().slice(0,10);
-
-    async function fetchAll() {
-      const r = await Promise.all([
-        sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id),
-        sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).eq("status","active"),
-        sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("cdl_expires_on", todayStr).lte("cdl_expires_on", in60),
-        sb.from("compass_drivers").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("medical_card_expires_on", todayStr).lte("medical_card_expires_on", in60),
-        sb.from("compass_vehicles").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id),
-        sb.from("compass_vehicles").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).eq("status","out_of_service"),
-        sb.from("compass_vehicles").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("next_dot_inspection_due", todayStr).lte("next_dot_inspection_due", in60),
-        sb.from("compass_inspections").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("inspection_date", ago90),
-        sb.from("compass_inspections").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("inspection_date", ago90).or("oos_driver.eq.true,oos_vehicle.eq.true"),
-        sb.from("compass_accidents").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("accident_date", ago90),
-        sb.from("compass_mvr_records").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).eq("result","pending"),
-        sb.from("compass_da_tests").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id).gte("collected_on", ago90),
-        sb.from("compass_dq_documents").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id),
-        sb.from("compass_training_records").select("*", { count: "exact", head: true }).eq("carrier_id", carrier!.id),
-        sb.from("compass_drivers").select("id,first_name,last_name,status,cdl_state,cdl_expires_on").eq("carrier_id", carrier!.id).order("created_at", { ascending: false }).limit(5),
-      ]);
-      if (cancelled) return;
-      setCounts({
-        drivers: r[0].count ?? 0, drivers_active: r[1].count ?? 0,
-        cdl_expiring_60d: r[2].count ?? 0, medical_expiring_60d: r[3].count ?? 0,
-        vehicles: r[4].count ?? 0, vehicles_oos: r[5].count ?? 0,
-        inspection_due_30d: r[6].count ?? 0,
-        inspections_recent: r[7].count ?? 0, oos_recent: r[8].count ?? 0,
-        accidents_recent: r[9].count ?? 0,
-        mvr_pending: r[10].count ?? 0, da_tests_recent: r[11].count ?? 0,
-        dq_docs_total: r[12].count ?? 0, training_records_total: r[13].count ?? 0,
-      });
-      setRecentDrivers((r[14].data as typeof recentDrivers) || []);
-      setLoading(false);
-    }
-    fetchAll().catch((e) => { console.error(e); setLoading(false); });
-    return () => { cancelled = true; };
-  }, [carrier]);
-
-  const greeting = (() => {
-    const h = new Date().getHours();
-    return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-  })();
-  const fname = ((user?.user_metadata?.full_name as string) || user?.email || "").split(/[@. ]/)[0];
-
+// ---------- helpers ----------
+function Donut({ data, size = 180 }: { data: { label: string; count: number; color: string }[]; size?: number }) {
+  const total = data.reduce((a, b) => a + b.count, 0) || 1;
+  const cx = size / 2, cy = size / 2, r = size * 0.42, inner = size * 0.27;
+  let acc = 0;
   return (
-    <AppShell crumbs="DASHBOARD" title={`${greeting}${fname ? `, ${fname.charAt(0).toUpperCase()+fname.slice(1)}` : ""}`}>
-      <div className="p-6 max-w-7xl">
-        <div className="mb-8">
-          <p className="text-[var(--fg-muted)] text-[14px]">
-            {carrier ? <>Live snapshot for <strong className="text-[var(--fg)]">{carrier.name}</strong>.</> : "Loading your carrier…"}
-          </p>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="distribution">
+      {data.map((d, i) => {
+        const start = (acc / total) * 2 * Math.PI - Math.PI / 2;
+        acc += d.count;
+        const end = (acc / total) * 2 * Math.PI - Math.PI / 2;
+        const large = end - start > Math.PI ? 1 : 0;
+        const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
+        const x2 = cx + r * Math.cos(end),   y2 = cy + r * Math.sin(end);
+        const x3 = cx + inner * Math.cos(end), y3 = cy + inner * Math.sin(end);
+        const x4 = cx + inner * Math.cos(start), y4 = cy + inner * Math.sin(start);
+        return (
+          <path key={i} d={`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${inner} ${inner} 0 ${large} 0 ${x4} ${y4} Z`} fill={d.color} />
+        );
+      })}
+    </svg>
+  );
+}
+function StatusDot({ kind }: { kind: "overdue" | "warn" | "info" | "ok" }) {
+  const map = { overdue: "var(--danger)", warn: "var(--warning)", info: "var(--accent)", ok: "var(--success)" };
+  return <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: map[kind] }} />;
+}
+
+// ---------- page ----------
+export default function DashboardPage() {
+  return (
+    <AppShell title="Compliance Command Center" crumbs={`${DEMO_CARRIER.name} · DOT #${DEMO_CARRIER.dot_number}`}>
+      <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
+        {/* Header strip */}
+        <div className="x3-card p-5 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-lg grid place-items-center font-black text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>X3</div>
+            <div>
+              <div className="text-[19px] font-extrabold text-[var(--fg)]">Compliance Command Center</div>
+              <div className="text-[12px] text-[var(--fg-muted)]">{DEMO_CARRIER.name} · DOT #{DEMO_CARRIER.dot_number}</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="inline-block px-3 py-1 rounded-full text-[11px] tracking-[.12em] uppercase font-bold bg-[var(--success)]/15 text-[var(--success)]">{DEMO_FLEET.compliance_pct}% Compliance health</span>
+            <div className="text-[11px] text-[var(--fg-muted)] mt-1">Refreshed 8:16 PM</div>
+          </div>
         </div>
 
-        {/* STAT GRID — 4-col on desktop, with clear typographic hierarchy */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Active drivers"      value={counts.drivers_active} delta={counts.drivers ? `${counts.drivers - counts.drivers_active} inactive` : "—"} status="info" />
-          <StatCard label="Vehicles"            value={counts.vehicles}       delta={counts.vehicles_oos ? `${counts.vehicles_oos} OOS` : "All in service"} status={counts.vehicles_oos ? "warn" : "ok"} />
-          <StatCard label="CDLs expiring (60d)" value={counts.cdl_expiring_60d}     delta={counts.cdl_expiring_60d ? "Action needed" : "All current"} status={counts.cdl_expiring_60d ? "warn" : "ok"} />
-          <StatCard label="Medical cards (60d)" value={counts.medical_expiring_60d} delta={counts.medical_expiring_60d ? "Action needed" : "All current"} status={counts.medical_expiring_60d ? "warn" : "ok"} />
-          <StatCard label="Inspections (90d)"   value={counts.inspections_recent} delta={counts.oos_recent ? `${counts.oos_recent} OOS` : "no OOS"} status={counts.oos_recent ? "warn" : "info"} />
-          <StatCard label="Accidents (90d)"     value={counts.accidents_recent} delta={counts.accidents_recent ? "Review" : "None"} status={counts.accidents_recent ? "alert" : "ok"} />
-          <StatCard label="DOT insp. due 60d"   value={counts.inspection_due_30d} status={counts.inspection_due_30d ? "warn" : "info"} />
-          <StatCard label="MVR pulls pending"   value={counts.mvr_pending} status={counts.mvr_pending ? "warn" : "info"} />
+        {/* KPI strip — 6 cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { tone: "accent",  label: "ACTIVE DRIVERS", value: DEMO_FLEET.active_drivers,  sub: `of ${DEMO_FLEET.drivers_on_roster} on roster`, icon: "👤" },
+            { tone: "success", label: "POWER UNITS",    value: DEMO_FLEET.power_units,     sub: "across fleet",                                  icon: "🚛" },
+            { tone: "danger",  label: "OPEN ALERTS",    value: DEMO_FLEET.open_alerts,     sub: `${DEMO_FLEET.open_alerts_urgent} urgent`,        icon: "⚠" },
+            { tone: "danger",  label: "CDLS EXPIRED",   value: DEMO_FLEET.cdls_expired,    sub: "needs action",                                  icon: "✕" },
+            { tone: "success", label: "MECS ≤30D",      value: DEMO_FLEET.mecs_expiring_30d, sub: "expiring soon",                              icon: "♡" },
+            { tone: "warning", label: "DQ SCORE",       value: `${DEMO_FLEET.dq_score_pct}%`, sub: `${DEMO_FLEET.dq_docs_present} of ${DEMO_FLEET.dq_docs_total} docs`, icon: "★" },
+          ].map((k, i) => (
+            <div key={i} className="x3-card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] tracking-[.16em] uppercase font-bold text-[var(--fg-muted)]">{k.label}</div>
+                <span className={`text-[14px]`} style={{ color: `var(--${k.tone === "accent" ? "accent" : k.tone === "danger" ? "danger" : k.tone === "warning" ? "warning" : "success"})` }}>{k.icon}</span>
+              </div>
+              <div className="text-[28px] font-black leading-none text-[var(--fg)]">{k.value}</div>
+              <div className="text-[11px] text-[var(--fg-muted)] mt-1">{k.sub}</div>
+            </div>
+          ))}
         </div>
 
-        {/* QUICK ACTIONS */}
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[.18em] font-bold text-[var(--fg-muted)]">Quick actions</h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <QuickAction href="/app/drivers"           icon="👤" title="Add a driver"     desc="Build a new DQ file from scratch" />
-          <QuickAction href="/app/vehicles"          icon="🚛" title="Add a vehicle"    desc="Track maintenance + inspections" />
-          <QuickAction href="/app/background-checks" icon="🛡" title="Order BG check"   desc="Live Checkr embed (FCRA-compliant)" />
-          <QuickAction href="/app/mvr"               icon="🪪" title="Pull an MVR"      desc="State-specific MVR lookup" />
-          <QuickAction href="/app/audit-export"      icon="📄" title="Audit packet"     desc="Full DOT compliance export" />
-          <QuickAction href="/app/ask"               icon="∞" title="Ask Compass"      desc="CFR-cited answer to any FMCSA question" />
-        </div>
-
-        {/* TWO-COLUMN: recent + compliance health */}
-        <div className="grid md:grid-cols-2 gap-4">
+        {/* Compliance Overview + CSA Scores */}
+        <div className="grid lg:grid-cols-2 gap-4">
           <div className="x3-card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[var(--fg)] font-bold text-[15px]">Recently added drivers</h3>
-              <Link href="/app/drivers" className="text-[11px] text-[var(--accent)] font-bold hover:underline">View all →</Link>
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">Compliance Overview</div>
+              <Link href="/app/audit-export" className="text-[12px] text-[var(--accent)] font-bold hover:underline">Full Report</Link>
             </div>
-            {loading ? (
-              <div className="text-[var(--fg-muted)] text-sm py-6 text-center">Loading…</div>
-            ) : recentDrivers.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-2xl mb-2">🚛</div>
-                <p className="text-[var(--fg-muted)] text-sm mb-3">No drivers yet</p>
-                <Link href="/app/drivers" className="inline-block px-4 py-2 rounded-lg font-bold text-[12px] text-[var(--accent-fg)] bg-[var(--accent)] hover:bg-[var(--accent-2)] transition-colors">Add your first →</Link>
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="relative">
+                <Donut data={[{ label: "good", count: DEMO_FLEET.compliance_pct, color: "var(--warning)" }, { label: "gap", count: 100 - DEMO_FLEET.compliance_pct, color: "var(--surface-2)" }]} />
+                <div className="absolute inset-0 grid place-items-center">
+                  <div className="text-center">
+                    <div className="text-[32px] font-black text-[var(--fg)] leading-none">{DEMO_FLEET.compliance_pct}%</div>
+                    <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mt-1">OVERALL</div>
+                    <div className="text-[11px] text-[var(--warning)] font-semibold mt-1">Action needed</div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <ul className="space-y-2">
-                {recentDrivers.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between py-1.5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full grid place-items-center text-[11px] font-black text-[var(--accent-fg)] bg-[var(--accent)]">{(d.first_name?.[0]||"")+(d.last_name?.[0]||"")}</div>
-                      <div>
-                        <Link href={`/app/drivers?id=${d.id}`} className="text-[var(--fg)] font-semibold hover:text-[var(--accent)] text-sm">{d.first_name} {d.last_name}</Link>
-                        <div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_state || "—"} · {d.status}</div>
-                      </div>
+              <div className="flex-1 min-w-[280px] space-y-2.5">
+                {COMPLIANCE_BARS.map((b) => (
+                  <div key={b.label}>
+                    <div className="flex justify-between text-[12px] text-[var(--fg-muted)] mb-1">
+                      <span className="font-semibold text-[var(--fg)]">{b.label}</span><span>{b.pct}%</span>
                     </div>
-                  </li>
+                    <div className="h-2 rounded-full bg-[var(--surface-2)] overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${b.pct}%`, background: b.color === "green" ? "var(--success)" : b.color === "yellow" ? "var(--warning)" : "var(--danger)" }} />
+                    </div>
+                  </div>
                 ))}
-              </ul>
-            )}
+              </div>
+            </div>
+          </div>
+          <div className="x3-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">CSA Scores</div>
+              <div className="text-[11px] text-[var(--fg-muted)]">BASIC measures — lower is better</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {CSA_BASICS.map((c) => {
+                const tone = c.status === "alert" ? "var(--danger)" : c.status === "warn" ? "var(--warning)" : "var(--success)";
+                const bg   = c.status === "alert" ? "rgba(220,38,38,.10)" : c.status === "warn" ? "rgba(180,83,9,.10)" : "rgba(4,120,87,.08)";
+                return (
+                  <div key={c.name} className="rounded-lg border border-[var(--border)] p-3" style={{ background: bg }}>
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] tracking-[.12em] uppercase font-bold text-[var(--fg-muted)]">{c.name}</div>
+                    </div>
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <div className="text-[22px] font-black" style={{ color: tone }}>{c.msr}</div>
+                      <div className="text-[10px] text-[var(--fg-muted)] font-semibold">MSR</div>
+                    </div>
+                    <div className="text-[10px] text-[var(--fg-muted)] mt-0.5">Threshold {c.threshold}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* 8-tile Action Items */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)]">Action items · what needs you today</div>
+            <div className="text-[10px] text-[var(--fg-faint)]">Generated 8:16 PM</div>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {Object.entries(ACTION_ITEMS).map(([k, t]) => (
+              <div key={k} className="x3-card p-4 flex flex-col">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <div className="text-[12px] font-extrabold text-[var(--fg)] leading-tight">{t.title}</div>
+                </div>
+                <div className="text-[10px] text-[var(--fg-faint)] mb-3">{t.cfr}</div>
+                <div className="space-y-1.5 flex-1">
+                  {t.items.map((it, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 text-[11px]">
+                      <div className="min-w-0">
+                        <div className="text-[var(--fg)] font-semibold truncate">{it.who}</div>
+                        <div className="text-[var(--fg-muted)] truncate">{it.meta}</div>
+                      </div>
+                      <div className={`px-1.5 py-0.5 rounded text-[9px] font-bold whitespace-nowrap ${it.statusKind === "overdue" ? "bg-[var(--danger)]/15 text-[var(--danger)]" : "bg-[var(--warning)]/15 text-[var(--warning)]"}`}>{it.status}</div>
+                    </div>
+                  ))}
+                </div>
+                <Link href={t.cta.href} className="text-[11px] font-bold text-[var(--accent)] hover:underline mt-3">{t.cta.label}</Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FMCSA Carrier Profile */}
+        <div className="x3-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)]">FMCSA Carrier Profile</div>
+            <Link href="https://safer.fmcsa.dot.gov/" target="_blank" rel="noopener" className="text-[12px] text-[var(--accent)] font-bold hover:underline">Sync with FMCSA</Link>
+          </div>
+          <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 text-[12px]">
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Safety Rating</div>
+              <div className="text-[15px] text-[var(--success)] font-extrabold">{DEMO_CARRIER.safety_rating}</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">As of {DEMO_CARRIER.rating_date} · {DEMO_CARRIER.rating_type}</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Operating Authority</div>
+              <div className="text-[15px] text-[var(--success)] font-extrabold">✓ Active</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Authorized for Property</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Annual Miles</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.annual_miles.toLocaleString()}</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">In 2025</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Power Units</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.reported_power_units.toLocaleString()}</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Reported on MCS-150</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Drivers</div>
+              <div className="text-[15px] text-[var(--fg)] font-extrabold">{DEMO_CARRIER.reported_drivers.toLocaleString()}</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Reported on MCS-150</div>
+            </div>
+          </div>
+          <div className="text-[10px] text-[var(--fg-faint)] mt-4">📡 Last MCS-150 filed Sep 24, 2025 · Last sync 4/22/2026</div>
+
+          <div className="border-t border-[var(--border)] mt-4 pt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-[12px]">
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--accent)] mb-1">Your X3 Fleet</div>
+              <div className="flex items-baseline gap-1.5"><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.power_units - DEMO_FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">POWER UNITS</div></div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Active only · Manage →</div>
+            </div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.tractors}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Tractors</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.straight_trucks}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Straight trucks</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.trailers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Trailers</div></div>
+            <div><div className="text-[20px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.active_drivers}</div><div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Active drivers</div></div>
           </div>
 
+          <div className="border-t border-[var(--border)] mt-4 pt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-[12px]">
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">BIPD Insurance</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.bipd_insurance}</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Cargo Insurance</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.cargo_insurance}</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">24-mo Crashes</div>
+              <div className="text-[14px] text-[var(--fg)] font-extrabold">{DEMO_FLEET.crashes_24mo_total} total · {DEMO_FLEET.crashes_24mo_fatal} fatal · {DEMO_FLEET.crashes_24mo_injury} injury</div>
+            </div>
+            <div>
+              <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">OOS Rates</div>
+              <div className="text-[12px] text-[var(--fg)] font-semibold">Driver {DEMO_FLEET.driver_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {DEMO_FLEET.driver_oos_national_pct}%)</span></div>
+              <div className="text-[12px] text-[var(--fg)] font-semibold">Vehicle {DEMO_FLEET.vehicle_oos_rate_pct}% <span className="text-[var(--fg-faint)]">(nat'l {DEMO_FLEET.vehicle_oos_national_pct}%)</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Drivers section */}
+        <div className="grid lg:grid-cols-2 gap-4">
           <div className="x3-card p-5">
-            <h3 className="text-[var(--fg)] font-bold text-[15px] mb-4">Compliance health</h3>
-            <ul className="space-y-3">
-              <HealthRow label="CDL expirations (60d)"   count={counts.cdl_expiring_60d}     okLabel="All current" />
-              <HealthRow label="Medical cards (60d)"     count={counts.medical_expiring_60d} okLabel="All current" />
-              <HealthRow label="Out-of-service vehicles" count={counts.vehicles_oos}         okLabel="All in service" />
-              <HealthRow label="OOS inspections (90d)"   count={counts.oos_recent}           okLabel="No OOS in 90d" />
-              <HealthRow label="Recent accidents (90d)"  count={counts.accidents_recent}     okLabel="None recorded" warnLevel={1} />
-              <HealthRow label="DOT insp. due (60d)"     count={counts.inspection_due_30d}   okLabel="All within window" />
-            </ul>
+            <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">Driver status</div>
+            <div className="flex items-center gap-6 flex-wrap">
+              <Donut data={DRIVER_STATUS} />
+              <ul className="text-[12px] space-y-1.5">
+                {DRIVER_STATUS.map((d) => (
+                  <li key={d.label} className="flex items-center gap-2"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: d.color }} /> <span className="text-[var(--fg)] font-semibold">{d.label}</span> <span className="text-[var(--fg-muted)]">{d.count}</span></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="x3-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">CDL expiration buckets</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Active drivers</div>
+            </div>
+            <div className="grid grid-cols-5 gap-2 items-end h-[180px]">
+              {CDL_BUCKETS.map((b) => {
+                const max = Math.max(...CDL_BUCKETS.map(x => x.count));
+                const h = Math.max(2, (b.count / max) * 100);
+                const color = b.label === "Expired" ? "var(--danger)" : b.label === "Over 90 days" ? "var(--success)" : "var(--warning)";
+                return (
+                  <div key={b.label} className="flex flex-col items-center gap-1.5">
+                    <div className="text-[11px] font-bold text-[var(--fg)]">{b.count}</div>
+                    <div className="w-full rounded-t" style={{ height: `${h}%`, background: color, minHeight: 4 }} />
+                    <div className="text-[9px] text-[var(--fg-muted)] text-center">{b.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Vehicles section */}
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="x3-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">Vehicle types</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">100 units</div>
+            </div>
+            <div className="flex items-center gap-6 flex-wrap">
+              <Donut data={VEHICLE_TYPES} />
+              <ul className="text-[12px] space-y-1.5">
+                {VEHICLE_TYPES.map((d) => (
+                  <li key={d.label} className="flex items-center gap-2"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: d.color }} /> <span className="text-[var(--fg)] font-semibold">{d.label}</span> <span className="text-[var(--fg-muted)]">{d.count}</span></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="x3-card p-5">
+            <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">Maintenance & inspection</div>
+            <div className="grid grid-cols-2 gap-3">
+              {MAINTENANCE_KPIS.map((k) => {
+                const toneColor = k.tone === "red" ? "var(--danger)" : k.tone === "yellow" ? "var(--warning)" : "var(--success)";
+                const bg = k.tone === "red" ? "rgba(220,38,38,.08)" : k.tone === "yellow" ? "rgba(180,83,9,.08)" : "rgba(4,120,87,.08)";
+                return (
+                  <div key={k.label} className="rounded-lg border border-[var(--border)] p-4" style={{ background: bg }}>
+                    <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{k.label}</div>
+                    <div className="text-[28px] font-black leading-none" style={{ color: toneColor }}>{k.value}</div>
+                    <div className="text-[10px] text-[var(--fg-muted)] mt-1">{k.sub}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Inspections last 6 months */}
+        <div className="x3-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)]">Inspections · last 6 months</div>
+            <div className="flex gap-3 text-[10px] text-[var(--fg-muted)]">
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--success)" }} />Clean</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--warning)" }} />Violations</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--danger)" }} />Out-of-service</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-5 gap-3 items-end h-[180px]">
+            {INSPECTIONS_BARS.map((m) => {
+              const total = m.clean + m.violations + m.oos;
+              const maxT = Math.max(...INSPECTIONS_BARS.map(x => x.clean + x.violations + x.oos));
+              const scale = (total / maxT) * 100;
+              return (
+                <div key={m.month} className="flex flex-col items-center gap-1.5">
+                  <div className="w-full flex flex-col" style={{ height: `${scale}%`, minHeight: 6 }}>
+                    <div style={{ flex: m.oos,        background: "var(--danger)"  }} />
+                    <div style={{ flex: m.violations, background: "var(--warning)" }} />
+                    <div style={{ flex: m.clean,      background: "var(--success)" }} />
+                  </div>
+                  <div className="text-[10px] text-[var(--fg-muted)]">{m.month}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Drug & Alcohol */}
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="x3-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">Tests by type</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Stacked by result</div>
+            </div>
+            <div className="grid grid-cols-4 gap-3 items-end h-[180px]">
+              {DA_TESTS_BY_TYPE.map((t) => {
+                const total = t.negative + t.dilute + t.canceled + t.positive + t.refusal;
+                const maxT = Math.max(...DA_TESTS_BY_TYPE.map(x => x.negative + x.dilute + x.canceled + x.positive + x.refusal));
+                const h = (total / maxT) * 100;
+                return (
+                  <div key={t.type} className="flex flex-col items-center gap-1.5">
+                    <div className="w-full flex flex-col" style={{ height: `${h}%`, minHeight: 6 }}>
+                      <div style={{ flex: t.refusal,  background: "#A78BFA" }} />
+                      <div style={{ flex: t.positive, background: "var(--danger)" }} />
+                      <div style={{ flex: t.canceled, background: "#9CA3AF" }} />
+                      <div style={{ flex: t.dilute,   background: "var(--warning)" }} />
+                      <div style={{ flex: t.negative, background: "var(--success)" }} />
+                    </div>
+                    <div className="text-[10px] text-[var(--fg-muted)] text-center">{t.type}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="x3-card p-5">
+            <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">Monthly testing trend</div>
+            <svg viewBox="0 0 600 180" className="w-full h-[180px]" preserveAspectRatio="none">
+              {(() => {
+                const max = Math.max(...DA_MONTHLY.map(d => d.total));
+                const w = 600, h = 180, padL = 40, padR = 20, padT = 10, padB = 30;
+                const stepX = (w - padL - padR) / (DA_MONTHLY.length - 1);
+                const y = (v: number) => padT + (h - padT - padB) * (1 - v / max);
+                const total = DA_MONTHLY.map((d, i) => `${padL + i*stepX},${y(d.total)}`).join(" ");
+                const pos = DA_MONTHLY.map((d, i) => `${padL + i*stepX},${y(d.positives)}`).join(" ");
+                return (
+                  <>
+                    <polyline fill="none" stroke="var(--accent)" strokeWidth="2.5" points={total} />
+                    <polyline fill="none" stroke="var(--danger)" strokeWidth="2" points={pos} />
+                    {DA_MONTHLY.map((d, i) => (
+                      <g key={i}>
+                        <circle cx={padL + i*stepX} cy={y(d.total)}     r="3" fill="var(--accent)" />
+                        <circle cx={padL + i*stepX} cy={y(d.positives)} r="2.5" fill="var(--danger)" />
+                        <text x={padL + i*stepX} y={h - 12} textAnchor="middle" fontSize="10" fill="var(--fg-muted)">{d.m}</text>
+                      </g>
+                    ))}
+                  </>
+                );
+              })()}
+            </svg>
+            <div className="flex gap-4 text-[10px] text-[var(--fg-muted)] mt-2">
+              <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5" style={{ background: "var(--accent)" }} />Total tests</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-0.5" style={{ background: "var(--danger)" }} />Positives/refusal</span>
+            </div>
+          </div>
+        </div>
+
+        {/* HOS / ELD */}
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="x3-card p-5">
+            <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">HOS metrics — last 30 days</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-[var(--border)] p-4 bg-[rgba(4,120,87,.06)]">
+                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Total Logs</div>
+                <div className="text-[28px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.total_logs_30d}</div>
+                <div className="text-[10px] text-[var(--fg-muted)] mt-1">last 30 days</div>
+              </div>
+              <div className="rounded-lg border border-[var(--border)] p-4 bg-[rgba(4,120,87,.06)]">
+                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Violations</div>
+                <div className="text-[28px] font-black leading-none text-[var(--success)] mt-1">{HOS_METRICS.violations_30d}</div>
+                <div className="text-[10px] text-[var(--fg-muted)] mt-1">11hr or 14hr</div>
+              </div>
+              <div className="rounded-lg border border-[var(--border)] p-4">
+                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Avg Drive</div>
+                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.avg_drive}</div>
+                <div className="text-[10px] text-[var(--fg-muted)] mt-1">per log</div>
+              </div>
+              <div className="rounded-lg border border-[var(--border)] p-4">
+                <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Total Miles</div>
+                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.total_miles_30d.toLocaleString()}</div>
+                <div className="text-[10px] text-[var(--fg-muted)] mt-1">distance driven</div>
+              </div>
+            </div>
+          </div>
+          <div className="x3-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[15px] font-extrabold text-[var(--fg)]">Document expiration</div>
+              <div className="text-[10px] text-[var(--fg-muted)]">Next 90 days</div>
+            </div>
+            <div className="space-y-2.5">
+              {DOC_EXPIRATIONS.map((row) => {
+                const total = row["0_30"] + row["31_60"] + row["61_90"];
+                const max = Math.max(...DOC_EXPIRATIONS.map(r => r["0_30"] + r["31_60"] + r["61_90"]));
+                const scale = (total / max) * 100;
+                return (
+                  <div key={row.kind}>
+                    <div className="text-[11px] text-[var(--fg-muted)] mb-1">{row.kind}</div>
+                    <div className="flex h-5 rounded overflow-hidden bg-[var(--surface-2)]" style={{ width: `${scale}%`, minWidth: 30 }}>
+                      <div style={{ flex: row["0_30"],  background: "var(--danger)"  }} />
+                      <div style={{ flex: row["31_60"], background: "var(--warning)" }} />
+                      <div style={{ flex: row["61_90"], background: "var(--success)" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-3 text-[10px] text-[var(--fg-muted)] mt-3">
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--danger)"  }} />0-30 days</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--warning)" }} />31-60 days</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--success)" }} />61-90 days</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Training by topic */}
+        <div className="x3-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)]">Training by topic</div>
+            <div className="text-[10px] text-[var(--fg-muted)]">Stacked · completed / in progress / expired</div>
+          </div>
+          <div className="space-y-2">
+            {TRAINING_TOPICS.map((t) => {
+              const total = t.completed + t.in_progress + t.expired;
+              const max = Math.max(...TRAINING_TOPICS.map(x => x.completed + x.in_progress + x.expired));
+              const scale = (total / max) * 100;
+              return (
+                <div key={t.topic} className="grid grid-cols-[140px_1fr_60px] items-center gap-3 text-[11px]">
+                  <div className="text-[var(--fg)] font-semibold truncate">{t.topic}</div>
+                  <div className="flex h-4 rounded overflow-hidden bg-[var(--surface-2)]" style={{ width: `${scale}%`, minWidth: 20 }}>
+                    <div style={{ flex: t.completed,   background: "var(--success)" }} />
+                    <div style={{ flex: t.in_progress, background: "var(--accent)"  }} />
+                    <div style={{ flex: t.expired,     background: "var(--danger)"  }} />
+                  </div>
+                  <div className="text-[10px] text-[var(--fg-muted)] tabular-nums text-right">{t.completed + t.in_progress + t.expired}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-3 text-[10px] text-[var(--fg-muted)] mt-3">
+            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--success)" }} />Completed</span>
+            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--accent)"  }} />In progress</span>
+            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "var(--danger)"  }} />Expired</span>
           </div>
         </div>
       </div>
     </AppShell>
-  );
-}
-
-/* ============================================================
-   DASHBOARD CARDS — refreshed for both modes
-   ============================================================ */
-
-type Status = "ok" | "info" | "warn" | "alert";
-
-function StatCard({ label, value, delta, status = "info" }: { label: string; value: number | string; delta?: string; status?: Status }) {
-  // Status drives a small color accent on the value + a left rail
-  const railColor =
-    status === "ok"    ? "var(--success)" :
-    status === "warn"  ? "var(--warning)" :
-    status === "alert" ? "var(--danger)"  :
-                          "var(--accent)";
-  return (
-    <div className="x3-card x3-card-hover relative p-5 overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: railColor }} />
-      <div className="text-[10px] tracking-[.16em] uppercase font-bold text-[var(--fg-muted)] mb-2">{label}</div>
-      <div className="text-3xl font-extrabold tabular-nums text-[var(--fg)]">{value}</div>
-      {delta && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{delta}</div>}
-    </div>
-  );
-}
-
-function QuickAction({ href, icon, title, desc }: { href: string; icon: string; title: string; desc: string }) {
-  return (
-    <Link href={href} className="x3-card x3-card-hover block p-5 group">
-      <div className="text-2xl mb-2">{icon}</div>
-      <div className="text-[var(--fg)] font-bold text-[14px] mb-1 group-hover:text-[var(--accent)] transition-colors">{title}</div>
-      <div className="text-[var(--fg-muted)] text-[12px]">{desc}</div>
-    </Link>
-  );
-}
-
-function HealthRow({ label, count, okLabel, warnLevel = 0 }: { label: string; count: number; okLabel: string; warnLevel?: number }) {
-  const status: Status = count === 0 ? "ok" : count <= warnLevel ? "warn" : "alert";
-  const color = status === "ok" ? "var(--success)" : status === "warn" ? "var(--warning)" : "var(--danger)";
-  return (
-    <li className="flex items-center justify-between text-[13px]">
-      <span className="text-[var(--fg-muted)]">{label}</span>
-      <span className="font-extrabold tabular-nums" style={{ color }}>{count === 0 ? `✓ ${okLabel}` : count}</span>
-    </li>
   );
 }
