@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import AdminGuard from "@/components/AdminGuard";
+import { useIsSuperAdmin } from "@/lib/superAdmin";
 import { useFinance } from "@/lib/useFinance";
 
 const TIER_LABEL: Record<string, string> = { diy: "DIY $25/driver", dfy: "DFY $50/driver", enterprise: "Enterprise" };
@@ -26,6 +26,7 @@ function lastTwelveMonths(): string[] {
 }
 
 export default function FinancePage() {
+  const isSuperAdmin = useIsSuperAdmin();
   const months = lastTwelveMonths();
   const [month, setMonth] = useState(months[0]);
   const [tab, setTab] = useState<"clients" | "ledger" | "owed" | "add">("clients");
@@ -52,8 +53,17 @@ export default function FinancePage() {
     return arr;
   }, [clientRows]);
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-2xl font-bold mb-2">Restricted</h1>
+        <p className="text-[var(--fg-muted)]">This page is for X3 super-admins only.</p>
+        <Link href="/app" className="text-[var(--accent)] hover:underline mt-4 inline-block">← Back to dashboard</Link>
+      </div>
+    );
+  }
   return (
-    <AdminGuard>
+    <>
       <div className="p-6 lg:p-10 max-w-[1400px] mx-auto">
         <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
           <div>
@@ -226,7 +236,7 @@ export default function FinancePage() {
         ) : null}
         <style jsx>{`.input { width: 100%; padding: 8px 10px; background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--fg); }`}</style>
       </div>
-    </AdminGuard>
+    </>
   );
 }
 
