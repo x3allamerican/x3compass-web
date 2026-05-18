@@ -87,7 +87,7 @@ export function useFinance(month: string) {
       // Run ledger fetch + by-client in parallel
       const [r1, r2] = await Promise.all([
         fetch(`/api/admin/finance?month=${month}${sync}`,           { headers: auth, cache: "no-store" }),
-        fetch(`/api/admin/finance/byclient?month=${month}`,        { headers: auth, cache: "no-store" }),
+        fetch(`/api/admin/finance?view=by-client&month=${month}`,        { headers: auth, cache: "no-store" }),
       ]);
       if (!r1.ok) throw new Error(`Finance GET HTTP ${r1.status}: ${await r1.text()}`);
       if (!r2.ok) throw new Error(`By-client GET HTTP ${r2.status}: ${await r2.text()}`);
