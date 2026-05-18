@@ -108,11 +108,11 @@ function statusFor(req: Requirement, driver: DriverLike, docs: Doc[]): { status:
 }
 
 const STATUS_COLOR: Record<Status, { bg: string; border: string; text: string; pill: string; symbol: string }> = {
-  valid:    { bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-300", pill: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40", symbol: "✓" },
-  expiring: { bg: "bg-amber-500/10",   border: "border-amber-500/40",   text: "text-amber-300",   pill: "bg-amber-500/20 text-amber-300 border-amber-500/40",     symbol: "⚠" },
-  expired:  { bg: "bg-rose-500/10",    border: "border-rose-500/40",    text: "text-rose-300",    pill: "bg-rose-500/20 text-rose-300 border-rose-500/40",         symbol: "✗" },
-  missing:  { bg: "bg-rose-500/10",    border: "border-rose-500/40",    text: "text-rose-300",    pill: "bg-rose-500/20 text-rose-300 border-rose-500/40",         symbol: "○" },
-  na:       { bg: "bg-[var(--surface-3)]", border: "border-[var(--border)]", text: "text-[var(--fg-muted)]", pill: "bg-[var(--surface-3)] text-[var(--fg-muted)] border-[var(--border)]", symbol: "–" },
+  valid:    { bg: "bg-emerald-500/20", border: "border-emerald-500/60", text: "text-emerald-100", pill: "bg-emerald-500/30 text-emerald-100 border-emerald-400/70", symbol: "✓" },
+  expiring: { bg: "bg-amber-500/20",   border: "border-amber-500/60",   text: "text-amber-100",   pill: "bg-amber-500/30 text-amber-100 border-amber-400/70",     symbol: "⚠" },
+  expired:  { bg: "bg-rose-500/20",    border: "border-rose-500/60",    text: "text-rose-100",    pill: "bg-rose-500/30 text-rose-100 border-rose-400/70",         symbol: "✗" },
+  missing:  { bg: "bg-rose-500/20",    border: "border-rose-500/60",    text: "text-rose-100",    pill: "bg-rose-500/30 text-rose-100 border-rose-400/70",         symbol: "○" },
+  na:       { bg: "bg-[var(--surface-3)]", border: "border-[var(--border)]", text: "text-[var(--fg)]",       pill: "bg-[var(--surface-2)] text-[var(--fg)] border-[var(--border)]", symbol: "–" },
 };
 
 export function DriverDQGrid({
@@ -146,16 +146,16 @@ export function DriverDQGrid({
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
         <div className="flex items-end justify-between gap-4 mb-3 flex-wrap">
           <div>
-            <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">Driver Qualification File · 49 CFR § 391</div>
-            <div className="text-[22px] font-extrabold text-[var(--fg)]">
+            <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-[var(--fg-muted)] mb-1">Driver Qualification File · 49 CFR § 391</div>
+            <div className="text-[26px] font-extrabold text-[var(--fg)]">
               {driver.last_name || ""}, {driver.first_name || ""}
             </div>
             {driver.hire_date && <div className="text-[11px] text-[var(--fg-faint)]">Hired {driver.hire_date}</div>}
           </div>
           <div className="text-right">
             <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">DQ Completion</div>
-            <div className="text-[36px] font-black leading-none text-[var(--fg)]">{summary.pct}%</div>
-            <div className="text-[11px] text-[var(--fg-muted)] mt-1">
+            <div className="text-[40px] font-black leading-none text-[var(--fg)]">{summary.pct}%</div>
+            <div className="text-[13px] text-[var(--fg-muted)] mt-2 font-semibold">
               <span className="text-emerald-400 font-bold">{summary.valid} valid</span>
               {summary.expiring > 0 && <> · <span className="text-amber-400 font-bold">{summary.expiring} expiring</span></>}
               {summary.expired > 0 && <> · <span className="text-rose-400 font-bold">{summary.expired} expired</span></>}
@@ -181,22 +181,22 @@ export function DriverDQGrid({
           return (
             <div
               key={req.id}
-              className={`rounded-xl border ${c.border} ${c.bg} p-4 cursor-pointer transition-transform hover:scale-[1.02]`}
+              className={`rounded-xl border-2 ${c.border} ${c.bg} p-5 cursor-pointer transition-transform hover:scale-[1.02] shadow-sm`}
               onClick={() => onUpload?.(req.doc_types[0])}
               title={req.hint}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-extrabold text-[var(--fg)] leading-tight">{req.label}</div>
-                  <div className="text-[10px] font-mono text-[var(--fg-muted)] mt-0.5">{req.cfr}</div>
+                  <div className="text-[15px] font-extrabold text-white leading-tight">{req.label}</div>
+                  <div className="text-[12px] font-mono text-[var(--fg-muted)] mt-1 font-bold">{req.cfr}</div>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${c.pill} flex-shrink-0`}>
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${c.pill} flex-shrink-0`}>
                   {c.symbol} {status === "valid" ? "OK" : status === "expiring" ? "EXP SOON" : status === "expired" ? "EXPIRED" : status === "missing" ? "MISSING" : "N/A"}
                 </span>
               </div>
-              <div className={`text-[11px] ${c.text} font-semibold mt-2`}>{detail}</div>
+              <div className={`text-[13px] ${c.text} font-bold mt-3`}>{detail}</div>
               {expiresOn && status === "expiring" && (
-                <div className="text-[10px] text-[var(--fg-muted)] mt-1">
+                <div className="text-[12px] text-white/80 mt-1 font-bold">
                   {Math.ceil((new Date(expiresOn).getTime() - Date.now()) / 86_400_000)} days remaining
                 </div>
               )}
@@ -205,7 +205,7 @@ export function DriverDQGrid({
         })}
       </div>
 
-      <div className="text-[11px] text-[var(--fg-faint)] flex flex-wrap gap-x-4">
+      <div className="text-[12px] text-[var(--fg-muted)] flex flex-wrap gap-x-5 font-semibold">
         <span><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> Valid / on file</span>
         <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span> Expiring within window</span>
         <span><span className="inline-block w-2 h-2 rounded-full bg-rose-500 mr-1"></span> Expired or missing</span>
