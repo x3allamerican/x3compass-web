@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
-import AdminGuard from "@/components/AdminGuard";
 import { useAgentState } from "@/lib/useAgentState";
 import { AgentLogsModal, AgentRunNowModal, Toast } from "@/components/AdminModals";
 
@@ -205,8 +204,7 @@ export default function FinanceTeamPage() {
 
   return (
     <AppShell>
-      <AdminGuard>
-        <div className="px-6 lg:px-10 py-6 max-w-[1400px] mx-auto">
+      <div className="px-6 lg:px-10 py-6 max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="flex items-end justify-between flex-wrap gap-3 mb-6">
             <div>
@@ -308,11 +306,10 @@ export default function FinanceTeamPage() {
           </div>
         </div>
 
-        {/* Modals */}
-        <AgentLogsModal open={!!logsFor} agentName={logsFor || ""} onClose={() => setLogsFor(null)} />
-        <AgentRunNowModal open={!!runFor} agentName={runFor || ""} onClose={() => setRunFor(null)} onConfirm={() => runFor && handleRun(runFor)} />
-        {toast ? <Toast message={toast} onDismiss={() => setToast(null)} /> : null}
-      </AdminGuard>
+      {/* Modals */}
+      <AgentLogsModal open={!!logsFor} agentName={logsFor || ""} onClose={() => setLogsFor(null)} />
+      <AgentRunNowModal open={!!runFor} agentName={runFor || ""} onClose={() => setRunFor(null)} onConfirm={() => runFor && handleRun(runFor)} />
+      {toast ? <Toast message={toast} onDismiss={() => setToast(null)} /> : null}
     </AppShell>
   );
 }
