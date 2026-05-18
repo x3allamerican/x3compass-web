@@ -219,7 +219,7 @@ export function DriverDQGrid({
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
                   <div className="text-[15px] font-extrabold text-black dark:text-white leading-tight">{req.label}</div>
-                  <div className="text-[12px] font-mono text-[var(--fg-muted)] mt-1 font-bold">{req.cfr}</div>
+                  <div className="text-[12px] font-mono text-black dark:text-white mt-1 font-bold">{req.cfr}</div>
                 </div>
                 <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${c.pill} flex-shrink-0`}>
                   {c.symbol} {status === "valid" ? "OK" : status === "expiring" ? "EXP SOON" : status === "expired" ? "EXPIRED" : status === "missing" ? "MISSING" : "N/A"}
