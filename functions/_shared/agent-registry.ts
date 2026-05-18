@@ -249,7 +249,7 @@ async function agentIftaReminder(env: Env): Promise<AgentResult> {
   log.info(`[ifta-reminder] next IFTA deadline: ${next.toISOString()} · ${daysTo} days`);
   if (![30, 14, 7, 1].includes(daysTo)) return { status: "skipped", summary: `Not a reminder day (${daysTo}d to next deadline) — fires only at 30/14/7/1 days out`, log: log.text() };
   const supa = supaFetch(env);
-  const carriers = await supa.select("compass_carriers", "select=id,name,billing_email&subscription_status=in.(active,trialing)") as Array<{ id: string; name: string; billing_email: string | null }>;
+  const carriers = await supa.select("compass_carriers", "select=id,name,primary_contact_email&subscription_status=in.(active,trialing)") as Array<{ id: string; name: string; primary_contact_email: string | null }>;
   let sent = 0;
   for (const c of carriers) {
     if (!c.primary_contact_email) continue;
