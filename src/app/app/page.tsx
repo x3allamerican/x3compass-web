@@ -39,15 +39,22 @@ function StatusDot({ kind }: { kind: "overdue" | "warn" | "info" | "ok" }) {
 
 // ---------- page ----------
 type ApiData = {
-  carrier?: { name: string; dot_number: string; mc_number: string; safety_rating: string };
+  carrier?: typeof DEMO_CARRIER;
   fleet?: typeof DEMO_FLEET;
   compliance_bars?: typeof COMPLIANCE_BARS;
   csa_basics?: typeof CSA_BASICS | null;
   action_items?: typeof ACTION_ITEMS;
+  action_items_row2?: typeof ACTION_ITEMS;
   driver_status?: typeof DRIVER_STATUS;
   cdl_buckets?: typeof CDL_BUCKETS;
   vehicle_types?: typeof VEHICLE_TYPES;
   maintenance_kpis?: typeof MAINTENANCE_KPIS;
+  inspections_bars?: typeof INSPECTIONS_BARS;
+  da_tests_by_type?: typeof DA_TESTS_BY_TYPE;
+  da_monthly?: typeof DA_MONTHLY;
+  hos_metrics?: typeof HOS_METRICS;
+  doc_expirations?: typeof DOC_EXPIRATIONS;
+  training_topics?: typeof TRAINING_TOPICS;
 };
 
 export default function DashboardPage() {
@@ -69,15 +76,21 @@ export default function DashboardPage() {
   }, [userCarrier?.id]);
 
   // Live values overlay demo data — if API returned a field, use it; else demo.
-  const CARRIER = api?.carrier ? { ...DEMO_CARRIER, name: api.carrier.name, dot_number: api.carrier.dot_number, mc_number: api.carrier.mc_number, safety_rating: api.carrier.safety_rating } : DEMO_CARRIER;
+  const CARRIER = api?.carrier ? { ...DEMO_CARRIER, ...api.carrier } : DEMO_CARRIER;
   const FLEET = api?.fleet ? { ...DEMO_FLEET, ...api.fleet } : DEMO_FLEET;
   const BARS = api?.compliance_bars && api.compliance_bars.length > 0 ? api.compliance_bars : COMPLIANCE_BARS;
   const BASICS = api?.csa_basics && api.csa_basics.length > 0 ? api.csa_basics : CSA_BASICS;
-  const ACTIONS = api?.action_items ? { ...ACTION_ITEMS, ...api.action_items } : ACTION_ITEMS;
+  const ACTIONS = { ...ACTION_ITEMS, ...(api?.action_items || {}), ...(api?.action_items_row2 || {}) };
   const DRIVERS_STATUS = api?.driver_status && api.driver_status.length > 0 ? api.driver_status : DRIVER_STATUS;
   const CDLS = api?.cdl_buckets && api.cdl_buckets.length > 0 ? api.cdl_buckets : CDL_BUCKETS;
   const VEHICLES = api?.vehicle_types && api.vehicle_types.length > 0 ? api.vehicle_types : VEHICLE_TYPES;
   const MAINT = api?.maintenance_kpis && api.maintenance_kpis.length > 0 ? api.maintenance_kpis : MAINTENANCE_KPIS;
+  const INSPECTIONS = api?.inspections_bars && api.inspections_bars.length > 0 ? api.inspections_bars : INSPECTIONS_BARS;
+  const DA_BY_TYPE = api?.da_tests_by_type && api.da_tests_by_type.length > 0 ? api.da_tests_by_type : DA_TESTS_BY_TYPE;
+  const DA_TREND = api?.da_monthly && api.da_monthly.length > 0 ? api.da_monthly : DA_MONTHLY;
+  const HOS = api?.hos_metrics ? { ...HOS_METRICS, ...api.hos_metrics } : HOS_METRICS;
+  const DOCEX = api?.doc_expirations && api.doc_expirations.length > 0 ? api.doc_expirations : DOC_EXPIRATIONS;
+  const TRAINING = api?.training_topics && api.training_topics.length > 0 ? api.training_topics : TRAINING_TOPICS;
 
   return (
     <AppShell title="Compliance Command Center" crumbs={`${CARRIER.name} · DOT #${CARRIER.dot_number}`}>
@@ -354,9 +367,9 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="grid grid-cols-5 gap-3 items-end h-[180px]">
-            {INSPECTIONS_BARS.map((m) => {
+            {INSPECTIONS.map((m) => {
               const total = m.clean + m.violations + m.oos;
-              const maxT = Math.max(...INSPECTIONS_BARS.map(x => x.clean + x.violations + x.oos));
+              const maxT = Math.max(...INSPECTIONS.map(x => x.clean + x.violations + x.oos));
               const scale = (total / maxT) * 100;
               return (
                 <div key={m.month} className="flex flex-col items-center gap-1.5">
@@ -380,9 +393,9 @@ export default function DashboardPage() {
               <div className="text-[10px] text-[var(--fg-muted)]">Stacked by result</div>
             </div>
             <div className="grid grid-cols-4 gap-3 items-end h-[180px]">
-              {DA_TESTS_BY_TYPE.map((t) => {
+              {DA_BY_TYPE.map((t) => {
                 const total = t.negative + t.dilute + t.canceled + t.positive + t.refusal;
-                const maxT = Math.max(...DA_TESTS_BY_TYPE.map(x => x.negative + x.dilute + x.canceled + x.positive + x.refusal));
+                const maxT = Math.max(...DA_BY_TYPE.map(x => x.negative + x.dilute + x.canceled + x.positive + x.refusal));
                 const h = (total / maxT) * 100;
                 return (
                   <div key={t.type} className="flex flex-col items-center gap-1.5">
@@ -403,17 +416,17 @@ export default function DashboardPage() {
             <div className="text-[15px] font-extrabold text-[var(--fg)] mb-3">Monthly testing trend</div>
             <svg viewBox="0 0 600 180" className="w-full h-[180px]" preserveAspectRatio="none">
               {(() => {
-                const max = Math.max(...DA_MONTHLY.map(d => d.total));
+                const max = Math.max(...DA_TREND.map(d => d.total));
                 const w = 600, h = 180, padL = 40, padR = 20, padT = 10, padB = 30;
-                const stepX = (w - padL - padR) / (DA_MONTHLY.length - 1);
+                const stepX = (w - padL - padR) / (DA_TREND.length - 1);
                 const y = (v: number) => padT + (h - padT - padB) * (1 - v / max);
-                const total = DA_MONTHLY.map((d, i) => `${padL + i*stepX},${y(d.total)}`).join(" ");
-                const pos = DA_MONTHLY.map((d, i) => `${padL + i*stepX},${y(d.positives)}`).join(" ");
+                const total = DA_TREND.map((d, i) => `${padL + i*stepX},${y(d.total)}`).join(" ");
+                const pos = DA_TREND.map((d, i) => `${padL + i*stepX},${y(d.positives)}`).join(" ");
                 return (
                   <>
                     <polyline fill="none" stroke="var(--accent)" strokeWidth="2.5" points={total} />
                     <polyline fill="none" stroke="var(--danger)" strokeWidth="2" points={pos} />
-                    {DA_MONTHLY.map((d, i) => (
+                    {DA_TREND.map((d, i) => (
                       <g key={i}>
                         <circle cx={padL + i*stepX} cy={y(d.total)}     r="3" fill="var(--accent)" />
                         <circle cx={padL + i*stepX} cy={y(d.positives)} r="2.5" fill="var(--danger)" />
@@ -438,22 +451,22 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-[var(--border)] p-4 bg-[rgba(4,120,87,.06)]">
                 <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Total Logs</div>
-                <div className="text-[28px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.total_logs_30d}</div>
+                <div className="text-[28px] font-black leading-none text-[var(--fg)] mt-1">{HOS.total_logs_30d}</div>
                 <div className="text-[10px] text-[var(--fg-muted)] mt-1">last 30 days</div>
               </div>
               <div className="rounded-lg border border-[var(--border)] p-4 bg-[rgba(4,120,87,.06)]">
                 <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Violations</div>
-                <div className="text-[28px] font-black leading-none text-[var(--success)] mt-1">{HOS_METRICS.violations_30d}</div>
+                <div className="text-[28px] font-black leading-none text-[var(--success)] mt-1">{HOS.violations_30d}</div>
                 <div className="text-[10px] text-[var(--fg-muted)] mt-1">11hr or 14hr</div>
               </div>
               <div className="rounded-lg border border-[var(--border)] p-4">
                 <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Avg Drive</div>
-                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.avg_drive}</div>
+                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS.avg_drive}</div>
                 <div className="text-[10px] text-[var(--fg-muted)] mt-1">per log</div>
               </div>
               <div className="rounded-lg border border-[var(--border)] p-4">
                 <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)]">Total Miles</div>
-                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS_METRICS.total_miles_30d.toLocaleString()}</div>
+                <div className="text-[24px] font-black leading-none text-[var(--fg)] mt-1">{HOS.total_miles_30d.toLocaleString()}</div>
                 <div className="text-[10px] text-[var(--fg-muted)] mt-1">distance driven</div>
               </div>
             </div>
@@ -464,9 +477,9 @@ export default function DashboardPage() {
               <div className="text-[10px] text-[var(--fg-muted)]">Next 90 days</div>
             </div>
             <div className="space-y-2.5">
-              {DOC_EXPIRATIONS.map((row) => {
+              {DOCEX.map((row) => {
                 const total = row["0_30"] + row["31_60"] + row["61_90"];
-                const max = Math.max(...DOC_EXPIRATIONS.map(r => r["0_30"] + r["31_60"] + r["61_90"]));
+                const max = Math.max(...DOCEX.map(r => r["0_30"] + r["31_60"] + r["61_90"]));
                 const scale = (total / max) * 100;
                 return (
                   <div key={row.kind}>
@@ -495,9 +508,9 @@ export default function DashboardPage() {
             <div className="text-[10px] text-[var(--fg-muted)]">Stacked · completed / in progress / expired</div>
           </div>
           <div className="space-y-2">
-            {TRAINING_TOPICS.map((t) => {
+            {TRAINING.map((t) => {
               const total = t.completed + t.in_progress + t.expired;
-              const max = Math.max(...TRAINING_TOPICS.map(x => x.completed + x.in_progress + x.expired));
+              const max = Math.max(...TRAINING.map(x => x.completed + x.in_progress + x.expired));
               const scale = (total / max) * 100;
               return (
                 <div key={t.topic} className="grid grid-cols-[140px_1fr_60px] items-center gap-3 text-[11px]">

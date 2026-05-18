@@ -78,12 +78,20 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       carrierId = (cRows[0] as { id: string }).id;
     }
 
-    const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa] = await Promise.all([
+    const sinceISO = new Date(Date.now() - 180 * 86_400_000).toISOString().slice(0,10);
+    const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0,10);
+    const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa, saferRows, inspections, accidents, daTests, hosLogs, training] = await Promise.all([
       pgSelect(SUPABASE_URL, SR, "compass_carriers", `select=name,usdot_number,mc_number&id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status,hire_date&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,vehicle_type,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,driver_id,doc_type,expires_on&carrier_id=eq.${carrierId}&order=expires_on.asc.nullslast&limit=500`),
       pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
+      pgSelect(SUPABASE_URL, SR, "compass_carrier_safer", `select=*&carrier_id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_inspections", `select=*&carrier_id=eq.${carrierId}&inspection_date=gte.${sinceISO}&order=inspection_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_accidents", `select=*&carrier_id=eq.${carrierId}&order=accident_date.desc&limit=100`),
+      pgSelect(SUPABASE_URL, SR, "compass_da_tests", `select=*&carrier_id=eq.${carrierId}&collected_on=gte.${sinceISO}&order=collected_on.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_hos_logs", `select=*&carrier_id=eq.${carrierId}&log_date=gte.${since30}&order=log_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_training_records", `select=*&carrier_id=eq.${carrierId}&order=completed_on.desc&limit=500`),
     ]);
 
     type CarrierRow = { name?: string; usdot_number?: string; mc_number?: string; safety_rating?: string };
@@ -302,6 +310,179 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       { label: "PM ≤30D",            value: inspection30d,     sub: "next 30 days", tone: "ok" },
     ];
 
+    // ── FMCSA SAFER carrier profile
+    type SaferRow = {
+      safety_rating?: string; rating_date?: string; rating_type?: string; operating_authority?: string;
+      annual_miles?: number; reported_power_units?: number; reported_drivers?: number;
+      last_mcs150_filed?: string;
+      bipd_insurance_amount_cents?: number; bipd_required_amount_cents?: number; cargo_insurance_amount_cents?: number;
+      crashes_24mo_total?: number; crashes_24mo_fatal?: number; crashes_24mo_injury?: number;
+      driver_oos_rate_pct?: number; driver_oos_national_pct?: number;
+      vehicle_oos_rate_pct?: number; vehicle_oos_national_pct?: number;
+      last_synced_at?: string;
+    };
+    const safer = (saferRows.rows[0] as SaferRow | undefined) || {};
+    const fmtMoney = (cents?: number) => cents == null ? "—" : cents >= 100_000_000 ? `$${(cents/100_000_000).toFixed(0)}M` : cents >= 100_000 ? `$${(cents/100_000).toFixed(0)}K` : `$${(cents/100).toFixed(0)}`;
+
+    // ── INSPECTIONS — last 6 months stacked bar (clean/violations/oos)
+    type InspRow = { inspection_date?: string; oos_driver?: boolean; oos_vehicle?: boolean; violation_count?: number };
+    const inspRows = inspections.rows as InspRow[];
+    const monthLabels: string[] = [];
+    const monthKeys: string[] = [];
+    {
+      const d = new Date(); d.setDate(1);
+      for (let i = 5; i >= 0; i--) {
+        const dt = new Date(d); dt.setMonth(dt.getMonth() - i);
+        monthKeys.push(dt.toISOString().slice(0, 7));
+        monthLabels.push(dt.toLocaleString("en-US", { month: "short", year: "2-digit" }).replace(" ", " "));
+      }
+    }
+    const inspBars = monthLabels.map((label, i) => {
+      const k = monthKeys[i];
+      const rows = inspRows.filter(r => r.inspection_date && r.inspection_date.startsWith(k));
+      const oos = rows.filter(r => r.oos_driver || r.oos_vehicle).length;
+      const viol = rows.filter(r => (r.violation_count || 0) > 0 && !(r.oos_driver || r.oos_vehicle)).length;
+      const clean = rows.length - oos - viol;
+      return { label, clean, violations: viol, oos };
+    });
+
+    // ── ACCIDENTS — unclassified ones feed "Incidents Awaiting Review" action card
+    type AccRow = { id: string; accident_date?: string; preventable?: string | null; driver_id?: string; description?: string; cause_category?: string };
+    const accRows = accidents.rows as AccRow[];
+    const unclassifiedAccidents = accRows.filter(a => !a.preventable || a.preventable === "undetermined");
+
+    // ── D&A — tests-by-type stacked + monthly trend
+    type DaRow = { test_type?: string; result?: string; collected_on?: string };
+    const daRows = daTests.rows as DaRow[];
+    const daResultMap: Record<string, "negative"|"dilute"|"canceled"|"positive"|"refusal"> = { negative: "negative", dilute_negative: "dilute", cancelled: "canceled", positive: "positive", refusal: "refusal" };
+    const daResults = ["negative","dilute_negative","cancelled","positive","refusal"] as const;
+    const daTypes = ["pre_employment","random","post_accident","reasonable_suspicion"] as const;
+    const daTestsByType = daTypes.map(t => {
+      const rs = daRows.filter(r => r.test_type === t);
+      const out: Record<string, number> = { type: 0 as unknown as number };
+      const counts: Record<string, number> = {};
+      counts.negative = rs.filter(x => x.result === "negative").length;
+      counts.dilute = rs.filter(x => x.result === "dilute_negative").length;
+      counts.canceled = rs.filter(x => x.result === "cancelled").length;
+      counts.positive = rs.filter(x => x.result === "positive").length;
+      counts.refusal = rs.filter(x => x.result === "refusal").length;
+      return { type: t.replace(/_/g, " "), ...counts };
+    });
+    const daMonthly = monthLabels.map((label, i) => {
+      const k = monthKeys[i];
+      const rs = daRows.filter(r => r.collected_on && r.collected_on.startsWith(k));
+      return { label, total: rs.length, positives: rs.filter(r => r.result === "positive" || r.result === "refusal").length };
+    });
+
+    // ── HOS — last 30 days roll-up
+    type HosRow = { total_drive_minutes?: number; violations?: unknown[] };
+    const hosRows = hosLogs.rows as HosRow[];
+    const totalLogs = hosRows.length;
+    const totalDriveMins = hosRows.reduce((s, r) => s + (r.total_drive_minutes || 0), 0);
+    const avgDriveMins = totalLogs > 0 ? Math.round(totalDriveMins / totalLogs) : 0;
+    const hosViolations = hosRows.filter(r => Array.isArray(r.violations) && r.violations.length > 0).length;
+    const formatHM = (mins: number) => {
+      const h = Math.floor(mins / 60), m = mins % 60;
+      return `${h}h ${m.toString().padStart(2, '0')}m`;
+    };
+    const hosMetrics = {
+      total_logs_30d: totalLogs,
+      violations_30d: hosViolations,
+      avg_drive: formatHM(avgDriveMins),
+      total_miles_30d: Math.round(totalDriveMins * 0.85),
+    };
+
+    // ── Document expiration stacked bar (CDL / MEC / Training across 0-30, 31-60, 61-90)
+    function bucketDocs(docFilter: (d: DocRow | DrvRow) => string | null | undefined, rows: Array<DocRow | DrvRow>) {
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (const r of rows) {
+        const exp = docFilter(r);
+        if (!exp) continue;
+        const t = new Date(exp).getTime();
+        if (t < now) continue;
+        if (t <= inDays(30)) b0++;
+        else if (t <= inDays(60)) b1++;
+        else if (t <= inDays(90)) b2++;
+      }
+      return { "0_30": b0, "31_60": b1, "61_90": b2 };
+    }
+    type TrainRow = { expires_on?: string; course_name?: string; course_category?: string; driver_id?: string };
+    const trainRows = training.rows as TrainRow[];
+    const docExpirations = [
+      { name: "CDL",      ...bucketDocs(d => (d as DrvRow).cdl_expires_on, drvRows) },
+      { name: "MEC",      ...bucketDocs(d => (d as DrvRow).medical_card_expires_on, drvRows) },
+      { name: "Training", ...bucketDocs(d => (d as TrainRow).expires_on, trainRows) },
+    ];
+
+    // ── Training topics stacked bar (completed/in-progress/expired)
+    const trainingTopicNames = ["Supervisor D&A","Pre-Trip Inspection","Defensive Driving","ELDT BTW","Distracted Driving","Cargo Securement","HOS Refresher","ELDT Theory","Winter Driving","Hazmat"];
+    const trainingTopics = trainingTopicNames.map(name => {
+      const rows = trainRows.filter(r => r.course_name === name);
+      const completed = rows.filter(r => !r.expires_on || r.expires_on >= today).length;
+      const expired = rows.filter(r => r.expires_on && r.expires_on < today).length;
+      const inProgress = Math.max(0, drvRows.length - rows.length);  // drivers without record yet
+      return { name, completed, in_progress: inProgress, expired };
+    });
+
+    // ── Action items rows 2 — incidents awaiting · ELDT incomplete · training expiring · clearinghouse owed
+    const driverIdByName = (driverId: string) => drvRows.find(d => d.id === driverId);
+    const incidentsAwaiting = {
+      title: "Incidents Awaiting Review",
+      cfr: "Preventability classification",
+      items: unclassifiedAccidents.slice(0, 5).map(a => {
+        const drv = driverIdByName(a.driver_id || "");
+        const drvName = drv ? `${drv.first_name || ""} ${drv.last_name || ""}`.trim() : "Driver";
+        return {
+          who: a.accident_date ? `${new Date(a.accident_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · ${(a.cause_category || "incident").replace(/_/g," ")}` : "incident",
+          meta: `${drvName} · ${a.description || ""}`,
+          status: "CLASSIFY",
+          statusKind: "warn" as const,
+        };
+      }),
+      cta: { href: "/app/accidents", label: "Open register →" },
+    };
+
+    const driversMissingEldt = drvRows.filter(d => !trainRows.some(t => t.driver_id === d.id && (t.course_name === "ELDT BTW" || t.course_name === "ELDT Theory")));
+    const eldtIncomplete = {
+      title: "ELDT Incomplete",
+      cfr: "49 CFR § 380",
+      items: driversMissingEldt.slice(0, 5).map(d => ({
+        who: `${d.first_name || ""} ${d.last_name || ""}`.trim() || "Driver",
+        meta: "Missing: theory + BTW",
+        status: "LOG ELDT",
+        statusKind: "warn" as const,
+      })),
+      cta: { href: "/app/training", label: "Open training log →" },
+    };
+
+    const expiredTraining = trainRows.filter(t => t.expires_on && t.expires_on < today).slice(0, 5);
+    const trainingExpiring = {
+      title: "Training Expiring / Expired",
+      cfr: "49 CFR Part 380",
+      items: expiredTraining.map(t => {
+        const drv = driverIdByName(t.driver_id || "");
+        const drvName = drv ? `${drv.first_name || ""} ${drv.last_name || ""}`.trim() : "Driver";
+        const days = Math.floor((Date.now() - new Date(t.expires_on || today).getTime()) / 86_400_000);
+        return { who: t.course_name || "Course", meta: `${drvName} · ${t.expires_on ? new Date(t.expires_on).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}`, status: `${days}d OVERDUE`, statusKind: "overdue" as const };
+      }),
+      cta: { href: "/app/training", label: "Open training log →" },
+    };
+
+    const positiveDaTests = daRows.filter(r => r.result === "positive" || r.result === "refusal").slice(0, 5);
+    const clearinghouseOwed = {
+      title: "Clearinghouse Reporting Owed",
+      cfr: "49 CFR § 382.705 · 3 business days",
+      items: positiveDaTests.map(r => {
+        return {
+          who: r.test_type ? `positive · ${r.test_type.replace(/_/g," ")}` : "positive",
+          meta: r.collected_on ? new Date(r.collected_on).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "",
+          status: "REPORT",
+          statusKind: "warn" as const,
+        };
+      }),
+      cta: { href: "/app/drug-alcohol", label: "Mark reported →" },
+    };
+
     return json({
       ok: true,
       demo: false,
@@ -311,7 +492,24 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           name: carrierName,
           dot_number: dot,
           mc_number: carrier.mc_number || "—",
-          safety_rating: carrier.safety_rating || "Unrated",
+          safety_rating: safer.safety_rating || "Unrated",
+          rating_date: safer.rating_date || null,
+          rating_type: safer.rating_type || null,
+          operating_authority: safer.operating_authority || null,
+          annual_miles: safer.annual_miles || 0,
+          reported_power_units: safer.reported_power_units || 0,
+          reported_drivers: safer.reported_drivers || 0,
+          last_mcs150_filed: safer.last_mcs150_filed || null,
+          bipd_insurance: `${fmtMoney(safer.bipd_insurance_amount_cents)} on file / ${fmtMoney(safer.bipd_required_amount_cents)} req`,
+          cargo_insurance: fmtMoney(safer.cargo_insurance_amount_cents),
+          crashes_24mo_total: safer.crashes_24mo_total || 0,
+          crashes_24mo_fatal: safer.crashes_24mo_fatal || 0,
+          crashes_24mo_injury: safer.crashes_24mo_injury || 0,
+          driver_oos_rate_pct: safer.driver_oos_rate_pct ?? 0,
+          driver_oos_national_pct: safer.driver_oos_national_pct ?? 6.47,
+          vehicle_oos_rate_pct: safer.vehicle_oos_rate_pct ?? 0,
+          vehicle_oos_national_pct: safer.vehicle_oos_national_pct ?? 22.28,
+          last_synced_at: safer.last_synced_at || null,
         },
         fleet: {
           active_drivers: activeDrivers,
@@ -328,6 +526,16 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           dq_docs_present: dqValid,
           dq_docs_total: dqTarget,
           compliance_pct: overallCompliancePct,
+          // SAFER-derived (mirrored onto fleet for page JSX)
+          bipd_insurance: `${fmtMoney(safer.bipd_insurance_amount_cents)} on file / ${fmtMoney(safer.bipd_required_amount_cents)} req`,
+          cargo_insurance: fmtMoney(safer.cargo_insurance_amount_cents),
+          crashes_24mo_total: safer.crashes_24mo_total || 0,
+          crashes_24mo_fatal: safer.crashes_24mo_fatal || 0,
+          crashes_24mo_injury: safer.crashes_24mo_injury || 0,
+          driver_oos_rate_pct: safer.driver_oos_rate_pct ?? 0,
+          driver_oos_national_pct: safer.driver_oos_national_pct ?? 6.47,
+          vehicle_oos_rate_pct: safer.vehicle_oos_rate_pct ?? 0,
+          vehicle_oos_national_pct: safer.vehicle_oos_national_pct ?? 22.28,
         },
         compliance_bars: complianceBars,
         csa_basics: csaBasics, // null when no snapshot exists → client falls back to demo
@@ -336,6 +544,13 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         cdl_buckets: cdlBuckets,
         vehicle_types: vehicleTypes,
         maintenance_kpis: maintenanceKpis,
+        inspections_bars: inspBars,
+        da_tests_by_type: daTestsByType,
+        da_monthly: daMonthly,
+        hos_metrics: hosMetrics,
+        doc_expirations: docExpirations,
+        training_topics: trainingTopics,
+        action_items_row2: { incidents_awaiting: incidentsAwaiting, eldt_incomplete: eldtIncomplete, training_expiring: trainingExpiring, clearinghouse_owed: clearinghouseOwed },
       },
     });
   } catch (err) {
