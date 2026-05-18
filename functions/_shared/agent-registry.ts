@@ -392,16 +392,26 @@ async function agentFmcsaScraper(env: Env, inputs?: { dot_numbers?: string[] }):
       const r = await fetch(`https://safer.fmcsa.dot.gov/query.asp?searchtype=ANY&query_type=queryCarrierSnapshot&query_param=USDOT&query_string=${dot}`, { headers: { Accept: "text/html", "User-Agent": "X3CompassAgent/1.0" } });
       if (!r.ok) { errors++; log.warn(`[fmcsa-scraper] DOT ${dot}: HTTP ${r.status}`); continue; }
       const html = await r.text();
-      // Lightweight regex extract — SAFER HTML is consistent
-      const get = (label: string) => { const m = html.match(new RegExp(label + "[^<]*<[^>]*>\\s*([^<]+)<", "i")); return m ? m[1].trim() : ""; };
-      // SAFER HTML uses uppercase tags and label-anchor wrappers. Extract by anchor name.
-      const grab = (anchor: string) => (html.match(new RegExp(`#${anchor}["\']?[^>]*>[^<]*<\\/A>[^<]*<\\/TH>\\s*<TD[^>]*>([\\s\\S]*?)<\\/TD>`, "i"))?.[1] || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+      // SAFER HTML uses uppercase TH tags with anchor-wrapped labels like
+      //   <TH...><A class="querylabel" href="saferhelp.aspx#Carrier">Legal Name:</A></TH>
+      //   <TD class="queryfield"...>XPO LOGISTICS FREIGHT INC&nbsp;</TD>
+      // Walk by indexOf — much more robust than regex through string-escaping layers.
+      const grab = (anchor: string): string => {
+        const a = html.indexOf("saferhelp.aspx#" + anchor);
+        if (a < 0) return "";
+        const tdStart = html.indexOf("<TD", a);
+        if (tdStart < 0) return "";
+        const gt    = html.indexOf(">", tdStart);
+        const tdEnd = html.indexOf("</TD>", gt);
+        if (tdEnd < 0) return "";
+        return html.substring(gt + 1, tdEnd).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+      };
       const legalName  = grab("Carrier");
       const physAddr   = grab("PhysicalAddress");
       const state      = (physAddr.match(/,\s*([A-Z]{2})\s+\d{5}/)?.[1] || "").trim();
       const powerUnits = parseInt(grab("PowerUnits").replace(/[^\d]/g, ""), 10) || null;
       const drivers    = parseInt(grab("Drivers").replace(/[^\d]/g, ""), 10) || null;
-      const safety     = grab("SafetyRating") || (html.match(/Carrier Safety Rating:[^<]*<\/A>\s*<br>\s*<b>\s*<font[^>]*>([^<]+)</i)?.[1] || "").replace(/&nbsp;/g, " ").trim();
+      const safety     = grab("SafetyRating") || "";
       if (!legalName) { errors++; log.warn(`[fmcsa-scraper] DOT ${dot}: SAFER HTML did not parse — likely an invalid DOT or layout change`); continue; }
       await supa.insert("compass_fmcsa_snapshots", { dot_number: dot, legal_name: legalName, safety_rating: safety, power_units: powerUnits, drivers: drivers, state, raw: { source: "safer_html_scrape", parsed_at: new Date().toISOString() } });
       ingested++;
