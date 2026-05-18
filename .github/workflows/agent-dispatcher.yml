@@ -1,0 +1,48 @@
+# X3 Admin Control Center — Agent Cron Dispatcher
+#
+# Runs every 5 minutes. POSTs to /api/admin/dispatch which selects every
+# scheduled+enabled agent whose next_run_at has passed and fires each one.
+# Per-agent timing lives in compass_agents.cron_expr — see the
+# 20260517_compass_admin_agents.sql migration.
+#
+# Required repo secret: X3_INTERNAL_SECRET — shared with Cloudflare Pages env
+# of the same name. This is what gates the dispatcher (no super-admin user
+# auth, just the shared secret).
+
+name: Agent Dispatcher
+
+on:
+  schedule:
+    # Every 5 minutes. Note: GitHub Actions cron is not exact — drift up to a
+    # few minutes is expected. That's why agents run on their own schedule
+    # within compass_agents.cron_expr, not "exactly when this workflow fires".
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fire due agents
+        env:
+          X3_INTERNAL_SECRET: ${{ secrets.X3_INTERNAL_SECRET }}
+          DISPATCH_URL:       https://x3compass.com/api/admin/dispatch
+        run: |
+          set -euo pipefail
+          if [ -z "${X3_INTERNAL_SECRET:-}" ]; then
+            echo "::error::X3_INTERNAL_SECRET secret missing. Set it in repo secrets."
+            exit 1
+          fi
+          response=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST "$DISPATCH_URL" \
+            -H "X-X3-Internal-Secret: $X3_INTERNAL_SECRET" \
+            -H "Content-Type: application/json")
+          status=$(echo "$response" | tail -n1 | sed 's/HTTP_STATUS://')
+          body=$(echo "$response" | sed '$d')
+          echo "Status: $status"
+          echo "Body: $body"
+          if [ "$status" != "200" ]; then
+            echo "::error::Dispatcher returned non-200"
+            exit 1
+          fi
+          echo "::notice::Dispatcher ran successfully"

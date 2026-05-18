@@ -63,16 +63,53 @@ function fakeLogsForAgent(name: string): LogRow[] {
 }
 
 export function AgentLogsModal({ open, onClose, agentName }: { open: boolean; onClose: () => void; agentName: string }) {
-  const logs = agentName ? fakeLogsForAgent(agentName) : [];
+  const [realRuns, setRealRuns] = useState<Array<{ when: string; status: string; duration: string; summary: string; log?: string }> | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open || !agentName) { setRealRuns(null); return; }
+    setLoading(true);
+    (async () => {
+      try {
+        const { getSupabase } = await import("@/lib/supabase");
+        let auth: HeadersInit = {};
+        try { const tok = (await getSupabase().auth.getSession()).data.session?.access_token; if (tok) auth = { Authorization: `Bearer ${tok}` }; } catch {}
+        const r = await fetch(`/api/admin/agents/${encodeURIComponent(agentName)}/logs?limit=50`, { headers: auth });
+        if (r.ok) {
+          const j = await r.json() as { runs: Array<{ started_at: string; duration_ms: number | null; status: string; summary: string | null; log: string | null }> };
+          setRealRuns(j.runs.map((x) => ({ when: new Date(x.started_at).toLocaleString("en-US"), status: x.status, duration: ((x.duration_ms || 0) / 1000).toFixed(1) + "s", summary: x.summary || "(no summary)", log: x.log || undefined })));
+        } else { setRealRuns([]); }
+      } catch { setRealRuns([]); }
+      setLoading(false);
+    })();
+  }, [open, agentName]);
+
+  const fallback = agentName ? fakeLogsForAgent(agentName) : [];
+  const hasReal = realRuns && realRuns.length > 0;
   return (
     <Modal open={open} onClose={onClose} title={`Logs · ${agentName}`} width={900}
       footer={<><button onClick={onClose} className="px-3 py-1.5 rounded-lg font-bold text-[13px] text-[var(--fg)] border border-[var(--border)]">Close</button><a href="#" className="px-3 py-1.5 rounded-lg font-extrabold text-[13px] text-[var(--accent-fg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Download .log</a></>}
     >
       <div className="p-5 space-y-3">
-        <div className="text-[12px] text-[var(--fg-muted)]">Last 15 lines · most recent at top · click <strong className="text-[var(--fg)]">Download .log</strong> for the full 50-run history.</div>
-        <div className="rounded-lg border border-[var(--border)] overflow-hidden bg-[#0F1C32]">
-          <pre className="text-[11px] font-mono leading-relaxed p-4 overflow-x-auto max-h-[420px] overflow-y-auto" style={{ color: "#E2E8F0" }}>{logs.map((l, i) => (<div key={i} className="flex gap-3"><span className="text-[#94A3B8] whitespace-nowrap">{l.ts}</span><span className={l.level === "error" ? "text-[#F87171]" : l.level === "warn" ? "text-[#FBBF24]" : "text-[#86EFAC]"}>{l.level.toUpperCase().padEnd(5)}</span><span className="text-[#E2E8F0]">{l.line}</span></div>))}</pre>
-        </div>
+        <div className="text-[12px] text-[var(--fg-muted)] flex items-center gap-2">{loading ? <>⏳ Loading runs from <code className="font-mono">compass_agent_runs</code> …</> : hasReal ? <><span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-[var(--success)]/15 text-[var(--success)]">LIVE</span> Last 50 runs from the database. Click any row to expand the captured log.</> : <><span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-[#FACC15]/15 text-[#B45309]">SIMULATED</span> No real runs in the DB yet — showing example output. Once the agent has fired, the real logs land here.</>}</div>
+        {hasReal ? (
+          <div className="rounded-lg border border-[var(--border)] overflow-hidden">
+            <table className="w-full text-[12px]">
+              <thead className="bg-[var(--surface-2)] text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)]"><tr><th className="text-left px-3 py-2 font-bold">Started</th><th className="text-left px-3 py-2 font-bold">Status</th><th className="text-right px-3 py-2 font-bold">Duration</th><th className="text-left px-3 py-2 font-bold">Summary</th></tr></thead>
+              <tbody>{realRuns!.map((r, i) => (
+                <tr key={i} className="border-t border-[var(--border)] align-top">
+                  <td className="px-3 py-2 whitespace-nowrap text-[var(--fg-muted)] tabular-nums">{r.when}</td>
+                  <td className="px-3 py-2"><span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${r.status === "ok" ? "bg-[var(--success)] text-white" : r.status === "error" ? "bg-[var(--danger)] text-white" : r.status === "partial" ? "bg-[var(--warning)] text-white" : "bg-[#94A3B8] text-white"}`}>{r.status.toUpperCase()}</span></td>
+                  <td className="px-3 py-2 text-right tabular-nums text-[var(--fg-muted)]">{r.duration}</td>
+                  <td className="px-3 py-2 text-[var(--fg)]">{r.summary}{r.log && <details className="mt-1"><summary className="text-[10px] text-[var(--accent)] cursor-pointer">show log →</summary><pre className="text-[10px] font-mono mt-1 p-2 rounded bg-[#0F1C32] text-[#E2E8F0] whitespace-pre-wrap">{r.log}</pre></details>}</td>
+                </tr>))}</tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-[var(--border)] overflow-hidden bg-[#0F1C32]">
+            <pre className="text-[11px] font-mono leading-relaxed p-4 overflow-x-auto max-h-[420px] overflow-y-auto" style={{ color: "#E2E8F0" }}>{fallback.map((l, i) => (<div key={i} className="flex gap-3"><span className="text-[#94A3B8] whitespace-nowrap">{l.ts}</span><span className={l.level === "error" ? "text-[#F87171]" : l.level === "warn" ? "text-[#FBBF24]" : "text-[#86EFAC]"}>{l.level.toUpperCase().padEnd(5)}</span><span className="text-[#E2E8F0]">{l.line}</span></div>))}</pre>
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -113,8 +150,8 @@ export function AgentEditModal({ open, onClose, agentName, currentCadence, curre
           </select>
           <div className="text-[11px] text-[var(--fg-muted)] mt-2">Cron-compatible string. Saved to the agent config table on next deploy.</div>
         </div>
-        <div className="rounded-lg border border-[#FACC15]/40 p-3 bg-[#FACC15]/5 text-[12px] text-[var(--fg-muted)]">
-          <strong className="text-[#B45309]">⚠ Prototype</strong> — saves to your browser only. Wire to <code className="font-mono text-[var(--accent)]">PATCH /api/admin/agents/{agentName}</code> for production persistence + reload of Cloudflare cron triggers.
+        <div className="rounded-lg border border-[var(--success)]/40 p-3 bg-[var(--success)]/5 text-[12px] text-[var(--fg-muted)]">
+          <strong className="text-[var(--success)]">✓ Live</strong> — saves to <code className="font-mono text-[var(--accent)]">compass_agents</code> via <code className="font-mono text-[var(--accent)]">PATCH /api/admin/agents/{agentName}</code>. The cron dispatcher picks up the new cadence on its next 5-minute tick.
         </div>
       </div>
     </Modal>
@@ -130,8 +167,8 @@ export function AgentRunNowModal({ open, onClose, agentName, onConfirm }: { open
       <div className="p-5 space-y-3 text-[13px] text-[var(--fg-muted)] leading-relaxed">
         <div>This will fire <code className="font-mono text-[var(--accent)]">{agentName}</code> immediately outside its normal cadence. The run uses the same service-role JWT and writes the result to the activity log.</div>
         <div>You&apos;ll see the run appear at the top of the Activity tab within a few seconds.</div>
-        <div className="rounded-lg border border-[#FACC15]/40 p-3 bg-[#FACC15]/5">
-          <strong className="text-[#B45309]">⚠ Prototype</strong> — this simulates a successful run locally. Wire to <code className="font-mono text-[var(--accent)]">POST /api/admin/agents/{agentName}/run</code> for the real thing.
+        <div className="rounded-lg border border-[var(--success)]/40 p-3 bg-[var(--success)]/5">
+          <strong className="text-[var(--success)]">✓ Live</strong> — this fires <code className="font-mono text-[var(--accent)]">POST /api/admin/agents/{agentName}/run</code> with your super-admin JWT. The run lands in <code className="font-mono text-[var(--accent)]">compass_agent_runs</code> and the Activity tab updates within seconds.
         </div>
       </div>
     </Modal>
