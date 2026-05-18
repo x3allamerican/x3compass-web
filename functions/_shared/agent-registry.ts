@@ -98,7 +98,7 @@ async function agentPortfolioBrief(env: Env): Promise<AgentResult> {
   const carriers   = await supa.select("compass_carriers",         "select=id,name,subscription_status") as Array<{ id: string; name: string; subscription_status: string }>;
   const drivers    = await supa.select("compass_drivers",          "select=id,status") as Array<{ id: string; status: string | null }>;
   const vehicles   = await supa.select("compass_vehicles",         "select=id") as unknown[];
-  const dq         = await supa.select("compass_dq_documents",     `select=id,expiration_date&expiration_date=lte.${encodeURIComponent(new Date(Date.now()+30*86400_000).toISOString())}`) as Array<{ expiration_date: string }>;
+  const dq         = await supa.select("compass_dq_documents",     `select=id,expires_on&expires_on=lte.${encodeURIComponent(new Date(Date.now()+30*86400_000).toISOString().slice(0,10))}`) as Array<{ expires_on: string }>;
   const activeCarriers = carriers.filter((c) => c.subscription_status === "active" || c.subscription_status === "trialing").length;
   const activeDrivers  = drivers.filter((d) => d.status === "active" || d.status === null).length;
   log.info(`[portfolio-brief] carriers=${carriers.length} active=${activeCarriers} drivers=${drivers.length} vehicles=${vehicles.length} dq_due_30d=${dq.length}`);
@@ -211,17 +211,17 @@ async function agentDriverReminders(env: Env): Promise<AgentResult> {
   const supa = supaFetch(env);
   // pull all drivers with an expiration in the next 60 days
   const horizon = new Date(Date.now() + 60 * 86400_000).toISOString();
-  const drivers = await supa.select("compass_drivers", `select=id,first_name,last_name,email,license_expiration,medical_cert_expiration&status=eq.active&or=(license_expiration.lte.${encodeURIComponent(horizon)},medical_cert_expiration.lte.${encodeURIComponent(horizon)})`) as Array<{ id: string; first_name: string; last_name: string; email: string | null; license_expiration: string | null; medical_cert_expiration: string | null }>;
+  const drivers = await supa.select("compass_drivers", `select=id,first_name,last_name,email,cdl_expires_on,medical_card_expires_on&status=eq.active&or=(cdl_expires_on.lte.${encodeURIComponent(horizon)},medical_card_expires_on.lte.${encodeURIComponent(horizon)})`) as Array<{ id: string; first_name: string; last_name: string; email: string | null; cdl_expires_on: string | null; medical_card_expires_on: string | null }>;
   log.info(`[driver-reminders] ${drivers.length} drivers with expiring docs in 60d`);
   let sentCount = 0;
   for (const d of drivers) {
     if (!d.email) continue;
     const items: string[] = [];
     const today = new Date(); const daysTo = (iso: string | null) => iso ? Math.ceil((new Date(iso).getTime() - today.getTime()) / 86400_000) : null;
-    const cdl = daysTo(d.license_expiration);
-    const mec = daysTo(d.medical_cert_expiration);
-    if (cdl !== null && cdl <= 60) items.push(`Your CDL expires in <strong>${cdl} days</strong> (${d.license_expiration})`);
-    if (mec !== null && mec <= 60) items.push(`Your medical examiner cert expires in <strong>${mec} days</strong> (${d.medical_cert_expiration})`);
+    const cdl = daysTo(d.cdl_expires_on);
+    const mec = daysTo(d.medical_card_expires_on);
+    if (cdl !== null && cdl <= 60) items.push(`Your CDL expires in <strong>${cdl} days</strong> (${d.cdl_expires_on})`);
+    if (mec !== null && mec <= 60) items.push(`Your medical examiner cert expires in <strong>${mec} days</strong> (${d.medical_card_expires_on})`);
     if (items.length === 0) continue;
     const r = await sendEmail(env, {
       to: d.email,
@@ -252,9 +252,9 @@ async function agentIftaReminder(env: Env): Promise<AgentResult> {
   const carriers = await supa.select("compass_carriers", "select=id,name,billing_email&subscription_status=in.(active,trialing)") as Array<{ id: string; name: string; billing_email: string | null }>;
   let sent = 0;
   for (const c of carriers) {
-    if (!c.billing_email) continue;
+    if (!c.primary_contact_email) continue;
     const r = await sendEmail(env, {
-      to: c.billing_email,
+      to: c.primary_contact_email,
       subject: `IFTA quarterly filing due in ${daysTo} day${daysTo === 1 ? "" : "s"}`,
       html: `<h1>IFTA reminder for ${c.name}</h1><p>Your next IFTA quarterly fuel-tax filing is due <strong>${next.toUTCString()}</strong> — ${daysTo} day${daysTo === 1 ? "" : "s"} from now.</p><p>Open <a class="btn" href="https://x3compass.com/app/ifta">IFTA Concierge →</a></p>`,
     });
@@ -276,8 +276,8 @@ async function agentDataRetentionPurge(env: Env, inputs?: { dryRun?: boolean }):
   //   D&A test results: 5 years (49 CFR § 382.401)
   const cutoff3y = new Date(Date.now() - 3 * 365 * 86400_000).toISOString();
   const cutoff5y = new Date(Date.now() - 5 * 365 * 86400_000).toISOString();
-  const mvrStale = await supa.select("compass_mvr_records",     `select=id&pulled_at=lt.${encodeURIComponent(cutoff3y)}`) as unknown[];
-  const daStale  = await supa.select("compass_da_tests",        `select=id&test_date=lt.${encodeURIComponent(cutoff5y)}`) as unknown[];
+  const mvrStale = await supa.select("compass_mvr_records",     `select=id&created_at=lt.${encodeURIComponent(cutoff3y)}`) as unknown[];
+  const daStale  = await supa.select("compass_da_tests",        `select=id&created_at=lt.${encodeURIComponent(cutoff5y)}`) as unknown[];
   log.info(`[data-retention-purge] dry_run=${dryRun} · candidates: ${mvrStale.length} MVR (>3y), ${daStale.length} D&A (>5y)`);
   // We intentionally do NOT delete anything from this agent yet — too risky
   // until we have a soft-delete + archive-to-R2 flow. This is observability
