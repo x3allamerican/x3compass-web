@@ -1,0 +1,69 @@
+# One-shot migration applier for Sprint #20 finance team schema.
+# Triggered manually via workflow_dispatch. Deletes itself after success.
+name: Apply Finance Team Migration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply migration via Supabase Management API
+        env:
+          SUPABASE_MGMT_TOKEN: ${{ secrets.SUPABASE_MGMT_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_MGMT_TOKEN:-}" ]; then
+            echo "::error::SUPABASE_MGMT_TOKEN missing"
+            exit 1
+          fi
+          # Find project ref
+          projects=$(curl -sS -H "Authorization: Bearer $SUPABASE_MGMT_TOKEN" "https://api.supabase.com/v1/projects")
+          project_ref=$(echo "$projects" | python3 -c "
+          import json, sys
+          for p in json.load(sys.stdin):
+              if 'compass' in p.get('name','').lower() or 'x3' in p.get('name','').lower():
+                  print(p['id']); break
+          ")
+          echo "project_ref=$project_ref"
+
+          if [ -z "$project_ref" ]; then
+            echo "::error::Could not identify project ref. Available:"
+            echo "$projects" | python3 -m json.tool
+            exit 1
+          fi
+
+          # POST the SQL
+          sql=$(cat supabase/migrations/20260518c_compass_finance_team.sql)
+          payload=$(python3 -c "
+          import json, sys
+          with open('supabase/migrations/20260518c_compass_finance_team.sql') as f:
+              print(json.dumps({'query': f.read()}))
+          ")
+          resp=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Authorization: Bearer $SUPABASE_MGMT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://api.supabase.com/v1/projects/$project_ref/database/query")
+          status=$(echo "$resp" | tail -n1 | sed 's/HTTP_STATUS://')
+          body=$(echo "$resp" | sed '$d')
+          echo "Status: $status"
+          echo "Body (first 2000 chars):"
+          echo "${body:0:2000}"
+          if [ "$status" != "200" ] && [ "$status" != "201" ]; then
+            echo "::error::Migration failed"
+            exit 1
+          fi
+          echo "::notice::Sprint #20 finance team schema applied successfully"
+
+          # Verify tables exist
+          verify_sql='select table_name from information_schema.tables where table_name in (\"compass_chart_of_accounts\",\"compass_journal_entries\",\"compass_journal_lines\",\"compass_usage_events\",\"compass_bank_transactions\",\"compass_vendor_invoices\",\"compass_period_closes\") order by table_name;'
+          verify_payload=$(python3 -c "import json; print(json.dumps({'query': '''$verify_sql'''}))")
+          curl -sS -X POST \
+            -H "Authorization: Bearer $SUPABASE_MGMT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$verify_payload" \
+            "https://api.supabase.com/v1/projects/$project_ref/database/query"

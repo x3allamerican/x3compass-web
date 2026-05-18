@@ -45,15 +45,37 @@ async function stripeGet(env: Env, path: string): Promise<unknown> {
   if (!r.ok) throw new Error(`Stripe ${path} HTTP ${r.status}: ${await r.text()}`);
   return r.json();
 }
-async function askClaude(env: Env, system: string, prompt: string, maxTokens = 2048): Promise<string> {
+async function askClaude(env: Env, system: string, prompt: string, maxTokens = 2048, attribution?: { carrier_id?: string | null; agent_name?: string; agent_run_id?: string }): Promise<string> {
   if (!env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not set");
+  const model = "claude-sonnet-4-6";
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: maxTokens, system, messages: [{ role: "user", content: prompt }] }),
+    body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: prompt }] }),
   });
   if (!r.ok) throw new Error(`Anthropic HTTP ${r.status}: ${await r.text()}`);
-  const j = (await r.json()) as { content?: Array<{ text: string }> };
+  const j = (await r.json()) as { id?: string; content?: Array<{ text: string }>; usage?: { input_tokens?: number; output_tokens?: number } };
+
+  // Sprint #20: per-carrier COGS instrumentation
+  const tokensIn  = j.usage?.input_tokens  || 0;
+  const tokensOut = j.usage?.output_tokens || 0;
+  if (tokensIn > 0 || tokensOut > 0) {
+    try {
+      const ft = await import("./finance-team");
+      await ft.recordUsage(env, {
+        carrier_id:   attribution?.carrier_id || null,
+        vendor:       "anthropic",
+        service:      model,
+        units_in:     tokensIn,
+        units_out:    tokensOut,
+        cost_cents:   ft.anthropicCostCents(model, tokensIn, tokensOut),
+        agent_name:   attribution?.agent_name,
+        agent_run_id: attribution?.agent_run_id,
+        request_id:   j.id,
+      });
+    } catch (_e) { /* never block on telemetry */ }
+  }
+
   return j.content?.[0]?.text ?? "";
 }
 async function sha256Hex(s: string): Promise<string> {
