@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import TopNav from "@/components/TopNav";
@@ -58,6 +58,27 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const router = useRouter();
   const { user, carrier, loading, signOut } = useUser();
   const isSuperAdmin = useIsSuperAdmin();
+  const asideRef = useRef<HTMLElement>(null);
+
+  // Persist sidebar scroll position across page navigations.
+  // The sidebar re-mounts on every /app/* route change because AppShell is rendered
+  // per-page (not yet a shared layout). sessionStorage gives us scroll-position
+  // continuity until we lift AppShell into app/app/layout.tsx.
+  useEffect(() => {
+    const aside = asideRef.current;
+    if (!aside) return;
+    const saved = sessionStorage.getItem("x3-sidebar-scroll");
+    if (saved) aside.scrollTop = parseInt(saved, 10) || 0;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        try { sessionStorage.setItem("x3-sidebar-scroll", String(aside.scrollTop)); } catch {}
+      });
+    };
+    aside.addEventListener("scroll", onScroll, { passive: true });
+    return () => { aside.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -105,7 +126,7 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
         </div>
       )}
       <div className="grid grid-cols-[260px_1fr] max-md:grid-cols-[72px_1fr] flex-1">
-        <aside className="border-r border-[var(--border)] bg-[var(--surface)] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+        <aside ref={asideRef} className="border-r border-[var(--border)] bg-[var(--surface)] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
           <div className="px-3 pt-4 pb-3 border-b border-[var(--border)]">
             <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] px-2">Workspace</div>
           </div>
