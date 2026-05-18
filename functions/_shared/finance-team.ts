@@ -7,8 +7,8 @@
 import { supaFetch } from "./supabase-admin";
 
 export interface Env {
-  SUPABASE_URL: string;
-  SUPABASE_SERVICE_ROLE: string;
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE?: string;
 }
 
 // Per-million-token prices for the models we use (US, prod tier)
