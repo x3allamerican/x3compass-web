@@ -293,11 +293,13 @@ const ECFR_PARTS_TO_WATCH = ["382", "383", "390", "391", "392", "393", "395", "3
 async function agentRegulatoryScanner(env: Env): Promise<AgentResult> {
   const log = newLogger();
   const supa = supaFetch(env);
-  const today = new Date().toISOString().slice(0, 10);
   const changes: string[] = [];
   let checked = 0, errors = 0;
   for (const part of ECFR_PARTS_TO_WATCH) {
-    const url = `https://www.ecfr.gov/api/versioner/v1/structure/${today}/title-49.json?part=${part}`;
+    // /versions/ lists every amendment with its date — perfect for change detection.
+    // Hashing the version list is far cheaper than fetching full XML content and gives
+    // us a precise "this part was amended on X" signal.
+    const url = `https://www.ecfr.gov/api/versioner/v1/versions/title-49.json?part=${part}`;
     try {
       const r = await fetch(url, { headers: { Accept: "application/json" } });
       if (!r.ok) { log.warn(`[regulatory-scanner] eCFR Part ${part}: HTTP ${r.status}`); errors++; continue; }
@@ -383,13 +385,24 @@ async function agentFmcsaScraper(env: Env, inputs?: { dot_numbers?: string[] }):
   let ingested = 0, errors = 0;
   for (const dot of seedDots.slice(0, 25)) {
     try {
-      const r = await fetch(`https://mobile.fmcsa.dot.gov/qc/services/carriers/${dot}?webKey=public`, { headers: { Accept: "application/json" } });
+      // Fall back to scraping the public SAFER snapshot HTML when no QC web key is
+      // available. The HTML is stable enough to extract the basics (legal name, state,
+      // power units, safety rating). A real QC key would let us hit
+      // mobile.fmcsa.dot.gov for clean JSON.
+      const r = await fetch(`https://safer.fmcsa.dot.gov/query.asp?searchtype=ANY&query_type=queryCarrierSnapshot&query_param=USDOT&query_string=${dot}`, { headers: { Accept: "text/html", "User-Agent": "X3CompassAgent/1.0" } });
       if (!r.ok) { errors++; log.warn(`[fmcsa-scraper] DOT ${dot}: HTTP ${r.status}`); continue; }
-      const body = await r.json() as { content?: { carrier?: { legalName?: string; phyState?: string; totalPowerUnits?: number; totalDrivers?: number; safetyRating?: string } } };
-      const car = body.content?.carrier;
-      if (!car) { errors++; continue; }
-      await supa.insert("compass_fmcsa_snapshots", { dot_number: dot, legal_name: car.legalName || "", safety_rating: car.safetyRating || "", power_units: car.totalPowerUnits ?? null, drivers: car.totalDrivers ?? null, state: car.phyState || "", raw: car as unknown as Record<string, unknown> });
+      const html = await r.text();
+      // Lightweight regex extract — SAFER HTML is consistent
+      const get = (label: string) => { const m = html.match(new RegExp(label + "[^<]*<[^>]*>\\s*([^<]+)<", "i")); return m ? m[1].trim() : ""; };
+      const legalName  = (html.match(/<th[^>]*>\s*Legal Name:?\s*<\/th>\s*<td[^>]*>\s*([^<]+)<\/td>/i)?.[1] || "").trim();
+      const state      = (html.match(/<th[^>]*>\s*Physical Address:?[\s\S]{0,300}?,\s*([A-Z]{2})\s*\d{5}/i)?.[1] || "").trim();
+      const powerUnits = parseInt((html.match(/<th[^>]*>\s*Power Units:?\s*<\/th>\s*<td[^>]*>\s*([\d,]+)<\/td>/i)?.[1] || "0").replace(/,/g, ""), 10) || null;
+      const drivers    = parseInt((html.match(/<th[^>]*>\s*Drivers:?\s*<\/th>\s*<td[^>]*>\s*([\d,]+)<\/td>/i)?.[1] || "0").replace(/,/g, ""), 10) || null;
+      const safety     = (html.match(/<b>\s*Safety Rating:?\s*<\/b>\s*([^<]+)</i)?.[1] || "").trim();
+      if (!legalName) { errors++; log.warn(`[fmcsa-scraper] DOT ${dot}: SAFER HTML did not parse — likely an invalid DOT or layout change`); continue; }
+      await supa.insert("compass_fmcsa_snapshots", { dot_number: dot, legal_name: legalName, safety_rating: safety, power_units: powerUnits, drivers: drivers, state, raw: { source: "safer_html_scrape", parsed_at: new Date().toISOString() } });
       ingested++;
+      log.info(`[fmcsa-scraper] DOT ${dot}: ${legalName} · ${state} · PU=${powerUnits} · drivers=${drivers}`);
     } catch (e) { errors++; log.error(`[fmcsa-scraper] DOT ${dot}: ${e}`); }
   }
   return { status: errors === seedDots.length ? "error" : errors > 0 ? "partial" : "ok", summary: `${ingested}/${seedDots.length} DOTs ingested · ${errors} errors`, log: log.text() };
