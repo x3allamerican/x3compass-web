@@ -27,6 +27,7 @@ export default function DQFilesPage() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterDriver, setFilterDriver] = useState("");
+  const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [prefillDocType, setPrefillDocType] = useState<string | undefined>();
   const [view, setView] = useState<"grid" | "table">("grid");
@@ -43,7 +44,22 @@ export default function DQFilesPage() {
     if (!filterDriver && drivers.length > 0) setFilterDriver(drivers[0].id);
   }, [drivers, filterDriver]);
 
-  const filtered = useMemo(() => filterDriver ? docs.filter(d => d.driver_id === filterDriver) : docs, [docs, filterDriver]);
+  const filtered = useMemo(() => {
+    let rows = filterDriver ? docs.filter(d => d.driver_id === filterDriver) : docs;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter(d => {
+        const drv = drivers.find(x => x.id === d.driver_id);
+        const drvName = drv ? `${drv.first_name || ""} ${drv.last_name || ""}`.toLowerCase() : "";
+        return (
+          (d.doc_type || "").toLowerCase().includes(q) ||
+          (d.label || "").toLowerCase().includes(q) ||
+          drvName.includes(q)
+        );
+      });
+    }
+    return rows;
+  }, [docs, filterDriver, search, drivers]);
   const selectedDriver = useMemo(() => drivers.find(d => d.id === filterDriver), [drivers, filterDriver]);
 
   const today = new Date().toISOString().slice(0,10);
@@ -91,6 +107,7 @@ export default function DQFilesPage() {
         </div>
 
         <div className="flex flex-wrap gap-3 mb-5 items-center">
+          <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search docs by type, label, or driver name…" className="flex-1 min-w-[260px] px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]" />
           <select value={filterDriver} onChange={(e)=>setFilterDriver(e.target.value)} className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm min-w-[220px]">
             <option value="">All drivers (table view)</option>
             {drivers.map(d => <option key={d.id} value={d.id}>{driverLabel(d)}</option>)}
@@ -144,12 +161,36 @@ function DocFormModal({ carrier_id, drivers, preDriverId, preDocType, onClose, o
   const [form, setForm] = useState<Partial<Doc>>({ doc_type: preDocType || "medical_card", driver_id: preDriverId || drivers[0]?.id });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string|null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadFileToStorage(): Promise<string | null> {
+    if (!file) return null;
+    setUploading(true);
+    try {
+      const sb = getSupabase();
+      const driverId = form.driver_id;
+      if (!driverId) throw new Error("Select a driver before uploading");
+      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${carrier_id}/${driverId}/${Date.now()}_${safeName}`;
+      const { error: upErr } = await sb.storage.from("dq-docs").upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      // Signed URL good for 1 year (3600*24*365 = 31536000)
+      const { data: signed } = await sb.storage.from("dq-docs").createSignedUrl(path, 31536000);
+      return signed?.signedUrl || null;
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError(null);
     try {
       if (!form.driver_id) throw new Error("Select a driver");
-      const { error } = await getSupabase().from("compass_dq_documents").insert([{ ...form, carrier_id }]);
+      // Upload file first (if attached) and use the returned signed URL
+      const uploadedUrl = await uploadFileToStorage();
+      const payload = { ...form, carrier_id, url: uploadedUrl || form.url || null };
+      const { error } = await getSupabase().from("compass_dq_documents").insert([payload]);
       if (error) throw error;
       onSaved();
     } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
@@ -171,7 +212,12 @@ function DocFormModal({ carrier_id, drivers, preDriverId, preDocType, onClose, o
           </select>
         </Field>
         <Field label="Label (optional)"><input className="x3i" value={form.label||""} onChange={(e)=>setForm({...form,label:e.target.value})} placeholder="e.g. 2026 renewal" /></Field>
-        <Field label="File URL (Drive / R2 / S3 link)"><input className="x3i" type="url" value={form.url||""} onChange={(e)=>setForm({...form,url:e.target.value})} placeholder="https://…" /></Field>
+        <Field label="Upload file (PDF, JPG, PNG, DOCX — 50MB max)">
+          <input type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-[var(--fg-muted)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[var(--accent)] file:text-[var(--accent-fg)]" />
+          {file && <div className="text-[11px] text-[var(--fg-muted)] mt-1">📎 {file.name} · {(file.size/1024/1024).toFixed(2)} MB{uploading ? " · uploading…" : ""}</div>}
+          {!file && <div className="text-[11px] text-[var(--fg-muted)] mt-1">Or paste a link instead:</div>}
+        </Field>
+        {!file && <Field label="Link (optional)"><input className="x3i" type="url" value={form.url||""} onChange={(e)=>setForm({...form,url:e.target.value})} placeholder="https://drive.google.com/… or s3 link" /></Field>}
         <Field label="Expires on"><input className="x3i" type="date" value={form.expires_on||""} onChange={(e)=>setForm({...form,expires_on:e.target.value})} /></Field>
         {error && <Err msg={error} />}
         <ModalActions onClose={onClose} busy={busy} submitLabel="Upload" />
