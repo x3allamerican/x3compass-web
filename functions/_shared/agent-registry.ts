@@ -554,8 +554,8 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   const supa = supaFetch(env);
   const carrierId = inputs?.carrier_id;
   if (!carrierId) return { status: "error", summary: "Missing inputs.carrier_id", log: log.text() };
-  const inspections = await supa.select("compass_inspections", `select=id,inspection_date,violations,result&carrier_id=eq.${carrierId}&inspection_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; violations: unknown; result: string }>;
-  const accidents = await supa.select("compass_accidents", `select=id,occurred_on,severity&carrier_id=eq.${carrierId}&occurred_on=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; severity: string }>;
+  const inspections = await supa.select("compass_inspections", `select=id,inspection_date,violation_count,oos_driver,oos_vehicle&carrier_id=eq.${carrierId}&inspection_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; violation_count: number | null; oos_driver: boolean | null; oos_vehicle: boolean | null }>;
+  const accidents = await supa.select("compass_accidents", `select=id,accident_date,recordable,fatalities,injuries&carrier_id=eq.${carrierId}&accident_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; recordable: boolean | null; fatalities: number | null; injuries: number | null }>;
   // Until CarrierOk is wired, we approximate BASIC scores as count-of-relevant-violations / inspection_count
   // This is intentionally rough — it's a "computed_from_inspections" snapshot, not an official MSR.
   const snap = { carrier_id: carrierId, source: "computed_from_inspections", raw: { inspections: inspections.length, accidents: accidents.length, computed_at: new Date().toISOString() }, unsafe_driving: 0, crash_indicator: accidents.length * 0.5, hos_compliance: 0, vehicle_maint: 0, hazmat: 0, driver_fitness: 0, ctrl_substances: 0 };
