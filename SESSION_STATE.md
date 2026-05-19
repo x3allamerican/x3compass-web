@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (a11y gate fixed).
+Last updated: 2026-05-19 by Claude (Prospects fully wired — task #197).
 
 ---
 
@@ -27,10 +27,11 @@ Already wired & polished:
 - a11y test gate adjustment — block on critical only, log serious as backlog. Marketing site has 735+ serious color-contrast issues (4.42:1 vs 4.5:1 floor on #f4f7fa surface) that predate this sprint; tracked as task #195 for a dedicated contrast pass. Zero critical violations means a11y tests will go green.
 - /app/marketing — 6 KPIs + funnel + traffic sparkline + recent leads matching X3FS classic. New /api/marketing backend pulls real numbers from marketing_clicks/marketing_leads/marketing_campaigns/marketing_audit_invites. Status pills now theme-aware (bg-cyan-100 dark:bg-cyan-500/45 family, NOT text-white-on-cyan which was unreadable in light). Added Tracking Link Builder (was missing). CSV export wired.
 - /app/notifications — 4 KPIs + Channel breakdown bars + Active Rules + Notification Log (was missing — added the third X3FS classic section). New /api/notifications pulls notification_log + notification_rules + notification_event_defaults. Status + Channel pills theme-aware (emerald/amber/rose for status, cyan/violet/amber/slate for channels). Channel filter + Status filter + CSV export.
+- /app/prospects (CRITICAL) — 7-tab FMCSA prospects center matching X3FS classic 1068-line page. 6 KPIs, fleet distribution that updates per tab, 4 carrier tables (new entrants / below sat / new this week / all in-region) with search + state + rating filters, multi-select + Bulk Outreach POST + CSV export. Outreach log (200 latest from fmcsa_outreach_log) + Email templates (live from fmcsa_outreach_templates) + Scraper runs (30 latest from fmcsa_scraper_runs). Theme-aware Rating + Outreach + Run pills. New POST /api/prospects/outreach idempotent (won't double-queue), skips below-sat by default unless tab=below_sat. Below-sat tab notice flags Joshua's personal-handle list.
 - /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
-- /app/prospects, /app/audit-log, /app/finance, /app/finance-team, /app/integrations
+- /app/audit-log, /app/finance, /app/finance-team, /app/integrations
 - /app/settings
 - /app/marketing
 - /app/notifications
