@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (Audit Export polished).
+Last updated: 2026-05-19 by Claude (Settings 3-tab matches X3FS).
 
 ---
 
@@ -22,6 +22,7 @@ Already wired & polished:
 - /app/inspections — Levels I–VI Definitions card mirroring X3FS, uniform pills, grid-aligned legend
 - /app/scorecards — composite score backend (90-day window) + tier filter + Definitions card with formula
 - /app/audit-export — KPI cards + Quick-full-audit button + Scope definitions w/ CFR cites + uniform status pills + retry on failed
+- /app/settings — 3-tab rebuild matching X3FS classic (Profile · Team · Billing). Profile adds dba/operation_type/carrier_category/fleet_size. Team gets invite + members table backed by compass_carrier_users + new POST /api/auth/invite. Billing gets live plan card with driver count × tier price, auto-renewal status, Stripe portal link, export data.
 - /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
@@ -62,6 +63,7 @@ Remaining to audit in Sprint #21:
 - `compass_accidents` — extended w/ severity, citation, occurred_time, alc_test_status, drug_test_status
 - `compass_social_posts` — platform, status, body, image_url, hashtags, scheduled_at, posted_at, postiz_id, ai_generated, ai_prompt_used
 - `compass_vendor_integrations` — carrier_id + vendor unique
+- `compass_carriers` — added dba, operation_type, carrier_category, fleet_size (with CHECK constraints) — migration 20260519
 - RLS WITH CHECK added to compass_drivers, compass_vehicles, compass_dq_documents
 
 ### Seeded demo data (for the XPO test carrier)
