@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (Playwright mobile failures fixed).
+Last updated: 2026-05-19 by Claude (Marketing wired + theme-aware pills).
 
 ---
 
@@ -24,9 +24,11 @@ Already wired & polished:
 - /app/audit-export — KPI cards + Quick-full-audit button + Scope definitions w/ CFR cites + uniform status pills + retry on failed
 - /app/settings — 3-tab rebuild matching X3FS classic (Profile · Team · Billing). Profile adds dba/operation_type/carrier_category/fleet_size. Team gets invite + members table backed by compass_carrier_users + new POST /api/auth/invite. Billing gets live plan card with driver count × tier price, auto-renewal status, Stripe portal link, export data.
 - Mobile Playwright fixes — TopNav Sign-in no longer `hidden sm:block` + html/body overflow-x:hidden + max-width:100vw guard. Resolves 12 failing Sprint #8 mobile-viewport tests.
+- /app/marketing — 6 KPIs + funnel + traffic sparkline + recent leads matching X3FS classic. New /api/marketing backend pulls real numbers from marketing_clicks/marketing_leads/marketing_campaigns/marketing_audit_invites. Status pills now theme-aware (bg-cyan-100 dark:bg-cyan-500/45 family, NOT text-white-on-cyan which was unreadable in light). Added Tracking Link Builder (was missing). CSV export wired.
 - /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
+- /app/notifications, /app/prospects, /app/audit-log, /app/finance, /app/finance-team, /app/integrations
 - /app/settings
 - /app/marketing
 - /app/notifications
