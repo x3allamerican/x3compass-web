@@ -94,7 +94,7 @@ export default function TopNav() {
             <>
               <Link
                 href="/signin"
-                className="text-[15px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)] hidden sm:block"
+                className="text-[14px] sm:text-[15px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)]"
               >
                 Sign in
               </Link>

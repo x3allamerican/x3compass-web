@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (Settings 3-tab matches X3FS).
+Last updated: 2026-05-19 by Claude (Playwright mobile failures fixed).
 
 ---
 
@@ -23,6 +23,7 @@ Already wired & polished:
 - /app/scorecards — composite score backend (90-day window) + tier filter + Definitions card with formula
 - /app/audit-export — KPI cards + Quick-full-audit button + Scope definitions w/ CFR cites + uniform status pills + retry on failed
 - /app/settings — 3-tab rebuild matching X3FS classic (Profile · Team · Billing). Profile adds dba/operation_type/carrier_category/fleet_size. Team gets invite + members table backed by compass_carrier_users + new POST /api/auth/invite. Billing gets live plan card with driver count × tier price, auto-renewal status, Stripe portal link, export data.
+- Mobile Playwright fixes — TopNav Sign-in no longer `hidden sm:block` + html/body overflow-x:hidden + max-width:100vw guard. Resolves 12 failing Sprint #8 mobile-viewport tests.
 - /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
@@ -52,7 +53,7 @@ Remaining to audit in Sprint #21:
 - **#138** 3 parallel skill-builder agents (FMCSA · Hazmat · Procedural).
 - **#139** 2,400+ skill corpus build (1,800 FMCSA mandate).
 - **#116** Book first attorney review ($1.5-2.5k).
-- **#186** Joshua needs to `kill 35088 35076 35075 35025 35006 35004` and restart Claude — phantom agentmemory MCP processes are accepting saves into a void. Other sessions report "memory files disappeared" because of this.
+- ~~#186 phantom agentmemory~~ — RESOLVED 2026-05-19. ps confirmed 6 phantoms are gone; PID 25249 (real daemon) + 21890 (iii backend) routing live.
 
 ### Persistent secrets location
 - File: `/Users/joshuakovarik/Documents/Claude/Projects/X3 All-American/X3 Fleet Safety/secrets.env` (gitignored)

@@ -98,6 +98,10 @@ html, body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
+  /* Belt-and-suspenders against any rogue mobile overflow (Sprint #8 probe). */
+  overflow-x: hidden;
+  /* Safari mobile zoom-from-input guard — locks viewport horizontally only. */
+  max-width: 100vw;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 
