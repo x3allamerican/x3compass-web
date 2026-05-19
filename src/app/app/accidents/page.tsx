@@ -24,23 +24,23 @@ type VOpt = { id:string; year:number|null; make:string|null; model:string|null; 
 // solid bg + white text in light mode; tinted /30 in dark
 // =========================================================================
 const SEV = {
-  minor:    "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/30 dark:text-slate-100 dark:border-slate-400/70",
-  moderate: "bg-amber-600 text-white border-amber-700 dark:bg-amber-500/30 dark:text-amber-100 dark:border-amber-400/70",
-  severe:   "bg-red-700 text-white border-red-800 dark:bg-rose-500/30 dark:text-rose-100 dark:border-rose-400/70",
-  fatal:    "bg-black text-white border-black dark:bg-black dark:text-white dark:border-white/30",
+  minor:    "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/45 dark:text-slate-50 dark:border-slate-300/80",
+  moderate: "bg-amber-600 text-white border-amber-700 dark:bg-amber-500/45 dark:text-amber-50 dark:border-amber-300/80",
+  severe:   "bg-red-700 text-white border-red-800 dark:bg-rose-500/45 dark:text-rose-50 dark:border-rose-300/80",
+  fatal:    "bg-black text-white border-black dark:bg-black dark:text-white dark:border-white/60",
 };
 const PRV = {
-  preventable:     "bg-red-700 text-white border-red-800 dark:bg-rose-500/30 dark:text-rose-100 dark:border-rose-400/70",
-  non_preventable: "bg-green-700 text-white border-green-800 dark:bg-emerald-500/30 dark:text-emerald-100 dark:border-emerald-400/70",
-  undetermined:    "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/30 dark:text-slate-100 dark:border-slate-400/70",
-  pending:         "bg-blue-700 text-white border-blue-800 dark:bg-blue-500/30 dark:text-blue-100 dark:border-blue-400/70",
+  preventable:     "bg-red-700 text-white border-red-800 dark:bg-rose-500/45 dark:text-rose-50 dark:border-rose-300/80",
+  non_preventable: "bg-green-700 text-white border-green-800 dark:bg-emerald-500/45 dark:text-emerald-50 dark:border-emerald-300/80",
+  undetermined:    "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/45 dark:text-slate-50 dark:border-slate-300/80",
+  pending:         "bg-blue-700 text-white border-blue-800 dark:bg-blue-500/45 dark:text-blue-50 dark:border-blue-300/80",
 };
 const DA = {
-  completed:    "bg-green-700 text-white border-green-800 dark:bg-emerald-500/30 dark:text-emerald-100 dark:border-emerald-400/70",
-  missed:       "bg-red-700 text-white border-red-800 dark:bg-rose-500/30 dark:text-rose-100 dark:border-rose-400/70",
-  scheduled:    "bg-amber-600 text-white border-amber-700 dark:bg-amber-500/30 dark:text-amber-100 dark:border-amber-400/70",
-  not_required: "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/30 dark:text-slate-100 dark:border-slate-400/70",
-  refused:      "bg-black text-white border-black dark:bg-black dark:text-white dark:border-white/30",
+  completed:    "bg-green-700 text-white border-green-800 dark:bg-emerald-500/45 dark:text-emerald-50 dark:border-emerald-300/80",
+  missed:       "bg-red-700 text-white border-red-800 dark:bg-rose-500/45 dark:text-rose-50 dark:border-rose-300/80",
+  scheduled:    "bg-amber-600 text-white border-amber-700 dark:bg-amber-500/45 dark:text-amber-50 dark:border-amber-300/80",
+  not_required: "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/45 dark:text-slate-50 dark:border-slate-300/80",
+  refused:      "bg-black text-white border-black dark:bg-black dark:text-white dark:border-white/60",
 };
 function Pill({ cls, children, size = "md" }: { cls: string; children: React.ReactNode; size?: "sm" | "md" }) {
   const sizing = size === "sm"
@@ -58,19 +58,19 @@ function Pill({ cls, children, size = "md" }: { cls: string; children: React.Rea
 // =========================================================================
 function DefinitionsCard() {
   return (
-    <div className="rounded-2xl border-2 border-blue-500 dark:border-blue-400/40 bg-blue-50/50 dark:bg-blue-500/5 p-6 mb-5">
+    <div className="rounded-2xl border-2 border-blue-500 dark:border-blue-400 bg-blue-50/60 dark:bg-blue-950/40 p-6 mb-5">
       <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
-        <div className="text-[18px] font-extrabold text-blue-700 dark:text-blue-300 flex items-center gap-2">
+        <div className="text-[18px] font-extrabold text-blue-700 dark:text-blue-200 flex items-center gap-2">
           📚 Definitions reference
         </div>
-        <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-blue-600 dark:text-blue-400">FMCSA / DOT criteria</div>
+        <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-blue-600 dark:text-blue-300">FMCSA / DOT criteria</div>
       </div>
       <div className="text-[12px] text-black dark:text-white mb-4">
         Use these definitions when classifying severity and making preventability calls. Sources: <strong>49 CFR § 390.5T</strong> (DOT-recordable), <strong>49 CFR § 382.303</strong> (post-accident testing), and the FMCSA Crash Preventability Determination Program (CPDP).
       </div>
       <div className="grid lg:grid-cols-2 gap-5">
         <div>
-          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-400 mb-3 border-b-2 border-amber-400 dark:border-amber-500 pb-1">SEVERITY LEVELS</div>
+          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">SEVERITY LEVELS</div>
           <div className="space-y-2.5">
             <div className="flex items-start gap-3"><Pill cls={SEV.minor} size="sm">MINOR</Pill><div className="text-[12px] text-black dark:text-white flex-1">No injuries. Minor property damage only. No tow required (e.g., low-speed parking-lot contact, fender-bender).</div></div>
             <div className="flex items-start gap-3"><Pill cls={SEV.moderate} size="sm">MODERATE</Pill><div className="text-[12px] text-black dark:text-white flex-1">Injuries treated and released, or vehicle towed from scene, or property damage requiring repair. Often DOT-recordable.</div></div>
@@ -79,7 +79,7 @@ function DefinitionsCard() {
           </div>
         </div>
         <div>
-          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-400 mb-3 border-b-2 border-amber-400 dark:border-amber-500 pb-1">PREVENTABILITY CLASSIFICATIONS</div>
+          <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">PREVENTABILITY CLASSIFICATIONS</div>
           <div className="space-y-2.5">
             <div className="flex items-start gap-3"><Pill cls={PRV.preventable} size="sm">PREVENT</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could have reasonably done something to avoid the crash. Counts toward the CSA Crash Indicator BASIC. Triggers safety review and corrective action.</div></div>
             <div className="flex items-start gap-3"><Pill cls={PRV.non_preventable} size="sm">NON-PREV</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could not reasonably have prevented the crash. Examples eligible under FMCSA's CPDP: struck by wrong-way / DUI / suicidal driver, hit while legally stopped or parked, struck by debris, hit-and-run, animal strikes.</div></div>
@@ -88,7 +88,7 @@ function DefinitionsCard() {
           </div>
         </div>
       </div>
-      <div className="text-[11px] text-black dark:text-white mt-4 pt-4 border-t border-blue-200 dark:border-blue-400/30">
+      <div className="text-[11px] text-black dark:text-white mt-4 pt-4 border-t border-blue-200 dark:border-blue-400/60">
         <strong>DOT-recordable test (49 CFR § 390.5T):</strong> a fatality, OR an injury treated away from the scene, OR a vehicle towed from the scene due to disabling damage. Even minor accidents can be DOT-recordable.
         <strong className="ml-3">CPDP eligibility:</strong> only crashes meeting the FMCSA-specified categories qualify for non-preventable submission. Submit within 24 months of the crash via the DataQs portal.
       </div>
@@ -156,7 +156,7 @@ export default function AccidentsPage() {
               value={search}
               onChange={(e)=>setSearch(e.target.value)}
               placeholder="Search by location, state, or description…"
-              className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
+              className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] placeholder:text-[var(--fg-muted)] text-sm focus:outline-none focus:border-[var(--accent)]"
             />
           </div>
           <select value={filterSev} onChange={(e)=>setFilterSev(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
@@ -210,7 +210,7 @@ export default function AccidentsPage() {
                 const sev = (a.severity || "minor") as keyof typeof SEV;
                 const prv = (a.preventable || "pending") as keyof typeof PRV;
                 return (
-                  <tr key={a.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)]/50 cursor-pointer" onClick={() => setEditAcc(a)}>
+                  <tr key={a.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] cursor-pointer" onClick={() => setEditAcc(a)}>
                     <td className="px-3 py-3">
                       <div className="text-[var(--fg)] font-semibold">{new Date(a.accident_date).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" })}</div>
                       {a.occurred_time && <div className="text-[11px] text-[var(--fg-muted)]">{a.occurred_time.slice(0,5)}</div>}
@@ -223,9 +223,9 @@ export default function AccidentsPage() {
                     <td className="px-3 py-3"><Pill cls={SEV[sev]}>{sev.toUpperCase()}</Pill></td>
                     <td className="px-3 py-3"><Pill cls={PRV[prv]}>{prv === "non_preventable" ? "NON PREVENTABLE" : prv === "preventable" ? "PREVENTABLE" : prv === "undetermined" ? "UNDETERMINED" : "PENDING"}</Pill></td>
                     <td className="px-3 py-3 hidden md:table-cell">
-                      {a.recordable && <span className="text-red-700 dark:text-rose-400 font-extrabold text-[13px]">DOT</span>}
+                      {a.recordable && <span className="text-red-700 dark:text-rose-300 font-extrabold text-[13px]">DOT</span>}
                       {a.fatalities > 0 && <span className="ml-2 text-black dark:text-white font-extrabold text-[13px]">FATAL</span>}
-                      {a.injuries > 0 && <span className="ml-2 text-amber-700 dark:text-amber-400 font-bold text-[13px]">{a.injuries} inj</span>}
+                      {a.injuries > 0 && <span className="ml-2 text-amber-700 dark:text-amber-300 font-bold text-[13px]">{a.injuries} inj</span>}
                       {!a.recordable && a.fatalities === 0 && a.injuries === 0 && <span className="text-[var(--fg-faint)]">—</span>}
                     </td>
                     <td className="px-3 py-3 hidden lg:table-cell">
