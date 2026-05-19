@@ -42,8 +42,15 @@ const DA = {
   not_required: "bg-slate-500 text-white border-slate-600 dark:bg-slate-500/30 dark:text-slate-100 dark:border-slate-400/70",
   refused:      "bg-black text-white border-black dark:bg-black dark:text-white dark:border-white/30",
 };
-function Pill({ cls, children }: { cls: string; children: React.ReactNode }) {
-  return <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${cls} whitespace-nowrap`}>{children}</span>;
+function Pill({ cls, children, size = "md" }: { cls: string; children: React.ReactNode; size?: "sm" | "md" }) {
+  const sizing = size === "sm"
+    ? "min-w-[88px] px-2 py-1 text-[10px]"
+    : "min-w-[124px] px-3 py-1.5 text-[11px]";
+  return (
+    <span className={`inline-block ${sizing} rounded-full font-extrabold border ${cls} whitespace-nowrap text-center tracking-wider uppercase`}>
+      {children}
+    </span>
+  );
 }
 
 // =========================================================================
@@ -65,19 +72,19 @@ function DefinitionsCard() {
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-400 mb-3 border-b-2 border-amber-400 dark:border-amber-500 pb-1">SEVERITY LEVELS</div>
           <div className="space-y-2.5">
-            <div className="flex items-start gap-3"><Pill cls={SEV.minor}>MINOR</Pill><div className="text-[12px] text-black dark:text-white flex-1">No injuries. Minor property damage only. No tow required (e.g., low-speed parking-lot contact, fender-bender).</div></div>
-            <div className="flex items-start gap-3"><Pill cls={SEV.moderate}>MODERATE</Pill><div className="text-[12px] text-black dark:text-white flex-1">Injuries treated and released, or vehicle towed from scene, or property damage requiring repair. Often DOT-recordable.</div></div>
-            <div className="flex items-start gap-3"><Pill cls={SEV.severe}>SEVERE</Pill><div className="text-[12px] text-black dark:text-white flex-1">Serious injuries requiring transport for medical treatment. Substantial property damage. Disabling damage to one or more vehicles. DOT-recordable per § 390.5T.</div></div>
-            <div className="flex items-start gap-3"><Pill cls={SEV.fatal}>FATAL</Pill><div className="text-[12px] text-black dark:text-white flex-1">One or more fatalities. Always DOT-recordable. Triggers post-accident drug & alcohol testing under 49 CFR § 382.303 and immediate FMCSA reporting if applicable.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={SEV.minor} size="sm">MINOR</Pill><div className="text-[12px] text-black dark:text-white flex-1">No injuries. Minor property damage only. No tow required (e.g., low-speed parking-lot contact, fender-bender).</div></div>
+            <div className="flex items-start gap-3"><Pill cls={SEV.moderate} size="sm">MODERATE</Pill><div className="text-[12px] text-black dark:text-white flex-1">Injuries treated and released, or vehicle towed from scene, or property damage requiring repair. Often DOT-recordable.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={SEV.severe} size="sm">SEVERE</Pill><div className="text-[12px] text-black dark:text-white flex-1">Serious injuries requiring transport for medical treatment. Substantial property damage. Disabling damage to one or more vehicles. DOT-recordable per § 390.5T.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={SEV.fatal} size="sm">FATAL</Pill><div className="text-[12px] text-black dark:text-white flex-1">One or more fatalities. Always DOT-recordable. Triggers post-accident drug & alcohol testing under 49 CFR § 382.303 and immediate FMCSA reporting if applicable.</div></div>
           </div>
         </div>
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-400 mb-3 border-b-2 border-amber-400 dark:border-amber-500 pb-1">PREVENTABILITY CLASSIFICATIONS</div>
           <div className="space-y-2.5">
-            <div className="flex items-start gap-3"><Pill cls={PRV.preventable}>PREVENT</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could have reasonably done something to avoid the crash. Counts toward the CSA Crash Indicator BASIC. Triggers safety review and corrective action.</div></div>
-            <div className="flex items-start gap-3"><Pill cls={PRV.non_preventable}>NON-PREV</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could not reasonably have prevented the crash. Examples eligible under FMCSA's CPDP: struck by wrong-way / DUI / suicidal driver, hit while legally stopped or parked, struck by debris, hit-and-run, animal strikes.</div></div>
-            <div className="flex items-start gap-3"><Pill cls={PRV.undetermined}>UNDET'D</Pill><div className="text-[12px] text-black dark:text-white flex-1">Insufficient evidence to make a determination after investigation. Document what was reviewed and why a call could not be made.</div></div>
-            <div className="flex items-start gap-3"><Pill cls={PRV.pending}>PENDING</Pill><div className="text-[12px] text-black dark:text-white flex-1">Determination not yet made. Investigation in progress (police report, witness statements, ELD/dashcam review). Default state for newly logged accidents.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={PRV.preventable} size="sm">PREVENT</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could have reasonably done something to avoid the crash. Counts toward the CSA Crash Indicator BASIC. Triggers safety review and corrective action.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={PRV.non_preventable} size="sm">NON-PREV</Pill><div className="text-[12px] text-black dark:text-white flex-1">Driver could not reasonably have prevented the crash. Examples eligible under FMCSA's CPDP: struck by wrong-way / DUI / suicidal driver, hit while legally stopped or parked, struck by debris, hit-and-run, animal strikes.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={PRV.undetermined} size="sm">UNDET'D</Pill><div className="text-[12px] text-black dark:text-white flex-1">Insufficient evidence to make a determination after investigation. Document what was reviewed and why a call could not be made.</div></div>
+            <div className="flex items-start gap-3"><Pill cls={PRV.pending} size="sm">PENDING</Pill><div className="text-[12px] text-black dark:text-white flex-1">Determination not yet made. Investigation in progress (police report, witness statements, ELD/dashcam review). Default state for newly logged accidents.</div></div>
           </div>
         </div>
       </div>
@@ -226,7 +233,7 @@ export default function AccidentsPage() {
                     </td>
                     <td className="px-3 py-3 hidden md:table-cell">
                       {(a.alc_test_status || a.drug_test_status) ? (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5 items-start">
                           {a.alc_test_status && <Pill cls={DA[a.alc_test_status as keyof typeof DA] || DA.not_required}>Alc: {a.alc_test_status.toUpperCase()}</Pill>}
                           {a.drug_test_status && <Pill cls={DA[a.drug_test_status as keyof typeof DA] || DA.not_required}>Drug: {a.drug_test_status.toUpperCase()}</Pill>}
                         </div>
