@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-18 by Claude (Sprint #21).
+Last updated: 2026-05-19 by Claude (Scorecards wired).
 
 ---
 
@@ -20,10 +20,10 @@ Already wired & polished:
 - /app/vehicles
 - /app/accidents — Definitions reference, severity/citation/D&A columns, uniform pills, dark-mode legibility
 - /app/inspections — Levels I–VI Definitions card mirroring X3FS, uniform pills, grid-aligned legend
-- /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish)
+- /app/scorecards — composite score backend (90-day window) + tier filter + Definitions card with formula
+- /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
-- /app/scorecards
 - /app/audit-export
 - /app/settings
 - /app/marketing
@@ -36,7 +36,7 @@ Remaining to audit in Sprint #21:
 ### Sprint #21 Postiz integration
 - User: Postiz Cloud, $49/mo plan.
 - `POSTIZ_BASE_URL` defaults to `https://app.postiz.com` in `publish.ts` (this commit).
-- `POSTIZ_API_KEY` lives in `secrets.env` (length 64). Needs to be set on Cloudflare Pages env.
+- `POSTIZ_API_KEY` set on Cloudflare Pages production + preview (deploy 49660eac).
 - Smoke test status (pre-Postiz):
   - GET /api/admin/social/list → 200
   - POST /api/admin/social/generate → 200 (Anthropic post generated successfully)
