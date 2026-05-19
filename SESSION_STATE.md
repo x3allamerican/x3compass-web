@@ -2,7 +2,7 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (Scorecards wired).
+Last updated: 2026-05-19 by Claude (Audit Export polished).
 
 ---
 
@@ -21,10 +21,10 @@ Already wired & polished:
 - /app/accidents — Definitions reference, severity/citation/D&A columns, uniform pills, dark-mode legibility
 - /app/inspections — Levels I–VI Definitions card mirroring X3FS, uniform pills, grid-aligned legend
 - /app/scorecards — composite score backend (90-day window) + tier filter + Definitions card with formula
+- /app/audit-export — KPI cards + Quick-full-audit button + Scope definitions w/ CFR cites + uniform status pills + retry on failed
 - /admin/social — Social Media Manager (Anthropic-backed generate + Postiz publish, env wired on CF Pages)
 
 Remaining to audit in Sprint #21:
-- /app/audit-export
 - /app/settings
 - /app/marketing
 - /app/notifications
