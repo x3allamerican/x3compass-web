@@ -25,7 +25,9 @@ for (const path of PAGES) {
   test(`accessibility — ${path} has zero critical violations`, async ({ page }) => {
     await page.goto(`${PROD}${path}`);
     const results = await new AxeBuilder({ page })
-      .include("main, header, footer")
+      // No .include() — analyze the whole page. Restricting to landmarks
+      // breaks when a page doesn't render one of them (which is its own
+      // a11y issue, but not what THIS test should fail on).
       .options({ runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } })
       .analyze();
 

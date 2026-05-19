@@ -89,7 +89,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <ThemeProvider>
-        {children}
+        <main id="main">{children}</main>
         <CookieBanner />
         <Script id="x3-error-capture" strategy="afterInteractive">{`
           (function(){
