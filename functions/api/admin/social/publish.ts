@@ -4,13 +4,17 @@
  * Gated by POSTIZ_API_KEY + POSTIZ_BASE_URL env vars.
  */
 interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; POSTIZ_API_KEY?: string; POSTIZ_BASE_URL?: string; }
+
+// Postiz Cloud is the hosted SaaS at app.postiz.com — use that as the default so
+// only POSTIZ_API_KEY needs to be set. Self-hosted users can override via env.
+const DEFAULT_POSTIZ_BASE_URL = "https://app.postiz.com";
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { id?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.id) return json({ ok: false, error: "Missing id" }, 400);
-  if (!ctx.env.POSTIZ_API_KEY || !ctx.env.POSTIZ_BASE_URL) {
-    return json({ ok: false, configured: false, error: "Postiz not configured. Set POSTIZ_API_KEY + POSTIZ_BASE_URL on Cloudflare Pages and redeploy.", help_url: "https://docs.postiz.com" }, 503);
+  if (!ctx.env.POSTIZ_API_KEY) {
+    return json({ ok: false, configured: false, error: "Postiz not configured. Set POSTIZ_API_KEY on Cloudflare Pages and redeploy. (POSTIZ_BASE_URL defaults to https://app.postiz.com for Postiz Cloud.)", help_url: "https://docs.postiz.com" }, 503);
   }
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) return json({ ok: false, error: "Server missing Supabase env" }, 500);
 
@@ -24,7 +28,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
   // Push to Postiz
   try {
-    const pr = await fetch(`${ctx.env.POSTIZ_BASE_URL.replace(/\/$/, "")}/api/v1/posts`, {
+    const pr = await fetch(`${(ctx.env.POSTIZ_BASE_URL || DEFAULT_POSTIZ_BASE_URL).replace(/\/$/, "")}/api/v1/posts`, {
       method: "POST",
       headers: { Authorization: `Bearer ${ctx.env.POSTIZ_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
