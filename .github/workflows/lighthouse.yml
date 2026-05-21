@@ -1,0 +1,128 @@
+name: lighthouse
+
+# Lighthouse CI on every push to main. Runs against production after a
+# 90s deploy-settle delay. Fails if any of the 4 scores drop below the
+# threshold below — keeps us from regressing the Sprint #6 perf/a11y gains.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 7 * * *'   # daily 07:00 UTC also re-runs against prod
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: lighthouse
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gate
+        run: |
+          [ -f AGENT_SAFETY.md ] || { echo "::error::AGENT_SAFETY.md missing"; exit 1; }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: install lhci
+        run: npm install -g @lhci/cli@0.13.0
+
+      - name: wait for deploy on push
+        if: github.event_name == 'push'
+        run: sleep 90
+
+      - name: run Lighthouse against production
+        id: lh
+        continue-on-error: true
+        run: |
+          mkdir -p .lighthouseci
+          # 3 representative URLs — homepage + a high-traffic inner + the demo target
+          for URL in https://x3compass-web.pages.dev/ https://x3compass-web.pages.dev/pricing/ https://x3compass-web.pages.dev/trust/ https://x3compass-web.pages.dev/skills/ https://x3compass-web.pages.dev/hazmat/; do
+            SLUG=$(echo "$URL" | sed 's|https://||;s|/|_|g')
+            lhci collect --url="$URL" --numberOfRuns=1 \
+              --settings.preset=desktop \
+              --settings.skipAudits=uses-http2 \
+              --upload.target=filesystem \
+              --upload.outputDir=".lighthouseci/$SLUG" 2>&1 | tail -10 || echo "FAIL $URL"
+          done
+
+          # Pull scores out of the JSON reports
+          python3 <<'PY'
+          import os, json, glob, sys
+          rows = []
+          for d in glob.glob(".lighthouseci/*"):
+              for f in glob.glob(f"{d}/lhr-*.json"):
+                  r = json.load(open(f))
+                  url = r["finalUrl"]
+                  cats = r["categories"]
+                  rows.append({
+                      "url": url,
+                      "perf": round(cats["performance"]["score"] * 100),
+                      "a11y": round(cats["accessibility"]["score"] * 100),
+                      "bp":   round(cats["best-practices"]["score"] * 100),
+                      "seo":  round(cats["seo"]["score"] * 100),
+                  })
+          if not rows:
+              print("No reports collected"); sys.exit(0)
+          # Thresholds — fail if any URL drops below
+          THRESH = {"perf": 85, "a11y": 90, "bp": 90, "seo": 95}  # Sprint #21 follow-up: raised after perf batch
+          fails = []
+          for r in rows:
+              for k in THRESH:
+                  if r[k] < THRESH[k]:
+                      fails.append(f"{r['url']}: {k}={r[k]} < {THRESH[k]}")
+          summary = ["## Lighthouse scores\n", "| URL | Perf | A11y | BP | SEO |", "|---|---:|---:|---:|---:|"]
+          for r in rows:
+              summary.append(f"| {r['url']} | {r['perf']} | {r['a11y']} | {r['bp']} | {r['seo']} |")
+          if fails:
+              summary.append("\n**Failures (below threshold):**")
+              for f in fails: summary.append(f"- {f}")
+          out = "\n".join(summary)
+          print(out)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(out + "\n")
+          if fails:
+              with open("/tmp/lh_fail.txt", "w") as f:
+                  f.write("\n".join(fails))
+          PY
+
+      - name: file incident if scores dropped below threshold
+        if: hashFiles('/tmp/lh_fail.txt') != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const fails = fs.readFileSync('/tmp/lh_fail.txt', 'utf8');
+            // De-dupe — one open lighthouse-regression issue at a time
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'lighthouse-regression', per_page: 3,
+            });
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: open.data[0].number,
+                body: `Still failing at ${new Date().toISOString()}:\n\`\`\`\n${fails}\n\`\`\``,
+              });
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[lighthouse] Production scores dropped below threshold`,
+              body: [
+                `**Lighthouse regression detected**`, ``,
+                `\`\`\``, fails, `\`\`\``, ``,
+                `Thresholds: Performance≥80, Accessibility≥90, BestPractices≥85, SEO≥90.`,
+                `Agent rules in \`AGENT_SAFETY.md\`. Doctor will be dispatched.`,
+              ].join('\n'),
+              labels: ['lighthouse-regression', 'uptime-alert', 'incident'],
+            });

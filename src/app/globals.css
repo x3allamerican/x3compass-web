@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/* ============================================================
+   X3 COMPASS · DUAL-MODE THEME SYSTEM (v2 — readable light)
+   Both dark + light themes share the cyan brand accent.
+   Theme is toggled by adding `light` class to <html>.
+   ============================================================ */
+
+/* ---- DARK (default) ---- */
+:root {
+  --bg:           #0A1929;
+  --bg-2:         #0B1B2E;
+  --bg-3:         #091525;
+  --surface:      #15233D;
+  --surface-2:    #1A2B47;
+  --surface-3:    #0F1C32;
+
+  --fg:           #FFFFFF;
+  --fg-muted:     rgba(255, 255, 255, 0.72);
+  --fg-faint:     rgba(255, 255, 255, 0.50);
+  --fg-on-accent: #0A1929;
+
+  --border:       #1E3556;
+  --border-strong:#2A446B;
+  --hairline:     rgba(255, 255, 255, 0.08);
+
+  --accent:       #22D3EE;
+  --accent-2:     #06B6D4;
+  --accent-fg:    #0A1929;
+
+  --success:      #34D399;
+  --warning:      #FBBF24;
+  --danger:       #F87171;
+
+  --card-shadow:  0 1px 0 rgba(255,255,255,0.02), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --decoration-opacity: 1;
+}
+
+/* ---- LIGHT (high-contrast, slate-based) ---- */
+:root.light {
+  --bg:           #F4F7FA;        /* warm off-white */
+  --bg-2:         #FFFFFF;
+  --bg-3:         #E8EFF5;
+  --surface:      #FFFFFF;        /* card bg = pure white, shadow gives the depth */
+  --surface-2:    #F8FAFC;
+  --surface-3:    #FFFFFF;
+
+  --fg:           #0F172A;        /* slate-900 — body text */
+  --fg-muted:     #334155;        /* slate-700 — readable secondary, NOT washed out */
+  --fg-faint:     #475569;        /* slate-600 — 7.05:1 contrast on #F4F7FA, comfortably passes WCAG AA (was #64748B = 4.43:1, just under the 4.5 floor) */
+  --fg-on-accent: #FFFFFF;
+
+  --border:       #CBD5E1;        /* slate-300 — visible card edges */
+  --border-strong:#94A3B8;        /* slate-400 — emphasized */
+  --hairline:     rgba(15, 23, 42, 0.08);
+
+  --accent:       #0E7490;        /* cyan-700 — AA contrast on white */
+  --accent-2:     #155E75;        /* cyan-800 */
+  --accent-fg:    #FFFFFF;
+
+  --success:      #047857;        /* emerald-700 */
+  --warning:      #B45309;        /* amber-700 */
+  --danger:       #B91C1C;        /* red-700 */
+
+  --card-shadow:  0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --decoration-opacity: 0.35;
+}
+
+/* ---- LIGHT-MODE: tame the dark-mode-only glow decorations ----
+   Many marketing sections apply inline `background: radial-gradient(...)` to a
+   decorative pseudo-element with cyan/violet glows tuned for dark navy. In
+   light mode they read as muddy washes. Drop their opacity in light mode. */
+:root.light [style*="radial-gradient"] {
+  opacity: var(--decoration-opacity);
+}
+
+/* ---- Theme-aware utility classes ---- */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-border-default: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  /* Belt-and-suspenders against any rogue mobile overflow (Sprint #8 probe). */
+  overflow-x: hidden;
+  /* Safari mobile zoom-from-input guard — locks viewport horizontally only. */
+  max-width: 100vw;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+/* Italic emphasis serif — for "every card you collect" style words */
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Card utility — works beautifully in both modes.
+   Dark: subtle 1px border + shadow.
+   Light: visible border + soft shadow (gives card affordance without weight). */
+.x3-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.x3-card-hover {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.x3-card-hover:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Visible keyboard-only focus ring (doesn't show on mouse click) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect prefers-reduced-motion — kill all CSS transitions/animations for users who opted out */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* sr-only / focus:not-sr-only — Tailwind has these built in but we add the focus-visible flavor for safety */
+.sr-only-focus {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Skeleton pulse (used by src/components/Skeleton.tsx) ─────────────── */
+@keyframes x3-skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1.0; }
+}
+.animate-x3-pulse { animation: x3-skeleton-pulse 1.4s ease-in-out infinite; }
