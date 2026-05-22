@@ -41,7 +41,7 @@ const COMPONENTS = [
     desc: "Partner-only Slack/Discord. Deal swaps. Best-practice sharing. Quarterly in-person meetup (optional).",
     retail: "Industry peer groups charge $2K-5K/yr" },
   { n: "10", title: "Monthly office hours with founder", badge: "FOUNDER ACCESS",
-    desc: "60-minute monthly call with Joshua Kovarik + the product team. Roadmap preview, Q&A, feature requests heard directly. Partners' #1 referenced reason for upgrading from Direct.",
+    desc: "60-minute monthly call with X3 Compass Team + the product team. Roadmap preview, Q&A, feature requests heard directly. Partners' #1 referenced reason for upgrading from Direct.",
     retail: "Founder access at scale ≈ priceless" },
   { n: "11", title: "Carrier outreach toolkit", badge: "SCRIPTS+SEQUENCES",
     desc: "Cold-email templates, LinkedIn sequences, carrier-discovery scripts, proposal frameworks. Pre-built for the safety-consultant-to-motor-carrier sale.",

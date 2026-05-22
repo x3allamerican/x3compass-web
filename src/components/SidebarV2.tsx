@@ -24,21 +24,21 @@ type Group = { kind: "group"; title: string; icon: string; defaultOpen?: boolean
 type Item = Leaf | Group;
 
 const DOT_BG: Record<Dot, string> = {
-  emerald: "bg-emerald-600 dark:bg-emerald-400",
-  cyan:    "bg-cyan-700    dark:bg-cyan-400",
-  amber:   "bg-amber-600   dark:bg-amber-400",
-  rose:    "bg-rose-700    dark:bg-rose-400",
-  violet:  "bg-violet-700  dark:bg-violet-400",
-  slate:   "bg-slate-600   dark:bg-slate-400",
+  emerald: "bg-emerald-500 dark:bg-emerald-300",
+  cyan:    "bg-cyan-500    dark:bg-cyan-300",
+  amber:   "bg-amber-500   dark:bg-amber-300",
+  rose:    "bg-rose-500    dark:bg-rose-300",
+  violet:  "bg-violet-500  dark:bg-violet-300",
+  slate:   "bg-slate-500   dark:bg-slate-300",
 };
 
 const PILL_CLS: Record<Dot, string> = {
-  emerald: "bg-emerald-100 dark:bg-emerald-500/40 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
-  cyan:    "bg-cyan-100    dark:bg-cyan-500/40    text-cyan-900    dark:text-cyan-50    border-cyan-700    dark:border-cyan-300/80",
-  amber:   "bg-amber-100   dark:bg-amber-500/40   text-amber-900   dark:text-amber-50   border-amber-700   dark:border-amber-300/80",
-  rose:    "bg-rose-100    dark:bg-rose-500/40    text-rose-900    dark:text-rose-50    border-rose-700    dark:border-rose-300/80",
-  violet:  "bg-violet-100  dark:bg-violet-500/40  text-violet-900  dark:text-violet-50  border-violet-700  dark:border-violet-300/80",
-  slate:   "bg-slate-200   dark:bg-slate-500/40   text-slate-900   dark:text-slate-50   border-slate-600   dark:border-slate-300/80",
+  emerald: "bg-emerald-100 dark:bg-emerald-500/60 text-emerald-900 dark:text-emerald-100 border-emerald-600 dark:border-emerald-400",
+  cyan:    "bg-cyan-100    dark:bg-cyan-500/60    text-cyan-900    dark:text-cyan-100    border-cyan-600    dark:border-cyan-400",
+  amber:   "bg-amber-100   dark:bg-amber-500/60   text-amber-900   dark:text-amber-100   border-amber-600   dark:border-amber-400",
+  rose:    "bg-rose-100    dark:bg-rose-500/60    text-rose-900    dark:text-rose-100    border-rose-600    dark:border-rose-400",
+  violet:  "bg-violet-100  dark:bg-violet-500/60  text-violet-900  dark:text-violet-100  border-violet-600  dark:border-violet-400",
+  slate:   "bg-slate-200   dark:bg-slate-500/60   text-slate-900   dark:text-slate-100   border-slate-600   dark:border-slate-400",
 };
 
 const NAV: Item[] = [

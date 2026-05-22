@@ -69,13 +69,14 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const sidebarParam = searchParams?.get("sidebar") || null;
   useEffect(() => {
     if (sidebarParam === "v2") { try { localStorage.setItem("x3-sidebar", "v2"); } catch {} }
-    if (sidebarParam === "v1") { try { localStorage.removeItem("x3-sidebar"); } catch {} }
+    if (sidebarParam === "v1") { try { localStorage.setItem("x3-sidebar", "v1"); } catch {} }
   }, [sidebarParam]);
   const useV2 =
-    sidebarParam === "v2" ||
-    (typeof window !== "undefined" && sidebarParam !== "v1" && (() => {
-      try { return localStorage.getItem("x3-sidebar") === "v2"; } catch { return false; }
-    })());
+    sidebarParam !== "v1" &&
+    (sidebarParam === "v2" ||
+    (typeof window !== "undefined" && (() => {
+      try { return localStorage.getItem("x3-sidebar") !== "v1"; } catch { return true; }
+    })()));
 
   // Persist sidebar scroll position across page navigations.
   // The sidebar re-mounts on every /app/* route change because AppShell is rendered

@@ -50,7 +50,7 @@ const ORGANIZATION_JSONLD = {
   foundingDate: "2024-01-01",
   founder: {
     "@type": "Person",
-    name: "Joshua Kovarik",
+    name: "X3 Compass Team",
     jobTitle: "Founder & CEO",
     url: SITE,
     sameAs: ["https://github.com/joshuakovarik"],

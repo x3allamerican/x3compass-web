@@ -16,21 +16,21 @@
   --surface-3:    #0F1C32;
 
   --fg:           #FFFFFF;
-  --fg-muted:     rgba(255, 255, 255, 0.72);
-  --fg-faint:     rgba(255, 255, 255, 0.50);
+  --fg-muted:     rgba(255, 255, 255, 0.80);
+  --fg-faint:     rgba(255, 255, 255, 0.60);
   --fg-on-accent: #0A1929;
 
-  --border:       #1E3556;
-  --border-strong:#2A446B;
-  --hairline:     rgba(255, 255, 255, 0.08);
+  --border:       #2A446B;
+  --border-strong:#3A5A8B;
+  --hairline:     rgba(255, 255, 255, 0.12);
 
-  --accent:       #22D3EE;
-  --accent-2:     #06B6D4;
+  --accent:       #00D9FF;
+  --accent-2:     #00B8D4;
   --accent-fg:    #0A1929;
 
-  --success:      #34D399;
+  --success:      #10D981;
   --warning:      #FBBF24;
-  --danger:       #F87171;
+  --danger:       #FF5555;
 
   --card-shadow:  0 1px 0 rgba(255,255,255,0.02), 0 8px 24px rgba(0, 0, 0, 0.25);
   --decoration-opacity: 1;
