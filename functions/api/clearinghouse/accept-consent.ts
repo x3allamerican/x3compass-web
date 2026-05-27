@@ -29,8 +29,11 @@
  */
 
 import { type SupaEnv } from "../../_shared/supabase-admin";
+import { sendEmail, type EmailEnv } from "../../_shared/emails";
 
-interface Env extends SupaEnv {}
+interface Env extends SupaEnv, EmailEnv {
+  PUBLIC_APP_URL?: string;
+}
 
 interface RequestBody {
   consent_id?: string;
@@ -83,9 +86,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   if (!typedName) return json({ ok: false, error: "typed_name required" }, 400);
   if (body.agree !== true) return json({ ok: false, error: "Explicit agreement required" }, 400);
 
-  // 2. Fetch the consent + driver name to validate typed signature
+  // 2. Fetch the consent + driver name + email + carrier name to validate
+  //    the typed signature and to send the driver confirmation email after.
   const lookup = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/compass_clearinghouse_consents?id=eq.${cid}&select=id,carrier_id,driver_id,consent_type,consent_received_at,consent_revoked_at,consent_deadline_at,compass_drivers!inner(first_name,last_name)`,
+    `${env.SUPABASE_URL}/rest/v1/compass_clearinghouse_consents?id=eq.${cid}&select=id,carrier_id,driver_id,consent_type,consent_received_at,consent_revoked_at,consent_deadline_at,carriers!inner(name),compass_drivers!inner(first_name,last_name,email)`,
     { headers: SUPABASE_HEADERS(env.SUPABASE_SERVICE_ROLE) }
   );
   if (!lookup.ok) return json({ ok: false, error: `Supabase lookup ${lookup.status}` }, 500);
@@ -98,7 +102,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     consent_received_at: string | null;
     consent_revoked_at: string | null;
     consent_deadline_at: string | null;
-    compass_drivers?: { first_name?: string; last_name?: string };
+    carriers?: { name?: string };
+    compass_drivers?: { first_name?: string; last_name?: string; email?: string };
   }>;
 
   if (!rows.length) return json({ ok: false, error: "Consent not found" }, 404);
@@ -166,10 +171,75 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     }).catch(() => { /* non-fatal — queue will be retried */ });
   }
 
+  // 7. Send driver confirmation email (best-effort · non-fatal if it fails).
+  //    Gives the driver immediate proof of what they signed, when, for whom.
+  const driverEmail = c.compass_drivers?.email;
+  const driverFirst = c.compass_drivers?.first_name || "Driver";
+  const carrierName = c.carriers?.name || "your motor carrier";
+  if (driverEmail && env.RESEND_API_KEY) {
+    const queryTypeLabel = c.consent_type === "triggered_24hr" ? "triggered full" : "pre-employment full";
+    const subject = `Confirmation · your FMCSA Clearinghouse consent was received`;
+    const text = `Hi ${driverFirst},
+
+This confirms ${carrierName} received your electronic consent to run an FMCSA Clearinghouse ${queryTypeLabel} query on your record.
+
+Signed at: ${now.toUTCString()}
+Consent type: ${queryTypeLabel}
+Requested by: ${carrierName}
+
+What happens next:
+- ${carrierName} will run the full query through the FMCSA Clearinghouse.
+- If your record is clean, no further action is needed.
+- If there is information on file, ${carrierName} will follow up with you directly.
+
+You have the right to review your own FMCSA Clearinghouse record at any time, free of charge:
+https://clearinghouse.fmcsa.dot.gov
+
+If you did NOT authorize this query or have questions, contact ${carrierName} immediately. You may also revoke consent through your carrier.
+
+Keep this email for your records.
+
+X3 Compass · on behalf of ${carrierName}`;
+    const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0F172A;line-height:1.55;max-width:560px;margin:0 auto;padding:24px;">
+      <div style="display:inline-block;background:#D1FAE5;border:1px solid #4ADE80;color:#047857;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:16px;">✓ Consent received</div>
+      <h1 style="font-size:22px;font-weight:800;margin:0 0 16px;">Your consent was received</h1>
+      <p>Hi <strong>${driverFirst}</strong>,</p>
+      <p>This confirms <strong>${carrierName}</strong> received your electronic consent to run an FMCSA Clearinghouse <strong>${queryTypeLabel}</strong> query on your record.</p>
+      <table style="width:100%;margin:18px 0;border-collapse:collapse;font-size:13px;">
+        <tr><td style="padding:6px 0;color:#475569;width:140px;">Signed at</td><td style="padding:6px 0;color:#0F172A;font-weight:600;">${now.toLocaleString("en-US",{dateStyle:"long",timeStyle:"short"})}</td></tr>
+        <tr><td style="padding:6px 0;color:#475569;">Consent type</td><td style="padding:6px 0;color:#0F172A;font-weight:600;">${queryTypeLabel}</td></tr>
+        <tr><td style="padding:6px 0;color:#475569;">Requested by</td><td style="padding:6px 0;color:#0F172A;font-weight:600;">${carrierName}</td></tr>
+      </table>
+      <h3 style="font-size:14px;font-weight:800;margin:20px 0 8px;">What happens next</h3>
+      <ol style="margin:0 0 16px 18px;padding:0;font-size:13px;color:#334155;line-height:1.6;">
+        <li>${carrierName} runs the full query through the FMCSA Clearinghouse.</li>
+        <li>If your record is clean, no further action is needed.</li>
+        <li>If there is information on file, ${carrierName} will follow up with you directly.</li>
+      </ol>
+      <p style="background:#F1F5F9;border-left:3px solid #0E7490;padding:10px 14px;margin:18px 0;border-radius:4px;font-size:12.5px;line-height:1.55;">
+        <strong>Review your own record (free):</strong><br>
+        <a href="https://clearinghouse.fmcsa.dot.gov" style="color:#0E7490;">clearinghouse.fmcsa.dot.gov</a>
+      </p>
+      <p style="font-size:12px;color:#64748B;">If you did NOT authorize this query, contact ${carrierName} immediately. Keep this email for your records.</p>
+      <hr style="border:none;border-top:1px solid #CBD5E1;margin:24px 0;">
+      <p style="font-size:11px;color:#94A3B8;">X3 Compass · on behalf of ${carrierName} · 49 CFR §382.711 retention applies</p>
+    </body></html>`;
+
+    // Fire and forget · non-fatal
+    sendEmail(env, {
+      to: driverEmail,
+      subject,
+      html,
+      text,
+      replyTo: env.EMAIL_FROM_SUPPORT,
+    }).catch(() => { /* swallow · audit row already persisted */ });
+  }
+
   return json({
     ok: true,
     consent_id: cid,
     received_at: now.toISOString(),
     late,
+    driver_email_sent: !!(driverEmail && env.RESEND_API_KEY),
   });
 }

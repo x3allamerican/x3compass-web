@@ -127,6 +127,74 @@ export default function ClearinghousePage() {
     consent_type: "pre_employment" | "triggered_24hr";
   }>(null);
 
+  // Per-row action state for Run / Revoke buttons
+  const [actionBusy, setActionBusy]     = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  async function runQuery(query_id: string) {
+    setActionBusy(query_id); setActionNotice(null);
+    if (isDemo) {
+      // Demo short-circuit
+      await new Promise(r => setTimeout(r, 500));
+      setActionNotice({ kind: "ok", text: `Demo mode · would have called FMCSA Clearinghouse API for query ${query_id.slice(0, 8)}. Apply the migration to run for real.` });
+      setActionBusy(null); return;
+    }
+    try {
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch("/api/clearinghouse/run-query", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session?.access_token || ""}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ query_id }),
+      });
+      const data = await res.json() as { ok: boolean; error?: string; result?: string; triggered_followup?: boolean };
+      if (!data.ok) throw new Error(data.error || "Run failed");
+      setActionNotice({ kind: "ok", text: `Query complete · result: ${data.result}${data.triggered_followup ? " · 24-hr triggered consent created" : ""}` });
+      // Refresh queries + consents
+      if (carrier) {
+        const sb2 = getSupabase();
+        const [q, c] = await Promise.all([
+          sb2.from("compass_clearinghouse_queries").select("id,driver_id,query_type,query_run_at,result,consent_received_at,cost_cents,fmcsa_query_id").eq("carrier_id", carrier.id).order("query_run_at", { ascending: false }).limit(50),
+          sb2.from("compass_clearinghouse_consents").select("id,driver_id,consent_type,consent_requested_at,consent_deadline_at,consent_received_at").eq("carrier_id", carrier.id).is("consent_revoked_at", null),
+        ]);
+        setQueries((q.data as Query[]) || []);
+        setConsents((c.data as Consent[]) || []);
+      }
+    } catch (err) {
+      setActionNotice({ kind: "err", text: err instanceof Error ? err.message : "Run failed" });
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function revokeConsent(consent_id: string) {
+    if (!confirm("Revoke this consent? The driver's link will stop working. This action is logged for audit.")) return;
+    setActionBusy(consent_id); setActionNotice(null);
+    if (isDemo) {
+      await new Promise(r => setTimeout(r, 300));
+      setActionNotice({ kind: "ok", text: `Demo mode · would have revoked consent ${consent_id.slice(0, 8)}.` });
+      setActionBusy(null); return;
+    }
+    try {
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch("/api/clearinghouse/revoke-consent", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session?.access_token || ""}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ consent_id }),
+      });
+      const data = await res.json() as { ok: boolean; error?: string };
+      if (!data.ok) throw new Error(data.error || "Revoke failed");
+      setActionNotice({ kind: "ok", text: "Consent revoked." });
+      // Drop from local state
+      setConsents(prev => prev.filter(c => c.id !== consent_id));
+    } catch (err) {
+      setActionNotice({ kind: "err", text: err instanceof Error ? err.message : "Revoke failed" });
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
   /* KPI counters */
   const kpis = useMemo(() => {
     const now = Date.now();
@@ -350,6 +418,13 @@ export default function ClearinghousePage() {
                             >
                               Resend consent
                             </button>
+                            <button
+                              onClick={() => revokeConsent(c.id)}
+                              disabled={actionBusy === c.id}
+                              className="px-3 py-1.5 rounded text-[11px] font-bold text-[var(--fg-muted)] border border-[var(--border)] hover:text-[var(--danger)] hover:border-[var(--danger)]/40 disabled:opacity-50"
+                            >
+                              {actionBusy === c.id ? "…" : "Revoke"}
+                            </button>
                           </div>
                         </div>
                       );
@@ -379,19 +454,21 @@ export default function ClearinghousePage() {
                       <th className="text-left px-4 py-3">Result</th>
                       <th className="text-left px-4 py-3 hidden lg:table-cell">FMCSA ID</th>
                       <th className="text-right px-4 py-3">Cost</th>
+                      <th className="text-right px-4 py-3 w-[90px]"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
                     {loading ? (
-                      <tr><td colSpan={6} className="px-4 py-8 text-center text-[var(--fg-muted)]">Loading…</td></tr>
+                      <tr><td colSpan={7} className="px-4 py-8 text-center text-[var(--fg-muted)]">Loading…</td></tr>
                     ) : effQueries.length === 0 ? (
-                      <tr><td colSpan={6} className="px-4 py-10 text-center">
+                      <tr><td colSpan={7} className="px-4 py-10 text-center">
                         <div className="text-2xl mb-2">📋</div>
                         <div className="text-[var(--fg)] font-bold mb-1">No queries yet</div>
                         <div className="text-[var(--fg-muted)] text-sm">Pre-employment queries appear here once you start screening CDL drivers.</div>
                       </td></tr>
                     ) : effQueries.map(q => {
                       const pill = RESULT_PILL[q.result];
+                      const isPending = q.result === "pending";
                       return (
                         <tr key={q.id} className="hover:bg-[var(--surface-2)]/40">
                           <td className="px-4 py-3 text-[var(--fg)] font-semibold">{q.driver_name}</td>
@@ -404,6 +481,18 @@ export default function ClearinghousePage() {
                           </td>
                           <td className="px-4 py-3 text-[11px] text-[var(--fg-faint)] font-mono hidden lg:table-cell">{q.fmcsa_query_id || "—"}</td>
                           <td className="px-4 py-3 text-right tabular-nums text-[var(--fg)]">${((q.cost_cents || 0) / 100).toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right">
+                            {isPending ? (
+                              <button
+                                onClick={() => runQuery(q.id)}
+                                disabled={actionBusy === q.id}
+                                className="px-2.5 py-1 rounded text-[10.5px] font-extrabold text-[var(--bg)] disabled:opacity-50"
+                                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+                              >
+                                {actionBusy === q.id ? "Running…" : "Run query →"}
+                              </button>
+                            ) : null}
+                          </td>
                         </tr>
                       );
                     })}
