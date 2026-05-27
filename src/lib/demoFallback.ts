@@ -207,6 +207,41 @@ export const DEMO_CLEARINGHOUSE_CONSENTS: DemoClearinghouseConsent[] = [
   { id: "chc-003", driver_id: "d-004", driver_name: "Walsh, Anders",   consent_type: "pre_employment",  consent_requested_at: daysAgo(42),                                      consent_deadline_at: null,                                              consent_received_at: daysAgo(41), status: "received" },
 ];
 
+/* ----------- /app/hos ----------- */
+
+export type DemoHosLog = {
+  id: string;
+  driver_id: string;
+  driver_name: string;
+  log_date: string;
+  total_drive_minutes: number;
+  total_on_duty_minutes: number;
+  hours_70_8: number;          // running total of last 8 days
+  violations: Array<{ cfr: string; label: string; severity: "warning" | "violation" }>;
+  eld_source: string | null;   // "motive" | "samsara" | "geotab" | "keeptruckin" | null (manual)
+  certified: boolean;
+};
+
+export const DEMO_HOS_LOGS: DemoHosLog[] = [
+  // Today
+  { id: "hl-001", driver_id: "d-005", driver_name: "Jansen, Brett",       log_date: today(), total_drive_minutes: 695, total_on_duty_minutes: 845, hours_70_8: 68.4, violations: [{ cfr: "§395.3(a)(1)", label: "11-hr drive limit exceeded by 35m", severity: "violation" }, { cfr: "§395.3(c)", label: "Approaching 70-hr/8-day · 1.6h headroom", severity: "warning" }], eld_source: "motive",  certified: false },
+  { id: "hl-002", driver_id: "d-002", driver_name: "Saunders, Khalil",    log_date: today(), total_drive_minutes: 640, total_on_duty_minutes: 820, hours_70_8: 58.1, violations: [], eld_source: "motive",  certified: false },
+  { id: "hl-003", driver_id: "d-001", driver_name: "Reyes, Marcus",       log_date: today(), total_drive_minutes: 540, total_on_duty_minutes: 720, hours_70_8: 49.8, violations: [], eld_source: "samsara", certified: true  },
+  // Yesterday
+  { id: "hl-004", driver_id: "d-009", driver_name: "Kowalski, Renee",     log_date: daysAgo(1), total_drive_minutes: 480, total_on_duty_minutes: 630, hours_70_8: 41.2, violations: [{ cfr: "§395.3(a)(3)(ii)", label: "30-min break missed after 8.4 cumulative drive hrs", severity: "violation" }], eld_source: "geotab",  certified: true },
+  { id: "hl-005", driver_id: "d-006", driver_name: "Velasquez, Carla",    log_date: daysAgo(1), total_drive_minutes: 525, total_on_duty_minutes: 705, hours_70_8: 47.5, violations: [], eld_source: "samsara", certified: true },
+  { id: "hl-006", driver_id: "d-008", driver_name: "Okafor, Yusuf",       log_date: daysAgo(1), total_drive_minutes: 615, total_on_duty_minutes: 815, hours_70_8: 52.0, violations: [], eld_source: "motive",  certified: true },
+  // 2 days ago
+  { id: "hl-007", driver_id: "d-010", driver_name: "Beaumont, Trent",     log_date: daysAgo(2), total_drive_minutes: 580, total_on_duty_minutes: 760, hours_70_8: 50.3, violations: [], eld_source: "motive",  certified: true },
+  { id: "hl-008", driver_id: "d-005", driver_name: "Jansen, Brett",       log_date: daysAgo(2), total_drive_minutes: 660, total_on_duty_minutes: 845, hours_70_8: 53.7, violations: [{ cfr: "§395.3(a)(2)", label: "14-hr duty window exceeded by 25m", severity: "violation" }], eld_source: "motive",  certified: true },
+  { id: "hl-009", driver_id: "d-011", driver_name: "Ramaswamy, Priya",    log_date: daysAgo(2), total_drive_minutes: 450, total_on_duty_minutes: 600, hours_70_8: 39.8, violations: [], eld_source: "keeptruckin", certified: true },
+  // 3-5 days ago
+  { id: "hl-010", driver_id: "d-003", driver_name: "Mendelsohn, Linda",   log_date: daysAgo(3), total_drive_minutes: 600, total_on_duty_minutes: 800, hours_70_8: 48.0, violations: [], eld_source: "samsara", certified: true },
+  { id: "hl-011", driver_id: "d-002", driver_name: "Saunders, Khalil",    log_date: daysAgo(3), total_drive_minutes: 610, total_on_duty_minutes: 790, hours_70_8: 47.3, violations: [], eld_source: "motive",  certified: true },
+  { id: "hl-012", driver_id: "d-007", driver_name: "Whitman, D.",         log_date: daysAgo(4), total_drive_minutes: 0,   total_on_duty_minutes: 0,   hours_70_8: 0.0,  violations: [{ cfr: "§395.8(k)", label: "Missing RODS · ELD malfunction reported, not yet repaired", severity: "warning" }], eld_source: null, certified: false },
+  { id: "hl-013", driver_id: "d-001", driver_name: "Reyes, Marcus",       log_date: daysAgo(5), total_drive_minutes: 555, total_on_duty_minutes: 735, hours_70_8: 42.1, violations: [], eld_source: "samsara", certified: true },
+];
+
 /* ----------- helpers ----------- */
 
 /** Returns demo rows ONLY when real-data array is empty AND we're in demo mode.
