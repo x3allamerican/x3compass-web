@@ -86,6 +86,7 @@ export default function ClearinghousePage() {
   const [queries, setQueries] = useState<Query[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
   const [consents, setConsents] = useState<Consent[]>([]);
+  const [carrierCtpa, setCarrierCtpa] = useState<{ legal_name: string; fmcsa_clearinghouse_name: string; mode: string | null; custom_name: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,12 +97,27 @@ export default function ClearinghousePage() {
       const sb = getSupabase();
       // All three queries hit the new tables. If they don't exist yet (migration
       // not applied), error rows return as empty and demo fallback fills the gap.
-      const [q, v, c] = await Promise.all([
+      const [q, v, c, ctpaRow] = await Promise.all([
         sb.from("compass_clearinghouse_queries").select("id,driver_id,query_type,query_run_at,result,consent_received_at,cost_cents,fmcsa_query_id").eq("carrier_id", carrier.id).order("query_run_at", { ascending: false }).limit(50),
         sb.from("compass_clearinghouse_violations").select("id,driver_id,violation_type,violation_date,reported_by,prohibited_status_active,sap_evaluation_complete,return_to_duty_complete,notes").eq("carrier_id", carrier.id),
         sb.from("compass_clearinghouse_consents").select("id,driver_id,consent_type,consent_requested_at,consent_deadline_at,consent_received_at").eq("carrier_id", carrier.id).is("consent_revoked_at", null),
+        // Carrier's chosen C/TPA · drives the FMCSA Clearinghouse designation prompt below.
+        // Joins compass_ctpas if migration 20260527c has been applied; safe NULL fallback otherwise.
+        sb.from("carriers").select("ctpa_mode, ctpa_custom_name, ctpa:compass_ctpas(legal_name,fmcsa_clearinghouse_name)").eq("id", carrier.id).maybeSingle(),
       ]);
       if (cancelled) return;
+      // Resolve the carrier's C/TPA into a flat shape for the callout below.
+      const ctpaData = (ctpaRow.data as { ctpa_mode: string | null; ctpa_custom_name: string | null; ctpa: { legal_name: string; fmcsa_clearinghouse_name: string } | null } | null) || null;
+      if (ctpaData?.ctpa) {
+        setCarrierCtpa({
+          legal_name: ctpaData.ctpa.legal_name,
+          fmcsa_clearinghouse_name: ctpaData.ctpa.fmcsa_clearinghouse_name,
+          mode: ctpaData.ctpa_mode,
+          custom_name: ctpaData.ctpa_custom_name,
+        });
+      } else {
+        setCarrierCtpa(null);
+      }
       // Real Supabase rows lack driver_name — Phase 1 just uses demo or returns empty.
       // V1 will join compass_drivers for real labels.
       setQueries((q.data as Query[]) || []);
@@ -322,6 +338,69 @@ export default function ClearinghousePage() {
             },
           ]}
         />
+
+        {/* ============================================================
+            C/TPA DESIGNATION CALLOUT
+            ------------------------------------------------------------
+            Per §382.705(c), employers may designate a C/TPA in the FMCSA
+            Clearinghouse to file queries and report violations on their
+            behalf. We pre-fill the EXACT legal name to search at
+            clearinghouse.fmcsa.dot.gov · differs per carrier based on
+            who they picked at /app/drug-alcohol.
+              · If no C/TPA picked yet · prompt them to choose one
+              · If Procom picked · prompt to designate PROCOM
+              · If BYO picked  · prompt to designate <their TPA's
+                                  fmcsa_clearinghouse_name>
+            ============================================================ */}
+        <section
+          className="rounded-xl border p-5 flex items-start gap-4"
+          style={{
+            background: "linear-gradient(135deg, rgba(22,199,255,0.08), rgba(14,165,233,0.04))",
+            borderColor: "rgba(22,199,255,0.30)",
+            boxShadow: "var(--card-shadow)",
+          }}
+          aria-label="C/TPA designation prompt"
+        >
+          <span aria-hidden style={{ fontSize: 26, lineHeight: 1 }}>📝</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-1">
+              Step · Designate your C/TPA in the FMCSA Clearinghouse
+            </div>
+            {carrierCtpa ? (
+              <>
+                <p className="text-[13px] text-[var(--fg)] m-0 leading-relaxed">
+                  Your C/TPA is <strong>{carrierCtpa.custom_name || carrierCtpa.legal_name}</strong>. Designate them at clearinghouse.fmcsa.dot.gov so they can {carrierCtpa.mode === "byo_manual" ? "report violations on your behalf" : "conduct queries + report violations on your behalf"}. Search for the exact name when prompted: <code className="text-[11.5px] bg-[var(--surface-3)] px-1.5 py-0.5 rounded font-bold">{carrierCtpa.fmcsa_clearinghouse_name}</code>
+                </p>
+                <p className="text-[11px] text-[var(--fg-muted)] mt-1.5 m-0">
+                  Per §382.711(b)(3) · any C/TPA designation change must be updated in the Clearinghouse within 10 days.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-[13px] text-[var(--fg)] m-0 leading-relaxed">
+                  You haven&apos;t picked a C/TPA yet. Choose one at <Link href="/app/drug-alcohol" className="text-[var(--accent)] font-bold hover:underline">Drug &amp; Alcohol →</Link> and we&apos;ll surface the exact name to designate at clearinghouse.fmcsa.dot.gov. Procom is the X3-recommended default · BYO is fully supported.
+                </p>
+              </>
+            )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href="https://clearinghouse.fmcsa.dot.gov"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)]"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+              >
+                Open FMCSA Clearinghouse ↗
+              </a>
+              <Link
+                href="/app/drug-alcohol"
+                className="px-3.5 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
+              >
+                {carrierCtpa ? "Change C/TPA" : "Pick a C/TPA"}
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* ============================================================
             KPI STRIP — 4 mini KPIs
