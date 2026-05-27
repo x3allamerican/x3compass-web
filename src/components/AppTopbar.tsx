@@ -64,13 +64,13 @@ export default function AppTopbar({
         borderBottom: "2px solid rgba(255, 255, 255, 0.55)",
         position: "sticky",
         top: 0,
-        zIndex: 30,
+        zIndex: 31,
         display: "grid",
         gridTemplateColumns: "1fr auto 1fr",
         alignItems: "center",
         gap: 24,
         padding: "14px 28px",
-        minHeight: 110,
+        minHeight: 134,
       }}
     >
       {/* LEFT spacer — keeps the title TRULY centered across the topbar */}

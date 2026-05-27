@@ -181,7 +181,10 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
         Eliminates the empty marketing-style header that was bleeding into the app. */}
     <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "#000000" }}>
 
-      {/* TOP-LEFT BOX — X3 Compass logo (single SVG matching the brand artwork) */}
+      {/* TOP-LEFT BOX — X3 Compass logo. STICKY so the whole top row stays
+          locked while content scrolls. Same minHeight as the AppTopbar on the
+          right so the two cells stay flush. Joshua: top row is now locked
+          across every /app/* surface; no per-page logo overrides allowed. */}
       <Link
         href="/app"
         aria-label="X3 Compass — Home"
@@ -197,7 +200,10 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           justifyContent: "center",
           padding: "6px 10px",
           textDecoration: "none",
-          minHeight: 110,
+          minHeight: 134,
+          position: "sticky",
+          top: 0,
+          zIndex: 31,
         }}
       >
         {/* Logo: real X3 COMPASS artwork from the brand PNG, retinted to
@@ -210,8 +216,8 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           aria-label="X3 Compass"
           style={{
             display: "block",
-            height: 108,
-            width: 220,
+            height: 124,
+            width: 252,
             maxWidth: "100%",
             backgroundColor: "var(--accent)",
             WebkitMaskImage: 'url("/x3-compass-logo-alpha.png")',
