@@ -2,7 +2,32 @@
 
 **Source of truth.** This file is the canonical "where we left off" record across every Claude session, every Cowork window, every machine. Chat compacts; agentmemory has phantoms; `main` is permanent. Read this first at session start. Update at session end.
 
-Last updated: 2026-05-19 by Claude (Sprint #21 COMPLETE — Integrations + 4 agents).
+Last updated: 2026-05-26 by Claude (overnight: dashboard polish + Bugatti Hazmat Center port — READY TO DEPLOY).
+
+---
+
+## 🌙 Overnight 2026-05-26 — needs ONE local deploy
+
+**Code is ready. Sandbox can't build (errno -35 on workspace mount). Joshua: run this in the morning:**
+
+```
+cd "/Users/joshuakovarik/Documents/Claude/Projects/X3 All-American/X3 Fleet Safety/X3 Compass/x3compass-redesign/web"
+rm -rf .next out
+NEXT_TELEMETRY_DISABLED=1 npm run build && npx wrangler@latest pages deploy out --project-name=x3compass-web --branch=main --commit-dirty=true
+```
+
+**What's in the build queued up for you:**
+
+1. **AppTopbar.tsx** — DASHBOARD title lowered (paddingTop 14), subtitle band narrowed (maxWidth 900→560), spacer between duplicate marquee segments widened so only ONE green LIVE is ever visible, animation slowed 36s→42s to keep scroll speed natural.
+2. **AppShell.tsx** — logo bumped 96px→108px (slightly larger, still inside the 110px top row).
+3. **/app/page.tsx (dashboard)** — Card border-radius 14→12 (matches static), main padding unified to 24, Action Items switched from tinted boxes to flat list with bottom-border rows (matches static `.action-item` style), CSA letter glyphs now transparent + cyan border (matches `.csa-letter`), bottom row grid 1fr/1fr/1fr → 1.4fr/1fr/1.4fr (matches `.bottom-row`), severity donut 150px→160px.
+4. **/app/hazmat/page.tsx (Bugatti rebuild)** — Replaced minimal app-shell version with full Bugatti tier: oversized headline + amber gradient + $25K-fine stakes line, 6-checkmark trust grid, FINES BANNER ($89,678 / $209,249 / 5 yrs prison with USC cites), all-9-hazard-classes placard demo strip, 10-tile service stack with CFR pills, "100 open-source skills" trust block linking to github.com/x3fleetsafety/hazmat-skills. NO more "migration note" warning — this IS the destination.
+
+**Cache-bust tip if you don't see changes immediately:**
+- Cloudflare edge cache can sit on stale HTML for ~5 min. Hard refresh (⌘⇧R).
+- If `--branch=main` lands as a preview instead of production, check Cloudflare Pages → x3compass-web → Settings → Builds & deployments and confirm `main` is the configured production branch.
+
+---
 
 ---
 

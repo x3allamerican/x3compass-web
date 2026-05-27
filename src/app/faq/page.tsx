@@ -62,7 +62,7 @@ export default function FAQ() {
             <span className="serif-italic" style={{ color: "#22D3EE" }}>Real ones.</span>
           </h1>
           <p className="text-[17px] text-white/65">
-            Can&apos;t find what you need? <Link href="mailto:support@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
+            Can&apos;t find what you need? <Link href="mailto:joshua@x3compass.com" className="text-[#22D3EE] font-bold">Email us</Link> or{" "}
             <Link href="/app/ask" className="text-[#22D3EE] font-bold">ask Compass directly</Link>.
           </p>
         </section>

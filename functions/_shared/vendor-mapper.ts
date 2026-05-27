@@ -271,6 +271,156 @@ export async function upsertDrivers(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Vehicle normalization — same pattern as drivers, for compass_vehicles.
+// ─────────────────────────────────────────────────────────────────────────────
+export interface NormalizedVehicle {
+  vin?: string | null;
+  unit_number?: string | null;
+  make?: string | null;
+  model?: string | null;
+  year?: number | null;
+  license_plate?: string | null;
+  license_plate_state?: string | null;
+  status?: "active" | "inactive" | "out_of_service";
+  source_vendor?: string;
+  source_id?: string;
+}
+
+type MotiveVehicleEnvelope = {
+  vehicle?: {
+    id?: string | number;
+    number?: string;
+    make?: string;
+    model?: string;
+    year?: string | number;
+    vin?: string;
+    license_plate_number?: string;
+    license_plate_state?: string;
+    status?: string;
+  };
+};
+
+export function mapMotive(items: MotiveVehicleEnvelope[]): NormalizedVehicle[] {
+  return items
+    .map(it => it?.vehicle)
+    .filter((v): v is NonNullable<MotiveVehicleEnvelope["vehicle"]> => !!v)
+    .map(v => ({
+      vin:           v.vin || null,
+      unit_number:   v.number || null,
+      make:          v.make || null,
+      model:         v.model || null,
+      year:          v.year ? Number(v.year) || null : null,
+      license_plate: v.license_plate_number || null,
+      license_plate_state: v.license_plate_state || null,
+      status:        (v.status === "out_of_service" ? "out_of_service" : v.status === "inactive" ? "inactive" : "active") as NormalizedVehicle["status"],
+      source_vendor: "motive",
+      source_id:     v.id != null ? String(v.id) : undefined,
+    }));
+}
+
+type SamsaraVehicle = {
+  id?: string | number;
+  name?: string;
+  vin?: string;
+  make?: string;
+  model?: string;
+  year?: string | number;
+  licensePlate?: string;
+};
+
+export function mapSamsara(items: SamsaraVehicle[]): NormalizedVehicle[] {
+  return items.map(v => ({
+    vin:           v.vin || null,
+    unit_number:   v.name || null,
+    make:          v.make || null,
+    model:         v.model || null,
+    year:          v.year ? Number(v.year) || null : null,
+    license_plate: v.licensePlate || null,
+    license_plate_state: null,
+    status:        "active" as NormalizedVehicle["status"],
+    source_vendor: "samsara",
+    source_id:     v.id != null ? String(v.id) : undefined,
+  }));
+}
+
+export async function upsertVehicles(
+  env: SupaEnv,
+  carrierId: string,
+  rows: NormalizedVehicle[],
+): Promise<UpsertResult> {
+  const result: UpsertResult = { inserted: 0, updated: 0, skipped: 0, errors: [] };
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) {
+    result.errors.push({ row: -1, reason: "Server missing SUPABASE_URL / SUPABASE_SERVICE_ROLE" });
+    return result;
+  }
+  const base = env.SUPABASE_URL.replace(/\/$/, "");
+  const sr = env.SUPABASE_SERVICE_ROLE;
+
+  const BATCH = 50;
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const slice = rows.slice(i, i + BATCH).map((r, j) => {
+      if (!r.vin && !r.unit_number) {
+        result.errors.push({ row: i + j, reason: "missing vin and unit_number" });
+        return null;
+      }
+      return {
+        carrier_id: carrierId,
+        vin: r.vin || null,
+        unit_number: r.unit_number || null,
+        make: r.make || null,
+        model: r.model || null,
+        year: r.year || null,
+        license_plate: r.license_plate || null,
+        license_plate_state: r.license_plate_state || null,
+        status: r.status || "active",
+      };
+    }).filter(Boolean);
+
+    if (slice.length === 0) {
+      result.skipped += rows.slice(i, i + BATCH).length;
+      continue;
+    }
+
+    try {
+      const r = await fetch(`${base}/rest/v1/compass_vehicles?on_conflict=carrier_id,vin`, {
+        method: "POST",
+        headers: {
+          apikey: sr,
+          Authorization: `Bearer ${sr}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
+        body: JSON.stringify(slice),
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        if (r.status === 400 && text.includes("constraint")) {
+          const r2 = await fetch(`${base}/rest/v1/compass_vehicles`, {
+            method: "POST",
+            headers: { apikey: sr, Authorization: `Bearer ${sr}`, "Content-Type": "application/json", Prefer: "return=representation" },
+            body: JSON.stringify(slice),
+          });
+          if (r2.ok) {
+            const ins = (await r2.json()) as unknown[];
+            result.inserted += ins.length;
+          } else {
+            result.errors.push({ row: i, reason: `batch insert ${r2.status}: ${(await r2.text()).slice(0, 200)}` });
+          }
+          continue;
+        }
+        result.errors.push({ row: i, reason: `batch ${r.status}: ${text.slice(0, 200)}` });
+        continue;
+      }
+      const ins = (await r.json()) as unknown[];
+      result.inserted += ins.length;
+    } catch (err) {
+      result.errors.push({ row: i, reason: `batch exception: ${err instanceof Error ? err.message : String(err)}` });
+    }
+  }
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Track a vendor sync run on compass_vendor_integrations
 // ─────────────────────────────────────────────────────────────────────────────
 export async function markVendorSync(

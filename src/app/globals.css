@@ -16,21 +16,21 @@
   --surface-3:    #0F1C32;
 
   --fg:           #FFFFFF;
-  --fg-muted:     rgba(255, 255, 255, 0.80);
-  --fg-faint:     rgba(255, 255, 255, 0.60);
+  --fg-muted:     rgba(255, 255, 255, 0.72);
+  --fg-faint:     rgba(255, 255, 255, 0.50);
   --fg-on-accent: #0A1929;
 
-  --border:       #2A446B;
-  --border-strong:#3A5A8B;
-  --hairline:     rgba(255, 255, 255, 0.12);
+  --border:       #1E3556;
+  --border-strong:#2A446B;
+  --hairline:     rgba(255, 255, 255, 0.08);
 
-  --accent:       #00D9FF;
-  --accent-2:     #00B8D4;
+  --accent:       #22D3EE;
+  --accent-2:     #06B6D4;
   --accent-fg:    #0A1929;
 
-  --success:      #10D981;
+  --success:      #34D399;
   --warning:      #FBBF24;
-  --danger:       #FF5555;
+  --danger:       #F87171;
 
   --card-shadow:  0 1px 0 rgba(255,255,255,0.02), 0 8px 24px rgba(0, 0, 0, 0.25);
   --decoration-opacity: 1;
@@ -74,6 +74,82 @@
   opacity: var(--decoration-opacity);
 }
 
+/* ============================================================
+   MANUS APP SHELL — true-black canvas + electric cyan
+   ------------------------------------------------------------
+   These tokens override the marketing-site palette ONLY within
+   the AppShell (any element under [data-x3-shell="app"]).
+   The marketing site palette stays exactly as it was.
+
+   Source of truth: app.x3compass.com computed CSS, captured
+   2026-05-26. DO NOT change these without first confirming
+   the static app still matches.
+
+   TENANT WHITE-LABEL: TenantThemeProvider injects per-tenant
+   overrides inline via the style attribute, taking precedence
+   over these defaults via CSS specificity.
+   ============================================================ */
+[data-x3-shell="app"] {
+  --bg:            #000000;
+  --bg-2:          #0A0F18;
+  --bg-3:          #050810;
+  --surface:       #0F1620;
+  --surface-2:     #131C2A;
+  --surface-3:     #0B121C;
+
+  --fg:            #FFFFFF;
+  --fg-muted:      rgba(255, 255, 255, 0.88);   /* was 0.72 — Joshua: brighter */
+  --fg-faint:      rgba(255, 255, 255, 0.68);   /* was 0.50 — Joshua: brighter */
+  --fg-on-accent:  #000000;
+
+  --border:        #243349;
+  --border-strong: #38507A;
+  --hairline:      rgba(255, 255, 255, 0.10);
+
+  /* Brighter, more saturated cyan — matches app.x3compass.com */
+  --accent:        #22D3EE;
+  --accent-2:      #06B6D4;
+  --accent-fg:     #000000;
+
+  --success:       #4ADE80;
+  --warning:       #FBBF24;
+  --danger:        #F87171;
+
+  --card-shadow:   0 1px 0 rgba(255,255,255,0.05), 0 14px 36px rgba(0, 0, 0, 0.55);
+  --shell-sidebar-width: 264px;
+  --shell-header-height: 110px;
+  --shell-radius: 14px;
+
+  /* Base font size bump — Joshua: font is too small */
+  font-size: 15px;
+}
+
+/* Light-mode app shell — same shape, light palette. Tenant overrides
+   still take precedence. */
+:root.light [data-x3-shell="app"] {
+  --bg:            #F4F7FA;
+  --bg-2:          #FFFFFF;
+  --bg-3:          #E8EFF5;
+  --surface:       #FFFFFF;
+  --surface-2:     #F8FAFC;
+  --surface-3:     #FFFFFF;
+
+  --fg:            #0F172A;
+  --fg-muted:      #334155;
+  --fg-faint:      #475569;
+  --fg-on-accent:  #FFFFFF;
+
+  --border:        #CBD5E1;
+  --border-strong: #94A3B8;
+  --hairline:      rgba(15, 23, 42, 0.08);
+
+  --accent:        #0E7490;
+  --accent-2:      #155E75;
+  --accent-fg:     #FFFFFF;
+
+  --card-shadow:   0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
 /* ---- Theme-aware utility classes ---- */
 @theme inline {
   --color-bg: var(--bg);
@@ -103,6 +179,16 @@ html, body {
   /* Safari mobile zoom-from-input guard — locks viewport horizontally only. */
   max-width: 100vw;
   transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+/* When the app shell mounts, paint the document background black to match.
+   Cannot use [data-x3-shell="app"] as a parent selector on body because body
+   is its ancestor. Instead use :has() to find the shell wrapper and apply. */
+body:has([data-x3-shell="app"]) {
+  background: #000000;
+}
+:root.light body:has([data-x3-shell="app"]) {
+  background: #F4F7FA;
 }
 
 /* Italic emphasis serif — for "every card you collect" style words */

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
+import BrandMark from "@/components/BrandMark";
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,14 +12,8 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-9 h-9 grid place-items-center font-black text-base rounded-md text-[#0A1929]"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)" }}
-                >
-                  X3
-                </div>
-                <div className="text-white font-extrabold tracking-tight">X3 COMPASS</div>
+              <div className="mb-4">
+                <BrandMark variant="compass" size="md" />
               </div>
               <p className="text-[13px] text-white/55 max-w-xs">
                 The AI Safety Director for motor carriers running 1–100 power units. CFR-grounded answers, audit-ready files, daily compliance digest.

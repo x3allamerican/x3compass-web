@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
+import EducationHubCard from "@/components/EducationHubCard";
 import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
 import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
@@ -84,12 +85,34 @@ export default function DriversPage() {
         <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>
       </>}>
       <div className="p-6">
-        {/* KPI stat cards — top row, classic-app style */}
+        {/* Education Hub — matches app.x3compass.com/drivers exactly (For Drivers / For Employers / For C/TPAs + Ask AI Concierge) */}
+        <div className="mb-5">
+          <EducationHubCard
+            surface="Drivers"
+            subtitle="Driver lifecycle, qualification, supervision, and discipline — based on 49 CFR Parts 383, 391, 392 & 395. Onboarding kits, supervisor playbooks, retention plans."
+            audiences={[
+              { label: "For Drivers", subtitle: "CDL / CLP HOLDERS", tone: "cyan", icon: "🧑‍✈️",
+                body: "Know your obligations under 49 CFR — application accuracy, medical card, MVR access, drug & alcohol testing, HOS compliance, and how to report safety concerns without retaliation.",
+                bullets: ["Application accuracy (391.21)", "Medical certification (391.41)", "MVR + violations reporting (391.27)", "Drug & alcohol testing (Part 382)", "HOS recordkeeping (Part 395)", "Right to report safety (49 CFR 386.12)", "What's in your DQ file", "Driver onboarding checklist"],
+                cta: "Open Driver guide →", href: "/app/dq-files" },
+              { label: "For Employers", subtitle: "MOTOR CARRIERS · HR / SAFETY", tone: "violet", icon: "⏱",
+                body: "Run a defensible driver program: hire right, document everything, supervise actively, discipline progressively, retain proactively. Every gap is a CSA exposure.",
+                bullets: ["DQ file SOP — every required document", "Hiring decision matrix", "Onboarding curriculum (30/60/90)", "Supervisor's daily/weekly playbook", "Progressive discipline policy", "Driver retention SOP", "Annual review process (391.25)", "Termination & documentation SOP"],
+                cta: "Open Employer guide →", href: "/app/dq-files" },
+              { label: "For C/TPAs", subtitle: "CONSORTIA / THIRD-PARTY ADMINISTRATORS", tone: "amber", icon: "🛡",
+                body: "Driver management as a service. Centralize DQ files, route MVR / D&A / HOS data through one workflow, deliver consolidated reports to client carriers.",
+                bullets: ["Multi-tenant DQ file mgmt", "Client driver onboarding workflow", "Cross-client MVR + D&A coordination", "Driver lifecycle dashboard at scale", "Annual review service offering", "Compliance reporting templates"],
+                cta: "Open C/TPA guide →", href: "/app/ask?context=ctpa" },
+            ]}
+          />
+        </div>
+
+        {/* KPI strip — matches live app.x3compass.com (4 mini KPIs: Active Drivers / New This Month / DQ Expiring ≤ 30d / Inactive · Terminated) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active drivers"           value={kpis.active}    sub={`${drivers.length} on roster`} />
-          <KpiCard label="Pending hires"            value={kpis.pending}   sub="In onboarding pipeline" tone={kpis.pending > 0 ? "info" : "muted"} />
-          <KpiCard label="CDL expiring ≤30d"        value={kpis.cdlExp30}  sub="Renew before driver-down" tone={kpis.cdlExp30 > 0 ? "warn" : "ok"} />
-          <KpiCard label="Med card expiring ≤30d"   value={kpis.medExp30}  sub="49 CFR § 391.45" tone={kpis.medExp30 > 0 ? "warn" : "ok"} />
+          <KpiCard label="Active drivers"           value={kpis.active}    sub={`↑ ${drivers.length} on roster`} tone="ok" />
+          <KpiCard label="New this month"           value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
+          <KpiCard label="DQ expiring ≤ 30d"        value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
+          <KpiCard label="Inactive / Terminated"    value={Math.max(0, drivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
         </div>
 
         {/* Filter bar */}

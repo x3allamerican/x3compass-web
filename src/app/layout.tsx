@@ -25,7 +25,15 @@ export const metadata: Metadata = {
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "X3 Compass — AI Safety Director" }],
   },
   twitter: { card: "summary_large_image", title: "X3 Compass — AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. $25/driver. Free trial.", images: ["/og-image.png"] },
-  icons: { icon: "/favicon.ico", apple: "/apple-touch-icon.png" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
 };
 
@@ -50,7 +58,7 @@ const ORGANIZATION_JSONLD = {
   foundingDate: "2024-01-01",
   founder: {
     "@type": "Person",
-    name: "X3 Compass Team",
+    name: "Joshua Kovarik",
     jobTitle: "Founder & CEO",
     url: SITE,
     sameAs: ["https://github.com/joshuakovarik"],

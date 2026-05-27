@@ -37,12 +37,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const gate = await requireSuperAdmin(ctx);
   if (!gate.ok) return unauthorized(gate.reason);
 
-  const url = new URL(ctx.request.url);
-    return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
     return new Response(JSON.stringify({ ok: false, error: "Server not configured" }), {
       status: 500,

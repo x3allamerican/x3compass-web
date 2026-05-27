@@ -54,8 +54,8 @@ const DEMO_BELOW_SAT: Row[] = [
 ];
 
 const DEMO_TEMPLATES: Template[] = [
-  { template_id: "new-entrant-intro", enabled: true,  segment_label: "New entrant <12 months", subject_template: "Welcome to interstate trucking — 7 things every new carrier needs in their first 90 days", body_text_template: `Hi {{first_name}},\n\nSaw your USDOT registration ({{dot_number}}) come through last {{registered_month}}. Congrats on the new authority — that's a real accomplishment.\n\nI run X3 Compass, an AI Safety Director for small fleets. We're not selling ELDs or training videos. We're the brain that watches your CDL expirations, drug-test windows, MVR pulls, IFTA filings, and CSA scores — and tells you exactly what's due before FMCSA does.\n\nIf you'd like a free 15-minute audit of where your DQ files stand right now, reply with a good time. No pitch, no obligation — you'll just walk away with a checklist.\n\nX3 Compass Team\nFounder, X3 Compass\nsupport@x3compass.com`, required_variables: ["first_name", "dot_number", "registered_month"], notes: "Auto-sent Tue/Wed/Thu 9am ET, capped 50/day" },
-  { template_id: "conditional-help",  enabled: false, segment_label: "Below-satisfactory rating", subject_template: "Spotted your Conditional rating — here's the 5-step path back to Satisfactory", body_text_template: "Personally reviewed by X3 Compass team before send. See agent-fmcsa-outreach.", required_variables: ["first_name", "dot_number", "safety_rating"], notes: "Manual-review-only — bulk auto-outreach skips these" },
+  { template_id: "new-entrant-intro", enabled: true,  segment_label: "New entrant <12 months", subject_template: "Welcome to interstate trucking — 7 things every new carrier needs in their first 90 days", body_text_template: `Hi {{first_name}},\n\nSaw your USDOT registration ({{dot_number}}) come through last {{registered_month}}. Congrats on the new authority — that's a real accomplishment.\n\nI run X3 Compass, an AI Safety Director for small fleets. We're not selling ELDs or training videos. We're the brain that watches your CDL expirations, drug-test windows, MVR pulls, IFTA filings, and CSA scores — and tells you exactly what's due before FMCSA does.\n\nIf you'd like a free 15-minute audit of where your DQ files stand right now, reply with a good time. No pitch, no obligation — you'll just walk away with a checklist.\n\nJoshua Kovarik\nFounder, X3 Compass\njoshua@x3compass.com`, required_variables: ["first_name", "dot_number", "registered_month"], notes: "Auto-sent Tue/Wed/Thu 9am ET, capped 50/day" },
+  { template_id: "conditional-help",  enabled: false, segment_label: "Below-satisfactory rating", subject_template: "Spotted your Conditional rating — here's the 5-step path back to Satisfactory", body_text_template: "Personally reviewed by Joshua before send. See agent-fmcsa-outreach.", required_variables: ["first_name", "dot_number", "safety_rating"], notes: "Manual-review-only — bulk auto-outreach skips these" },
 ];
 
 // ---------------- Theme-aware pills ----------------
@@ -309,7 +309,7 @@ export default function ProspectsPage() {
                 </div>
                 <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">
                   {tab === "new"       && "Highest intent — they're still building compliance habits. Auto-outreach goes here first."}
-                  {tab === "below_sat" && "X3 Compass team handles personally — bulk auto-outreach is paused for these."}
+                  {tab === "below_sat" && "Joshua handles personally — bulk auto-outreach is paused for these."}
                   {tab === "this_week" && "Carriers that showed up in this week's scrape but not the prior one."}
                   {tab === "all"       && "Full ICP-filtered universe. Use search/filters to narrow."}
                 </div>

@@ -360,7 +360,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex gap-2 flex-wrap pt-2">
                 <a href="/pricing" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--accent)] border border-[var(--border)] hover:border-[var(--accent)]">View pricing details</a>
-                <a href="mailto:support@x3compass.com?subject=Billing%20question" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] hover:text-[var(--fg)] border border-[var(--border)]">Contact billing</a>
+                <a href="mailto:joshua@x3compass.com?subject=Billing%20question" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] hover:text-[var(--fg)] border border-[var(--border)]">Contact billing</a>
               </div>
             </Block>
 

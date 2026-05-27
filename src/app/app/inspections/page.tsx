@@ -176,7 +176,7 @@ export default function InspectionsPage() {
             </thead>
             <tbody>
               {loading ? (
-                {Array.from({length:5}).map((_,i)=><SkeletonRow key={i} cols={9} />)}
+                <>{Array.from({length:5}).map((_,i)=><SkeletonRow key={i} cols={9} />)}</>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={9} className="text-center p-10">
                   <div className="text-2xl mb-2">📋</div>

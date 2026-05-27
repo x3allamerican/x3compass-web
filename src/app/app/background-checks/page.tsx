@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import EducationHubCard from "@/components/EducationHubCard";
 import { X3KPITile } from "@/components/X3AdminHero";
 import { SkeletonShell, SkeletonRow } from "@/components/Skeleton";
 import { useUser } from "@/lib/useUser";
@@ -193,6 +194,70 @@ export default function BackgroundChecksPage() {
       <Script src={SDK_URL} strategy="afterInteractive" onLoad={() => setSdkReady(true)} onError={() => { setSdkFailed(true); console.error("[checkr-sdk] failed to load"); }} />
 
       <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
+
+        {/* ============================================================
+            EDUCATION HUB — universal pattern across every X3 surface
+            (matches app.x3compass.com/background-tracker design)
+            ============================================================ */}
+        <EducationHubCard
+          surface="Background Tracker"
+          subtitle="Pre-employment background screening, FCRA compliance, ongoing rechecks, and adverse action procedures — per 49 CFR 391.23 + FCRA."
+          audiences={[
+            {
+              label: "For Drivers",
+              subtitle: "Job applicants + hires",
+              tone: "cyan",
+              icon: "👤",
+              body: "Your background check matters — but it's not a guarantee of disqualification. Know what's checked, what to dispute, how to explain a past, and your FCRA rights through the process.",
+              bullets: [
+                "What's checked (MVR, criminal, employment, D&A)",
+                "FCRA rights + consent",
+                "Disputing inaccurate findings",
+                "Explaining past records",
+                "Adverse action notice rights",
+                "State-specific protections",
+                "Re-check at annual or change",
+              ],
+              cta: "Open Driver guide →",
+              href: "/app/ask?topic=background-checks-drivers",
+            },
+            {
+              label: "For Employers",
+              subtitle: "HR / Safety / Compliance",
+              tone: "violet",
+              icon: "🏢",
+              body: "Build a defensible screening program: FCRA-compliant authorization, consistent application of standards, documented decision-making, adverse action procedures, retention. Inconsistent application = discrimination risk. Documentation = defense.",
+              bullets: [
+                "FCRA compliance + authorization",
+                "Pre-hire screening matrix",
+                "Adverse action procedure",
+                "Hiring decision documentation",
+                "Criminal screening + EEOC",
+                "Annual re-screening",
+                "State-specific (FCRA, ban-the-box)",
+                "Retention SOP",
+              ],
+              cta: "Open Employer guide →",
+              href: "/app/ask?topic=background-checks-employers",
+            },
+            {
+              label: "For C/TPAs",
+              subtitle: "Screening service providers",
+              tone: "amber",
+              icon: "🛡",
+              body: "Background screening as a service. Multi-client FCRA compliance. Adverse action coordination. Per-state nuance management. Compliance reporting.",
+              bullets: [
+                "Multi-client FCRA workflow",
+                "Adverse action coordination",
+                "Per-state nuance management",
+                "Reporting per client",
+                "Pre-employment + ongoing",
+              ],
+              cta: "Open C/TPA guide →",
+              href: "/app/ask?topic=background-checks-ctpa",
+            },
+          ]}
+        />
 
         {/* Status bar */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-[var(--surface-3)] border border-[var(--border)] rounded-xl px-4 py-3">

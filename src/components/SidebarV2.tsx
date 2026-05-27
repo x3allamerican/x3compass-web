@@ -17,6 +17,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import BrandMark from "@/components/BrandMark";
+import {
+  IconDashboard, IconDriver, IconVehicle, IconOps, IconAudit,
+  IconFinance, IconIntegrations, IconAsk, IconHazmat, IconImport, IconSettings,
+} from "@/components/SidebarIcons";
+import { ReactNode } from "react";
+
+/** Map a nav item label → stroke icon. Falls back to the emoji string in
+ *  the data structure (which still renders, just larger). Joshua said the
+ *  live site uses monochrome stroke icons, not emoji. */
+function strokeIconFor(labelOrTitle: string): ReactNode | null {
+  const key = labelOrTitle.toLowerCase();
+  if (key === "dashboard")                                          return <IconDashboard />;
+  if (key.includes("driver brain"))                                 return <IconDriver />;
+  if (key.includes("vehicle brain"))                                return <IconVehicle />;
+  if (key.includes("ops brain"))                                    return <IconOps />;
+  if (key.includes("audit") || key.includes("reports"))             return <IconAudit />;
+  if (key === "finance")                                            return <IconFinance />;
+  if (key.includes("integration"))                                  return <IconIntegrations />;
+  if (key.includes("ask compass") || key.includes("ask "))          return <IconAsk />;
+  if (key.includes("hazmat"))                                       return <IconHazmat />;
+  if (key.includes("bulk import") || key.includes("import"))        return <IconImport />;
+  if (key === "settings")                                           return <IconSettings />;
+  return null;
+}
 
 type Dot = "emerald" | "cyan" | "amber" | "rose" | "violet" | "slate";
 type Leaf = { kind?: "leaf"; href: string; label: string; icon: string; dot?: Dot; pill?: { label: string; color: Dot } };
@@ -24,21 +49,21 @@ type Group = { kind: "group"; title: string; icon: string; defaultOpen?: boolean
 type Item = Leaf | Group;
 
 const DOT_BG: Record<Dot, string> = {
-  emerald: "bg-emerald-500 dark:bg-emerald-300",
-  cyan:    "bg-cyan-500    dark:bg-cyan-300",
-  amber:   "bg-amber-500   dark:bg-amber-300",
-  rose:    "bg-rose-500    dark:bg-rose-300",
-  violet:  "bg-violet-500  dark:bg-violet-300",
-  slate:   "bg-slate-500   dark:bg-slate-300",
+  emerald: "bg-emerald-600 dark:bg-emerald-400",
+  cyan:    "bg-cyan-700    dark:bg-cyan-400",
+  amber:   "bg-amber-600   dark:bg-amber-400",
+  rose:    "bg-rose-700    dark:bg-rose-400",
+  violet:  "bg-violet-700  dark:bg-violet-400",
+  slate:   "bg-slate-600   dark:bg-slate-400",
 };
 
 const PILL_CLS: Record<Dot, string> = {
-  emerald: "bg-emerald-100 dark:bg-emerald-500/60 text-emerald-900 dark:text-emerald-100 border-emerald-600 dark:border-emerald-400",
-  cyan:    "bg-cyan-100    dark:bg-cyan-500/60    text-cyan-900    dark:text-cyan-100    border-cyan-600    dark:border-cyan-400",
-  amber:   "bg-amber-100   dark:bg-amber-500/60   text-amber-900   dark:text-amber-100   border-amber-600   dark:border-amber-400",
-  rose:    "bg-rose-100    dark:bg-rose-500/60    text-rose-900    dark:text-rose-100    border-rose-600    dark:border-rose-400",
-  violet:  "bg-violet-100  dark:bg-violet-500/60  text-violet-900  dark:text-violet-100  border-violet-600  dark:border-violet-400",
-  slate:   "bg-slate-200   dark:bg-slate-500/60   text-slate-900   dark:text-slate-100   border-slate-600   dark:border-slate-400",
+  emerald: "bg-emerald-100 dark:bg-emerald-500/40 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
+  cyan:    "bg-cyan-100    dark:bg-cyan-500/40    text-cyan-900    dark:text-cyan-50    border-cyan-700    dark:border-cyan-300/80",
+  amber:   "bg-amber-100   dark:bg-amber-500/40   text-amber-900   dark:text-amber-50   border-amber-700   dark:border-amber-300/80",
+  rose:    "bg-rose-100    dark:bg-rose-500/40    text-rose-900    dark:text-rose-50    border-rose-700    dark:border-rose-300/80",
+  violet:  "bg-violet-100  dark:bg-violet-500/40  text-violet-900  dark:text-violet-50  border-violet-700  dark:border-violet-300/80",
+  slate:   "bg-slate-200   dark:bg-slate-500/40   text-slate-900   dark:text-slate-50   border-slate-600   dark:border-slate-300/80",
 };
 
 const NAV: Item[] = [
@@ -91,7 +116,23 @@ const NAV: Item[] = [
   ]},
 
   { kind: "leaf", href: "/app/ask", label: "Ask Compass", icon: "∞", pill: { label: "AI", color: "violet" } },
-  { kind: "leaf", href: "/hazmat",   label: "Hazmat Center", icon: "⚠️" },
+
+  // Hazmat Center — collapsible dropdown with all 10 sub-tools (per Joshua, task #263).
+  // Top-level "Hazmat Center" link routes to /app/hazmat (the in-app Bugatti dashboard),
+  // NOT /hazmat (the public marketing page).
+  { kind: "group", title: "Hazmat Center", icon: "⚠", items: [
+    { href: "/app/hazmat",                     label: "Overview",            dot: "amber" },
+    { href: "/app/hazmat/placard-wizard",      label: "Placard Wizard",      dot: "amber" },
+    { href: "/app/hazmat/substances",          label: "Substance Lookup",    dot: "cyan"  },
+    { href: "/app/hazmat/lithium",             label: "Lithium Decision",    dot: "amber" },
+    { href: "/app/hazmat/exemptions",          label: "Exemption Checker",   dot: "emerald" },
+    { href: "/app/hazmat/audit",               label: "Audit Readiness",     dot: "emerald" },
+    { href: "/app/hazmat/training",            label: "Training Tracker",    dot: "cyan" },
+    { href: "/app/hazmat/shipping-papers",     label: "Shipping Papers",     dot: "cyan" },
+    { href: "/app/hazmat/emergency-response",  label: "Emergency Response",  dot: "rose" },
+    { href: "/app/hazmat/security-plan",       label: "Security Plan",       dot: "violet" },
+  ]},
+
   { kind: "leaf", href: "/app/import", label: "Bulk Import", icon: "⤴" },
 
   { kind: "group", title: "Settings", icon: "⚙", items: [
@@ -122,17 +163,17 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
 
   return (
     <aside
-      className="border-r border-[var(--border)] bg-[var(--surface)] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col"
+      className="sticky top-0 h-screen overflow-y-auto flex flex-col"
       aria-label="Primary navigation"
+      style={{
+        // True black sidebar — was using --surface (#0F1620 navy-tinted).
+        background: "#000000",
+        // Thicker white vertical line on right edge — per Joshua's direction
+        // (was 1px, now 2px for stronger box-line effect).
+        borderRight: "2px solid rgba(255, 255, 255, 0.55)",
+      }}
     >
-      {/* Brand strip */}
-      <div className="px-3 pt-4 pb-3 border-b border-[var(--border)] flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-lg grid place-items-center font-black text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>X3</div>
-        <div className="min-w-0">
-          <div className="font-extrabold text-[14px] text-[var(--fg)] leading-tight">Compass</div>
-          <div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] mt-0.5">Compliance Brain</div>
-        </div>
-      </div>
+      {/* Logo moved into AppTopbar (top line). Sidebar starts with nav. */}
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 space-y-1">
@@ -144,13 +185,15 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
               <Link
                 key={leaf.href}
                 href={leaf.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-semibold transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px] font-semibold transition-colors text-white ${
                   active
-                    ? "bg-[var(--accent)]/15 text-[var(--fg)] border-l-2 border-[var(--accent)] pl-[10px]"
-                    : "text-[var(--fg-muted)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+                    ? "bg-[var(--accent)]/15 border-l-2 border-[var(--accent)] pl-[10px]"
+                    : "hover:bg-[var(--bg-3)]"
                 }`}
               >
-                <span className="text-[17px] w-6 text-center" aria-hidden="true">{leaf.icon}</span>
+                <span className="w-5 grid place-items-center text-[var(--accent)] opacity-95" aria-hidden="true">
+                  {strokeIconFor(leaf.label) || <span className="text-[15px]">{leaf.icon}</span>}
+                </span>
                 <span className="flex-1 truncate">{leaf.label}</span>
                 {leaf.pill && (
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${PILL_CLS[leaf.pill.color]}`}>{leaf.pill.label}</span>
@@ -167,14 +210,16 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
           return (
             <details key={`g-${idx}-${group.title}`} className="group" open={startOpen}>
               <summary
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-semibold text-[var(--fg-muted)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)] cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-[16px] font-semibold text-white hover:bg-[var(--bg-3)] cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors"
               >
-                <span className="text-[17px] w-6 text-center" aria-hidden="true">{group.icon}</span>
+                <span className="w-5 grid place-items-center text-[var(--accent)] opacity-95" aria-hidden="true">
+                  {strokeIconFor(group.title) || <span className="text-[15px]">{group.icon}</span>}
+                </span>
                 <span className="flex-1 truncate">{group.title}</span>
                 {group.pill && (
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${PILL_CLS[group.pill.color]}`}>{group.pill.label}</span>
                 )}
-                <span className="text-[var(--fg-faint)] text-[12px] transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+                <span className="text-white/60 text-[12px] transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
               </summary>
               <div className="pl-3 pr-1 py-1 space-y-0.5">
                 {group.items.map((it) => {
@@ -183,10 +228,10 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
                     <Link
                       key={it.href}
                       href={it.href}
-                      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12.5px] transition-colors ${
+                      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[14.5px] transition-colors text-white ${
                         active
-                          ? "bg-[var(--accent)]/15 text-[var(--fg)] font-semibold"
-                          : "text-[var(--fg-muted)] hover:bg-[var(--bg-3)] hover:text-[var(--fg)]"
+                          ? "bg-[var(--accent)]/15 font-semibold"
+                          : "hover:bg-[var(--bg-3)]"
                       }`}
                     >
                       {it.dot && <span className={`w-1.5 h-1.5 rounded-full ${DOT_BG[it.dot]}`} aria-hidden="true" />}

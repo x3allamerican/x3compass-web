@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="X3 Compass">
+  <title>X3 Compass</title>
+  <rect width="800" height="480" fill="#000000"/>
+  <text x="400" y="280" text-anchor="middle"
+        font-family="Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif"
+        font-weight="900" font-size="290" letter-spacing="-18"
+        fill="#0E7490">X3</text>
+  <text x="400" y="270" text-anchor="middle"
+        font-family="Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif"
+        font-weight="900" font-size="290" letter-spacing="-18"
+        fill="#22D3EE">X3</text>
+  <text x="400" y="380" text-anchor="middle"
+        font-family="Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif"
+        font-weight="800" font-size="56" letter-spacing="22"
+        fill="#FFFFFF">COMPASS</text>
+</svg>

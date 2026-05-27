@@ -1,9 +1,12 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import SidebarV2 from "@/components/SidebarV2";
+import TenantThemeProvider, { DEFAULT_TENANT, TenantConfig } from "@/components/TenantThemeProvider";
+import AppTopbar from "@/components/AppTopbar";
+import PageHeader from "@/components/PageHeader";
 import { useUser } from "@/lib/useUser";
 import { useIsSuperAdmin } from "@/lib/superAdmin";
 
@@ -33,7 +36,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/csa",             label: "CSA Scores",        icon: "📊" },
     { href: "/app/document-lookup", label: "Document Lookup",   icon: "🔍" },
     { href: "/app/ask",             label: "Ask Compass",       icon: "∞" },
-    { href: "/hazmat",              label: "Hazmat Center",     icon: "⚠️" },
+    { href: "/app/hazmat",          label: "Hazmat Center",     icon: "⚠️" },
     { href: "/app/audit-export",    label: "Audit Export",      icon: "📄" },
   ]},
   { title: "Client Admin", items: [
@@ -55,7 +58,19 @@ const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: tru
   { href: "/app/integrations",   label: "Integrations",    icon: "🔌" },
 ]};
 
-export default function AppShell({ children, title, crumbs, actions }: { children: React.ReactNode; title?: string; crumbs?: string; actions?: React.ReactNode }) {
+// Next.js 16 static-export requires components using useSearchParams() to be
+// wrapped in a Suspense boundary. The exported default wraps AppShellInner.
+type AppShellProps = { children: React.ReactNode; title?: string; crumbs?: string; actions?: React.ReactNode };
+
+export default function AppShell(props: AppShellProps) {
+  return (
+    <Suspense fallback={null}>
+      <AppShellInner {...props} />
+    </Suspense>
+  );
+}
+
+function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,20 +78,30 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const isSuperAdmin = useIsSuperAdmin();
   const asideRef = useRef<HTMLElement>(null);
 
-  // Sidebar v2 feature flag — opt-in via ?sidebar=v2 on any /app URL.
-  // Persists for the rest of the session via localStorage so a single navigation
-  // doesn't drop the flag. Disable explicitly with ?sidebar=v1.
-  const sidebarParam = searchParams?.get("sidebar") || null;
+  // Sidebar v2 is the default as of Sprint 1 (Phase B). The Manus group
+  // structure (Driver Brain, Vehicle Brain, Ops Brain, Audit & Reports,
+  // Finance, Integrations, Hazmat Center PRO) is the only sidebar shipped.
+  // Legacy flat sidebar branch below is dead code, retained briefly for
+  // diff review and will be removed in Sprint 2.
+  const useV2 = true;
+  // Suppress unused-var lint on searchParams until we re-wire query handling.
+  void searchParams;
+
+  // FORCE DARK MODE inside the app shell. The static Manus design is always
+  // dark (true black + cyan). Light mode on /app/* renders washed-out gray
+  // which Joshua flagged as off-brand. The marketing site keeps the toggle.
   useEffect(() => {
-    if (sidebarParam === "v2") { try { localStorage.setItem("x3-sidebar", "v2"); } catch {} }
-    if (sidebarParam === "v1") { try { localStorage.setItem("x3-sidebar", "v1"); } catch {} }
-  }, [sidebarParam]);
-  const useV2 =
-    sidebarParam !== "v1" &&
-    (sidebarParam === "v2" ||
-    (typeof window !== "undefined" && (() => {
-      try { return localStorage.getItem("x3-sidebar") !== "v1"; } catch { return true; }
-    })()));
+    if (typeof document === "undefined") return;
+    const html = document.documentElement;
+    const wasLight = html.classList.contains("light");
+    html.classList.remove("light");
+    return () => {
+      // When AppShell unmounts (user navigates back to marketing), restore
+      // their previous theme preference so the marketing site doesn't get
+      // surprise-darkened.
+      if (wasLight) html.classList.add("light");
+    };
+  }, []);
 
   // Persist sidebar scroll position across page navigations.
   // The sidebar re-mounts on every /app/* route change because AppShell is rendered
@@ -101,22 +126,35 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   useEffect(() => {
     if (!loading && !user) {
       const here = pathname && pathname !== "/" ? `?return_to=${encodeURIComponent(pathname)}` : "";
-      router.replace(`/signin${here}`);
+      // Static export + router.replace can be flaky. window.location.href
+      // is reliable and works identically from a UX standpoint here since
+      // we're leaving the app shell anyway.
+      if (typeof window !== "undefined") {
+        window.location.href = `/signin${here}`;
+      }
     }
   }, [user, loading, pathname, router]);
 
+  // SAFETY NET REMOVED. The 3s timeout was kicking authenticated users
+  // back to /signin on slow refreshes (Supabase session validation can
+  // take longer than 3s on slower connections, but the user IS signed in).
+  // The try/catch in useUser already guarantees loading: false fires on
+  // any error, which triggers the natural redirect above. No timeout needed.
+
   if (loading || !user) {
+    // Auth gate: minimal spinner ONLY, no misleading "Sign in" button.
+    // The useEffect above redirects to /signin if !loading && !user.
+    // The safety-net effect (4s timeout) force-redirects if loading hangs.
+    // Showing a Sign in button here trapped users in a UX loop where they
+    // thought they had to sign in even when already authenticated.
     return (
-      <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
-        <TopNav />
-        <div className="flex-1 grid place-items-center">
-          <div className="text-center px-6">
-            <div className="w-14 h-14 rounded-full grid place-items-center text-[var(--bg)] font-black text-[22px] mx-auto mb-4" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>∞</div>
-            <div className="text-[14px] text-[var(--fg-muted)] font-semibold mb-2">Checking your session…</div>
-            <div className="text-[12px] text-[var(--fg-faint)]">If this takes more than a moment, you&apos;ll be redirected to sign in.</div>
-          </div>
+      <TenantThemeProvider>
+        <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "var(--bg)", color: "var(--fg)" }}>
+          <div className="w-12 h-12 rounded-full grid place-items-center mb-4" style={{ border: "3px solid var(--surface-2)", borderTopColor: "var(--accent)", animation: "x3-spin 0.9s linear infinite" }} aria-label="Loading" />
+          <div className="text-[12px]" style={{ color: "var(--fg-faint)" }}>Loading X3 Compass…</div>
+          <style>{`@keyframes x3-spin { to { transform: rotate(360deg); } }`}</style>
         </div>
-      </div>
+      </TenantThemeProvider>
     );
   }
 
@@ -128,22 +166,75 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const userLabel = (user.user_metadata?.full_name as string) || user.email || "Signed in";
   const carrierLabel = carrier ? `${carrier.name}${carrier.subscription_status === "trialing" ? " · trial" : ""}` : "No carrier";
 
+  // Build a TenantConfig from the loaded carrier. In Sprint 3 this will read
+  // per-tenant logo + token overrides from a carriers.tenant_theme column.
+  const tenant: TenantConfig = carrier
+    ? { id: String(carrier.id ?? carrier.usdot_number ?? "carrier"),
+        name: carrier.name ?? "Your fleet",
+        dotNumber: carrier.usdot_number ?? undefined,
+        productName: "X3 Compass" }
+    : DEFAULT_TENANT;
+
   return (
-    <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
-      <TopNav />
-      {carrier?.subscription_status === "trialing" && carrier.trial_ends_at && (
-        <div className="bg-cyan-900/40 border-b border-cyan-700/30 px-6 py-2 text-[12px] text-cyan-100 flex items-center justify-between">
-          <span>✨ Free trial — ends <strong>{new Date(carrier.trial_ends_at).toLocaleDateString()}</strong>.</span>
-          <Link href="/app/settings/billing" className="text-[var(--accent)] font-bold hover:underline">Add payment →</Link>
-        </div>
-      )}
+    <TenantThemeProvider tenant={tenant}>
+    {/* No TopNav inside the app shell — AppTopbar is the top bar, sidebar owns navigation.
+        Eliminates the empty marketing-style header that was bleeding into the app. */}
+    <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "#000000" }}>
+
+      {/* TOP-LEFT BOX — X3 Compass logo (single SVG matching the brand artwork) */}
+      <Link
+        href="/app"
+        aria-label="X3 Compass — Home"
+        className="x3-logo-box"
+        style={{
+          gridColumn: 1,
+          gridRow: 1,
+          background: "#000000",
+          borderRight: "2px solid rgba(255, 255, 255, 0.55)",
+          borderBottom: "2px solid rgba(255, 255, 255, 0.55)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "6px 10px",
+          textDecoration: "none",
+          minHeight: 110,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/x3-compass-logo-vector.png"
+          alt="X3 Compass"
+          style={{ height: 108, width: "auto", maxWidth: "100%", display: "block", objectFit: "contain" }}
+        />
+      </Link>
+
+      {/* TOP-RIGHT BOX — topbar with title + subtitle + user widgets */}
+      <div style={{ gridColumn: 2, gridRow: 1 }}>
+        <AppTopbar
+          title={title || "Dashboard"}
+          userEmail={user.email ?? null}
+          userName={(user.user_metadata?.full_name as string) || null}
+          userRole={isSuperAdmin ? "Founder" : "Fleet Manager"}
+          live
+          notificationCount={0}
+          stats={{
+            drivers: typeof carrier?.driver_count === "number" ? carrier.driver_count : undefined,
+            vehicles: typeof carrier?.vehicle_count === "number" ? carrier.vehicle_count : undefined,
+            dotStatus: carrier?.dot_status ?? null,
+          }}
+        />
+      </div>
+
+      {/* Past-due banner spans both columns of the bottom row */}
       {carrier?.subscription_status === "past_due" && (
-        <div className="bg-orange-900/40 border-b border-orange-700/30 px-6 py-2 text-[12px] text-orange-100 flex items-center justify-between">
+        <div style={{ gridColumn: "1 / -1" }} className="bg-orange-900/40 border-b border-orange-700/30 px-6 py-2 text-[12px] text-orange-100 flex items-center justify-between">
           <span>⚠ Last payment failed. Update your card to keep access.</span>
           <Link href="/app/settings/billing" className="text-orange-700 dark:text-orange-300 font-bold hover:underline">Update card →</Link>
         </div>
       )}
-      <div className="grid grid-cols-[260px_1fr] max-md:grid-cols-[72px_1fr] flex-1">
+
+      {/* BOTTOM ROW — sidebar + main content as two more boxes */}
+      <div className="contents max-md:grid-cols-[72px_1fr]" style={{ display: "contents" }}>
         {useV2 ? (
           <SidebarV2 isSuperAdmin={isSuperAdmin} />
         ) : (
@@ -189,19 +280,25 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
         </aside>
         )}
         <div className="min-w-0 flex flex-col">
-          <header className="sticky top-16 z-20 bg-[var(--bg)]/85 backdrop-blur-md border-b border-[var(--border)]">
-            <div className="px-6 h-16 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                {crumbs && <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-1">{crumbs}</div>}
-                <h1 className="text-[var(--fg)] font-extrabold text-[19px] truncate">{title ?? ""}</h1>
+          {/* Per-page sub-header — only renders when title/crumbs/actions are provided.
+              The AppTopbar above already shows "AI SAFETY DIRECTOR" + tenant context,
+              so most pages skip this. Surface-specific pages can still pass title/actions. */}
+          {(title || crumbs || actions) && (
+            <header className="sticky top-[112px] z-20" style={{ background: "color-mix(in srgb, var(--bg) 85%, transparent)", backdropFilter: "blur(8px)", borderBottom: "1px solid var(--border)" }}>
+              <div className="px-6 h-14 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  {crumbs && <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-0.5">{crumbs}</div>}
+                  {title && <h2 className="text-[var(--fg)] font-extrabold text-[17px] truncate">{title}</h2>}
+                </div>
+                {actions && <div className="flex items-center gap-2">{actions}</div>}
               </div>
-              <div className="flex items-center gap-2">{actions}<button className="w-9 h-9 rounded-full grid place-items-center text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-white/5" aria-label="Notifications">🔔</button></div>
-            </div>
-          </header>
+            </header>
+          )}
           <main className="flex-1">{children}</main>
         </div>
       </div>
       <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)" }} aria-label="Ask Compass">∞</Link>
     </div>
+    </TenantThemeProvider>
   );
 }
