@@ -243,7 +243,7 @@ export const hazmatAuditChecklist: TemplateFn<{
       <div class="signature-line"></div>
       <div class="signature-label">Inspector signature · date</div>
     `,
-    pdfOptions: { format: "Letter", printBackground: true },
+    pdfOptions: { format: "letter", printBackground: true },
   };
 };
 
@@ -282,7 +282,7 @@ export const trainingCertificate: TemplateFn<{
       <p class="meta" style="margin-top: 0.5in;">Issued under <span class="cfr">49 CFR § 172.704</span> · retained for the duration of the employee's tenure plus 3 years per § 172.704(d).</p>
     </div>
   `,
-  pdfOptions: { format: "Letter", printBackground: true, margin: { top: "0.6in", bottom: "0.6in", left: "0.6in", right: "0.6in" } },
+  pdfOptions: { format: "letter", printBackground: true, margin: { top: "0.6in", bottom: "0.6in", left: "0.6in", right: "0.6in" } },
 });
 
 /* ============================================================

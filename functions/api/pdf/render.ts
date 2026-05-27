@@ -108,7 +108,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   const cfPayload = {
     html,
     pdfOptions: {
-      format: "Letter",
+      format: "letter",
       printBackground: true,
       displayHeaderFooter: true,
       headerTemplate,
