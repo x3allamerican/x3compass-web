@@ -75,6 +75,7 @@ const NAV: Item[] = [
     { href: "/app/mvr",             label: "MVR Tracker",      icon: "🪪", dot: "emerald" },
     { href: "/app/drug-alcohol",    label: "Drug & Alcohol",   icon: "🧪", dot: "violet" },
     { href: "/app/da-concierge",    label: "D&A Concierge",    icon: "🧬", dot: "violet" },
+    { href: "/app/clearinghouse",   label: "Clearinghouse",    icon: "⚖", dot: "amber" },
     { href: "/app/training",        label: "Training",         icon: "🎓", dot: "cyan" },
     { href: "/app/background-checks", label: "Background Tracker", icon: "🛡", dot: "amber" },
     { href: "/app/driver-invites",  label: "Driver Invites",   icon: "✉", dot: "slate" },

@@ -291,7 +291,7 @@ export default function BackgroundChecksPage() {
                   { key: "annual_mvr",        name: "Annual MVR",             tag: null,                                       includes: "Single-state MVR for the driver's anniversary · auto-pull via Compass Tracker",        price: "$12.99", strike: null },
                   { key: "da_pre",            name: "DOT Drug & Alcohol (Pre-Employment)", tag: { text: "FMCSA Required", tone: "required" }, includes: "5-panel urinalysis · DOT-certified lab · 24-hr TAT · MRO review", price: "$58.00", strike: null },
                   { key: "psp",               name: "PSP (Pre-Employment Screening Program)", tag: { text: "FMCSA", tone: "required" }, includes: "5-yr crash history + 3-yr roadside inspection report · FMCSA data direct", price: "$10.00", strike: null },
-                  { key: "clearinghouse",     name: "FMCSA Clearinghouse Query", tag: { text: "Annual", tone: "required" },     includes: "Limited query (annual) · Full query (pre-employment) · drug & alcohol violations",     price: "$1.25 / $25.00", strike: null },
+                  { key: "clearinghouse",     name: "FMCSA Clearinghouse Query", tag: { text: "Annual", tone: "required" },     includes: "Limited query (annual) · Full query (pre-employment) · drug & alcohol violations · $24,500/yr unlimited plan available",     price: "$1.25", strike: null },
                   { key: "hme_verify",        name: "Hazmat HME Endorsement Verification", tag: { text: "Hazmat Add-on", tone: "hazmat" }, includes: "Verify driver's active HME (Hazardous Materials Endorsement) via state DMV",        price: "$8.99",  strike: null },
                 ].map((p) => {
                   const tagBg =

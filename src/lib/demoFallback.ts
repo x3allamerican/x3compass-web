@@ -147,6 +147,66 @@ export const DEMO_INSPECTIONS: DemoInspection[] = [
   { id: "i-007", inspection_date: daysAgo(108), driver_name: "Patel, Samir",      vehicle_unit: "T-104 / TR-203", level: "Level I",  state: "TX", location: "Amarillo IH-40",         result: "clean",       violations: 0, oos_violations: 0, citation: false, notes: "Annual inspection sticker verified" },
 ];
 
+/* ----------- /app/clearinghouse ----------- */
+
+export type DemoClearinghouseQuery = {
+  id: string;
+  driver_id: string;
+  driver_name: string;
+  query_type: "pre_employment_full" | "annual_limited" | "triggered_full";
+  query_run_at: string;
+  result: "information" | "no_information" | "pending" | "error";
+  consent_received_at: string | null;
+  cost_cents: number;
+  fmcsa_query_id: string | null;
+};
+
+export const DEMO_CLEARINGHOUSE_QUERIES: DemoClearinghouseQuery[] = [
+  { id: "chq-001", driver_id: "d-001", driver_name: "Reyes, Marcus",      query_type: "annual_limited",      query_run_at: daysAgo(38),  result: "no_information", consent_received_at: null,            cost_cents: 125, fmcsa_query_id: "FMCSA-26-04-19-A7912" },
+  { id: "chq-002", driver_id: "d-002", driver_name: "Saunders, Khalil",   query_type: "annual_limited",      query_run_at: daysAgo(72),  result: "information",    consent_received_at: null,            cost_cents: 125, fmcsa_query_id: "FMCSA-26-03-16-K1284" },
+  { id: "chq-003", driver_id: "d-002", driver_name: "Saunders, Khalil",   query_type: "triggered_full",      query_run_at: daysAgo(71),  result: "no_information", consent_received_at: daysAgo(71),     cost_cents: 125, fmcsa_query_id: "FMCSA-26-03-17-K1290" },
+  { id: "chq-004", driver_id: "d-004", driver_name: "Walsh, Anders",      query_type: "pre_employment_full", query_run_at: daysAgo(40),  result: "no_information", consent_received_at: daysAgo(41),     cost_cents: 125, fmcsa_query_id: "FMCSA-26-04-17-W5503" },
+  { id: "chq-005", driver_id: "d-003", driver_name: "Mendelsohn, Linda",  query_type: "annual_limited",      query_run_at: daysAgo(14),  result: "no_information", consent_received_at: null,            cost_cents: 125, fmcsa_query_id: "FMCSA-26-05-13-M8841" },
+  { id: "chq-006", driver_id: "d-007", driver_name: "Whitman, D.",        query_type: "pre_employment_full", query_run_at: daysAgo(20),  result: "pending",        consent_received_at: daysAgo(20),     cost_cents: 125, fmcsa_query_id: null },
+  { id: "chq-007", driver_id: "d-010", driver_name: "Beaumont, Trent",    query_type: "annual_limited",      query_run_at: daysAgo(95),  result: "no_information", consent_received_at: null,            cost_cents: 125, fmcsa_query_id: "FMCSA-26-02-22-B3047" },
+  { id: "chq-008", driver_id: "d-008", driver_name: "Okafor, Yusuf",      query_type: "annual_limited",      query_run_at: daysAgo(60),  result: "no_information", consent_received_at: null,            cost_cents: 125, fmcsa_query_id: "FMCSA-26-03-28-O9912" },
+];
+
+export type DemoClearinghouseViolation = {
+  id: string;
+  driver_id: string;
+  driver_name: string;
+  violation_type: "positive_drug_test" | "positive_alcohol_test" | "test_refusal" | "actual_knowledge" | "pre_employment_positive";
+  violation_date: string;
+  reported_by: "carrier" | "mro" | "sap" | "service_agent";
+  prohibited_status_active: boolean;
+  sap_evaluation_complete: boolean;
+  return_to_duty_complete: boolean;
+  notes: string;
+};
+
+export const DEMO_CLEARINGHOUSE_VIOLATIONS: DemoClearinghouseViolation[] = [
+  { id: "chv-001", driver_id: "d-012", driver_name: "Caldwell, Hank",   violation_type: "positive_drug_test", violation_date: daysAgo(330), reported_by: "mro",           prohibited_status_active: false, sap_evaluation_complete: true,  return_to_duty_complete: true,  notes: "Pre-employment positive · cleared via SAP evaluation 2025-08-12 · 6-test follow-up 4-of-6 complete" },
+  { id: "chv-002", driver_id: "d-009", driver_name: "Kowalski, Renee",  violation_type: "test_refusal",       violation_date: daysAgo(45),  reported_by: "service_agent", prohibited_status_active: true,  sap_evaluation_complete: false, return_to_duty_complete: false, notes: "Refusal during random pool selection · SAP referral sent 2026-04-15 · pending evaluation" },
+];
+
+export type DemoClearinghouseConsent = {
+  id: string;
+  driver_id: string;
+  driver_name: string;
+  consent_type: "pre_employment" | "triggered_24hr";
+  consent_requested_at: string;
+  consent_deadline_at: string | null;
+  consent_received_at: string | null;
+  status: "pending" | "received" | "expired";
+};
+
+export const DEMO_CLEARINGHOUSE_CONSENTS: DemoClearinghouseConsent[] = [
+  { id: "chc-001", driver_id: "d-005", driver_name: "Jansen, Brett",   consent_type: "triggered_24hr",  consent_requested_at: new Date(Date.now() - 8 * 3600000).toISOString(),  consent_deadline_at: new Date(Date.now() + 16 * 3600000).toISOString(), consent_received_at: null,        status: "pending" },
+  { id: "chc-002", driver_id: "d-013", driver_name: "Nakamura, Iris",  consent_type: "pre_employment",  consent_requested_at: daysAgo(2),                                       consent_deadline_at: null,                                              consent_received_at: null,        status: "pending" },
+  { id: "chc-003", driver_id: "d-004", driver_name: "Walsh, Anders",   consent_type: "pre_employment",  consent_requested_at: daysAgo(42),                                      consent_deadline_at: null,                                              consent_received_at: daysAgo(41), status: "received" },
+];
+
 /* ----------- helpers ----------- */
 
 /** Returns demo rows ONLY when real-data array is empty AND we're in demo mode.

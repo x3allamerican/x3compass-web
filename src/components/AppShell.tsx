@@ -28,6 +28,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
   { title: "Compliance Trackers", items: [
     { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
     { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
+    { href: "/app/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
     { href: "/app/background-checks",  label: "Background Tracker", icon: "🛡" },
     { href: "/app/ifta",               label: "IFTA Concierge",     icon: "⛽" },
   ]},

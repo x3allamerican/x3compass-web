@@ -1,0 +1,475 @@
+"use client";
+
+/* ============================================================
+   X3 COMPASS · FMCSA CLEARINGHOUSE · Phase 1 MVP
+   ------------------------------------------------------------
+   Drug & Alcohol Clearinghouse query orchestration per 49 CFR
+   Part 382 Subpart G. Reads/writes:
+     - compass_clearinghouse_queries
+     - compass_clearinghouse_violations
+     - compass_clearinghouse_consents
+
+   Memo: /clearinghouse-vertical-memo.md
+   Task: #240
+
+   Phase 1 scope (this file):
+     - Education Hub (3 audiences · Drivers / Employers / C-TPAs)
+     - 4-KPI strip
+     - 24-hour consent watchlist
+     - Driver queue table (due for annual limited)
+     - Audit ledger of all queries
+     - Right side panel: active violations + SAP follow-up
+   ============================================================ */
+
+import { useEffect, useMemo, useState } from "react";
+import AppShell from "@/components/AppShell";
+import EducationHubCard from "@/components/EducationHubCard";
+import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
+import {
+  DEMO_CLEARINGHOUSE_QUERIES,
+  DEMO_CLEARINGHOUSE_VIOLATIONS,
+  DEMO_CLEARINGHOUSE_CONSENTS,
+  withDemoFallback,
+  type DemoClearinghouseQuery,
+  type DemoClearinghouseViolation,
+  type DemoClearinghouseConsent,
+} from "@/lib/demoFallback";
+
+type Query = DemoClearinghouseQuery;
+type Violation = DemoClearinghouseViolation;
+type Consent = DemoClearinghouseConsent;
+
+function fmtDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function fmtRelative(iso: string | null): string {
+  if (!iso) return "—";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60_000) return "just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function hoursUntil(iso: string | null): number | null {
+  if (!iso) return null;
+  const ms = new Date(iso).getTime() - Date.now();
+  return Math.max(0, Math.floor(ms / 3_600_000));
+}
+
+const QUERY_TYPE_LABEL: Record<Query["query_type"], string> = {
+  pre_employment_full: "Pre-Employment Full",
+  annual_limited: "Annual Limited",
+  triggered_full: "Triggered Full",
+};
+
+const RESULT_PILL: Record<Query["result"], { bg: string; text: string; label: string }> = {
+  no_information: { bg: "rgba(74,222,128,0.18)",  text: "var(--success)",            label: "No Information" },
+  information:    { bg: "rgba(251,191,36,0.18)",  text: "var(--warning)",            label: "Information" },
+  pending:        { bg: "rgba(34,211,238,0.16)",  text: "var(--accent)",             label: "Pending" },
+  error:          { bg: "rgba(248,113,113,0.18)", text: "var(--danger)",             label: "Error" },
+};
+
+const VIOLATION_LABEL: Record<Violation["violation_type"], string> = {
+  positive_drug_test:     "Positive Drug Test",
+  positive_alcohol_test:  "Positive Alcohol Test",
+  test_refusal:           "Test Refusal",
+  actual_knowledge:       "Actual Knowledge",
+  pre_employment_positive: "Pre-Employment Positive",
+};
+
+export default function ClearinghousePage() {
+  const { carrier } = useUser();
+  const [queries, setQueries] = useState<Query[]>([]);
+  const [violations, setViolations] = useState<Violation[]>([]);
+  const [consents, setConsents] = useState<Consent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!carrier) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const sb = getSupabase();
+      // All three queries hit the new tables. If they don't exist yet (migration
+      // not applied), error rows return as empty and demo fallback fills the gap.
+      const [q, v, c] = await Promise.all([
+        sb.from("compass_clearinghouse_queries").select("id,driver_id,query_type,query_run_at,result,consent_received_at,cost_cents,fmcsa_query_id").eq("carrier_id", carrier.id).order("query_run_at", { ascending: false }).limit(50),
+        sb.from("compass_clearinghouse_violations").select("id,driver_id,violation_type,violation_date,reported_by,prohibited_status_active,sap_evaluation_complete,return_to_duty_complete,notes").eq("carrier_id", carrier.id),
+        sb.from("compass_clearinghouse_consents").select("id,driver_id,consent_type,consent_requested_at,consent_deadline_at,consent_received_at").eq("carrier_id", carrier.id).is("consent_revoked_at", null),
+      ]);
+      if (cancelled) return;
+      // Real Supabase rows lack driver_name — Phase 1 just uses demo or returns empty.
+      // V1 will join compass_drivers for real labels.
+      setQueries((q.data as Query[]) || []);
+      setViolations((v.data as Violation[]) || []);
+      setConsents((c.data as Consent[]) || []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [carrier]);
+
+  const effQueries    = useMemo(() => withDemoFallback(queries,    DEMO_CLEARINGHOUSE_QUERIES),    [queries]);
+  const effViolations = useMemo(() => withDemoFallback(violations, DEMO_CLEARINGHOUSE_VIOLATIONS), [violations]);
+  const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS),   [consents]);
+  const isDemo = queries.length === 0;
+
+  /* KPI counters */
+  const kpis = useMemo(() => {
+    const now = Date.now();
+    const oneYearAgo = now - 365 * 86_400_000;
+    const thisMonth = now - 30 * 86_400_000;
+
+    const preEmploymentThisMonth = effQueries.filter(q =>
+      q.query_type === "pre_employment_full" &&
+      new Date(q.query_run_at).getTime() >= thisMonth
+    ).length;
+
+    // Annual coverage: how many distinct drivers had a limited query in last 365d
+    const driversWithLimitedLast365 = new Set(
+      effQueries
+        .filter(q => q.query_type === "annual_limited" && new Date(q.query_run_at).getTime() >= oneYearAgo)
+        .map(q => q.driver_id)
+    );
+
+    const pendingConsents = effConsents.filter(c => !c.consent_received_at).length;
+
+    return {
+      preEmploymentThisMonth,
+      annualCoverage: driversWithLimitedLast365.size,
+      pendingConsents,
+      activeViolations: effViolations.filter(v => v.prohibited_status_active).length,
+    };
+  }, [effQueries, effViolations, effConsents]);
+
+  const totalCostThisMonthDollars = useMemo(() => {
+    const thisMonth = Date.now() - 30 * 86_400_000;
+    const cents = effQueries
+      .filter(q => new Date(q.query_run_at).getTime() >= thisMonth)
+      .reduce((s, q) => s + (q.cost_cents || 0), 0);
+    return (cents / 100).toFixed(2);
+  }, [effQueries]);
+
+  return (
+    <AppShell
+      title="Clearinghouse"
+      crumbs="FMCSA DRUG & ALCOHOL CLEARINGHOUSE · 49 CFR PART 382 SUBPART G"
+      actions={
+        <>
+          <button className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">
+            ⤓ Export audit log
+          </button>
+          <button className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">
+            ⚡ Run annual batch
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+          >
+            + New pre-employment query
+          </button>
+        </>
+      }
+    >
+      <div className="px-6 py-6 space-y-5 bg-[var(--bg)] min-h-screen">
+
+        {/* ============================================================
+            EDUCATION HUB · same pattern as every X3 surface
+            ============================================================ */}
+        <EducationHubCard
+          surface="Clearinghouse"
+          subtitle="Pre-employment + annual queries, 24-hour limited→full conversion, violation reporting, return-to-duty + SAP follow-up · per 49 CFR Part 382 Subpart G."
+          audiences={[
+            {
+              label: "For Drivers",
+              subtitle: "CDL holders + applicants",
+              tone: "cyan",
+              icon: "🧑‍✈️",
+              body: "Your Clearinghouse record follows you between carriers. Know what's reported, who reports it, your right to dispute, and the return-to-duty path if a violation lands on your record.",
+              bullets: [
+                "What's reported (positive D/A, refusals, return-to-duty)",
+                "How to view your own record (free at clearinghouse.fmcsa.dot.gov)",
+                "Your right to dispute inaccurate information",
+                "The return-to-duty + SAP evaluation path",
+                "Follow-up testing schedule (typically 6 tests in 12 months)",
+                "Driver consent rights (pre-employment + 24-hr triggered)",
+              ],
+              cta: "Open Driver guide →",
+              href: "/app/ask?context=clearinghouse-drivers",
+            },
+            {
+              label: "For Employers",
+              subtitle: "Motor carriers · safety + HR",
+              tone: "violet",
+              icon: "🏢",
+              body: "Pre-employment query before every hire. Annual limited query on every employed CDL driver. 24-hour deadline if limited returns information. Report your own violations within 3 days. Keep records 3 years.",
+              bullets: [
+                "Pre-employment full query SOP (consent → query → file)",
+                "Annual limited query batching strategy",
+                "24-hour limited→full conversion checklist",
+                "Carrier-reported violation workflow (3-day deadline)",
+                "Return-to-duty process (SAP referral → evaluation → RTD test)",
+                "Follow-up testing tracker (49 CFR §40 Subpart O)",
+                "Record retention (3 years · §382.711)",
+                "Penalties: up to $2,750/day for operating prohibited driver",
+              ],
+              cta: "Open Employer guide →",
+              href: "/app/ask?context=clearinghouse-employers",
+            },
+            {
+              label: "For C/TPAs",
+              subtitle: "Consortia / third-party admins",
+              tone: "amber",
+              icon: "🛡",
+              body: "Clearinghouse-Designated Employer Representative (C-DER) service at scale. Multi-tenant query orchestration. Consortium reporting. Aggregate audit-readiness across client carriers.",
+              bullets: [
+                "Multi-carrier query orchestration",
+                "Per-client query batching + cost tracking",
+                "Consortium drug-test pool integration",
+                "Cross-client violation coordination",
+                "White-label C-DER service offering",
+                "Aggregate compliance reporting",
+              ],
+              cta: "Open C/TPA guide →",
+              href: "/app/ask?context=clearinghouse-ctpa",
+            },
+          ]}
+        />
+
+        {/* ============================================================
+            KPI STRIP — 4 mini KPIs
+            ============================================================ */}
+        {isDemo && (
+          <div className="text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
+            ★ Demo data · showing Apex Logistics sample queries until your first query runs
+          </div>
+        )}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <KpiCard
+            label="Pre-employment queries"
+            value={String(kpis.preEmploymentThisMonth)}
+            sub="this month · $1.25 each"
+            tone="info"
+          />
+          <KpiCard
+            label="Annual coverage"
+            value={`${kpis.annualCoverage} drivers`}
+            sub="limited query in last 365 days"
+            tone={kpis.annualCoverage > 0 ? "ok" : "warn"}
+          />
+          <KpiCard
+            label="Pending consents"
+            value={String(kpis.pendingConsents)}
+            sub={kpis.pendingConsents > 0 ? "⚠ awaiting driver signature" : "all clear"}
+            tone={kpis.pendingConsents > 0 ? "warn" : "ok"}
+          />
+          <KpiCard
+            label="Active violations"
+            value={String(kpis.activeViolations)}
+            sub={kpis.activeViolations > 0 ? "drivers in prohibited status" : "no prohibited drivers"}
+            tone={kpis.activeViolations > 0 ? "danger" : "ok"}
+          />
+        </div>
+
+        {/* ============================================================
+            MAIN GRID — audit ledger left, side panel right
+            ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-5">
+
+          {/* ============================================================
+              24-HOUR CONSENT WATCHLIST + AUDIT LEDGER (left column)
+              ============================================================ */}
+          <div className="flex flex-col gap-5">
+
+            {/* 24-Hour Consent Watchlist — only render if there are pending consents */}
+            {effConsents.some(c => c.consent_type === "triggered_24hr" && !c.consent_received_at) && (
+              <div className="rounded-xl border-2 border-[var(--warning)]/40 bg-[var(--warning)]/5 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[13px] font-extrabold text-[var(--fg)]">
+                    <span style={{ color: "var(--warning)" }}>⏱</span> 24-hour consent watchlist
+                  </div>
+                  <span className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--warning)]">49 CFR §382.701(a)(2)</span>
+                </div>
+                <div className="text-[12px] text-[var(--fg-muted)] mb-3">
+                  Limited query returned <strong>information</strong>. Driver consent + full query must complete within 24 hours of the limited query result.
+                </div>
+                <div className="flex flex-col gap-2.5">
+                  {effConsents
+                    .filter(c => c.consent_type === "triggered_24hr" && !c.consent_received_at)
+                    .map(c => {
+                      const hrs = hoursUntil(c.consent_deadline_at);
+                      const urgent = hrs !== null && hrs < 6;
+                      return (
+                        <div key={c.id} className="flex items-center justify-between bg-[var(--surface)] rounded-lg p-3 border border-[var(--border)]">
+                          <div>
+                            <div className="text-[13px] font-semibold text-[var(--fg)]">{c.driver_name}</div>
+                            <div className="text-[11px] text-[var(--fg-muted)]">
+                              Requested {fmtRelative(c.consent_requested_at)} · deadline {fmtDate(c.consent_deadline_at)}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className="text-[11px] font-extrabold tabular-nums px-2 py-1 rounded"
+                              style={{
+                                color: urgent ? "var(--danger)" : "var(--warning)",
+                                background: urgent ? "rgba(248,113,113,0.18)" : "rgba(251,191,36,0.18)",
+                              }}
+                            >
+                              {hrs}h left
+                            </span>
+                            <button className="px-3 py-1.5 rounded text-[11px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
+                              Resend consent
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* AUDIT LEDGER */}
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] overflow-hidden">
+              <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-0.5">Query ledger</div>
+                  <div className="text-[15px] font-extrabold text-[var(--fg)]">Audit-ready query history</div>
+                </div>
+                <div className="text-[12px] text-[var(--fg-muted)]">
+                  {effQueries.length} {effQueries.length === 1 ? "query" : "queries"} · ${totalCostThisMonthDollars} this month
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead className="bg-[var(--surface-2)] text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--fg-muted)]">
+                    <tr>
+                      <th className="text-left px-4 py-3">Driver</th>
+                      <th className="text-left px-4 py-3">Query type</th>
+                      <th className="text-left px-4 py-3 hidden md:table-cell">Run at</th>
+                      <th className="text-left px-4 py-3">Result</th>
+                      <th className="text-left px-4 py-3 hidden lg:table-cell">FMCSA ID</th>
+                      <th className="text-right px-4 py-3">Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]">
+                    {loading ? (
+                      <tr><td colSpan={6} className="px-4 py-8 text-center text-[var(--fg-muted)]">Loading…</td></tr>
+                    ) : effQueries.length === 0 ? (
+                      <tr><td colSpan={6} className="px-4 py-10 text-center">
+                        <div className="text-2xl mb-2">📋</div>
+                        <div className="text-[var(--fg)] font-bold mb-1">No queries yet</div>
+                        <div className="text-[var(--fg-muted)] text-sm">Pre-employment queries appear here once you start screening CDL drivers.</div>
+                      </td></tr>
+                    ) : effQueries.map(q => {
+                      const pill = RESULT_PILL[q.result];
+                      return (
+                        <tr key={q.id} className="hover:bg-[var(--surface-2)]/40">
+                          <td className="px-4 py-3 text-[var(--fg)] font-semibold">{q.driver_name}</td>
+                          <td className="px-4 py-3 text-[var(--fg-muted)]">{QUERY_TYPE_LABEL[q.query_type]}</td>
+                          <td className="px-4 py-3 text-[var(--fg-muted)] tabular-nums hidden md:table-cell">{fmtDate(q.query_run_at)}</td>
+                          <td className="px-4 py-3">
+                            <span style={{ background: pill.bg, color: pill.text, padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+                              {pill.label}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-[11px] text-[var(--fg-faint)] font-mono hidden lg:table-cell">{q.fmcsa_query_id || "—"}</td>
+                          <td className="px-4 py-3 text-right tabular-nums text-[var(--fg)]">${((q.cost_cents || 0) / 100).toFixed(2)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* ============================================================
+              SIDE PANEL — Active Violations + RTD/SAP Follow-up
+              ============================================================ */}
+          <aside className="flex flex-col gap-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[13px] font-extrabold text-[var(--fg)]">
+                  <span style={{ color: "var(--danger)" }}>⚠</span> Active violations
+                </div>
+                <span className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-faint)]">§382.601</span>
+              </div>
+              {effViolations.filter(v => v.prohibited_status_active).length === 0 ? (
+                <div className="text-[12px] text-[var(--fg-muted)]">No drivers in prohibited status. ✓</div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {effViolations.filter(v => v.prohibited_status_active).map(v => (
+                    <div key={v.id} className="border-l-2 pl-3" style={{ borderColor: "var(--danger)" }}>
+                      <div className="text-[13px] font-semibold text-[var(--fg)]">{v.driver_name}</div>
+                      <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">
+                        {VIOLATION_LABEL[v.violation_type]} · {fmtDate(v.violation_date)}
+                      </div>
+                      <div className="text-[11px] text-[var(--fg-faint)] mt-1.5 leading-snug">{v.notes}</div>
+                      <button className="mt-2 text-[11px] text-[var(--accent)] hover:underline font-bold">
+                        Open RTD workflow →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
+              <div className="text-[13px] font-extrabold text-[var(--fg)] mb-3">RTD + SAP follow-up</div>
+              {effViolations.filter(v => v.sap_evaluation_complete && !v.prohibited_status_active).length === 0 ? (
+                <div className="text-[12px] text-[var(--fg-muted)]">No drivers in active follow-up testing.</div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {effViolations.filter(v => v.sap_evaluation_complete && !v.prohibited_status_active).map(v => (
+                    <div key={v.id}>
+                      <div className="text-[13px] font-semibold text-[var(--fg)]">{v.driver_name}</div>
+                      <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">{v.notes}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-3 pt-3 border-t border-[var(--border)] text-[11px] text-[var(--fg-faint)]">
+                49 CFR §40 Subpart O · typically 6 tests in 12 months, can extend to 5 years per SAP plan.
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+              <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-1">Pricing</div>
+              <div className="text-[13px] text-[var(--fg)] font-semibold mb-2">$1.25 per query · no X3 markup</div>
+              <div className="text-[11px] text-[var(--fg-muted)] leading-relaxed">
+                Pass-through FMCSA pricing. Limited or full · same fee. Annual unlimited plan ($24,500/yr) available for fleets running 18,000+ queries/year.
+              </div>
+              <div className="mt-3 text-[11px] text-[var(--fg-faint)]">
+                This month: <strong className="text-[var(--fg)]">${totalCostThisMonthDollars}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+/* ============================================================
+   KPI helper · matches the pattern used in other /app pages
+   ============================================================ */
+function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: string | number; sub?: string; tone?: "ok" | "warn" | "info" | "muted" | "danger" }) {
+  const color =
+    tone === "warn"   ? "var(--warning)" :
+    tone === "danger" ? "var(--danger)"  :
+    tone === "info"   ? "var(--accent)"  :
+    tone === "muted"  ? "var(--fg-muted)": "var(--accent)";
+  const showAccent = (tone === "warn" || tone === "danger") && typeof value === "string" && value !== "0";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-4">
+      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{label}</div>
+      <div className="text-[28px] font-black leading-none text-[var(--fg)]" style={{ color: showAccent ? color : undefined }}>
+        {value}
+      </div>
+      {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div>}
+    </div>
+  );
+}
