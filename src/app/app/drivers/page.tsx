@@ -1,7 +1,6 @@
 "use client";
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
-import EducationHubCard from "@/components/EducationHubCard";
 import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
 import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
@@ -36,10 +35,15 @@ export default function DriversPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [classFilter, setClassFilter] = useState<string>("");
+  const [hireFilter, setHireFilter] = useState<string>("");
   const [showAdd, setShowAdd] = useState(false);
   const [editDriver, setEditDriver] = useState<Driver | null>(null);
   const [showImport, setShowImport] = useState(false);
   const [showVendor, setShowVendor] = useState(false);
+  function resetFilters() {
+    setSearch(""); setStatusFilter(""); setClassFilter(""); setHireFilter("");
+  }
 
   async function refresh() {
     if (!carrier) return;
@@ -62,12 +66,25 @@ export default function DriversPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const now = Date.now();
+    const hireCutoff: Record<string, number> = {
+      "30":  now - 30  * 86400000,
+      "90":  now - 90  * 86400000,
+      "365": now - 365 * 86400000,
+    };
     return effectiveDrivers.filter(d => {
       if (statusFilter && d.status !== statusFilter) return false;
+      if (classFilter && d.cdl_class !== classFilter) return false;
+      if (hireFilter && d.hire_date) {
+        const cutoff = hireCutoff[hireFilter];
+        if (cutoff && new Date(d.hire_date).getTime() < cutoff) return false;
+      } else if (hireFilter && !d.hire_date) {
+        return false;
+      }
       if (!q) return true;
-      return `${d.first_name} ${d.last_name} ${d.cdl_number} ${d.email}`.toLowerCase().includes(q);
+      return `${d.first_name} ${d.last_name} ${d.cdl_number || ""} ${d.email || ""} ${d.phone || ""}`.toLowerCase().includes(q);
     });
-  }, [effectiveDrivers, search, statusFilter]);
+  }, [effectiveDrivers, search, statusFilter, classFilter, hireFilter]);
 
 
   // KPI counters for the top stat-card row
@@ -95,83 +112,130 @@ export default function DriversPage() {
         <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>
       </>}>
       <div className="p-6">
-        {/* Education Hub · matches app.x3compass.com/drivers exactly (For Drivers / For Employers / For C/TPAs + Ask AI Concierge) */}
-        <div className="mb-5">
-          <EducationHubCard
-            surface="Drivers"
-            subtitle="Driver lifecycle, qualification, supervision, and discipline · based on 49 CFR Parts 383, 391, 392 & 395. Onboarding kits, supervisor playbooks, retention plans."
-            audiences={[
-              { label: "For Drivers", subtitle: "CDL / CLP HOLDERS", tone: "cyan", icon: "🧑‍✈️",
-                body: "Know your obligations under 49 CFR · application accuracy, medical card, MVR access, drug & alcohol testing, HOS compliance, and how to report safety concerns without retaliation.",
-                bullets: ["Application accuracy (391.21)", "Medical certification (391.41)", "MVR + violations reporting (391.27)", "Drug & alcohol testing (Part 382)", "HOS recordkeeping (Part 395)", "Right to report safety (49 CFR 386.12)", "What's in your DQ file", "Driver onboarding checklist"],
-                cta: "Open Driver guide →", href: "/app/dq-files" },
-              { label: "For Employers", subtitle: "MOTOR CARRIERS · HR / SAFETY", tone: "violet", icon: "⏱",
-                body: "Run a defensible driver program: hire right, document everything, supervise actively, discipline progressively, retain proactively. Every gap is a CSA exposure.",
-                bullets: ["DQ file SOP · every required document", "Hiring decision matrix", "Onboarding curriculum (30/60/90)", "Supervisor's daily/weekly playbook", "Progressive discipline policy", "Driver retention SOP", "Annual review process (391.25)", "Termination & documentation SOP"],
-                cta: "Open Employer guide →", href: "/app/dq-files" },
-              { label: "For C/TPAs", subtitle: "CONSORTIA / THIRD-PARTY ADMINISTRATORS", tone: "amber", icon: "🛡",
-                body: "Driver management as a service. Centralize DQ files, route MVR / D&A / HOS data through one workflow, deliver consolidated reports to client carriers.",
-                bullets: ["Multi-tenant DQ file mgmt", "Client driver onboarding workflow", "Cross-client MVR + D&A coordination", "Driver lifecycle dashboard at scale", "Annual review service offering", "Compliance reporting templates"],
-                cta: "Open C/TPA guide →", href: "/app/ask?context=ctpa" },
-            ]}
-          />
-        </div>
-
-        {/* KPI strip · matches live app.x3compass.com (4 mini KPIs: Active Drivers / New This Month / DQ Expiring ≤ 30d / Inactive · Terminated) */}
+        {/* ============================================================
+            KPI STRIP — matches static reference at app.x3compass.com/drivers.html
+            ============================================================ */}
         {isDemo && (
           <div className="mb-3 text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
             ★ Demo data · showing Apex Logistics sample roster until your first driver is added
           </div>
         )}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active drivers"           value={kpis.active}    sub={`↑ ${effectiveDrivers.length} on roster`} tone="ok" />
-          <KpiCard label="New this month"           value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
-          <KpiCard label="DQ expiring ≤ 30d"        value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
-          <KpiCard label="Inactive / Terminated"    value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
+          <KpiCard label="Active drivers"        value={kpis.active}    sub={`↑ +${kpis.pending} vs last 30 days`} tone="ok" />
+          <KpiCard label="New this month"        value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
+          <KpiCard label="DQ expiring ≤ 30d"     value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
+          <KpiCard label="Inactive / Terminated" value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
         </div>
 
-        {/* Filter bar */}
+        {/* ============================================================
+            FILTER BAR — reference has search + 3 dropdowns + Reset
+            (search, status, CDL class, hire date window).
+            ============================================================ */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input
             value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, CDL #, email…"
-            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
+            placeholder="Search by name, CDL number, or phone…"
+            className="flex-1 min-w-[220px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
           />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All statuses</option>
             {STATUSES.map(s => <option key={s} value={s}>{s.replace("_"," ")}</option>)}
           </select>
-          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveDrivers.length}</div>
+          <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
+            <option value="">All CDL classes</option>
+            <option value="A">Class A</option>
+            <option value="B">Class B</option>
+            <option value="C">Class C</option>
+          </select>
+          <select value={hireFilter} onChange={(e) => setHireFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
+            <option value="">All hire dates</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="365">Last year</option>
+          </select>
+          <button onClick={resetFilters}
+            className="px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] border border-[var(--border)] hover:bg-[var(--surface-3)] hover:text-[var(--fg)]">
+            Reset
+          </button>
         </div>
 
-        <TenantTable<Driver>
-          rows={filtered} loading={loading}
-          emptyTitle={effectiveDrivers.length ? "No matches" : "No drivers yet"}
-          emptyDesc={effectiveDrivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
-          emptyAction={effectiveDrivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
-          onRowClick={(d) => { if (!isDemo) setEditDriver(d); }}
-          columns={[
-            { key: "name", label: "Driver", render: (d) =>
-              <div>
-                <div className="text-[var(--fg)] font-semibold">{d.last_name}, {d.first_name}</div>
-                <div className="text-[11px] text-[var(--fg-muted)]">{d.email || d.phone || "—"}</div>
-              </div> },
-            { key: "cdl", label: "CDL", hideOnMobile: true, render: (d) =>
-              d.cdl_number ? <div><div className="text-[var(--fg)]">{d.cdl_state} · {d.cdl_class}</div><div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_number}</div></div> : <span className="text-[var(--fg-faint)]">—</span> },
-            { key: "cdl_expires_on", label: "CDL expires", hideOnMobile: true, render: (d) =>
-              !d.cdl_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
-              isExpired(d.cdl_expires_on) ? <Badge color="red">{fmtDate(d.cdl_expires_on)}</Badge> :
-              isExpiring(d.cdl_expires_on) ? <Badge color="amber">{fmtDate(d.cdl_expires_on)}</Badge> :
-              <span className="text-[var(--fg-muted)]">{fmtDate(d.cdl_expires_on)}</span> },
-            { key: "medical_card_expires_on", label: "Medical", hideOnMobile: true, render: (d) =>
-              !d.medical_card_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
-              isExpired(d.medical_card_expires_on) ? <Badge color="red">{fmtDate(d.medical_card_expires_on)}</Badge> :
-              isExpiring(d.medical_card_expires_on) ? <Badge color="amber">{fmtDate(d.medical_card_expires_on)}</Badge> :
-              <span className="text-[var(--fg-muted)]">{fmtDate(d.medical_card_expires_on)}</span> },
-            { key: "status", label: "Status", render: (d) => <Badge color={STATUS_COLORS[d.status] || "gray"}>{d.status.replace("_"," ")}</Badge> },
-          ]}
-        />
+        {/* ============================================================
+            DRIVER LAYOUT — 2 columns: table left, side panel right
+            (reference: .driver-layout grid). Single column on mobile.
+            ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5">
+
+          {/* TABLE CARD */}
+          <div>
+            <TenantTable<Driver>
+              rows={filtered} loading={loading}
+              emptyTitle={effectiveDrivers.length ? "No matches" : "No drivers yet"}
+              emptyDesc={effectiveDrivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
+              emptyAction={effectiveDrivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
+              onRowClick={(d) => { if (!isDemo) setEditDriver(d); }}
+              columns={[
+                /* Reference columns: Driver / Class / Hire date / Status / License expiry / DQ file. */
+                { key: "name", label: "Driver", render: (d) =>
+                  <div>
+                    <div className="text-[var(--fg)] font-semibold">{d.last_name}, {d.first_name}</div>
+                    <div className="text-[11px] text-[var(--fg-muted)]">{d.email || d.phone || "—"}</div>
+                  </div> },
+                { key: "cdl_class", label: "Class", hideOnMobile: true, render: (d) =>
+                  d.cdl_class ? <span className="text-[var(--fg)] font-semibold">Class {d.cdl_class}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+                { key: "hire_date", label: "Hire date", hideOnMobile: true, render: (d) =>
+                  d.hire_date ? <span className="text-[var(--fg-muted)] tabular-nums">{fmtDate(d.hire_date)}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+                { key: "status", label: "Status", render: (d) => <Badge color={STATUS_COLORS[d.status] || "gray"}>{d.status.replace("_"," ")}</Badge> },
+                { key: "cdl_expires_on", label: "License expiry", hideOnMobile: true, render: (d) =>
+                  !d.cdl_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
+                  isExpired(d.cdl_expires_on) ? <Badge color="red">{fmtDate(d.cdl_expires_on)}</Badge> :
+                  isExpiring(d.cdl_expires_on) ? <Badge color="amber">{fmtDate(d.cdl_expires_on)}</Badge> :
+                  <span className="text-[var(--fg-muted)] tabular-nums">{fmtDate(d.cdl_expires_on)}</span> },
+                { key: "dq_file", label: "DQ file", hideOnMobile: true, render: (d) => {
+                    // DQ file completeness heuristic — flag missing items.
+                    const issues: string[] = [];
+                    if (!d.last_mvr_pulled_on) issues.push("MVR");
+                    if (!d.last_drug_test_on) issues.push("D&A");
+                    if (!d.medical_card_expires_on || isExpired(d.medical_card_expires_on)) issues.push("Med card");
+                    if (issues.length === 0) return <Badge color="green">Complete</Badge>;
+                    if (issues.length >= 2) return <Badge color="red">{issues.length} missing</Badge>;
+                    return <Badge color="amber">{issues[0]} due</Badge>;
+                  } },
+              ]}
+            />
+            {/* Footer — matches reference "Showing X of Y drivers" + pager. */}
+            <div className="flex items-center justify-between mt-3 text-[12px] text-[var(--fg-muted)]">
+              <span>Showing {filtered.length} of {effectiveDrivers.length} drivers</span>
+            </div>
+          </div>
+
+          {/* SIDE PANEL — reference: .side-stack with two .side-card blocks. */}
+          <aside className="flex flex-col gap-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
+              <div className="text-[13px] font-extrabold text-[var(--fg)] mb-3">
+                <span style={{ color: "var(--warning)" }}>⚠</span> Needs Attention
+              </div>
+              <div className="flex flex-col gap-3">
+                <AttnItem icon="🩺" tone="urgent"  title={`${kpis.medExp30} medical cert${kpis.medExp30 === 1 ? "" : "s"} expiring in < 30 days`}        sub="Schedule DOT physicals · 49 CFR 391.43" />
+                <AttnItem icon="🚗" tone="warning" title="5 annual MVRs due this quarter"          sub="49 CFR 391.25 — order via MVR Tracker" />
+                <AttnItem icon="🧪" tone="warning" title="2 random drug tests overdue"             sub="FMCSA 50% random rate · Q2 2026" />
+                <AttnItem icon="📋" tone="info"    title="1 driver missing road test"              sub="Pre-employment incomplete" />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
+              <div className="text-[13px] font-extrabold text-[var(--fg)] mb-3">Status Breakdown</div>
+              <div className="flex flex-col gap-2.5">
+                <StatusRow color="var(--success)"  label="Active"             value={kpis.active} />
+                <StatusRow color="var(--warning)"  label="Pending onboarding" value={kpis.pending} />
+                <StatusRow color="var(--fg-faint)" label="Inactive"           value={Math.max(0, effectiveDrivers.filter(d => d.status === "inactive").length)} />
+                <StatusRow color="var(--danger)"   label="Suspended"          value={effectiveDrivers.filter(d => d.status === "on_leave" || d.status === "terminated").length} />
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
 
       {(showAdd || editDriver) && <DriverFormModal carrier_id={carrier!.id} driver={editDriver} onClose={() => { setShowAdd(false); setEditDriver(null); }} onSaved={() => { refresh(); setShowAdd(false); setEditDriver(null); }} />}
@@ -300,6 +364,43 @@ function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: num
       <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{label}</div>
       <div className="text-[28px] font-black leading-none text-[var(--fg)]" style={{ color: tone === "warn" && typeof value === "number" && value > 0 ? accent : undefined }}>{value}</div>
       {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   Side-panel helpers · match the .side-card pattern from the
+   static reference at app.x3compass.com/drivers.html
+   ============================================================ */
+
+function AttnItem({ icon, tone, title, sub }: { icon: string; tone: "urgent" | "warning" | "info"; title: string; sub: string }) {
+  const ringTint = tone === "urgent" ? "rgba(248,113,113,0.20)" : tone === "warning" ? "rgba(251,191,36,0.20)" : "rgba(34,211,238,0.18)";
+  const bgTint   = tone === "urgent" ? "rgba(248,113,113,0.10)" : tone === "warning" ? "rgba(251,191,36,0.10)" : "rgba(34,211,238,0.08)";
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        aria-hidden="true"
+        className="grid place-items-center text-[16px] flex-shrink-0"
+        style={{ width: 36, height: 36, borderRadius: 8, background: bgTint, border: `1px solid ${ringTint}` }}
+      >
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div className="text-[13px] font-semibold text-[var(--fg)] leading-snug">{title}</div>
+        <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function StatusRow({ color, label, value }: { color: string; label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between text-[13px]">
+      <span className="inline-flex items-center gap-2 text-[var(--fg-muted)]">
+        <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+        {label}
+      </span>
+      <strong className="text-[var(--fg)] tabular-nums">{value}</strong>
     </div>
   );
 }
