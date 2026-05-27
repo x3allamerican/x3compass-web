@@ -62,7 +62,7 @@ deploy:
 # ============================================================
 verify:
   stage: verify
-  image: mcr.microsoft.com/playwright:v1.49.0-jammy
+  image: mcr.microsoft.com/playwright:v1.60.0-jammy
   needs:
     - deploy
   cache:
@@ -79,8 +79,9 @@ verify:
     # job key below — they catch design regressions but don't gate
     # the pipeline on AA-pixel diffs from CDN re-encodes.
     - sleep 15
-    - npm run test:smoke
-    - npm run test:e2e -- tests/visual.spec.ts || true
+    # CI runs chromium only (faster, cheaper). Local dev uses webkit too.
+    - npm run test:smoke -- --project=chromium-desktop
+    - npm run test:e2e -- tests/visual.spec.ts --project=chromium-desktop || true
   artifacts:
     when: always
     paths:
