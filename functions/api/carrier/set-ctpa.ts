@@ -72,7 +72,17 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   const user = await verifySupabaseJwt(env, token);
   if (!user) return json({ ok: false, error: "Invalid token" }, 401);
 
-  let body: { ctpa_slug?: string; ctpa_id?: string; custom_name?: string; mode?: string };
+  let body: {
+    ctpa_slug?: string;
+    ctpa_id?: string;
+    custom_name?: string;
+    mode?: string;
+    /** Required when mode = 'procom_referral'. Carrier must have ack'd the
+     *  Procom program disclosure modal in /app/drug-alcohol before reaching
+     *  here. */
+    disclosure_acked?: boolean;
+    disclosure_version?: string;
+  };
   try { body = await request.json() as typeof body; }
   catch { return json({ ok: false, error: "Invalid JSON body" }, 400); }
 
@@ -80,6 +90,19 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     return json({ ok: false, error: `mode must be one of ${VALID_MODES.join(", ")}` }, 400);
   }
   const mode = body.mode as Mode;
+
+  // Procom referral is the only path that REQUIRES the formal disclosure ack.
+  // BYO_connected and BYO_manual modes are operational selections from the
+  // marketplace, not enrollments in a referred consortium program · no ack needed.
+  if (mode === "procom_referral" && body.disclosure_acked !== true) {
+    return json({
+      ok: false,
+      error: "Procom requires disclosure acknowledgment · open the program details modal at /app/drug-alcohol and tick the confirmation box first.",
+    }, 412);
+  }
+  if (mode === "procom_referral" && !body.disclosure_version) {
+    return json({ ok: false, error: "disclosure_version required for Procom referral" }, 400);
+  }
 
   // Determine carrier_id from the caller's membership (single-carrier
   // path is fine for now; multi-carrier users would scope by header).
@@ -128,6 +151,26 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     return json({ ok: false, error: "custom_name required when picking 'Other'" }, 400);
   }
 
+  // Capture acknowledgment audit fields when Procom path · IP from CF edge headers.
+  const nowIso = new Date().toISOString();
+  const ackIp =
+    request.headers.get("CF-Connecting-IP") ||
+    request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
+    null;
+  const ackFields = mode === "procom_referral"
+    ? {
+        ctpa_disclosure_acked_at: nowIso,
+        ctpa_disclosure_acked_ip: ackIp,
+        ctpa_disclosure_version: body.disclosure_version,
+      }
+    : {
+        // Switching AWAY from Procom · clear the ack fields so a future
+        // re-enrollment with updated terms forces a fresh ack.
+        ctpa_disclosure_acked_at: null,
+        ctpa_disclosure_acked_ip: null,
+        ctpa_disclosure_version: null,
+      };
+
   // Update the carrier row.
   const update = await fetch(
     `${env.SUPABASE_URL}/rest/v1/carriers?id=eq.${carrier_id}`,
@@ -138,7 +181,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         ctpa_id: ctpa.id,
         ctpa_mode: mode,
         ctpa_custom_name: customName,
-        ctpa_selected_at: new Date().toISOString(),
+        ctpa_selected_at: nowIso,
+        ...ackFields,
       }),
     }
   );

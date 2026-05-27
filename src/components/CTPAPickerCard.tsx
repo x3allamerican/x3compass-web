@@ -20,6 +20,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
+import ProcomDisclosureModal from "@/components/ProcomDisclosureModal";
 
 type Mode = "procom_referral" | "byo_connected" | "byo_manual";
 
@@ -56,6 +57,9 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
   const [pickerOpen, setPickerOpen] = useState<boolean>(!initial?.ctpa_mode);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  // Procom disclosure modal · two roles: enrollment-time consent + post-enrollment reference.
+  const [procomModalOpen, setProcomModalOpen] = useState(false);
+  const [procomModalReadOnly, setProcomModalReadOnly] = useState(false);
 
   // Hydrate the marketplace once.
   useEffect(() => {
@@ -70,11 +74,20 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
   const procom = useMemo(() => marketplace.find((c) => c.slug === "procom") || null, [marketplace]);
   const selectedCtpa = useMemo(() => marketplace.find((c) => c.slug === selectedSlug) || initial?.ctpa || null, [marketplace, selectedSlug, initial]);
 
-  async function save(nextMode: Mode, nextCtpa: Ctpa, nextCustom: string | null) {
+  async function save(
+    nextMode: Mode,
+    nextCtpa: Ctpa,
+    nextCustom: string | null,
+    disclosureAck?: { acked: true; version: string }
+  ) {
     if (!carrierId) {
       // Demo mode short-circuit.
-      setNotice({ kind: "ok", text: `Demo mode · would have set your C/TPA to ${nextCtpa.legal_name} (${nextMode}).` });
+      setNotice({
+        kind: "ok",
+        text: `Demo mode · would have set your C/TPA to ${nextCtpa.legal_name} (${nextMode})${disclosureAck ? ` · ack'd ${disclosureAck.version}` : ""}.`,
+      });
       setPickerOpen(false);
+      setProcomModalOpen(false);
       onChange?.({ mode: nextMode, ctpa: nextCtpa, custom_name: nextCustom });
       return;
     }
@@ -85,7 +98,14 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
       const res = await fetch("/api/carrier/set-ctpa", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ ctpa_slug: nextCtpa.slug, custom_name: nextCustom, mode: nextMode }),
+        body: JSON.stringify({
+          ctpa_slug: nextCtpa.slug,
+          custom_name: nextCustom,
+          mode: nextMode,
+          ...(disclosureAck
+            ? { disclosure_acked: true, disclosure_version: disclosureAck.version }
+            : {}),
+        }),
       });
       const data = await res.json().catch(() => ({ ok: false, error: "Bad response" }));
       if (!data.ok) {
@@ -94,6 +114,7 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
         setNotice({ kind: "ok", text: data.note || "Saved." });
         setMode(nextMode);
         setPickerOpen(false);
+        setProcomModalOpen(false);
         onChange?.({ mode: nextMode, ctpa: nextCtpa, custom_name: nextCustom });
       }
     } catch (e) {
@@ -125,18 +146,38 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
               )}
             </div>
           </div>
-          <button
-            onClick={() => setPickerOpen(true)}
-            className="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
-          >
-            Change
-          </button>
+          <div className="shrink-0 flex flex-col items-end gap-1.5">
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
+            >
+              Change
+            </button>
+            {/* Post-enrollment reference for Procom · re-open the disclosure read-only */}
+            {mode === "procom_referral" && selectedCtpa?.slug === "procom" && (
+              <button
+                onClick={() => { setProcomModalReadOnly(true); setProcomModalOpen(true); }}
+                className="text-[10.5px] font-bold text-[var(--accent)] hover:underline"
+              >
+                View Procom program ↗
+              </button>
+            )}
+          </div>
         </header>
         {notice && (
           <div role="status" className={`mt-4 rounded-lg p-3 text-[12px] ${notice.kind === "ok" ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300" : "bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300"}`}>
             {notice.text}
           </div>
         )}
+
+        {/* Procom disclosure modal · accessible from the collapsed view in read-only mode */}
+        <ProcomDisclosureModal
+          open={procomModalOpen}
+          readOnly={procomModalReadOnly}
+          busy={busy}
+          onClose={() => setProcomModalOpen(false)}
+          onConfirm={(version) => procom && save("procom_referral", procom, null, { acked: true, version })}
+        />
       </section>
     );
   }
@@ -153,7 +194,7 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* MODE 1 · Procom referral */}
+        {/* MODE 1 · Procom referral · opens disclosure modal first (NOT immediate save) */}
         <Card
           title="Set me up with Procom"
           subtitle="RECOMMENDED · X3 partner"
@@ -164,9 +205,13 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
             "Procom is the recommended default in our marketplace",
             "Designate Procom as your C/TPA in FMCSA Clearinghouse · we walk you through it",
           ]}
-          cta="Pick Procom →"
+          cta="Review program · pick Procom →"
           disabled={busy || !procom}
-          onClick={() => procom && save("procom_referral", procom, null)}
+          onClick={() => {
+            // Open the formal Procom disclosure modal · carrier must ack BEFORE save.
+            setProcomModalReadOnly(false);
+            setProcomModalOpen(true);
+          }}
         />
 
         {/* MODE 2 · BYO connected (existing TPA + API path) */}
@@ -261,6 +306,16 @@ export default function CTPAPickerCard({ carrierId, initial, onChange }: Props) 
           {notice.text}
         </div>
       )}
+
+      {/* Procom disclosure modal · mounted on the expanded view too · same instance.
+          Opens when the carrier clicks the Procom Card · closes on ack OR cancel. */}
+      <ProcomDisclosureModal
+        open={procomModalOpen}
+        readOnly={procomModalReadOnly}
+        busy={busy}
+        onClose={() => setProcomModalOpen(false)}
+        onConfirm={(version) => procom && save("procom_referral", procom, null, { acked: true, version })}
+      />
     </section>
   );
 }
