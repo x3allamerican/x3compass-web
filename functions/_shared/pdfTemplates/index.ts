@@ -42,25 +42,25 @@ export function buildHeaderTemplate(subtitle?: string): string {
   return `
 <div style="
   width: 100%;
-  padding: 8px 0.6in 10px;
+  padding: 18px 0.6in 20px;
   background: linear-gradient(135deg, #0A1929 0%, #0E2438 100%);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
   font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: 9pt;
+  font-size: 10pt;
   color: #E2E8F0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid #16C7FF;
+  border-bottom: 3px solid #16C7FF;
   box-sizing: border-box;
 ">
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 30px; width: auto;" />
-    <span style="font-weight: 800; letter-spacing: 0.4px; color: #FFFFFF; font-size: 11pt;">X3 Compass</span>
+  <div style="display: flex; align-items: center; gap: 14px;">
+    <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 64px; width: auto;" />
+    <span style="font-weight: 800; letter-spacing: 0.6px; color: #FFFFFF; font-size: 19pt; line-height: 1;">X3 Compass</span>
   </div>
-  ${subtitle ? `<div style="font-size: 8.5pt; color: #16C7FF; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">${subtitle}</div>` : ""}
-  <div style="font-size: 8pt; color: #94A3B8;"><span class="date"></span></div>
+  ${subtitle ? `<div style="font-size: 10pt; color: #16C7FF; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;">${subtitle}</div>` : ""}
+  <div style="font-size: 10pt; color: #94A3B8; font-weight: 600;"><span class="date"></span></div>
 </div>`.trim();
 }
 
@@ -96,7 +96,7 @@ export function wrapBody(title: string, bodyHTML: string): string {
 <meta charset="utf-8" />
 <title>${escapeHtml(title)}</title>
 <style>
-  @page { size: Letter; margin: 1.1in 0.6in 0.85in 0.6in; }
+  @page { size: Letter; margin: 1.55in 0.6in 0.85in 0.6in; }
   html, body { font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A; }
   body { font-size: 11pt; line-height: 1.55; margin: 0; }
   h1 { font-size: 22pt; font-weight: 800; margin: 0 0 0.25in; letter-spacing: -0.3px; }
