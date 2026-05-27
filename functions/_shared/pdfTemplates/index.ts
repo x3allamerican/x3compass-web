@@ -42,7 +42,7 @@ export function buildHeaderTemplate(subtitle?: string): string {
   return `
 <div style="
   width: 100%;
-  padding: 18px 0.6in 20px;
+  padding: 14px 0.6in 16px;
   background: linear-gradient(135deg, #0A1929 0%, #0E2438 100%);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -55,10 +55,7 @@ export function buildHeaderTemplate(subtitle?: string): string {
   border-bottom: 3px solid #16C7FF;
   box-sizing: border-box;
 ">
-  <div style="display: flex; align-items: center; gap: 14px;">
-    <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 64px; width: auto;" />
-    <span style="font-weight: 800; letter-spacing: 0.6px; color: #FFFFFF; font-size: 19pt; line-height: 1;">X3 Compass</span>
-  </div>
+  <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 92px; width: auto; display: block;" />
   ${subtitle ? `<div style="font-size: 10pt; color: #16C7FF; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;">${subtitle}</div>` : ""}
   <div style="font-size: 10pt; color: #94A3B8; font-weight: 600;"><span class="date"></span></div>
 </div>`.trim();
@@ -96,7 +93,7 @@ export function wrapBody(title: string, bodyHTML: string): string {
 <meta charset="utf-8" />
 <title>${escapeHtml(title)}</title>
 <style>
-  @page { size: Letter; margin: 1.55in 0.6in 0.85in 0.6in; }
+  @page { size: Letter; margin: 1.7in 0.6in 0.85in 0.6in; }
   html, body { font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A; }
   body { font-size: 11pt; line-height: 1.55; margin: 0; }
   h1 { font-size: 22pt; font-weight: 800; margin: 0 0 0.25in; letter-spacing: -0.3px; }
@@ -366,10 +363,8 @@ export const hosDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?
     </ol>
 
     <div class="callout">
-      <strong>You can refuse to drive</strong> if the carrier's load assignment would force a violation · <span class="cfr">§392.3</span>. Drivers cannot be retaliated against for refusing on safety grounds · STAA 49 U.S.C. § 31105.
+      <strong>You can refuse to drive</strong> if the load would force a violation · <span class="cfr">§392.3</span>. Drivers can't be retaliated against for refusing on safety grounds · STAA 49 U.S.C. §31105.
     </div>
-
-    <p class="meta" style="margin-top: 0.4in;">Need more? Ask the X3 Compass AI brain at <strong>${escapeHtml(data.carrierName || "your carrier")}'s portal</strong> for personalized HOS coaching. Or call your safety director.</p>
   `,
 });
 
@@ -409,9 +404,9 @@ export const hosSupervisorPlaybook: TemplateFn<{ carrierName?: string; safetyDir
 
     <h2>III · ELD malfunction workflow</h2>
     <ol>
-      <li><strong>T+0</strong> · Driver notifies you (text, email, dispatch radio · whatever your policy says)</li>
-      <li><strong>T+0 to T+24 hr</strong> · Driver switches to paper RODS, reconstructs the past 7 days · you confirm receipt of notice in writing</li>
-      <li><strong>By T+8 days</strong> · Repair or replace the ELD · update the device · document everything</li>
+      <li><strong>Immediately</strong> · Driver notifies you the moment the malfunction is detected (text, email, dispatch radio · whatever your policy says)</li>
+      <li><strong>Within 24 hours</strong> · Driver switches to paper RODS and reconstructs the past 7 days · you confirm receipt of notice in writing</li>
+      <li><strong>Within 8 days</strong> · Repair or replace the ELD · update the device · document everything</li>
       <li><strong>If repair won't fit in 8 days</strong> · file an extension with FMCSA (Field Office) at <span class="cfr">§395.34(b)(2)</span> · keep a copy</li>
     </ol>
 

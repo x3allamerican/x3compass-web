@@ -115,7 +115,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       displayHeaderFooter: true,
       headerTemplate,
       footerTemplate,
-      margin: { top: "1.55in", bottom: "0.85in", left: "0.6in", right: "0.6in" },
+      margin: { top: "1.7in", bottom: "0.85in", left: "0.6in", right: "0.6in" },
       ...output.pdfOptions,
     },
   };
