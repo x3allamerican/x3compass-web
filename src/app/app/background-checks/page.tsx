@@ -195,62 +195,10 @@ export default function BackgroundChecksPage() {
 
       <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
 
-        {/* ============================================================
-            HERO · matches app.x3compass.com/background-tracker.html
-            Two-column layout: branded headline + 4-KPI strip right.
-            ============================================================ */}
-        <section
-          className="rounded-2xl border border-[var(--border)] overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)",
-            padding: "32px 32px",
-          }}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 items-center">
-            <div>
-              <div
-                className="inline-flex items-center gap-1.5 mb-4"
-                style={{
-                  background: "color-mix(in srgb, var(--accent) 12%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--accent) 38%, transparent)",
-                  color: "var(--accent)",
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: "1.2px",
-                  textTransform: "uppercase",
-                  padding: "5px 12px",
-                  borderRadius: 999,
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                }}
-              >
-                🔐 Driver Screening · FCRA-Compliant
-              </div>
-              <h1
-                style={{
-                  fontSize: "clamp(28px, 4vw, 44px)",
-                  fontWeight: 900,
-                  letterSpacing: "-1px",
-                  lineHeight: 1.1,
-                  margin: "0 0 14px",
-                  color: "var(--fg)",
-                }}
-              >
-                Background checks built for hazmat carriers.
-              </h1>
-              <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.55, margin: 0, maxWidth: 680 }}>
-                Order MVR, criminal, motor vehicle, and drug &amp; alcohol screenings directly from this page.
-                FCRA-grade adverse-action workflows, audit log, and inspector-ready exports
-                · powered by <strong style={{ color: "var(--accent)" }}>Checkr</strong>.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <BgHeroKpi label="Active Checks"     value={String(stats.inFlight || 0)} />
-              <BgHeroKpi label="Completed (90d)"   value={String(stats.completed || 0)} />
-              <BgHeroKpi label="Avg. TAT"          value="3.2 days" />
-              <BgHeroKpi label="FCRA Compliant"    value="✓" tone="ok" />
-            </div>
-          </div>
-        </section>
+        {/* Hero section removed per Joshua's request. Stats live in the
+            X3KPITile strip lower on the page, which is wired to live
+            vendor_orders counts and works whether or not the Checkr
+            SDK loads. The Education Hub serves as the page intro. */}
 
         {/* ============================================================
             EDUCATION HUB · universal pattern across every X3 surface
@@ -547,25 +495,4 @@ export default function BackgroundChecksPage() {
   );
 }
 
-/* ============================================================
-   Hero-strip KPI tile · matches .bg-kpi in the static reference
-   (compact label-over-value, accent color for OK indicators).
-   ============================================================ */
-function BgHeroKpi({ label, value, tone }: { label: string; value: string; tone?: "ok" }) {
-  return (
-    <div
-      className="rounded-xl border border-[var(--border)] p-4"
-      style={{ background: "var(--surface-3)" }}
-    >
-      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">
-        {label}
-      </div>
-      <div
-        className="text-[22px] font-black leading-none tabular-nums"
-        style={{ color: tone === "ok" ? "var(--success)" : "var(--fg)" }}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
+/* BgHeroKpi helper removed along with the hero section (per Joshua). */
