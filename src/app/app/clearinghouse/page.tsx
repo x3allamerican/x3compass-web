@@ -22,6 +22,7 @@
    ============================================================ */
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import EducationHubCard from "@/components/EducationHubCard";
 import { useUser } from "@/lib/useUser";
