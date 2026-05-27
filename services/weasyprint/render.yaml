@@ -1,0 +1,36 @@
+# Render.com infrastructure-as-code · one-click deploy for the X3 Compass
+# WeasyPrint service.
+#
+# How to deploy:
+#   1. Push this repo to GitLab (already done · main branch)
+#   2. https://dashboard.render.com/new/web-service → connect this repo
+#      OR use Render's "Deploy to Render" button from the README
+#   3. Render auto-detects render.yaml and provisions the service
+#   4. After first deploy, set the WEASYPRINT_TOKEN secret in the
+#      Render dashboard (Environment → Add Secret) · generate a 32-char
+#      random string and also save it to CF Pages env vars as
+#      WEASYPRINT_TOKEN (so the Pages Function can authenticate)
+#   5. Note the service URL (https://x3-weasyprint.onrender.com or similar)
+#      and set WEASYPRINT_SERVICE_URL on CF Pages
+
+services:
+  - type: web
+    name: x3-weasyprint
+    runtime: docker
+    rootDir: services/weasyprint
+    dockerfilePath: Dockerfile
+    plan: starter         # $7/mo · 0.5 CPU, 512 MB RAM, no cold sleep
+    region: oregon        # cheapest region
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: WEASYPRINT_TOKEN
+        sync: false       # we set this manually in the dashboard (secret)
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: LOG_LEVEL
+        value: "info"
+    # Free plan would sleep after 15min idle (~30s cold start). Starter is
+    # the minimum for production reliability. Bump to standard ($25/mo · 1 GB)
+    # if we start seeing OOMs on large audit packets.
