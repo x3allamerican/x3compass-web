@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
+import CTPAPickerCard from "@/components/CTPAPickerCard";
 
 type TestType = "Pre-employment" | "Random" | "Post-accident" | "Reasonable suspicion" | "Return-to-duty" | "Follow-up";
 type TestResult = "Negative" | "Negative-dilute" | "Positive" | "Refusal" | "Pending";
@@ -82,6 +83,10 @@ export default function DrugAlcoholPage() {
           auditTraps={["Random testing rate below 50% drugs or 10% alcohol · counted at year-end against driver-pool average", "Pre-employment test missing for a driver who started safety-sensitive functions", "Clearinghouse query missing for a new hire (must be a Full query before safety-sensitive work)", "Limited query not run annually for every existing driver"]}
           askCompassLinks={[{ label: "What's my random rate this year? (Part 382)", query: "What's my random rate this year" }, { label: "When is a full Clearinghouse query required?", query: "When is a full Clearinghouse query required" }, { label: "Driver had a crash · do I test? (§ 382.303)", query: "Driver had a crash post-accident testing" }, { label: "Refusal vs diluted result · what's a refusal?", query: "Refusal vs diluted result" }]}
         />
+
+        {/* C/TPA · pick your consortium/third-party administrator */}
+        {/* Demo-mode safe: pass undefined carrierId · picker handles real auth itself */}
+        <CTPAPickerCard carrierId={undefined} />
 
         {/* DATA SOURCE */}
         <DataSourceCard
