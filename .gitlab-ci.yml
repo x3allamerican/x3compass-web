@@ -46,7 +46,18 @@ deploy:
   image: node:22-alpine
   needs:
     - build
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: "0_package-lock"
+    paths:
+      - node_modules
   script:
+    # Pages Functions are bundled by wrangler at deploy time · they need
+    # node_modules in scope (e.g. pdf-lib for /api/pdf/stamp + /merge).
+    # Reuse the build-stage's lockfile cache and run npm ci as a fallback.
+    - npm ci --no-audit --no-fund
     - npx --yes wrangler@latest pages deploy out --project-name=x3compass-web --branch=main --commit-dirty=true
   environment:
     name: production
