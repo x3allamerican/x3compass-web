@@ -236,7 +236,7 @@ export default function DataSourceCard({
               {/* CSV upload */}
               <div
                 className="rounded-xl p-6 border-2 border-dashed border-[var(--accent)]/40 text-center cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors"
-                style={{ background: "rgba(34, 211, 238, 0.03)" }}
+                style={{ background: "rgba(2, 6, 12, 0.45)" }}
                 onClick={() => fileInputRef.current?.click()}
               >
                 <input

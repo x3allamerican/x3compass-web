@@ -62,7 +62,7 @@ export default function DQFilesPage() {
             ⬆ Upload
           </button>
           <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
           >
             📄 Audit-ready bundle →
           </Link>
@@ -186,8 +186,8 @@ export default function DQFilesPage() {
           <div
             className="rounded-2xl p-4 border flex gap-3 items-start"
             style={{
-              background: "linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(15, 28, 50, 0.5))",
-              borderColor: "rgba(34, 211, 238, 0.30)",
+              background: "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+              borderColor: "rgba(2, 6, 12, 0.45)",
             }}
           >
             <div

@@ -59,7 +59,7 @@ export default function DrugAlcoholPage() {
             ⬆ Import test log
           </button>
           <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
           >
             + Log a test
           </Link>
@@ -117,7 +117,7 @@ export default function DrugAlcoholPage() {
                 <circle cx="50" cy="50" r="42" fill="none" stroke="#22D3EE" strokeWidth="10"
                   strokeDasharray={`${2 * Math.PI * 42 * 0.50} ${2 * Math.PI * 42}`}
                   strokeLinecap="round"
-                  style={{ filter: "drop-shadow(0 0 6px rgba(34, 211, 238, 0.6))" }}
+                  style={{ filter: "drop-shadow(0 0 6px rgba(2, 6, 12, 0.45))" }}
                 />
               </svg>
               <div className="absolute inset-0 grid place-items-center">
@@ -156,7 +156,7 @@ export default function DrugAlcoholPage() {
           }}
         >
           <div className="w-11 h-11 rounded-full grid place-items-center font-black text-[20px] text-[#0A1929] flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 0 20px rgba(34, 211, 238, 0.45)" }}
+            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 0 20px rgba(2, 6, 12, 0.45)" }}
           >
             ∞
           </div>

@@ -192,7 +192,7 @@ html, body {
    Cannot use [data-x3-shell="app"] as a parent selector on body because body
    is its ancestor. Instead use :has() to find the shell wrapper and apply. */
 body:has([data-x3-shell="app"]) {
-  background: #000000;
+  background: var(--bg);
 }
 :root.light body:has([data-x3-shell="app"]) {
   background: #F4F7FA;

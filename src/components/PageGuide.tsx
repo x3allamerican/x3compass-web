@@ -46,7 +46,7 @@ export default function PageGuide(config: PageGuideConfig) {
           className="w-9 h-9 rounded-full grid place-items-center font-black text-[var(--bg)] flex-shrink-0"
           style={{
             background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
-            boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
+            boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)",
           }}
         >
           ?
@@ -143,7 +143,7 @@ export default function PageGuide(config: PageGuideConfig) {
             )}
 
             {config.askCompassLinks && config.askCompassLinks.length > 0 && (
-              <div className="rounded-xl p-4 border border-[var(--accent)]/30" style={{ background: "rgba(34, 211, 238, 0.05)" }}>
+              <div className="rounded-xl p-4 border border-[var(--accent)]/30" style={{ background: "rgba(2, 6, 12, 0.45)" }}>
                 <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">
                   ∞ Ask Compass about this
                 </div>

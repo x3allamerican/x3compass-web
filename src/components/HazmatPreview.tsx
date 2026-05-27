@@ -53,8 +53,8 @@ export default function HazmatPreview() {
 
           {/* Result */}
           <div className="rounded-lg p-3 border" style={{
-            background: "linear-gradient(135deg, rgba(34, 211, 238, 0.10), rgba(15, 28, 50, 0.5))",
-            borderColor: "rgba(34, 211, 238, 0.30)",
+            background: "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+            borderColor: "rgba(2, 6, 12, 0.45)",
           }}>
             <div className="flex items-center gap-3 mb-2">
               {/* Diamond placard */}

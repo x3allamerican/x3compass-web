@@ -67,7 +67,7 @@ export default function BackgroundLegacyRedirect() {
             fontWeight: 800,
             fontSize: 14,
             textDecoration: "none",
-            boxShadow: "0 6px 20px rgba(34, 211, 238, 0.32)",
+            boxShadow: "0 6px 20px rgba(2, 6, 12, 0.45)",
           }}
         >
           Open Background Tracker →

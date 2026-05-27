@@ -231,7 +231,7 @@ export default function SkillsExplorer() {
                     className="text-[12.5px] font-bold text-[#0A1929] px-5 py-2 rounded-full whitespace-nowrap"
                     style={{
                       background: "linear-gradient(135deg, #22D3EE, #06B6D4)",
-                      boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)",
+                      boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)",
                     }}
                   >
                     Ask this with my fleet → Start free trial

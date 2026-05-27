@@ -133,8 +133,8 @@ export default function PlacardWizardLive() {
               style={{
                 background: placardRequired.required
                   ? "linear-gradient(135deg, rgba(225, 29, 44, 0.10), rgba(15, 28, 50, 0.5))"
-                  : "linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(15, 28, 50, 0.5))",
-                borderColor: placardRequired.required ? "rgba(225, 29, 44, 0.40)" : "rgba(34, 211, 238, 0.30)",
+                  : "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+                borderColor: placardRequired.required ? "rgba(225, 29, 44, 0.40)" : "rgba(2, 6, 12, 0.45)",
               }}
             >
               <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-2">

@@ -252,7 +252,7 @@ export default function SkillsCatalogPage() {
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" }}
             >
               ★ Start free trial →
             </Link>

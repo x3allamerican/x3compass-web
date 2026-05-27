@@ -69,7 +69,7 @@ export default function TrainingPage() {
             ⬆ Upload cert
           </button>
           <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#0A1929]"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
           >
             + Assign training
           </Link>

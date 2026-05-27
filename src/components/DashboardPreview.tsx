@@ -92,8 +92,8 @@ export default function DashboardPreview() {
             <div
               className="rounded-xl p-3 border flex items-start gap-2.5"
               style={{
-                background: "linear-gradient(135deg, rgba(34, 211, 238, 0.10), rgba(15, 28, 50, 0.5))",
-                borderColor: "rgba(34, 211, 238, 0.30)",
+                background: "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+                borderColor: "rgba(2, 6, 12, 0.45)",
               }}
             >
               <div

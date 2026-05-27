@@ -24,7 +24,7 @@ export default function StubPage({
           style={{ background: "linear-gradient(135deg, #15233D 0%, #0F1C32 100%)" }}
         >
           <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full blur-3xl pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(2, 6, 12, 0.45), transparent 70%)" }}
           />
           <div className="relative">
             <div className="flex items-center gap-4 mb-4">

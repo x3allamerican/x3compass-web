@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 
-const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" };
 
 export default function PartnerApplyPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -48,7 +48,7 @@ export default function PartnerApplyPage() {
           <div className="max-w-xl text-center">
             <div
               className="w-20 h-20 rounded-full grid place-items-center text-[var(--bg)] font-black text-[36px] mx-auto mb-6"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 6px rgba(34, 211, 238, 0.12)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 6px rgba(2, 6, 12, 0.45)" }}
             >
               ✓
             </div>

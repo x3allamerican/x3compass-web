@@ -105,7 +105,7 @@ export default function FAQ() {
           <div className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(800px 500px at 25% 100%, rgba(34, 211, 238, 0.18), transparent 60%), radial-gradient(700px 400px at 85% 0%, rgba(139, 92, 246, 0.18), transparent 60%)",
+                "radial-gradient(800px 500px at 25% 100%, rgba(2, 6, 12, 0.45), transparent 60%), radial-gradient(700px 400px at 85% 0%, rgba(139, 92, 246, 0.18), transparent 60%)",
             }}
           />
           <div className="max-w-3xl mx-auto px-6 text-center relative">
@@ -118,7 +118,7 @@ export default function FAQ() {
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <Link href="/app/ask" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[#0A1929]"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
+                style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" }}
               >
                 ★ Ask Compass →
               </Link>

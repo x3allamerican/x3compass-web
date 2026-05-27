@@ -73,7 +73,7 @@ export default function PricingPage() {
           ))}
         </div>
         <div className="text-center">
-          <Link href="/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 28px rgba(34, 211, 238, 0.32)" }}>Start your free trial →</Link>
+          <Link href="/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 28px rgba(2, 6, 12, 0.45)" }}>Start your free trial →</Link>
         </div>
       </div>
     </SiteShell>

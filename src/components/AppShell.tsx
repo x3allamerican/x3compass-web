@@ -179,7 +179,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
     <TenantThemeProvider tenant={tenant}>
     {/* No TopNav inside the app shell — AppTopbar is the top bar, sidebar owns navigation.
         Eliminates the empty marketing-style header that was bleeding into the app. */}
-    <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "#000000" }}>
+    <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "var(--bg)" }}>
 
       {/* TOP-LEFT BOX — X3 Compass logo. STICKY so the whole top row stays
           locked while content scrolls. Same minHeight as the AppTopbar on the
@@ -192,7 +192,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
         style={{
           gridColumn: 1,
           gridRow: 1,
-          background: "#000000",
+          background: "var(--bg)",
           borderRight: "2px solid rgba(255, 255, 255, 0.55)",
           borderBottom: "2px solid rgba(255, 255, 255, 0.55)",
           display: "flex",
@@ -321,7 +321,11 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           <main className="flex-1">{children}</main>
         </div>
       </div>
-      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)" }} aria-label="Ask Compass">∞</Link>
+      {/* SIGNATURE: the floating Ask Compass button is the ONE element in
+          the app permitted to keep a cyan halo. Joshua: "AI Concierge as
+          star of the show." Every other cyan-glow shadow site got swapped
+          to the tinted-bg shadow per ANTI_SLOP rule #2. */}
+      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.40)" }} aria-label="Ask Compass">∞</Link>
     </div>
     </TenantThemeProvider>
   );

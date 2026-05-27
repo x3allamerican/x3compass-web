@@ -70,7 +70,7 @@ const STEPS = [
 ];
 
 const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/40 transition-colors";
-const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" };
 
 export default function Home() {
   return (
@@ -282,7 +282,7 @@ export default function Home() {
               <div key={s.n} className={`${cardDark} p-6`}>
                 <div
                   className="w-9 h-9 rounded-full grid place-items-center text-[var(--bg)] font-black mb-3"
-                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 4px 12px rgba(34, 211, 238, 0.32)" }}
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
                 >
                   {s.n}
                 </div>
@@ -336,7 +336,7 @@ export default function Home() {
                   key={i}
                   className={`relative flex flex-col rounded-2xl p-7 ${
                     p.popular
-                      ? "border-[var(--accent)]/60 shadow-[0_18px_50px_rgba(34,211,238,0.18)]"
+                      ? "border-[var(--accent)]/60 shadow-[0_18px_50px_rgba(2, 6, 12, 0.45)]"
                       : "border-[var(--border)]"
                   } border`}
                   style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}

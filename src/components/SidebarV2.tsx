@@ -167,7 +167,7 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
       aria-label="Primary navigation"
       style={{
         // True black sidebar — was using --surface (#0F1620 navy-tinted).
-        background: "#000000",
+        background: "var(--bg)",
         // Thicker white vertical line on right edge — per Joshua's direction
         // (was 1px, now 2px for stronger box-line effect).
         borderRight: "2px solid rgba(255, 255, 255, 0.55)",
