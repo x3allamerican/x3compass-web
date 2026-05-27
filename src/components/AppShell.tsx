@@ -200,12 +200,39 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           minHeight: 110,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/x3-compass-logo-vector.png"
-          alt="X3 Compass"
-          style={{ height: 108, width: "auto", maxWidth: "100%", display: "block", objectFit: "contain" }}
-        />
+        {/* Inline SVG logo — uses var(--accent) so the X3 / COMPASS color
+            ALWAYS matches the topbar banner cyan exactly, regardless of theme
+            or per-tenant override. Replaces the baked-color PNG that was
+            drifting from the rest of the UI. */}
+        <svg
+          viewBox="0 0 480 280"
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          aria-label="X3 Compass"
+          style={{ height: 108, width: "auto", maxWidth: "100%", display: "block", color: "var(--accent)" }}
+        >
+          <text
+            x="240" y="170"
+            textAnchor="middle"
+            style={{
+              fontFamily: '"Arial Black", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: 900,
+              fontSize: 220,
+              fill: "currentColor",
+            }}
+          >X3</text>
+          <text
+            x="240" y="240"
+            textAnchor="middle"
+            style={{
+              fontFamily: '"Arial", "Helvetica Neue", Arial, sans-serif',
+              fontWeight: 800,
+              fontSize: 40,
+              fill: "currentColor",
+              letterSpacing: 16,
+            }}
+          >COMPASS</text>
+        </svg>
       </Link>
 
       {/* TOP-RIGHT BOX — topbar with title + subtitle + user widgets */}
