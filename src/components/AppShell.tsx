@@ -200,39 +200,30 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           minHeight: 110,
         }}
       >
-        {/* Inline SVG logo — uses var(--accent) so the X3 / COMPASS color
-            ALWAYS matches the topbar banner cyan exactly, regardless of theme
-            or per-tenant override. Replaces the baked-color PNG that was
-            drifting from the rest of the UI. */}
-        <svg
-          viewBox="0 0 480 280"
-          preserveAspectRatio="xMidYMid meet"
+        {/* Logo: real X3 COMPASS artwork from the brand PNG, retinted to
+            var(--accent) via CSS mask. The PNG provides the EXACT shape (X3
+            mark + COMPASS wordmark as designed); --accent provides the live
+            color so it ALWAYS matches the topbar banner / sidebar icons /
+            KPI cyan. Tenant white-label automatically recolors the logo. */}
+        <span
           role="img"
           aria-label="X3 Compass"
-          style={{ height: 108, width: "auto", maxWidth: "100%", display: "block", color: "var(--accent)" }}
-        >
-          <text
-            x="240" y="170"
-            textAnchor="middle"
-            style={{
-              fontFamily: '"Arial Black", "Helvetica Neue", Arial, sans-serif',
-              fontWeight: 900,
-              fontSize: 220,
-              fill: "currentColor",
-            }}
-          >X3</text>
-          <text
-            x="240" y="240"
-            textAnchor="middle"
-            style={{
-              fontFamily: '"Arial", "Helvetica Neue", Arial, sans-serif',
-              fontWeight: 800,
-              fontSize: 40,
-              fill: "currentColor",
-              letterSpacing: 16,
-            }}
-          >COMPASS</text>
-        </svg>
+          style={{
+            display: "block",
+            height: 108,
+            width: 220,
+            maxWidth: "100%",
+            backgroundColor: "var(--accent)",
+            WebkitMaskImage: 'url("/x3-compass-logo-vector.png")',
+            maskImage: 'url("/x3-compass-logo-vector.png")',
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            maskPosition: "center",
+          }}
+        />
       </Link>
 
       {/* TOP-RIGHT BOX — topbar with title + subtitle + user widgets */}
