@@ -21,7 +21,7 @@
      - Right side panel: active violations + SAP follow-up
    ============================================================ */
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import EducationHubCard from "@/components/EducationHubCard";
 import { useUser } from "@/lib/useUser";
@@ -117,6 +117,16 @@ export default function ClearinghousePage() {
   const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS),   [consents]);
   const isDemo = queries.length === 0;
 
+  // Consent modal state — drives both "Resend" and "+ New pre-employment".
+  const [consentModal, setConsentModal] = useState<null | {
+    mode: "resend" | "new_pre_employment";
+    consent_id?: string;
+    driver_id?: string;
+    driver_name: string;
+    driver_email: string;
+    consent_type: "pre_employment" | "triggered_24hr";
+  }>(null);
+
   /* KPI counters */
   const kpis = useMemo(() => {
     const now = Date.now();
@@ -166,6 +176,12 @@ export default function ClearinghousePage() {
             ⚡ Run annual batch
           </button>
           <button
+            onClick={() => setConsentModal({
+              mode: "new_pre_employment",
+              driver_name: "",
+              driver_email: "",
+              consent_type: "pre_employment",
+            })}
             className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]"
             style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
           >
@@ -320,7 +336,18 @@ export default function ClearinghousePage() {
                             >
                               {hrs}h left
                             </span>
-                            <button className="px-3 py-1.5 rounded text-[11px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
+                            <button
+                              onClick={() => setConsentModal({
+                                mode: "resend",
+                                consent_id: c.id,
+                                driver_id: c.driver_id,
+                                driver_name: c.driver_name,
+                                driver_email: "",  // user re-enters / confirms
+                                consent_type: "triggered_24hr",
+                              })}
+                              className="px-3 py-1.5 rounded text-[11px] font-bold text-[var(--bg)]"
+                              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+                            >
                               Resend consent
                             </button>
                           </div>
@@ -449,7 +476,197 @@ export default function ClearinghousePage() {
           </aside>
         </div>
       </div>
+
+      {/* ============================================================
+          SEND CONSENT MODAL · drives both Resend and New Pre-Employment
+          POSTs to /api/clearinghouse/send-consent
+          ============================================================ */}
+      {consentModal && (
+        <SendConsentModal
+          state={consentModal}
+          isDemo={isDemo}
+          onClose={() => setConsentModal(null)}
+          onSent={() => {
+            setConsentModal(null);
+            // Soft-refresh: re-fetch consents to update the watchlist
+            if (carrier) {
+              getSupabase()
+                .from("compass_clearinghouse_consents")
+                .select("id,driver_id,consent_type,consent_requested_at,consent_deadline_at,consent_received_at")
+                .eq("carrier_id", carrier.id)
+                .is("consent_revoked_at", null)
+                .then(({ data }) => setConsents((data as Consent[]) || []));
+            }
+          }}
+        />
+      )}
     </AppShell>
+  );
+}
+
+/* ============================================================
+   SendConsentModal · two-mode dialog
+   - mode='resend':              prefilled driver_name + consent_id; user
+                                 just confirms the email address and submits.
+   - mode='new_pre_employment':  blank slate; user picks driver + types
+                                 email + submits. Server creates a new
+                                 compass_clearinghouse_consents row.
+   ============================================================ */
+function SendConsentModal({
+  state,
+  isDemo,
+  onClose,
+  onSent,
+}: {
+  state: { mode: "resend" | "new_pre_employment"; consent_id?: string; driver_id?: string; driver_name: string; driver_email: string; consent_type: "pre_employment" | "triggered_24hr" };
+  isDemo: boolean;
+  onClose: () => void;
+  onSent: () => void;
+}) {
+  const [driverName, setDriverName]   = useState(state.driver_name);
+  const [driverEmail, setDriverEmail] = useState(state.driver_email);
+  const [busy, setBusy]               = useState(false);
+  const [error, setError]             = useState<string | null>(null);
+  const [success, setSuccess]         = useState<string | null>(null);
+
+  const title = state.mode === "resend"
+    ? `Resend consent · ${driverName || "driver"}`
+    : "New pre-employment query · request driver consent";
+
+  const intro = state.consent_type === "triggered_24hr"
+    ? "Sending the 24-hour triggered consent reminder. FMCSA requires the driver to consent within 24 hours of the limited query result · 49 CFR §382.701(a)(2)."
+    : "Sending the pre-employment consent request. FMCSA requires driver electronic consent before the full query can be run · 49 CFR §382.701(a).";
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!driverName.trim() || !driverEmail.trim()) {
+      setError("Driver name and email are both required.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(driverEmail)) {
+      setError("Driver email looks invalid.");
+      return;
+    }
+
+    setBusy(true);
+
+    if (isDemo) {
+      // Demo mode · no real send. Show what would have happened.
+      await new Promise(r => setTimeout(r, 400));
+      setSuccess(`Demo mode · would have emailed ${driverEmail} with the ${state.consent_type === "triggered_24hr" ? "24-hour triggered" : "pre-employment"} consent template. Apply the migration + connect Resend + Supabase to send for real.`);
+      setBusy(false);
+      return;
+    }
+
+    try {
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in required");
+
+      const res = await fetch("/api/clearinghouse/send-consent", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          consent_id: state.consent_id,
+          driver_id: state.driver_id,
+          driver_name: driverName,
+          driver_email: driverEmail,
+          consent_type: state.consent_type,
+        }),
+      });
+      const data = await res.json() as { ok: boolean; error?: string; sent_at?: string; deadline_at?: string; email?: { delivered: boolean; error?: string } };
+      if (!data.ok) throw new Error(data.error || "Send failed");
+
+      const msg = data.email?.delivered
+        ? `Consent request emailed to ${driverEmail}. ${data.deadline_at ? `Deadline: ${new Date(data.deadline_at).toLocaleString()}.` : ""}`
+        : `Consent recorded but email failed: ${data.email?.error || "unknown"}. You can resend.`;
+      setSuccess(msg);
+      setTimeout(onSent, 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Send failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-6" onClick={onClose}>
+      <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-2xl max-w-lg w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
+          <h2 className="text-[var(--fg)] font-extrabold text-[15px]">{title}</h2>
+          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl" aria-label="Close">×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <p className="text-[12px] text-[var(--fg-muted)] leading-relaxed">{intro}</p>
+
+          {isDemo && (
+            <div className="rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/8 px-3 py-2 text-[11px] text-[var(--accent)]">
+              ★ Demo mode · this will simulate the email without actually sending. Apply the SQL migration + connect Resend API key to enable real sends.
+            </div>
+          )}
+
+          <label className="block">
+            <div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1">Driver name</div>
+            <input
+              value={driverName}
+              onChange={(e) => setDriverName(e.target.value)}
+              placeholder="e.g. Marcus Reyes"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
+              required
+              disabled={busy}
+            />
+          </label>
+
+          <label className="block">
+            <div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1">Driver email</div>
+            <input
+              type="email"
+              value={driverEmail}
+              onChange={(e) => setDriverEmail(e.target.value)}
+              placeholder="driver@example.com"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
+              required
+              disabled={busy}
+            />
+            <div className="text-[10.5px] text-[var(--fg-faint)] mt-1">The driver will receive a one-click consent link.</div>
+          </label>
+
+          {error && (
+            <div className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/8 px-3 py-2 text-[12px] text-[var(--danger)]">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/8 px-3 py-2 text-[12px] text-[var(--success)]">
+              ✓ {success}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={busy}
+              className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] border border-[var(--border)] hover:text-[var(--fg)] hover:bg-[var(--surface-2)]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={busy || !!success}
+              className="px-5 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+            >
+              {busy ? "Sending…" : success ? "Sent ✓" : (state.mode === "resend" ? "Resend consent" : "Send consent request")}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
