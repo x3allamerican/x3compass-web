@@ -42,7 +42,7 @@ const SCOPE_LABEL: Record<string, string> = {
 };
 
 const SCOPE_DEFS: { value: string; label: string; tables: string; use_case: string; cfr: string }[] = [
-  { value: "full",              label: "Full audit",                 tables: "All 10 tables — drivers, vehicles, DQ docs, MVRs, training, D&A, accidents, inspections, IFTA, carrier profile.", use_case: "FMCSA Compliance Review, insurance underwriting, M&A due diligence.", cfr: "49 CFR § 385 · §390 · §391 · §382" },
+  { value: "full",              label: "Full audit",                 tables: "All 10 tables · drivers, vehicles, DQ docs, MVRs, training, D&A, accidents, inspections, IFTA, carrier profile.", use_case: "FMCSA Compliance Review, insurance underwriting, M&A due diligence.", cfr: "49 CFR § 385 · §390 · §391 · §382" },
   { value: "dq_files_only",     label: "DQ files only",              tables: "Drivers + all DQ documents (CDL, MVR, medical card, employment app, RFR, PSP, Clearinghouse pre-emp).", use_case: "DQ-file-focused audit (§391.51 compliance check) or new-hire packet review.", cfr: "49 CFR § 391.51" },
   { value: "drug_alcohol_only", label: "Drug & Alcohol only",        tables: "All D&A tests (pre-emp, random, post-accident, reasonable suspicion, return-to-duty, follow-up).", use_case: "Random pool consortium audit or D&A program review.", cfr: "49 CFR Part 382 · Part 40" },
   { value: "csa_only",          label: "CSA + Inspections + Accidents", tables: "Roadside inspections, accidents, CSA snapshots, related BASIC scores.", use_case: "DataQ challenge, post-crash review, or CSA trend analysis.", cfr: "49 CFR § 390.5T · § 396.9" },
@@ -141,7 +141,7 @@ export default function AuditExportPage() {
               rows={rows}
               loading={loading}
               emptyTitle="No exports yet"
-              emptyDesc='Click "⚡ Quick full audit" above to generate your first packet — covers all data, all dates.'
+              emptyDesc='Click "⚡ Quick full audit" above to generate your first packet · covers all data, all dates.'
               columns={[
                 { key: "exported_on", label: "Generated", render: (e) => new Date(e.exported_on).toLocaleString() },
                 { key: "scope",       label: "Scope",     render: (e) => SCOPE_LABEL[e.scope || "full"] || e.scope || "—" },
@@ -178,7 +178,7 @@ export default function AuditExportPage() {
               ))}
             </div>
             <div className="mt-4 pt-3 border-t border-[var(--border)] text-[11px] text-[var(--fg-muted)]">
-              <strong className="text-[var(--fg)]">Retention:</strong> packets stored 365 days in R2. Re-generate any time — the source data lives in your Supabase, not the ZIP.
+              <strong className="text-[var(--fg)]">Retention:</strong> packets stored 365 days in R2. Re-generate any time · the source data lives in your Supabase, not the ZIP.
             </div>
           </div>
         </div>

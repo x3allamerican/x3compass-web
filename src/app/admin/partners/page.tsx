@@ -78,7 +78,7 @@ function triageScore(r: AppRow): { score: number; tier: "HOT" | "WARM" | "COLD";
     signals.push("Credentialed");
   }
 
-  // Why answer quality (2×) — naive heuristic
+  // Why answer quality (2×) · naive heuristic
   const why = (r.why_compass || "").toLowerCase();
   if (why.length > 250 && /(scale|roi|client|grow|automat|ai|leverage)/.test(why)) {
     score += 4;

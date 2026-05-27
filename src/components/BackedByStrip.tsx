@@ -1,5 +1,5 @@
 /**
- * "Backed by" vendor trust strip — for a pre-revenue B2B SaaS, the next-best
+ * "Backed by" vendor trust strip · for a pre-revenue B2B SaaS, the next-best
  * trust signal after real customer logos is showing which audited vendors
  * actually power the product. Real names, no logos invented.
  *

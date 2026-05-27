@@ -27,7 +27,7 @@ type ApiPayload = {
   distinct_entities?: string[];
 };
 
-// DEMO overlay — preserves UX before audit_log has rows for this carrier
+// DEMO overlay · preserves UX before audit_log has rows for this carrier
 const DEMO_ROWS: LogRow[] = [
   { id: "d1", created_at: "2026-05-19T15:00:59Z", user_id: "u1", actor_email: "joshua@x3compass.com", action: "CREATE",      entity_type: "csa_snapshot",      entity_id: "dbc78820-abcd-1234-5678-9abcdef01234", entity_id_short: "dbc78820…", details: '"source":"manual","measurement_date":"2026-04-21"', ip_address: null },
   { id: "d2", created_at: "2026-05-19T14:48:08Z", user_id: "u1", actor_email: "joshua@x3compass.com", action: "UPDATE",      entity_type: "carrier",           entity_id: "19837b87-abcd-1234-5678-9abcdef01234", entity_id_short: "19837b87…", details: '"changed_fields":[legal_name,dba,dot_number,…]',     ip_address: null },
@@ -39,7 +39,7 @@ const DEMO_ROWS: LogRow[] = [
   { id: "d8", created_at: "2026-05-19T06:45:15Z", user_id: "u1", actor_email: "joshua@x3compass.com", action: "DELETE",      entity_type: "dq_document",       entity_id: "749dcbf2-abcd-1234-5678-9abcdef01234", entity_id_short: "749dcbf2…", details: '"doc_type":"national_registry_verification"',              ip_address: null },
 ];
 
-// Theme-aware action pills — readable in light + dark, matching accidents/inspections/prospects palette
+// Theme-aware action pills · readable in light + dark, matching accidents/inspections/prospects palette
 const ACTION_PILL: Record<string, string> = {
   CREATE:      "bg-emerald-100 dark:bg-emerald-500/45 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
   UPDATE:      "bg-cyan-100    dark:bg-cyan-500/45    text-cyan-900    dark:text-cyan-50    border-cyan-700    dark:border-cyan-300/80",
@@ -124,18 +124,18 @@ export default function AuditLogPage() {
         <X3AdminHero
           eyebrow="Audit Log"
           title="Every change. Every actor. Every timestamp."
-          intro={<>Immutable record of state changes across the entire X3 Compass platform — human edits, agent actions, system events. <strong className="text-white">Append-only</strong>, retained 7 years per FMCSA audit-defense requirements (§ 390.5T). Exportable as CSV or JSON for any FMCSA, SOC 2, or insurance audit.</>}
+          intro={<>Immutable record of state changes across the entire X3 Compass platform · human edits, agent actions, system events. <strong className="text-white">Append-only</strong>, retained 7 years per FMCSA audit-defense requirements (§ 390.5T). Exportable as CSV or JSON for any FMCSA, SOC 2, or insurance audit.</>}
           dataSource={{
             items: [
-              <span key="a1"><strong className="text-[var(--fg)]">Source</strong> — every CRUD on driver, vehicle, DQ document, medical, MVR, D&amp;A, training, incident, inspection, carrier, membership, and digest writes one row to <code className="font-mono text-[var(--accent)]">compass_audit_log</code>.</span>,
-              <span key="a2"><strong className="text-[var(--fg)]">Append-only</strong> — there is no UPDATE or DELETE endpoint. Even super-admins cannot mutate history. RLS denies non-owner/admin reads.</span>,
-              <span key="a3"><strong className="text-[var(--fg)]">Retention</strong> — 7 years (longer than the 3-year FMCSA window) so insurance + SOC 2 audits also stay covered.</span>,
+              <span key="a1"><strong className="text-[var(--fg)]">Source</strong> · every CRUD on driver, vehicle, DQ document, medical, MVR, D&amp;A, training, incident, inspection, carrier, membership, and digest writes one row to <code className="font-mono text-[var(--accent)]">compass_audit_log</code>.</span>,
+              <span key="a2"><strong className="text-[var(--fg)]">Append-only</strong> · there is no UPDATE or DELETE endpoint. Even super-admins cannot mutate history. RLS denies non-owner/admin reads.</span>,
+              <span key="a3"><strong className="text-[var(--fg)]">Retention</strong> · 7 years (longer than the 3-year FMCSA window) so insurance + SOC 2 audits also stay covered.</span>,
               <span key="a4"><strong className="text-[var(--fg)]">Exports</strong> are tenant-scoped JSON/CSV. The Audit Export page (/app/audit-export) bundles this with all other compass_* tables into one ZIP for offline review.</span>,
             ],
           }}
         />
 
-        {/* KPI strip — counts by action */}
+        {/* KPI strip · counts by action */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <X3KPITile label="Total events"  value={STATS.total}                       sub={isDemo ? "demo" : "real-time"}      tone="navy" />
           <X3KPITile label="Creates"       value={STATS.by_action.CREATE || 0}       sub="new records"                        tone="green" />

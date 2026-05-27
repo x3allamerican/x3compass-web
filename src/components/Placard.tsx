@@ -2,7 +2,7 @@
  * DOT-compliant Hazmat Placard generator.
  *
  * Renders an accurate diamond-shaped placard per 49 CFR § 172, Subpart F.
- * Scalable SVG — works at any size. Pixel-accurate colors per class.
+ * Scalable SVG · works at any size. Pixel-accurate colors per class.
  *
  * Colors are sourced from 49 CFR § 172.519 (general placarding tables).
  * Symbols are simplified SVG renderings of FMCSA-standard hazmat symbols.
@@ -20,11 +20,11 @@ export type HazardClass =
   | "9";
 
 export type PlacardSpec = {
-  /** Hazard class or division — drives colors, symbol, class number */
+  /** Hazard class or division · drives colors, symbol, class number */
   hazardClass: HazardClass;
   /** Optional UN/NA number displayed in the center band (e.g., "1203") */
   unNumber?: string;
-  /** Optional class name text (FLAMMABLE, CORROSIVE, etc.) — auto-derived if omitted */
+  /** Optional class name text (FLAMMABLE, CORROSIVE, etc.) · auto-derived if omitted */
   className?: string;
   /** Rendered width in CSS pixels (placard is square; height = width) */
   size?: number;
@@ -170,7 +170,7 @@ function Symbol({ kind, color }: { kind: ClassConfig["symbol"]; color: string })
         />
       );
     case "stripes":
-      // Class 9 — vertical black stripes in top half
+      // Class 9 · vertical black stripes in top half
       return (
         <g fill={color}>
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -197,7 +197,7 @@ export default function Placard({
   const classText = hazardClass.replace(".", ".");
 
   const viewBoxSize = 100;
-  // The placard is a diamond — square rotated 45°. We render in a 100×100 viewBox
+  // The placard is a diamond · square rotated 45°. We render in a 100×100 viewBox
   // and apply rotate(45) so the diamond fills the SVG area.
 
   // For split-background classes (4.x oxidizers, 5.2, 7, 8, 9), we paint the inner
@@ -220,7 +220,7 @@ export default function Placard({
         {/* Main color fill */}
         <rect x="17" y="17" width="66" height="66" fill={config.bgColor} />
 
-        {/* Class 4.1/4.2 — vertical red stripes (flammable solid) */}
+        {/* Class 4.1/4.2 · vertical red stripes (flammable solid) */}
         {(hazardClass === "4.1" || hazardClass === "4.2") && config.splitBg && (
           <g>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -236,22 +236,22 @@ export default function Placard({
           </g>
         )}
 
-        {/* Class 5.2 — top half red, bottom half yellow */}
+        {/* Class 5.2 · top half red, bottom half yellow */}
         {hazardClass === "5.2" && (
           <rect x="17" y="17" width="66" height="33" fill="#E11D2C" />
         )}
 
-        {/* Class 7 — top half yellow, bottom half white */}
+        {/* Class 7 · top half yellow, bottom half white */}
         {hazardClass === "7" && (
           <rect x="17" y="50" width="66" height="33" fill="#FFFFFF" />
         )}
 
-        {/* Class 8 — top half white, bottom half black */}
+        {/* Class 8 · top half white, bottom half black */}
         {hazardClass === "8" && (
           <rect x="17" y="50" width="66" height="33" fill="#000000" />
         )}
 
-        {/* Class 9 — striped top half */}
+        {/* Class 9 · striped top half */}
         {hazardClass === "9" && (
           <g>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -316,7 +316,7 @@ export default function Placard({
         {label}
       </text>
 
-      {/* Class number — bottom corner of the diamond */}
+      {/* Class number · bottom corner of the diamond */}
       <text
         x="50"
         y="86"

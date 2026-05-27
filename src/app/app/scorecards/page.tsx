@@ -38,7 +38,7 @@ const DEMO_SCORECARDS: Scorecard[] = [
 ];
 const DEMO_FLEET = { avg_score: 82, a_tier_count: 3, watchlist_count: 0, pct_crash_24mo: 5.6, total_drivers: 9 };
 
-// Theme-aware tier color tokens — bright in dark, readable in light, matching accidents/inspections palette
+// Theme-aware tier color tokens · bright in dark, readable in light, matching accidents/inspections palette
 const TIER_STYLE: Record<string, string> = {
   "A+": "bg-emerald-100 dark:bg-emerald-500/45 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
   "A":  "bg-emerald-100 dark:bg-emerald-500/45 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
@@ -60,13 +60,13 @@ function Pill({ tier, size = "md" }: { tier: string; size?: "sm" | "md" }) {
 
 function DefinitionsCard() {
   const items: { tier: string; range: string; meaning: string }[] = [
-    { tier: "A+", range: "95-100", meaning: "Exceptional — zero crashes, zero violations, perfect HOS. Bonus-eligible." },
-    { tier: "A",  range: "90-94",  meaning: "Strong — minor violations only, no OOS events, clean HOS." },
-    { tier: "B+", range: "85-89",  meaning: "Good — a few violations or 1 non-preventable accident. No coaching needed." },
-    { tier: "B",  range: "80-84",  meaning: "Acceptable — multiple violations or 1 preventable accident. Watch trend." },
-    { tier: "C+", range: "70-79",  meaning: "Below standard — recurring violations or HOS issues. Coaching recommended." },
-    { tier: "C",  range: "60-69",  meaning: "Concerning — pattern of violations + accidents. Mandatory coaching." },
-    { tier: "D",  range: "0-59",   meaning: "High risk — preventable crashes or OOS-D events. Suspension review." },
+    { tier: "A+", range: "95-100", meaning: "Exceptional · zero crashes, zero violations, perfect HOS. Bonus-eligible." },
+    { tier: "A",  range: "90-94",  meaning: "Strong · minor violations only, no OOS events, clean HOS." },
+    { tier: "B+", range: "85-89",  meaning: "Good · a few violations or 1 non-preventable accident. No coaching needed." },
+    { tier: "B",  range: "80-84",  meaning: "Acceptable · multiple violations or 1 preventable accident. Watch trend." },
+    { tier: "C+", range: "70-79",  meaning: "Below standard · recurring violations or HOS issues. Coaching recommended." },
+    { tier: "C",  range: "60-69",  meaning: "Concerning · pattern of violations + accidents. Mandatory coaching." },
+    { tier: "D",  range: "0-59",   meaning: "High risk · preventable crashes or OOS-D events. Suspension review." },
   ];
   return (
     <div className="x3-card p-5">

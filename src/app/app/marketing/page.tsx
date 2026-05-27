@@ -17,7 +17,7 @@ type ApiPayload = {
   campaigns?: Campaign[];
 };
 
-// Demo overlay — preserves the dashboard's look when the marketing pipe has no traffic yet.
+// Demo overlay · preserves the dashboard's look when the marketing pipe has no traffic yet.
 const DEMO_KPIS = { clicks_30d: 100, leads_30d: 13, invites_total: 3, audits_completed_total: 1, converted_total: 4, cost_per_lead: 0, click_to_lead_pct: 13, lead_to_audit_pct: 7.7 };
 const DEMO_FUNNEL: Funnel[] = [
   { campaign: "april-launch-facebook",       channel: "facebook",       clicks: 0,  leads: 4, invites: 0, audits: 0, converted: 2, click_to_lead: null, lead_to_audit: 0 },
@@ -34,7 +34,7 @@ const DEMO_LEADS: Lead[] = [
   { id: "l5", captured: "2026-04-16", name: "Mark Ruiz",       email: "mark.ruiz@example.com",                 company: "Ruiz Express",        fleet: "6-15",  source: "reddit",   pain: "csa, mvr",                 status: "converted"       },
 ];
 
-// Theme-aware status pills — readable in light AND dark, matching accidents/inspections palette.
+// Theme-aware status pills · readable in light AND dark, matching accidents/inspections palette.
 const STATUS_PILL: Record<string, string> = {
   new:              "bg-cyan-100    dark:bg-cyan-500/45    text-cyan-900    dark:text-cyan-50    border-cyan-700    dark:border-cyan-300/80",
   audit_invited:    "bg-amber-100   dark:bg-amber-500/45   text-amber-900   dark:text-amber-50   border-amber-700   dark:border-amber-300/80",
@@ -153,16 +153,16 @@ export default function MarketingPage() {
           intro="Inbound interest, conversion funnel, and content engagement."
           dataSource={{
             items: [
-              <span key="k1"><strong className="text-[var(--fg)]">Clicks</strong> from <code className="font-mono text-[var(--accent)]">/r/&lt;campaign&gt;</code> redirect — every link click logs to <code className="font-mono text-[var(--accent)]">marketing_clicks</code>.</span>,
-              <span key="k2"><strong className="text-[var(--fg)]">Leads</strong> from the <em>Ready-for-Compliance</em> form on x3compass.com — land in <code className="font-mono text-[var(--accent)]">marketing_leads</code> + trigger team@ alert.</span>,
-              <span key="k3"><strong className="text-[var(--fg)]">Invites &amp; Audits</strong> from the 15-Min Audit flow — each invite + completed audit attaches to its lead row.</span>,
+              <span key="k1"><strong className="text-[var(--fg)]">Clicks</strong> from <code className="font-mono text-[var(--accent)]">/r/&lt;campaign&gt;</code> redirect · every link click logs to <code className="font-mono text-[var(--accent)]">marketing_clicks</code>.</span>,
+              <span key="k2"><strong className="text-[var(--fg)]">Leads</strong> from the <em>Ready-for-Compliance</em> form on x3compass.com · land in <code className="font-mono text-[var(--accent)]">marketing_leads</code> + trigger team@ alert.</span>,
+              <span key="k3"><strong className="text-[var(--fg)]">Invites &amp; Audits</strong> from the 15-Min Audit flow · each invite + completed audit attaches to its lead row.</span>,
               <span key="k4"><strong className="text-[var(--fg)]">Conversions</strong> = leads marked <code className="font-mono text-[var(--accent)]">status=&apos;converted&apos;</code> once they subscribe via Stripe.</span>,
             ],
             footnote: <>Live data via <code className="font-mono text-[var(--accent)]">/api/marketing</code>. Click ↻ Refresh to re-pull.</>,
           }}
         />
 
-        {/* KPI row — 6 cards matching X3FS classic */}
+        {/* KPI row · 6 cards matching X3FS classic */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <X3KPITile label="Clicks · 30 days"   value={KPIS.clicks_30d}             sub={undefined}                                                tone="navy" />
           <X3KPITile label="Leads · 30 days"    value={KPIS.leads_30d}              sub={KPIS.click_to_lead_pct != null ? `${KPIS.click_to_lead_pct}% Click→Lead` : "—"} tone="navy" />

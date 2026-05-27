@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Skeleton — theme-aware loading placeholders with a soft pulse.
+ * Skeleton · theme-aware loading placeholders with a soft pulse.
  *
  * Use INSTEAD of "Loading…" text for any deferred content. Three flavors:
  *
@@ -15,7 +15,7 @@
  *
  * Light mode: slate-200 base, slate-300 highlight.
  * Dark mode:  surface-2 base, white/10 highlight.
- * Pulse opacity 60% → 100% → 60% over 1.4s — fast enough to feel responsive,
+ * Pulse opacity 60% → 100% → 60% over 1.4s · fast enough to feel responsive,
  * slow enough not to feel anxious.
  */
 import React from "react";
@@ -68,7 +68,7 @@ export function SkeletonChart({ h = 180 }: { h?: number }) {
 }
 
 /**
- * SkeletonShell — the dashboard / page-level placeholder.
+ * SkeletonShell · the dashboard / page-level placeholder.
  * Renders the same row-rhythm as the real content so the layout doesn't shift.
  */
 export function SkeletonShell({ kpis = 4, rows = 6 }: { kpis?: number; rows?: number }) {

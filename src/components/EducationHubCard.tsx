@@ -1,12 +1,12 @@
 "use client";
 
 /* ============================================================
-   EducationHubCard — universal pattern across every X3 surface
+   EducationHubCard · universal pattern across every X3 surface
    ------------------------------------------------------------
    Matches static app.x3compass.com background-tracker layout:
 
    ┌──────────────────────────────────────────────────────────┐
-   │ 🛡 SURFACE NAME — EDUCATION HUB   <subtitle>   [Ask AI →] │
+   │ 🛡 SURFACE NAME · EDUCATION HUB   <subtitle>   [Ask AI →] │
    ├────────────────┬────────────────┬────────────────────────┤
    │ FOR DRIVERS    │ FOR EMPLOYERS  │ FOR C/TPAs             │
    │ <subtitle>     │ <subtitle>     │ <subtitle>             │
@@ -34,7 +34,7 @@ export type Audience = {
   body: string;
   /** Bullet list */
   bullets: string[];
-  /** CTA text — "Open Driver guide →" */
+  /** CTA text · "Open Driver guide →" */
   cta: string;
   /** CTA target (route or anchor) */
   href: string;
@@ -45,7 +45,7 @@ export type Audience = {
 };
 
 type Props = {
-  /** Surface name shown in the header — "Background Tracker", "Hazmat Center" */
+  /** Surface name shown in the header · "Background Tracker", "Hazmat Center" */
   surface: string;
   /** One-line subtitle next to the header */
   subtitle?: string;
@@ -77,7 +77,7 @@ export default function EducationHubCard({ surface, subtitle, conciergeHref = "/
         gap: 18,
       }}
     >
-      {/* HEADER — title + subtitle + Ask AI Concierge */}
+      {/* HEADER · title + subtitle + Ask AI Concierge */}
       <header
         style={{
           display: "flex",
@@ -99,7 +99,7 @@ export default function EducationHubCard({ surface, subtitle, conciergeHref = "/
               margin: 0,
             }}
           >
-            {surface} — Education Hub
+            {surface} · Education Hub
           </h2>
           {subtitle && (
             <span style={{ fontSize: 12, color: "var(--fg-muted)", marginLeft: 4 }}>{subtitle}</span>
@@ -230,7 +230,7 @@ function AudienceColumn({ a }: { a: Audience }) {
 }
 
 /* ============================================================
-   Reusable simple-KPI card — matches background-tracker hero row
+   Reusable simple-KPI card · matches background-tracker hero row
    ------------------------------------------------------------
    ACTIVE ORDERS · 6
    AVG TURNAROUND · 3.2 days · Industry: 5-7d

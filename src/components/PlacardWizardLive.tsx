@@ -38,17 +38,17 @@ export default function PlacardWizardLive() {
   // Placarding decision
   const placardRequired = useMemo(() => {
     if (!subject) return null;
-    if (subject.placardThresholdLb === null) return { required: true, reason: "Table 1 — any quantity requires placarding" };
+    if (subject.placardThresholdLb === null) return { required: true, reason: "Table 1 · any quantity requires placarding" };
     const w = typeof weight === "number" ? weight : 0;
     return {
       required: w >= subject.placardThresholdLb,
       reason: w >= subject.placardThresholdLb
         ? `Aggregate weight ${w.toLocaleString()} lbs ≥ ${subject.placardThresholdLb.toLocaleString()} lb threshold`
-        : `Aggregate weight ${w.toLocaleString()} lbs is below the ${subject.placardThresholdLb.toLocaleString()} lb threshold — no placarding required`,
+        : `Aggregate weight ${w.toLocaleString()} lbs is below the ${subject.placardThresholdLb.toLocaleString()} lb threshold · no placarding required`,
     };
   }, [subject, weight]);
 
-  // Segregation conflicts — find common classes that conflict with this one
+  // Segregation conflicts · find common classes that conflict with this one
   const segregationConflicts = useMemo(() => {
     if (!subject) return [];
     const ours = subject.subclass ?? subject.class;
@@ -238,7 +238,7 @@ export default function PlacardWizardLive() {
           ) : subject ? (
             <div className="rounded-lg p-4 border border-emerald-500/40 bg-emerald-500/5 text-center">
               <div className="text-emerald-700 dark:text-emerald-300 text-[32px] mb-1">✓</div>
-              <div className="text-[12px] text-[var(--fg-muted)]">Under threshold — no placard required at this weight</div>
+              <div className="text-[12px] text-[var(--fg-muted)]">Under threshold · no placard required at this weight</div>
             </div>
           ) : (
             <div className="text-[11px] text-[var(--fg-faint)] italic text-center">

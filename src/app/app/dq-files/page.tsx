@@ -32,7 +32,7 @@ const DOCS: Doc[] = [
   { slot: "Clearinghouse pre-employment query",         cfr: "§ 382.701(a)", status: "complete", detail: "Limited query · negative · 2024-08-14" },
   { slot: "Clearinghouse annual query",      cfr: "§ 382.701(b)",  status: "missing",  detail: "Not yet conducted · DUE THIS WEEK" },
   { slot: "Drug & alcohol pre-employment test", cfr: "§ 382.301",  status: "complete", detail: "DOT 5-panel · negative · 2024-08-13" },
-  { slot: "Entry-Level Driver Training (ELDT) — theory", cfr: "Part 380.609", status: "missing", detail: "Driver had CDL pre-2022 · CHECK GRANDFATHER" },
+  { slot: "Entry-Level Driver Training (ELDT) · theory", cfr: "Part 380.609", status: "missing", detail: "Driver had CDL pre-2022 · CHECK GRANDFATHER" },
   { slot: "Hazmat endorsement (TSA-H)",      cfr: "49 CFR 1572",    status: "complete", detail: "Valid · expires 2027-02-19" },
 ];
 
@@ -125,10 +125,10 @@ export default function DQFilesPage() {
             { n: 1, title: "Connect Tenstreet / DocuSign / Drive My Way", detail: "If you already process driver applicants through Tenstreet, the application + signed forms route directly to the DQF. DocuSign-signed forms (medical, road test) auto-attach to the right slot." },
             { n: 2, title: "Or upload your existing PDFs", detail: "Drag and drop scanned med certs, CDLs, prior-employer letters, road test certificates. Compass OCRs each document, classifies it (e.g., 'medical certificate'), and routes it to the correct slot." },
             { n: 3, title: "Or add documents to slots one at a time", detail: "Click any of the 12 slots → upload that specific document. Useful when you're remediating an existing fleet's DQFs slot by slot." },
-            { n: 4, title: "Watch the compliance score per driver", detail: "Each driver shows a percentage — 12/12 slots green = 100%. Auditors typically sample 10-15 drivers; you want 100% on every one of those." },
+            { n: 4, title: "Watch the compliance score per driver", detail: "Each driver shows a percentage · 12/12 slots green = 100%. Auditors typically sample 10-15 drivers; you want 100% on every one of those." },
           ]}
-          weeklyHabits={["Review drivers with red/yellow slots (expired or missing) — fix them this week", "Run the DQF audit-self-assessment report monthly — surfaces patterns across the whole fleet"]}
-          auditTraps={["Prior-employer inquiries missing 30-day response documentation — § 391.23(c)(2) requires you document the attempt", "Annual driver's certificate of violations missing — § 391.27 — drivers often forget this one", "Medical examiner verification missing the National Registry number — § 391.51(b)(7)", "Road test or equivalent missing for drivers hired before § 391.31 was widely understood"]}
+          weeklyHabits={["Review drivers with red/yellow slots (expired or missing) · fix them this week", "Run the DQF audit-self-assessment report monthly · surfaces patterns across the whole fleet"]}
+          auditTraps={["Prior-employer inquiries missing 30-day response documentation · § 391.23(c)(2) requires you document the attempt", "Annual driver's certificate of violations missing · § 391.27 · drivers often forget this one", "Medical examiner verification missing the National Registry number · § 391.51(b)(7)", "Road test or equivalent missing for drivers hired before § 391.31 was widely understood"]}
           askCompassLinks={[{ label: "What's missing from this DQF? (§ 391.51)", query: "What's missing from this DQF" }, { label: "DQF audit self-assessment workflow", query: "DQF audit self-assessment workflow" }, { label: "When can I accept a prior employer's pre-employment test?", query: "Pre-employment test prior employer acceptance" }]}
         />
 

@@ -13,18 +13,18 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: { default: "X3 Compass — AI Safety Director for fleets", template: "%s · X3 Compass" },
-  description: "An AI Safety Director — or a real one. Both work. 12 specialized brains, 300+ FMCSA skills, CFR-cited answers. DIY at $25/driver, DFY at $50/driver. 7-day free trial, no card.",
+  title: { default: "X3 Compass · AI Safety Director for fleets", template: "%s · X3 Compass" },
+  description: "An AI Safety Director · or a real one. Both work. 12 specialized brains, 300+ FMCSA skills, CFR-cited answers. DIY at $25/driver, DFY at $50/driver. 7-day free trial, no card.",
   keywords: ["FMCSA compliance","DOT compliance software","fleet safety","AI safety director","DataQ disputes","hazmat compliance","DQ files","CDL compliance","hours of service","driver qualification file","X3 Compass"],
   authors: [{ name: "X3 Fleet Safety LLC" }],
   alternates: { canonical: SITE },
   openGraph: {
     type: "website", locale: "en_US", url: SITE, siteName: "X3 Compass",
-    title: "X3 Compass — AI Safety Director for fleets",
+    title: "X3 Compass · AI Safety Director for fleets",
     description: "12 specialized brains. 300+ CFR-cited skills. The AI Safety Director for FMCSA-regulated fleets 1-100. Free 7-day trial.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "X3 Compass — AI Safety Director" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "X3 Compass · AI Safety Director" }],
   },
-  twitter: { card: "summary_large_image", title: "X3 Compass — AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. $25/driver. Free trial.", images: ["/og-image.png"] },
+  twitter: { card: "summary_large_image", title: "X3 Compass · AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. $25/driver. Free trial.", images: ["/og-image.png"] },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -94,7 +94,7 @@ const FAQ_JSONLD = {
     {
       "@type": "Question",
       name: "How is X3 Compass different from QuickBooks for fleets?",
-      acceptedAnswer: { "@type": "Answer", text: "X3 Compass is FMCSA-compliance software, not accounting. It tracks Driver Qualification Files, MVRs, drug & alcohol testing, IFTA filings, CSA scores, hours-of-service, and roadside inspections — with CFR citations on every answer. QuickBooks does books; X3 Compass keeps you legal." },
+      acceptedAnswer: { "@type": "Answer", text: "X3 Compass is FMCSA-compliance software, not accounting. It tracks Driver Qualification Files, MVRs, drug & alcohol testing, IFTA filings, CSA scores, hours-of-service, and roadside inspections · with CFR citations on every answer. QuickBooks does books; X3 Compass keeps you legal." },
     },
     {
       "@type": "Question",
@@ -109,7 +109,7 @@ const FAQ_JSONLD = {
     {
       "@type": "Question",
       name: "Is there a free trial?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes — 7-day free trial, no credit card required. Cancel any time from /app/settings/billing." },
+      acceptedAnswer: { "@type": "Answer", text: "Yes · 7-day free trial, no credit card required. Cancel any time from /app/settings/billing." },
     },
     {
       "@type": "Question",
@@ -130,7 +130,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSONLD) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSONLD) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
-        {/* No-flash theme bootstrap — runs before React hydration */}
+        {/* No-flash theme bootstrap · runs before React hydration */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('x3-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.classList.add(t);}catch(e){document.documentElement.classList.add('dark');}})();`,

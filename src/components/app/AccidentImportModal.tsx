@@ -40,7 +40,7 @@ export function AccidentImportModal({ carrierId, onClose, onImported }: { carrie
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <div>
             <h2 id="modal-title" className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import accidents</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mt-1">49 CFR § 390.15 — accidents must be retained for 3 years.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mt-1">49 CFR § 390.15 · accidents must be retained for 3 years.</p>
           </div>
           <button onClick={onClose} aria-label="Close dialog" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>

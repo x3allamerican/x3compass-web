@@ -57,13 +57,13 @@ export default function IFTAPage() {
           who="Any motor carrier with a CMV that crosses state lines and exceeds the 26,000-lb GVW threshold. Required quarterly, due 30 days after each quarter ends."
           howTo={[
             { n: 1, title: "Connect your fuel card (WEX, Comdata, EFS, Fleet One)", detail: "OAuth/API pulls every fuel transaction with state + amount automatically. Combined with miles from your ELD, this is the fully-automated path." },
-            { n: 2, title: "Connect your ELD for state-by-state mileage", detail: "Motive / Samsara / Geotab — Compass extracts state-crossings from GPS data and computes state-by-state miles per quarter." },
+            { n: 2, title: "Connect your ELD for state-by-state mileage", detail: "Motive / Samsara / Geotab · Compass extracts state-crossings from GPS data and computes state-by-state miles per quarter." },
             { n: 3, title: "Or upload fuel + mileage CSVs", detail: "Two templates: fuel transactions (date, state, gallons, cost) and mileage by state (date, vehicle, miles per state). Useful if you do paper trip sheets." },
             { n: 4, title: "Compass generates the quarterly return", detail: "Pre-built quarterly return ready for review. Variance flags compare to prior quarters. Direct e-file to base state (when state portal supports it) or printable PDF." },
           ]}
-          weeklyHabits={["Quick weekly fuel-vs-miles sanity check — Compass flags anomalies", "Late in Q4: review Q1 reconciliation to confirm payment was applied correctly"]}
-          auditTraps={["Mileage from ELD vs odometer mismatch — IFTA auditors look for this", "Fuel receipts double-counted or missing", "Personal-use miles included in IFTA reporting", "Late filing penalties (returns due 30 days after quarter)"]}
-          askCompassLinks={[{ label: "How do I file IFTA quarterly?", query: "How do I file IFTA quarterly" }, { label: "IFTA audit preparation — what records do I produce?", query: "IFTA audit preparation" }, { label: "IFTA mileage by state calculation", query: "IFTA mileage by state calculation" }]}
+          weeklyHabits={["Quick weekly fuel-vs-miles sanity check · Compass flags anomalies", "Late in Q4: review Q1 reconciliation to confirm payment was applied correctly"]}
+          auditTraps={["Mileage from ELD vs odometer mismatch · IFTA auditors look for this", "Fuel receipts double-counted or missing", "Personal-use miles included in IFTA reporting", "Late filing penalties (returns due 30 days after quarter)"]}
+          askCompassLinks={[{ label: "How do I file IFTA quarterly?", query: "How do I file IFTA quarterly" }, { label: "IFTA audit preparation · what records do I produce?", query: "IFTA audit preparation" }, { label: "IFTA mileage by state calculation", query: "IFTA mileage by state calculation" }]}
         />
 
         {/* DATA SOURCE */}

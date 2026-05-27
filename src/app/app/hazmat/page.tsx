@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   X3 COMPASS — HAZMAT CENTER
+   X3 COMPASS · HAZMAT CENTER
    ------------------------------------------------------------
    Cyan-themed in-app landing page. Mirrors the live
    app.x3compass.com/hazmat-center look (UI cyan, NOT the
@@ -9,7 +9,7 @@
 
    Placard demo strip uses the REAL SVG library at
    /public/hazmat/placards/ (33 standard class placards +
-   21 specialty placards) — no more CSS recreations.
+   21 specialty placards) · no more CSS recreations.
 
    Theme tokens come from AppShell's [data-x3-shell="app"]
    scope (var(--accent), var(--surface), var(--border), …)
@@ -34,7 +34,7 @@ const SERVICES = [
   { slug: "/app/ask?context=hazmat",        icon: "🤖", name: "AI Hazmat Concierge",    desc: "Ask anything about placarding, segregation, exemptions, training, lithium.",     cfr: "49 CFR Parts 171-180" },
 ];
 
-/* The 9 hazard classes — wired to the REAL SVG files in /public/hazmat/placards/.
+/* The 9 hazard classes · wired to the REAL SVG files in /public/hazmat/placards/.
    Each entry points to a file that already exists (verified May 27, 2026). */
 const PLACARDS = [
   { cls: "1", file: "class-1.1.svg", name: "Explosives" },
@@ -54,7 +54,7 @@ export default function HazmatCenterPage() {
       <main style={{ background: "var(--bg)", color: "var(--fg)", minHeight: "calc(100vh - 134px)", padding: 0 }}>
 
         {/* ============================================================
-            HERO — cyan theme, $25K fine stakes, 6 trust checks
+            HERO · cyan theme, $25K fine stakes, 6 trust checks
             ============================================================ */}
         <section style={{ padding: "60px 32px 48px", textAlign: "center", maxWidth: 1100, margin: "0 auto" }}>
           <div style={{
@@ -93,7 +93,7 @@ export default function HazmatCenterPage() {
                style={{ color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}>
               100 open-source hazmat skills
             </a>{" "}
-            — Apache 2.0, fully public, auditable.
+            · Apache 2.0, fully public, auditable.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
@@ -134,7 +134,7 @@ export default function HazmatCenterPage() {
         </section>
 
         {/* ============================================================
-            FINES BANNER — federal penalty stack
+            FINES BANNER · federal penalty stack
             ============================================================ */}
         <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px 60px" }}>
           <div style={{
@@ -155,7 +155,7 @@ export default function HazmatCenterPage() {
         </section>
 
         {/* ============================================================
-            PLACARD STRIP — RENDERS THE REAL SVG FILES
+            PLACARD STRIP · RENDERS THE REAL SVG FILES
             ------------------------------------------------------------
             No more CSS-recreated diamonds. These are the official DOT
             placard SVGs in /public/hazmat/placards/.
@@ -223,7 +223,7 @@ export default function HazmatCenterPage() {
         </section>
 
         {/* ============================================================
-            10 SERVICE TILES — the full hazmat ops stack
+            10 SERVICE TILES · the full hazmat ops stack
             ============================================================ */}
         <section id="features" style={{ maxWidth: 1200, margin: "0 auto", padding: "72px 32px 40px" }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
@@ -270,12 +270,12 @@ export default function HazmatCenterPage() {
         </section>
 
         {/* ============================================================
-            EDUCATION HUB — same audience triad as every other surface
+            EDUCATION HUB · same audience triad as every other surface
             ============================================================ */}
         <section style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px 40px" }}>
           <EducationHubCard
             surface="Hazmat"
-            subtitle="49 CFR Parts 171-180 — placarding, packaging, shipping papers, training, security, emergency response. Penalties up to $89,678 per knowing violation."
+            subtitle="49 CFR Parts 171-180 · placarding, packaging, shipping papers, training, security, emergency response. Penalties up to $89,678 per knowing violation."
             audiences={[
               {
                 label: "For Drivers", subtitle: "CDL / CLP HOLDERS WITH H ENDORSEMENT", tone: "cyan", icon: "🧑‍✈️",
@@ -284,7 +284,7 @@ export default function HazmatCenterPage() {
                   "Where the shipping paper lives (172.201, 172.205)",
                   "Reportable incidents (171.15, 171.16)",
                   "Emergency Response Guidebook lookup",
-                  "Segregation table — what cannot ride together",
+                  "Segregation table · what cannot ride together",
                   "Smoking, brake-check, and route restrictions",
                   "TSA-H endorsement maintenance",
                 ],
@@ -305,7 +305,7 @@ export default function HazmatCenterPage() {
               },
               {
                 label: "For C/TPAs", subtitle: "CONSORTIA / THIRD-PARTY ADMINISTRATORS", tone: "amber", icon: "🛡",
-                body: "If you administer hazmat compliance for multiple carriers, the Hazmat Center scales horizontally — every carrier rolls up under your dashboard with PHMSA registration tracking, training compliance, and audit-readiness scores.",
+                body: "If you administer hazmat compliance for multiple carriers, the Hazmat Center scales horizontally · every carrier rolls up under your dashboard with PHMSA registration tracking, training compliance, and audit-readiness scores.",
                 bullets: [
                   "Multi-tenant training tracker",
                   "Per-carrier PHMSA registration status",
@@ -322,7 +322,7 @@ export default function HazmatCenterPage() {
         </section>
 
         {/* ============================================================
-            TRUST BLOCK — 100 open-source skills
+            TRUST BLOCK · 100 open-source skills
             ============================================================ */}
         <section style={{ maxWidth: 1000, margin: "0 auto", padding: "16px 32px 80px" }}>
           <div style={{
@@ -342,7 +342,7 @@ export default function HazmatCenterPage() {
                 100 hazmat skills. Public. Auditable. Apache 2.0.
               </h3>
               <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.55, margin: 0, maxWidth: 580 }}>
-                Every reasoning module behind the Hazmat Center is published on GitLab. CFR-cited, peer-reviewable, free to fork. The price is for the run-time — orchestration, identity, audit trail, support, updates.
+                Every reasoning module behind the Hazmat Center is published on GitLab. CFR-cited, peer-reviewable, free to fork. The price is for the run-time · orchestration, identity, audit trail, support, updates.
               </p>
             </div>
             <a

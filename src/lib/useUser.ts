@@ -45,7 +45,7 @@ export function useUser() {
   const refresh = useCallback(async () => {
     // CRITICAL: Wrap the whole thing in try/catch. Without it, any thrown
     // exception (missing env vars, network blip, Supabase outage, anything)
-    // silently swallows and setState({loading: false}) never fires — leaving
+    // silently swallows and setState({loading: false}) never fires · leaving
     // users stuck on "Checking your session…" forever. This was the bug
     // Joshua saw in the wild.
     try {
@@ -62,7 +62,7 @@ export function useUser() {
       setState({ user, carrier, loading: false, error: null });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      // Surface to console for live debugging — production users see the
+      // Surface to console for live debugging · production users see the
       // error string in the AppShell fallback (red text under the logo).
       // eslint-disable-next-line no-console
       console.error("[useUser] refresh failed:", msg);

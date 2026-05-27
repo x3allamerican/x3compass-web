@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * Founder card — a pre-revenue B2B SaaS without customer logos benefits
+ * Founder card · a pre-revenue B2B SaaS without customer logos benefits
  * from putting the founder's face (or credentials) on the page. This card
  * humanizes the product + ties it to a real person with DOT compliance
  * background.
@@ -21,7 +21,7 @@ export default function FounderCard() {
           <p className="text-[14px] text-[var(--fg-muted)] leading-relaxed mb-3">
             DOT-compliance operator turned software founder. Built X3 Fleet Safety servicing dozens
             of small carriers, then realized the same AI brain could scale to thousands. X3 Compass
-            is that brain — productized, CFR-cited, and priced so a 5-truck owner-operator can
+            is that brain · productized, CFR-cited, and priced so a 5-truck owner-operator can
             afford the same compliance posture as a 500-truck enterprise.
           </p>
           <div className="flex gap-3 text-[12px] font-bold">

@@ -67,7 +67,7 @@ export default function StubPage({
             <div className="text-[13px] text-white/70">
               The brain is live and answering questions on{" "}
               <Link href="/app/ask" className="text-[#22D3EE] font-bold hover:underline">Ask Compass</Link>.
-              The dedicated screen — table view, detail drawers, CSV/manual/API import — ships next sprint.
+              The dedicated screen · table view, detail drawers, CSV/manual/API import · ships next sprint.
             </div>
           </div>
         </div>

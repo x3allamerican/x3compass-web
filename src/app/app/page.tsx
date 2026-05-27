@@ -1,13 +1,13 @@
 "use client";
 
 /* ============================================================
-   X3 COMPASS — COMPLIANCE COMMAND CENTER
+   X3 COMPASS · COMPLIANCE COMMAND CENTER
    ------------------------------------------------------------
    Mirrors app.x3compass.com/dashboard.html structure exactly:
      main
-       section.kpi-row    — 4-tile hero (donut + sparkline)
-       section.middle-row — Compliance Overview | Action Items | CSA Scores
-       section.bottom-row — Health Trend | Severity Donut | Expiring Items
+       section.kpi-row    · 4-tile hero (donut + sparkline)
+       section.middle-row · Compliance Overview | Action Items | CSA Scores
+       section.bottom-row · Health Trend | Severity Donut | Expiring Items
    ============================================================ */
 
 import { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ function Donut({
   );
 }
 
-/** Tiny SVG sparkline — fake-positive cyan line for the dashboard hero KPIs. */
+/** Tiny SVG sparkline · fake-positive cyan line for the dashboard hero KPIs. */
 function Sparkline({ trend = "up", width = 180, height = 60 }: { trend?: "up" | "flat" | "down"; width?: number; height?: number }) {
   const points = trend === "up"   ? [10, 12, 9, 15, 13, 22, 18, 25, 24, 32]
                 : trend === "down" ? [32, 28, 30, 22, 25, 18, 19, 12, 14, 8]
@@ -74,7 +74,7 @@ function Sparkline({ trend = "up", width = 180, height = 60 }: { trend?: "up" | 
   );
 }
 
-/** Filled severity donut — used in Open Alerts KPI + bottom-row Severity card. */
+/** Filled severity donut · used in Open Alerts KPI + bottom-row Severity card. */
 function SeverityDonut({ urgent, warning, info, size = 110, stroke = 18 }: { urgent: number; warning: number; info: number; size?: number; stroke?: number }) {
   const total = urgent + warning + info || 1;
   const r = (size - stroke) / 2;
@@ -101,7 +101,7 @@ function SeverityDonut({ urgent, warning, info, size = 110, stroke = 18 }: { urg
   );
 }
 
-/** Bar chart — Expiring Items Next 30 Days. */
+/** Bar chart · Expiring Items Next 30 Days. */
 function BarChart({ data, height = 200 }: { data: Array<{ label: string; value: number; color?: string }>; height?: number }) {
   const max = Math.max(...data.map(d => d.value), 1);
   return (
@@ -117,7 +117,7 @@ function BarChart({ data, height = 200 }: { data: Array<{ label: string; value: 
   );
 }
 
-/** Trend line chart — Compliance Health Trend (90 days). */
+/** Trend line chart · Compliance Health Trend (90 days). */
 function TrendChart({ values, height = 200 }: { values: number[]; height?: number }) {
   const max = Math.max(...values);
   const min = Math.min(...values);
@@ -180,10 +180,10 @@ export default function CompassDashboard() {
       <main className="x3-dashboard-main" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* ============================================================
-            KPI ROW — 4 hero cards (Manus design)
+            KPI ROW · 4 hero cards (Manus design)
             ============================================================ */}
         <section className="x3-kpi-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-          {/* KPI 1: Compliance Health — cyan donut + sparkline */}
+          {/* KPI 1: Compliance Health · cyan donut + sparkline */}
           <Card>
             <CardHeader title="Compliance Health" />
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -199,7 +199,7 @@ export default function CompassDashboard() {
             </div>
           </Card>
 
-          {/* KPI 2: Active Drivers — huge number, truck icon */}
+          {/* KPI 2: Active Drivers · huge number, truck icon */}
           <Card>
             <CardHeader title="Active Drivers" />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%", gap: 12 }}>
@@ -215,7 +215,7 @@ export default function CompassDashboard() {
             </div>
           </Card>
 
-          {/* KPI 3: Open Alerts — number + severity breakdown + severity donut */}
+          {/* KPI 3: Open Alerts · number + severity breakdown + severity donut */}
           <Card>
             <CardHeader title="Open Alerts" />
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -240,7 +240,7 @@ export default function CompassDashboard() {
             </div>
           </Card>
 
-          {/* KPI 4: DQ Score — donut + sparkline */}
+          {/* KPI 4: DQ Score · donut + sparkline */}
           <Card>
             <CardHeader title="DQ Score" />
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -258,7 +258,7 @@ export default function CompassDashboard() {
         </section>
 
         {/* ============================================================
-            MIDDLE ROW — Compliance Overview | Action Items | CSA Scores
+            MIDDLE ROW · Compliance Overview | Action Items | CSA Scores
             ============================================================ */}
         <section className="x3-middle-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
 
@@ -347,7 +347,7 @@ export default function CompassDashboard() {
         </section>
 
         {/* ============================================================
-            BOTTOM ROW — Trend chart | Severity donut | Expiring items bar
+            BOTTOM ROW · Trend chart | Severity donut | Expiring items bar
             ============================================================ */}
         <section className="x3-bottom-row" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1.4fr", gap: 16 }}>
 
@@ -397,7 +397,7 @@ export default function CompassDashboard() {
 }
 
 /* ============================================================
-   Card primitives — used throughout the dashboard. Match the
+   Card primitives · used throughout the dashboard. Match the
    Manus surface look: dark panel, 1px border, soft drop shadow.
    ============================================================ */
 

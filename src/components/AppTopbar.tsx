@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   AppTopbar — centered title + scrolling subtitle in topbar
+   AppTopbar · centered title + scrolling subtitle in topbar
    ------------------------------------------------------------
    Layout:
                      DASHBOARD                          🔔  JK  Joshua Kovarik
@@ -11,7 +11,7 @@
 import { useTenant } from "./TenantThemeProvider";
 
 type Props = {
-  /** Page name (used only for accessibility — VISUAL topbar title is the brand banner "AI SAFETY DIRECTOR" per Joshua). */
+  /** Page name (used only for accessibility · VISUAL topbar title is the brand banner "AI SAFETY DIRECTOR" per Joshua). */
   title: string;
   userEmail?: string | null;
   userName?: string | null;
@@ -21,7 +21,7 @@ type Props = {
   notificationCount?: number;
 };
 
-/** The topbar always shows the BRAND banner — not the per-page name. Joshua wants
+/** The topbar always shows the BRAND banner · not the per-page name. Joshua wants
  *  "AI SAFETY DIRECTOR" everywhere so we never see double-Drivers / double-Vehicles
  *  with the page-level <h1>. */
 const TOPBAR_BANNER = "AI SAFETY DIRECTOR";
@@ -45,7 +45,7 @@ export default function AppTopbar({
 
   // Subtitle uses the Apex Logistics demo values until a real tenant is wired.
   // Per Joshua: LIVE shows in GREEN; the rest of the subtitle is all cyan.
-  // Suppress lint on unused incoming props — the demo values override them.
+  // Suppress lint on unused incoming props · the demo values override them.
   void tenant; void stats;
   const parts: string[] = [
     ...(live ? ["***LIVE***"] : []),
@@ -73,10 +73,10 @@ export default function AppTopbar({
         minHeight: 134,
       }}
     >
-      {/* LEFT spacer — keeps the title TRULY centered across the topbar */}
+      {/* LEFT spacer · keeps the title TRULY centered across the topbar */}
       <div aria-hidden="true" />
 
-      {/* CENTER stack — title + scrolling subtitle */}
+      {/* CENTER stack · title + scrolling subtitle */}
       <div style={{ minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center", paddingTop: 14 }}>
         <h1
           aria-label={title}
@@ -126,7 +126,7 @@ export default function AppTopbar({
         </div>
       </div>
 
-      {/* RIGHT — bell + user widget (pinned to right edge) */}
+      {/* RIGHT · bell + user widget (pinned to right edge) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 14, flexShrink: 0 }}>
         <button
           aria-label={`Notifications${notificationCount ? `, ${notificationCount} unread` : ""}`}

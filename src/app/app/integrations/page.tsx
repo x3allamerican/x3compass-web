@@ -23,7 +23,7 @@ type Vendor = {
 type Summary = { live: number; configured: number; errors: number; planned: number; total: number };
 type ApiPayload = { ok: boolean; vendors?: Vendor[]; summary?: Summary; error?: string };
 
-// Demo fallback — preserves the page if no super-admin (or backend not yet deployed)
+// Demo fallback · preserves the page if no super-admin (or backend not yet deployed)
 const DEMO_VENDORS: Vendor[] = [
   { key: "stripe",     vendor: "Stripe",     category: "payments",   purpose: "Billing + subscriptions + Customer Portal",   badge: "Live",     status: "live",        secret_present: true, probe: "ok",   probe_detail: "200 OK", setup_url: "https://dashboard.stripe.com/" },
   { key: "anthropic",  vendor: "Anthropic",  category: "ai",         purpose: "Claude (AI brain powering every X3 agent)",   badge: "Live",     status: "live",        secret_present: true, probe: "ok",   probe_detail: "200 OK", setup_url: "https://console.anthropic.com/" },
@@ -37,7 +37,7 @@ const DEMO_VENDORS: Vendor[] = [
   { key: "fmcsa_clearinghouse", vendor: "FMCSA Clearinghouse", category: "compliance", purpose: "Federal D&A registry queries", badge: "Manual", status: "manual", secret_present: false, probe: "skip", probe_detail: "no public API" },
   { key: "carrierok",  vendor: "CarrierOk",  category: "safety",     purpose: "CSA scores + SAFER bulk data",                badge: "Pending",  status: "trial",       secret_present: false, probe: "skip" },
   { key: "motive",     vendor: "Motive",     category: "telematics", purpose: "ELD + HOS + dashcam",                         badge: "Q3 2026",  status: "available",   secret_present: false, probe: "skip" },
-  { key: "samsara",    vendor: "Samsara",    category: "telematics", purpose: "ELD + HOS + DVIR + telematics (OAuth)",       badge: "Partner",  status: "configured",  secret_present: true, probe: "skip", probe_detail: "OAuth ready — click Connect to authorize", connect_url: "/api/integrations/samsara/oauth-start" },
+  { key: "samsara",    vendor: "Samsara",    category: "telematics", purpose: "ELD + HOS + DVIR + telematics (OAuth)",       badge: "Partner",  status: "configured",  secret_present: true, probe: "skip", probe_detail: "OAuth ready · click Connect to authorize", connect_url: "/api/integrations/samsara/oauth-start" },
   { key: "geotab",     vendor: "Geotab",     category: "telematics", purpose: "ELD + telematics + fleet management",         badge: "Q3 2026",  status: "available",   secret_present: false, probe: "skip" },
   { key: "sambasafety",vendor: "SambaSafety",category: "telematics", purpose: "Continuous MVR monitoring",                   badge: "Q3 2026",  status: "available",   secret_present: false, probe: "skip" },
   { key: "fleetrabbit",vendor: "FleetRabbit",category: "telematics", purpose: "DVIR + maintenance + work orders (BYO)",       badge: "BYO",      status: "available",   secret_present: false, probe: "skip", probe_detail: "Already use FleetRabbit? Bring your API key in Settings → Integrations and Compass mirrors your DVIRs + recalls into the compliance brain." },
@@ -138,9 +138,9 @@ export default function IntegrationsPage() {
           </>}
           dataSource={{
             items: [
-              <span key="i1"><strong className="text-[var(--fg)]">Live probes</strong> — each card calls the vendor&apos;s health endpoint on page load with a 3-second timeout. Failure here usually means an expired API key or rate limit.</span>,
-              <span key="i2"><strong className="text-[var(--fg)]">Secrets</strong> live in Cloudflare Pages env vars. If a card shows <em>no secret</em>, the binding hasn&apos;t been set — that vendor won&apos;t function.</span>,
-              <span key="i3"><strong className="text-[var(--fg)]">Last events</strong> come from <code className="font-mono text-[var(--accent)]">vendor_webhook_events</code> — every inbound webhook lands there with vendor + payload + timestamp.</span>,
+              <span key="i1"><strong className="text-[var(--fg)]">Live probes</strong> · each card calls the vendor&apos;s health endpoint on page load with a 3-second timeout. Failure here usually means an expired API key or rate limit.</span>,
+              <span key="i2"><strong className="text-[var(--fg)]">Secrets</strong> live in Cloudflare Pages env vars. If a card shows <em>no secret</em>, the binding hasn&apos;t been set · that vendor won&apos;t function.</span>,
+              <span key="i3"><strong className="text-[var(--fg)]">Last events</strong> come from <code className="font-mono text-[var(--accent)]">vendor_webhook_events</code> · every inbound webhook lands there with vendor + payload + timestamp.</span>,
               <span key="i4"><strong className="text-[var(--fg)]">Setup URLs</strong> deep-link to each vendor&apos;s dashboard so you can rotate keys or add credit without hunting.</span>,
             ],
           }}

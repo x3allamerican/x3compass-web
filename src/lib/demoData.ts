@@ -1,5 +1,5 @@
 /**
- * demoData.ts — fallback dashboard data shown when /api/dashboard returns no real data.
+ * demoData.ts · fallback dashboard data shown when /api/dashboard returns no real data.
  * Used by src/app/app/page.tsx as the static demo state for the Compliance Command Center.
  *
  * Shape mirrors the ApiData type expected by the dashboard page.
@@ -86,7 +86,7 @@ export const CSA_BASICS = [
 ];
 
 /**
- * ACTION_ITEMS — each key is a section name; value is a card with title, CFR ref,
+ * ACTION_ITEMS · each key is a section name; value is a card with title, CFR ref,
  * a list of items (driver/vehicle with status), and a call-to-action link.
  */
 export type ActionItem = {

@@ -18,13 +18,13 @@ type CourseRow = {
 };
 
 const COURSES: CourseRow[] = [
-  { driver: "Jared Martinez",  initials: "JM", course: "ELDT — Theory",           cfr: "Part 380.609", provider: "CarriersEdge",    completed: "2024-08-12", expires: "—",          status: "current", statusLabel: "Complete" },
-  { driver: "Jared Martinez",  initials: "JM", course: "ELDT — Behind the Wheel", cfr: "Part 380.609", provider: "TPR · school 4421", completed: "2024-08-18", expires: "—",        status: "current", statusLabel: "Complete" },
+  { driver: "Jared Martinez",  initials: "JM", course: "ELDT · Theory",           cfr: "Part 380.609", provider: "CarriersEdge",    completed: "2024-08-12", expires: "—",          status: "current", statusLabel: "Complete" },
+  { driver: "Jared Martinez",  initials: "JM", course: "ELDT · Behind the Wheel", cfr: "Part 380.609", provider: "TPR · school 4421", completed: "2024-08-18", expires: "—",        status: "current", statusLabel: "Complete" },
   { driver: "Jared Martinez",  initials: "JM", course: "Defensive driving",       cfr: "Part 380",     provider: "Infinit-i",        completed: "2025-09-12", expires: "2026-09-12", status: "current", statusLabel: "11 mo left" },
   { driver: "Ricardo Torres",  initials: "RT", course: "Hazmat awareness",        cfr: "§ 172.704",    provider: "JJ Keller",        completed: "2023-08-20", expires: "2026-08-20", status: "due",     statusLabel: "Expires 84d" },
   { driver: "Sarah Johnson",   initials: "SJ", course: "Pre-trip inspection",     cfr: "Part 380",     provider: "CarriersEdge",     completed: "2023-03-17", expires: "2026-03-17", status: "overdue", statusLabel: "62d overdue" },
-  { driver: "Emma Park",       initials: "EP", course: "ELDT — Theory",           cfr: "Part 380.609", provider: "—",                completed: "—",          expires: "—",          status: "missing", statusLabel: "Missing · BLOCKER" },
-  { driver: "Emma Park",       initials: "EP", course: "ELDT — Behind the Wheel", cfr: "Part 380.609", provider: "—",                completed: "—",          expires: "—",          status: "missing", statusLabel: "Missing · BLOCKER" },
+  { driver: "Emma Park",       initials: "EP", course: "ELDT · Theory",           cfr: "Part 380.609", provider: "—",                completed: "—",          expires: "—",          status: "missing", statusLabel: "Missing · BLOCKER" },
+  { driver: "Emma Park",       initials: "EP", course: "ELDT · Behind the Wheel", cfr: "Part 380.609", provider: "—",                completed: "—",          expires: "—",          status: "missing", statusLabel: "Missing · BLOCKER" },
   { driver: "Mike Kowalski",   initials: "MK", course: "Cargo securement",        cfr: "Part 392.9",   provider: "Infinit-i",        completed: "2025-11-08", expires: "2026-11-08", status: "current", statusLabel: "12 mo left" },
   { driver: "Diego Ramirez",   initials: "DR", course: "Supervisor D&A awareness",cfr: "§ 382.603",    provider: "JJ Keller",        completed: "2024-04-22", expires: "2025-04-22", status: "overdue", statusLabel: "395d overdue" },
   { driver: "Linda Wilson",    initials: "LW", course: "Hazmat security plan",     cfr: "§ 172.800",   provider: "JJ Keller",        completed: "2025-06-15", expires: "2026-06-15", status: "due",     statusLabel: "Expires 31d" },
@@ -48,8 +48,8 @@ const AVATAR_GRAD: Record<string, string> = {
 };
 
 const COURSE_LIBRARY = [
-  { code: "ELDT-THEORY", name: "ELDT — Theory",            cfr: "Part 380.609", required: "Pre-CDL · class A/B/passenger", cycle: "Once", provider: "TPR providers" },
-  { code: "ELDT-BTW",     name: "ELDT — Behind the Wheel", cfr: "Part 380.609", required: "Pre-CDL · class A/B/passenger", cycle: "Once", provider: "TPR providers" },
+  { code: "ELDT-THEORY", name: "ELDT · Theory",            cfr: "Part 380.609", required: "Pre-CDL · class A/B/passenger", cycle: "Once", provider: "TPR providers" },
+  { code: "ELDT-BTW",     name: "ELDT · Behind the Wheel", cfr: "Part 380.609", required: "Pre-CDL · class A/B/passenger", cycle: "Once", provider: "TPR providers" },
   { code: "SUP-DA",       name: "Supervisor D&A Awareness", cfr: "§ 382.603",   required: "Anyone supervising CDL drivers",  cycle: "Once + remedial", provider: "JJ Keller, Infinit-i" },
   { code: "DEF-DRV",      name: "Defensive Driving",        cfr: "Part 380",    required: "All CDL drivers",                 cycle: "Annual", provider: "CarriersEdge, Infinit-i" },
   { code: "PRE-TRIP",     name: "Pre-Trip Inspection",      cfr: "Part 380",    required: "All CDL drivers",                 cycle: "Triennial", provider: "CarriersEdge" },
@@ -80,17 +80,17 @@ export default function TrainingPage() {
         {/* HOW THIS PAGE WORKS */}
         <PageGuide
           cfr="49 CFR Part 380 + § 391.11"
-          what="Training completions per driver — ELDT (first-time CDL), defensive driving, supervisor reasonable-suspicion, hazmat refresher, and any carrier-specific curriculum."
+          what="Training completions per driver · ELDT (first-time CDL), defensive driving, supervisor reasonable-suspicion, hazmat refresher, and any carrier-specific curriculum."
           who="Every motor carrier. ELDT is mandatory for first-time CDL applicants after 2/7/2022. Hazmat carriers need annual security awareness. Supervisors need RS training before they can make reasonable-suspicion calls."
           howTo={[
             { n: 1, title: "Connect your LMS (Infinit-i, JJ Keller Encompass, CarriersEdge)", detail: "OAuth pulls completion data per driver, per course, with timestamps and certificate URLs. Real-time sync as drivers finish courses." },
-            { n: 2, title: "Or upload training completion CSV", detail: "Template: driver, course code, course name, completion date, certificate URL, expiration. Works for any LMS that lets you export — or manual training (Smith System certified instructor)." },
-            { n: 3, title: "Or log training events manually", detail: "+ Add training record — useful for in-house toolbox talks, post-accident coaching, supervisor 2-hour RS training (§ 382.603), and one-off events." },
+            { n: 2, title: "Or upload training completion CSV", detail: "Template: driver, course code, course name, completion date, certificate URL, expiration. Works for any LMS that lets you export · or manual training (Smith System certified instructor)." },
+            { n: 3, title: "Or log training events manually", detail: "+ Add training record · useful for in-house toolbox talks, post-accident coaching, supervisor 2-hour RS training (§ 382.603), and one-off events." },
             { n: 4, title: "Verify ELDT for new CDL holders", detail: "Drivers with first CDL after 2/7/2022 need ELDT (theory + behind-the-wheel) from a TPR-registered provider. Compass checks the provider's TPR number against FMCSA's registry." },
           ]}
           weeklyHabits={["Confirm new hires have completed orientation training", "Review drivers with annual refresher coming due in next 30 days"]}
-          auditTraps={["ELDT certificate missing for a driver with first CDL after 2/7/2022 — automatic finding", "Supervisor reasonable-suspicion training undocumented — they can't legally make RS calls", "Hazmat security awareness training missing or older than 12 months for hazmat-endorsed drivers"]}
-          askCompassLinks={[{ label: "Is annual refresher training required?", query: "Annual driver refresher training requirements" }, { label: "ELDT — who needs it and what counts?", query: "ELDT entry-level driver training requirements" }, { label: "Supervisor 2-hour reasonable-suspicion course documentation", query: "Supervisor reasonable suspicion training documentation" }]}
+          auditTraps={["ELDT certificate missing for a driver with first CDL after 2/7/2022 · automatic finding", "Supervisor reasonable-suspicion training undocumented · they can't legally make RS calls", "Hazmat security awareness training missing or older than 12 months for hazmat-endorsed drivers"]}
+          askCompassLinks={[{ label: "Is annual refresher training required?", query: "Annual driver refresher training requirements" }, { label: "ELDT · who needs it and what counts?", query: "ELDT entry-level driver training requirements" }, { label: "Supervisor 2-hour reasonable-suspicion course documentation", query: "Supervisor reasonable suspicion training documentation" }]}
         />
 
         {/* DATA SOURCE */}

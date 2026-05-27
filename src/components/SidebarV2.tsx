@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * SidebarV2 — FleetRabbit-pattern sidebar adopted by X3 Compass.
+ * SidebarV2 · FleetRabbit-pattern sidebar adopted by X3 Compass.
  *
  * Behaviour:
  *  - Sticky/fixed: stays put while the main content scrolls
@@ -11,7 +11,7 @@
  *  - "What's new" footer card sticky at the bottom
  *  - Counter pills inline on group titles (e.g. "9 AI" on Finance Team)
  *
- * Enabled via the ?sidebar=v2 query string flag — AppShell branches on this.
+ * Enabled via the ?sidebar=v2 query string flag · AppShell branches on this.
  * Falls back to the existing flat-section sidebar when the flag isn't set.
  */
 
@@ -117,7 +117,7 @@ const NAV: Item[] = [
 
   { kind: "leaf", href: "/app/ask", label: "Ask Compass", icon: "∞", pill: { label: "AI", color: "violet" } },
 
-  // Hazmat Center — collapsible dropdown with all 10 sub-tools (per Joshua, task #263).
+  // Hazmat Center · collapsible dropdown with all 10 sub-tools (per Joshua, task #263).
   // Top-level "Hazmat Center" link routes to /app/hazmat (the in-app Bugatti dashboard),
   // NOT /hazmat (the public marketing page).
   { kind: "group", title: "Hazmat Center", icon: "⚠", items: [
@@ -166,9 +166,9 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
       className="sticky top-0 h-screen overflow-y-auto flex flex-col"
       aria-label="Primary navigation"
       style={{
-        // True black sidebar — was using --surface (#0F1620 navy-tinted).
+        // True black sidebar · was using --surface (#0F1620 navy-tinted).
         background: "var(--bg)",
-        // Thicker white vertical line on right edge — per Joshua's direction
+        // Thicker white vertical line on right edge · per Joshua's direction
         // (was 1px, now 2px for stronger box-line effect).
         borderRight: "2px solid rgba(255, 255, 255, 0.55)",
       }}

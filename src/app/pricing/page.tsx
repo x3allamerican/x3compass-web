@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const PLANS = [
-  { name: "DIY", price: 25, blurb: "AI Safety Director + 300+ FMCSA skills — you operate it.", features: ["AI brain across 12 compliance domains","300+ CFR-cited skills","DataQ dispute drafter","Placard wizard + 100 hazmat skills (with add-on)","Driver Qualification File generator","Auto MVR pull cadence","Email support"], cta: { label: "Start 7-day free trial", href: "/signup?plan=diy" } },
+  { name: "DIY", price: 25, blurb: "AI Safety Director + 300+ FMCSA skills · you operate it.", features: ["AI brain across 12 compliance domains","300+ CFR-cited skills","DataQ dispute drafter","Placard wizard + 100 hazmat skills (with add-on)","Driver Qualification File generator","Auto MVR pull cadence","Email support"], cta: { label: "Start 7-day free trial", href: "/signup?plan=diy" } },
   { name: "DFY", price: 50, blurb: "Done-for-you. We operate Compass on your account.", features: ["Everything in DIY","Dedicated safety advisor","Monthly compliance review call","FMCSA audit prep included","We file MVRs, drug tests, Clearinghouse","Priority slack + phone support","Same-day DataQ dispute filing"], featured: true, cta: { label: "Start 7-day free trial", href: "/signup?plan=dfy" } },
   { name: "Enterprise", price: null, blurb: "100+ trucks, multi-yard, integrations, custom SLAs.", features: ["Everything in DFY","Multi-tenant org structure","SSO + SCIM","Custom integrations","Dedicated CSM + named legal counsel","Custom data residency","MSA + signed BAA"], cta: { label: "Talk to us", href: "/partners" } },
 ];
@@ -51,7 +51,7 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
-        {/* ROI calculator — interactive widget */}
+        {/* ROI calculator · interactive widget */}
         <div className="mb-14">
           <ROICalculator />
         </div>
@@ -68,7 +68,7 @@ export default function PricingPage() {
           </div>
         </div>
         <div className="grid md:grid-cols-2 gap-6 mb-14">
-          {[["Is the trial really free?","Yes — 7 days, no card required. We don't auto-charge."],["Can I bring my own drug consortium, ELD, MVR vendor?","Yes on DIY; DFY bundles a Compass-managed consortium."],["Does the price include FMCSA filings?","USDOT/MC filing fees are paid directly to FMCSA."],["Can I cancel anytime?","Yes. Self-serve from your billing portal."],["Annual billing discount?","10% off annual. Reach out for the link."],["500 drivers?","Enterprise — let's talk."]].map(([q,a], i) => (
+          {[["Is the trial really free?","Yes · 7 days, no card required. We don't auto-charge."],["Can I bring my own drug consortium, ELD, MVR vendor?","Yes on DIY; DFY bundles a Compass-managed consortium."],["Does the price include FMCSA filings?","USDOT/MC filing fees are paid directly to FMCSA."],["Can I cancel anytime?","Yes. Self-serve from your billing portal."],["Annual billing discount?","10% off annual. Reach out for the link."],["500 drivers?","Enterprise · let's talk."]].map(([q,a], i) => (
             <div key={i} className="rounded-xl p-5 bg-[var(--surface-3)] border border-[var(--border)]"><div className="font-extrabold text-[var(--fg)] mb-1.5">{q}</div><div className="text-[13px] text-[var(--fg-muted)]">{a}</div></div>
           ))}
         </div>

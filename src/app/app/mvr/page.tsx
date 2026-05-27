@@ -81,14 +81,14 @@ function MvrHero() {
           You pull the MVR. <span className="text-[var(--accent)]">Compass reads it</span> and does the rest.
         </h2>
         <p className="text-[13px] md:text-[14px] text-[var(--fg-muted)] max-w-3xl leading-relaxed mb-5">
-          Drop the file (PDF, scan, or photo). Compass extracts license status, expiration, points, violations, and accident history — then auto-matches it to the driver and saves it to the audit-ready DQ file.{" "}
+          Drop the file (PDF, scan, or photo). Compass extracts license status, expiration, points, violations, and accident history · then auto-matches it to the driver and saves it to the audit-ready DQ file.{" "}
           <span className="font-mono text-[var(--accent)]">§ 391.51</span> retention handled automatically.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { n: 1, t: "Pull MVR from your DMV or vendor", s: "State portal, Checkr, SambaSafety, Foley, HireRight — anywhere" },
+            { n: 1, t: "Pull MVR from your DMV or vendor", s: "State portal, Checkr, SambaSafety, Foley, HireRight · anywhere" },
             { n: 2, t: "Drop it below", s: "Compass reads PDFs, scans, or phone photos" },
-            { n: 3, t: "Review & save", s: "~30 sec confirm — driver record auto-updates" },
+            { n: 3, t: "Review & save", s: "~30 sec confirm · driver record auto-updates" },
           ].map((s) => (
             <div key={s.n} className="flex items-start gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-3)]">
               <div className="w-7 h-7 rounded-full grid place-items-center font-extrabold text-[12px] text-[var(--bg)] flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>{s.n}</div>
@@ -105,7 +105,7 @@ function MvrHero() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Educational FAQ grid — When? What? Where?
+// Educational FAQ grid · When? What? Where?
 // ═══════════════════════════════════════════════════════════════════
 function EduFaqGrid() {
   const cards = [
@@ -115,12 +115,12 @@ function EduFaqGrid() {
       cfr: "49 CFR § 391.23, § 391.25, § 391.27",
       body: (
         <>
-          <p className="mb-2">Federal rules give you four triggers — three required, one strongly recommended:</p>
+          <p className="mb-2">Federal rules give you four triggers · three required, one strongly recommended:</p>
           <ul className="ml-5 list-disc space-y-1.5">
-            <li><strong>At hire</strong> — within 30 days of putting the driver behind the wheel. Pull from <em>every state</em> the driver was licensed in during the last 3 years.</li>
-            <li><strong>Annual</strong> — at least once every 12 months from the driver&apos;s licensing state, every active driver.</li>
-            <li><strong>Post-violation / on notice</strong> — within 30 days of being notified of a disqualifying conviction, license suspension, or state administrative action.</li>
-            <li><strong>Continuous monitoring</strong> (recommended) — ongoing alerts surface license changes within hours instead of yearly.</li>
+            <li><strong>At hire</strong> · within 30 days of putting the driver behind the wheel. Pull from <em>every state</em> the driver was licensed in during the last 3 years.</li>
+            <li><strong>Annual</strong> · at least once every 12 months from the driver&apos;s licensing state, every active driver.</li>
+            <li><strong>Post-violation / on notice</strong> · within 30 days of being notified of a disqualifying conviction, license suspension, or state administrative action.</li>
+            <li><strong>Continuous monitoring</strong> (recommended) · ongoing alerts surface license changes within hours instead of yearly.</li>
           </ul>
           <p className="mt-2">Compass calculates these dates for you and shows the status next to each driver below.</p>
         </>
@@ -135,7 +135,7 @@ function EduFaqGrid() {
           <p className="mb-2"><strong>At hire (every state in last 3 years):</strong> a 3-year history report from <em>each</em> state where the driver held a license. MI + OH + IN = three separate MVRs.</p>
           <p className="mb-2"><strong>Annual review:</strong> a 3-year history report from the driver&apos;s <em>current</em> licensing state. Just one.</p>
           <p>The MVR must show: <strong>license status, class, endorsements, restrictions, conviction history, and any administrative actions.</strong> CDL holders need the &ldquo;commercial driving record&rdquo; version that includes CDLIS data.</p>
-          <p className="mt-2">Compass reads any of those formats — you don&apos;t need to pre-format anything.</p>
+          <p className="mt-2">Compass reads any of those formats · you don&apos;t need to pre-format anything.</p>
         </>
       ),
     },
@@ -145,7 +145,7 @@ function EduFaqGrid() {
       cfr: "Vendor-neutral",
       body: (
         <>
-          <p><strong>1. Direct from your state DMV (cheapest)</strong> — all 50 states have online portals.</p>
+          <p><strong>1. Direct from your state DMV (cheapest)</strong> · all 50 states have online portals.</p>
           <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
             {["MI · Secretary of State", "OH · BMV", "IN · BMV", "TX · DPS", "CA · DMV", "All 50 states"].map((p) => (
               <span key={p} className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/30">{p}</span>
@@ -163,7 +163,7 @@ function EduFaqGrid() {
               <span key={p} className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-[var(--fg)] bg-[var(--bg-3)] border border-[var(--border)]">{p}</span>
             ))}
           </div>
-          <p className="text-[11px] text-[var(--fg-faint)] italic">Compass has no exclusive partnership — pick whichever vendor fits your workflow.</p>
+          <p className="text-[11px] text-[var(--fg-faint)] italic">Compass has no exclusive partnership · pick whichever vendor fits your workflow.</p>
         </>
       ),
     },
@@ -191,7 +191,7 @@ function EduFaqGrid() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Upload zone — drag-drop, AI-extract (Phase 1: stores file, queues for AI in Phase 2)
+// Upload zone · drag-drop, AI-extract (Phase 1: stores file, queues for AI in Phase 2)
 // ═══════════════════════════════════════════════════════════════════
 function UploadCard({ onManualEntry, onUploaded }: { onManualEntry: () => void; onUploaded: (file: File) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -244,7 +244,7 @@ function UploadCard({ onManualEntry, onUploaded }: { onManualEntry: () => void; 
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Continuous monitoring opt-in card — Compass differentiator
+// Continuous monitoring opt-in card · Compass differentiator
 // (Sits between Upload and KPIs. Vendor-neutral; just an offer.)
 // ═══════════════════════════════════════════════════════════════════
 function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEnrolled }: {
@@ -261,7 +261,7 @@ function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEn
             Stop pulling MVRs annually. <span className="text-[var(--accent)]">Continuously monitor.</span>
           </h3>
           <p className="text-[12.5px] text-[var(--fg-muted)] mb-3 max-w-2xl">
-            Checkr Continuous MVR integration: <strong>$5/driver/mo retail</strong> + $9.50 per triggered report (passthrough at cost) + state passthrough fees. The instant any state DMV updates a driver&apos;s record — violation, suspension, license status change — Compass writes the alert to this tracker and notifies you.{" "}
+            Checkr Continuous MVR integration: <strong>$5/driver/mo retail</strong> + $9.50 per triggered report (passthrough at cost) + state passthrough fees. The instant any state DMV updates a driver&apos;s record · violation, suspension, license status change · Compass writes the alert to this tracker and notifies you.{" "}
             {enrollmentCount > 0 ? (
               <span className="text-[var(--fg)] font-semibold">Currently active for {enrollmentCount} driver{enrollmentCount === 1 ? "" : "s"}.</span>
             ) : (
@@ -319,7 +319,7 @@ function EnrollModal({ carrierId, drivers, onClose, onEnrolled }: {
       const j = await r.json();
       if (!j.ok) {
         if (j.code === "NEEDS_BASELINE") setError("This driver needs a completed baseline Checkr MVR first. Order one from /app/background-checks, then come back once it returns 'clear'.");
-        else if (j.code === "ACCOUNT_NOT_APPROVED") setError("Continuous MVR isn't yet enabled on your Checkr account. The qualification form has been submitted — this will start working automatically once approved.");
+        else if (j.code === "ACCOUNT_NOT_APPROVED") setError("Continuous MVR isn't yet enabled on your Checkr account. The qualification form has been submitted · this will start working automatically once approved.");
         else setError(j.error || "Enrollment failed");
         return;
       }
@@ -437,7 +437,7 @@ export default function MvrPage() {
           />
         )}
 
-        {/* KPI grid — 4 tiles */}
+        {/* KPI grid · 4 tiles */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { l: "Active drivers", v: kpis.total, sub: "tracked here", c: "text-[var(--fg)]" },
@@ -458,7 +458,7 @@ export default function MvrPage() {
           <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-[16px] font-extrabold text-[var(--fg)] flex items-center gap-2">📋 Driver-by-driver MVR status</h2>
-              <p className="text-[11px] text-[var(--fg-muted)] mt-0.5">Source of truth — pulls from any source land here.</p>
+              <p className="text-[11px] text-[var(--fg-muted)] mt-0.5">Source of truth · pulls from any source land here.</p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <input
@@ -484,7 +484,7 @@ export default function MvrPage() {
             ) : drivers.length === 0 ? (
               <div className="p-10 text-center">
                 <div className="text-[14px] font-bold text-[var(--fg)] mb-1">No drivers yet</div>
-                <p className="text-[12px] text-[var(--fg-muted)]">Add drivers in /app/drivers — MVRs attach to drivers.</p>
+                <p className="text-[12px] text-[var(--fg-muted)]">Add drivers in /app/drivers · MVRs attach to drivers.</p>
               </div>
             ) : (
               <table className="w-full text-[13px]">
@@ -562,7 +562,7 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
   return (
     <Modal title="Log MVR pull (manual)" onClose={onClose}>
       <p className="text-[12px] text-[var(--fg-muted)] mb-3">
-        Skip the upload — type the values directly. Compass saves it to the audit file the same way.
+        Skip the upload · type the values directly. Compass saves it to the audit file the same way.
       </p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

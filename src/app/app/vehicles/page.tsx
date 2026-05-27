@@ -108,10 +108,10 @@ export default function VehiclesPage() {
       <div className="p-6">
         {isDemo && (
           <div className="mb-3 text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
-            ★ Demo data — showing Apex Logistics sample fleet until your first vehicle is added
+            ★ Demo data · showing Apex Logistics sample fleet until your first vehicle is added
           </div>
         )}
-        {/* KPI stat cards — top row, classic-app style */}
+        {/* KPI stat cards · top row, classic-app style */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           <KpiCard label="Active power units"           value={kpis.active}     sub={`${effectiveRows.length} on roster`} />
           <KpiCard label="Out of service"               value={kpis.oos}        sub="Down for maintenance / inspection" tone={kpis.oos > 0 ? "warn" : "ok"} />

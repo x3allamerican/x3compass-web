@@ -33,7 +33,7 @@ const AGENTS: AgentDef[] = [
   },
   {
     role: "Control Manager", agent: "agent-control-manager", schedule: "Daily 02:15 UTC", icon: "📒",
-    desc: "Owns the books — reconciliation, period close, audit trail.",
+    desc: "Owns the books · reconciliation, period close, audit trail.",
     outputs: ["Reconciliation report", "Journal entries", "Period close"],
     status: "live",
   },
@@ -56,7 +56,7 @@ const AGENTS: AgentDef[] = [
     status: "live",
   },
 
-  // ── 4 PROPOSED (Sprint #21+) — reasons specific to X3's business ────────
+  // ── 4 PROPOSED (Sprint #21+) · reasons specific to X3's business ────────
   {
     role: "Partner Settlement Manager", agent: "agent-partner-settlement", schedule: "Monthly on the 5th", icon: "🤝",
     desc: "Computes monthly 30% rev-share per partner, generates payout report, queues Stripe payouts.",
@@ -76,7 +76,7 @@ const AGENTS: AgentDef[] = [
     desc: "Computes estimated tax payments, tracks 1099-NEC candidates, alerts before Q1/Q2/Q3/Q4 deadlines, hands off to CPA.",
     outputs: ["Quarterly est tax calc", "1099-NEC candidate list", "Deadline alerts", "CPA handoff packet"],
     status: "proposed",
-    rationale: "Reporting Manager generates tax-ready exports but doesn't actively manage tax obligations. Missing a quarterly estimated payment = IRS penalty. 1099-NEC issuance has a January 31 deadline — needs an agent watching this.",
+    rationale: "Reporting Manager generates tax-ready exports but doesn't actively manage tax obligations. Missing a quarterly estimated payment = IRS penalty. 1099-NEC issuance has a January 31 deadline · needs an agent watching this.",
   },
   {
     role: "Pricing & Margin Manager", agent: "agent-pricing-margin", schedule: "Weekly Sundays", icon: "⚖️",
@@ -171,7 +171,7 @@ export default function FinanceTeamPage() {
           }
         }
         setLastRun(byAgent); setHealth(healthByAgent);
-      } catch { /* no-op — page works with empty state */ }
+      } catch { /* no-op · page works with empty state */ }
       finally { setLoading(false); }
     })();
   }, []);
@@ -203,14 +203,14 @@ export default function FinanceTeamPage() {
           eyebrow="AI Finance Team"
           title={<>The 9-agent virtual CFO. <span className="text-amber-700 dark:text-amber-400">Replaces QuickBooks + a bookkeeper.</span></>}
           intro={<>
-            5 agents are live in production today. <strong className="text-white">4 more are proposed</strong> to cover gaps specific to X3&apos;s actual business: Reseller 30% rev-share, vendor AP, active tax management, and per-tier unit-economics. Together they form a real virtual finance department — not a chatbot wrapper.
+            5 agents are live in production today. <strong className="text-white">4 more are proposed</strong> to cover gaps specific to X3&apos;s actual business: Reseller 30% rev-share, vendor AP, active tax management, and per-tier unit-economics. Together they form a real virtual finance department · not a chatbot wrapper.
           </>}
           dataSource={{
             items: [
               <span key="ft1"><strong className="text-[var(--fg)]">Agent runs</strong> log to <code className="font-mono text-[var(--accent)]">compass_agent_runs</code> with started_at, duration_ms, status, summary. This page shows last-run + 30-day health per agent.</span>,
-              <span key="ft2"><strong className="text-[var(--fg)]">Outputs</strong> land in <code className="font-mono text-[var(--accent)]">compass_journal_entries</code> + <code className="font-mono text-[var(--accent)]">compass_journal_lines</code> (double-entry) — see <Link href="/app/finance" className="text-[var(--accent)] underline">/app/finance</Link> for the ledger.</span>,
+              <span key="ft2"><strong className="text-[var(--fg)]">Outputs</strong> land in <code className="font-mono text-[var(--accent)]">compass_journal_entries</code> + <code className="font-mono text-[var(--accent)]">compass_journal_lines</code> (double-entry) · see <Link href="/app/finance" className="text-[var(--accent)] underline">/app/finance</Link> for the ledger.</span>,
               <span key="ft3"><strong className="text-[var(--fg)]">Why 9 not 5?</strong> Vanilla SaaS finance has 5 surface areas. X3 has 3 more: <em>Reseller payouts</em>, <em>vendor AP</em> (you spend $X/mo across 6+ SaaS vendors), and <em>active tax management</em> (1099-NEC, quarterly est).</span>,
-              <span key="ft4"><strong className="text-[var(--fg)]">Pricing &amp; Margin Manager</strong> is the unique safety net — flags any carrier whose Claude API spend exceeds their tier revenue. Without it, unit economics quietly invert.</span>,
+              <span key="ft4"><strong className="text-[var(--fg)]">Pricing &amp; Margin Manager</strong> is the unique safety net · flags any carrier whose Claude API spend exceeds their tier revenue. Without it, unit economics quietly invert.</span>,
             ],
           }}
         />
@@ -319,12 +319,12 @@ export default function FinanceTeamPage() {
         <div className="x3-card p-5">
           <h2 className="text-[15px] font-extrabold text-[var(--fg)] mb-2">🏛️ Architecture</h2>
           <p className="text-[12px] text-[var(--fg-muted)] leading-relaxed mb-3">
-            Each agent runs on a scheduled GitHub Action that calls an Anthropic-backed Pages Function. Runs log to <code className="font-mono text-[var(--accent)]">compass_agent_runs</code>. Outputs (journal entries, reports, alerts) write to the appropriate <code className="font-mono">compass_*</code> table. Workflow Coordinator (#4) is the brain of the brain — it dispatches the others and enforces the close calendar.
+            Each agent runs on a scheduled GitHub Action that calls an Anthropic-backed Pages Function. Runs log to <code className="font-mono text-[var(--accent)]">compass_agent_runs</code>. Outputs (journal entries, reports, alerts) write to the appropriate <code className="font-mono">compass_*</code> table. Workflow Coordinator (#4) is the brain of the brain · it dispatches the others and enforces the close calendar.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
             <div className="rounded-lg bg-[var(--surface-2)] p-3">
               <div className="font-bold text-[var(--fg)] mb-1">📊 Source of truth</div>
-              <div className="text-[var(--fg-muted)]"><code className="font-mono">compass_journal_entries</code> + <code className="font-mono">compass_journal_lines</code> — double-entry ledger, validates debits = credits before insert.</div>
+              <div className="text-[var(--fg-muted)]"><code className="font-mono">compass_journal_entries</code> + <code className="font-mono">compass_journal_lines</code> · double-entry ledger, validates debits = credits before insert.</div>
             </div>
             <div className="rounded-lg bg-[var(--surface-2)] p-3">
               <div className="font-bold text-[var(--fg)] mb-1">📒 Chart of accounts</div>

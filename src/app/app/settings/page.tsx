@@ -163,7 +163,7 @@ export default function SettingsPage() {
       const inserted = await getSupabase().from("compass_audit_exports").insert([{ carrier_id: carrier.id, scope: "full", status: "queued" }]).select("id").single();
       if (inserted.error) throw inserted.error;
       apiFetch("/api/audit/build", { method: "POST", body: JSON.stringify({ id: inserted.data!.id }) }).catch(() => {});
-      alert("Export queued — see /app/audit-export for download when ready (~60s).");
+      alert("Export queued · see /app/audit-export for download when ready (~60s).");
     } catch (err) {
       alert(err instanceof Error ? err.message : "Export queue failed");
     }
@@ -286,8 +286,8 @@ export default function SettingsPage() {
                   <Field label="Email *"><Input type="email" value={inviteEmail} onChange={setInviteEmail} required placeholder="teammate@yourcompany.com" /></Field>
                   <Field label="Role *">
                     <Select value={inviteRole} onChange={(v) => setInviteRole(v as "admin" | "viewer")}>
-                      <option value="admin">Admin — full read/write</option>
-                      <option value="viewer">Viewer — read-only</option>
+                      <option value="admin">Admin · full read/write</option>
+                      <option value="viewer">Viewer · read-only</option>
                     </Select>
                   </Field>
                 </Row>
@@ -366,7 +366,7 @@ export default function SettingsPage() {
 
             <Block title="Auto-renewal">
               <p className="text-[13px] text-[var(--fg-muted)] leading-relaxed">
-                Your subscription renews automatically. You can cancel at any time — cancellation takes effect at the end of your current term, and you keep access through that date. <span className="text-[11px] font-mono">(SOP-A5 · MSA § 7.2(c))</span>
+                Your subscription renews automatically. You can cancel at any time · cancellation takes effect at the end of your current term, and you keep access through that date. <span className="text-[11px] font-mono">(SOP-A5 · MSA § 7.2(c))</span>
               </p>
               {form.current_period_end && (
                 <div className="text-[12px] text-[var(--fg)] bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-700/40 dark:border-cyan-300/40 rounded-lg px-3 py-2 mt-2">
@@ -383,10 +383,10 @@ export default function SettingsPage() {
 
             <Block title="Export your data">
               <p className="text-[13px] text-[var(--fg-muted)] leading-relaxed">
-                Download a JSON bundle of everything X3 Compass holds on your carrier — drivers, DQ files, MVRs, D&amp;A tests, IFTA records, audit history. Available any time.
+                Download a JSON bundle of everything X3 Compass holds on your carrier · drivers, DQ files, MVRs, D&amp;A tests, IFTA records, audit history. Available any time.
               </p>
               <p className="text-[11px] text-[var(--fg-muted)] leading-relaxed">
-                DOT-regulated records (49 CFR §§ 391.51, 382.401, 395.8, 396.3, IFTA P560) remain on file under federal retention windows even if you cancel — the export reflects everything we hold today.
+                DOT-regulated records (49 CFR §§ 391.51, 382.401, 395.8, 396.3, IFTA P560) remain on file under federal retention windows even if you cancel · the export reflects everything we hold today.
               </p>
               <div className="flex gap-2 flex-wrap pt-2">
                 <button onClick={exportData} className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Generate export →</button>

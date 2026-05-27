@@ -1,5 +1,5 @@
 /* ============================================================
-   X3 Compass — DEMO DATA FALLBACK
+   X3 Compass · DEMO DATA FALLBACK
    ------------------------------------------------------------
    When a /app/* page queries Supabase and gets back an empty
    array (no rows yet for this carrier), we want to fill the
@@ -41,7 +41,7 @@ export type DemoDriver = {
   created_at: string;
 };
 
-// 14 demo drivers — matches the "Showing 14 of 72" copy on the live drivers page.
+// 14 demo drivers · matches the "Showing 14 of 72" copy on the live drivers page.
 // Mix of statuses, CDL classes, expiry dates so the badges + filters have variety.
 const today = () => new Date().toISOString().slice(0, 10);
 const inDays = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);

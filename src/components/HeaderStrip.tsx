@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   HeaderStrip — tenant context bar above the topbar
+   HeaderStrip · tenant context bar above the topbar
    ------------------------------------------------------------
    Mirrors the static Manus design:
      *** LIVE *** · Apex Logistics · DOT #123456 · Drivers: 36 ·
@@ -9,7 +9,7 @@
    ------------------------------------------------------------
    Pulls tenant identity from TenantThemeProvider.
    Stats can be passed in OR fetched from Supabase by the
-   consuming surface — kept stateless for now.
+   consuming surface · kept stateless for now.
    ============================================================ */
 
 import { useTenant } from "./TenantThemeProvider";

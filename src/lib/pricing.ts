@@ -20,7 +20,7 @@ export const TIERS: Tier[] = [
   {
     key: "diy", name: "DIY", subtitle: "Compass AI",
     price: 25, unit: "per driver / mo",
-    blurb: "AI Safety Director + 300+ FMCSA skills — you operate it.",
+    blurb: "AI Safety Director + 300+ FMCSA skills · you operate it.",
     features: [
       "AI brain across 12 compliance domains",
       "300+ CFR-cited skills",

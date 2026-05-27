@@ -46,7 +46,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/import",         label: "Bulk Import",    icon: "⤴" },
   ]},
 ];
-// X3 Admin section — only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
+// X3 Admin section · only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
 const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: true, items: [
   { href: "/app/control-center", label: "Control Center",  icon: "🎛" },
   { href: "/app/finance-team",   label: "AI Finance Team", icon: "💰" },
@@ -177,17 +177,17 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
 
   return (
     <TenantThemeProvider tenant={tenant}>
-    {/* No TopNav inside the app shell — AppTopbar is the top bar, sidebar owns navigation.
+    {/* No TopNav inside the app shell · AppTopbar is the top bar, sidebar owns navigation.
         Eliminates the empty marketing-style header that was bleeding into the app. */}
     <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "var(--bg)" }}>
 
-      {/* TOP-LEFT BOX — X3 Compass logo. STICKY so the whole top row stays
+      {/* TOP-LEFT BOX · X3 Compass logo. STICKY so the whole top row stays
           locked while content scrolls. Same minHeight as the AppTopbar on the
           right so the two cells stay flush. Joshua: top row is now locked
           across every /app/* surface; no per-page logo overrides allowed. */}
       <Link
         href="/app"
-        aria-label="X3 Compass — Home"
+        aria-label="X3 Compass · Home"
         className="x3-logo-box"
         style={{
           gridColumn: 1,
@@ -232,7 +232,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
         />
       </Link>
 
-      {/* TOP-RIGHT BOX — topbar with title + subtitle + user widgets */}
+      {/* TOP-RIGHT BOX · topbar with title + subtitle + user widgets */}
       <div style={{ gridColumn: 2, gridRow: 1 }}>
         <AppTopbar
           title={title || "Dashboard"}
@@ -257,7 +257,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
         </div>
       )}
 
-      {/* BOTTOM ROW — sidebar + main content as two more boxes */}
+      {/* BOTTOM ROW · sidebar + main content as two more boxes */}
       <div className="contents max-md:grid-cols-[72px_1fr]" style={{ display: "contents" }}>
         {useV2 ? (
           <SidebarV2 isSuperAdmin={isSuperAdmin} />
@@ -304,7 +304,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
         </aside>
         )}
         <div className="min-w-0 flex flex-col">
-          {/* Per-page sub-header — only renders when title/crumbs/actions are provided.
+          {/* Per-page sub-header · only renders when title/crumbs/actions are provided.
               The AppTopbar above already shows "AI SAFETY DIRECTOR" + tenant context,
               so most pages skip this. Surface-specific pages can still pass title/actions. */}
           {(title || crumbs || actions) && (

@@ -54,8 +54,8 @@ const DEMO_BELOW_SAT: Row[] = [
 ];
 
 const DEMO_TEMPLATES: Template[] = [
-  { template_id: "new-entrant-intro", enabled: true,  segment_label: "New entrant <12 months", subject_template: "Welcome to interstate trucking — 7 things every new carrier needs in their first 90 days", body_text_template: `Hi {{first_name}},\n\nSaw your USDOT registration ({{dot_number}}) come through last {{registered_month}}. Congrats on the new authority — that's a real accomplishment.\n\nI run X3 Compass, an AI Safety Director for small fleets. We're not selling ELDs or training videos. We're the brain that watches your CDL expirations, drug-test windows, MVR pulls, IFTA filings, and CSA scores — and tells you exactly what's due before FMCSA does.\n\nIf you'd like a free 15-minute audit of where your DQ files stand right now, reply with a good time. No pitch, no obligation — you'll just walk away with a checklist.\n\nJoshua Kovarik\nFounder, X3 Compass\njoshua@x3compass.com`, required_variables: ["first_name", "dot_number", "registered_month"], notes: "Auto-sent Tue/Wed/Thu 9am ET, capped 50/day" },
-  { template_id: "conditional-help",  enabled: false, segment_label: "Below-satisfactory rating", subject_template: "Spotted your Conditional rating — here's the 5-step path back to Satisfactory", body_text_template: "Personally reviewed by Joshua before send. See agent-fmcsa-outreach.", required_variables: ["first_name", "dot_number", "safety_rating"], notes: "Manual-review-only — bulk auto-outreach skips these" },
+  { template_id: "new-entrant-intro", enabled: true,  segment_label: "New entrant <12 months", subject_template: "Welcome to interstate trucking · 7 things every new carrier needs in their first 90 days", body_text_template: `Hi {{first_name}},\n\nSaw your USDOT registration ({{dot_number}}) come through last {{registered_month}}. Congrats on the new authority · that's a real accomplishment.\n\nI run X3 Compass, an AI Safety Director for small fleets. We're not selling ELDs or training videos. We're the brain that watches your CDL expirations, drug-test windows, MVR pulls, IFTA filings, and CSA scores · and tells you exactly what's due before FMCSA does.\n\nIf you'd like a free 15-minute audit of where your DQ files stand right now, reply with a good time. No pitch, no obligation · you'll just walk away with a checklist.\n\nJoshua Kovarik\nFounder, X3 Compass\njoshua@x3compass.com`, required_variables: ["first_name", "dot_number", "registered_month"], notes: "Auto-sent Tue/Wed/Thu 9am ET, capped 50/day" },
+  { template_id: "conditional-help",  enabled: false, segment_label: "Below-satisfactory rating", subject_template: "Spotted your Conditional rating · here's the 5-step path back to Satisfactory", body_text_template: "Personally reviewed by Joshua before send. See agent-fmcsa-outreach.", required_variables: ["first_name", "dot_number", "safety_rating"], notes: "Manual-review-only · bulk auto-outreach skips these" },
 ];
 
 // ---------------- Theme-aware pills ----------------
@@ -245,14 +245,14 @@ export default function ProspectsPage() {
 
         <X3AdminHero
           eyebrow="FMCSA Prospects · 5-State Region"
-          title={<>Small carriers in MI · OH · IN · IL · WI — <span className="text-amber-700 dark:text-amber-400">refreshed weekly.</span></>}
+          title={<>Small carriers in MI · OH · IN · IL · WI · <span className="text-amber-700 dark:text-amber-400">refreshed weekly.</span></>}
           intro={<>A weekly scrape pulls active interstate &amp; intrastate carriers in our 5-state region with <strong className="text-white">1–100 power units</strong> and an <strong className="text-white">email on file</strong> into the prospect list. Two signals get top billing: <strong className="text-white">new entrants under 12 months old</strong> (highest intent), and <strong className="text-white">conditional or unsatisfactory ratings</strong> (highest need for X3&apos;s help).</>}
           dataSource={{
             items: [
-              <span key="p1"><strong className="text-[var(--fg)]">Source</strong> — FMCSA SAFER bulk census (free, monthly) for the universe + Carrier Snapshot (free) for safety rating + new-entrant status. No paid APIs.</span>,
-              <span key="p2"><strong className="text-[var(--fg)]">Filter at ingest</strong> — <code className="font-mono text-[var(--accent)]">state IN (&apos;MI&apos;,&apos;OH&apos;,&apos;IN&apos;,&apos;IL&apos;,&apos;WI&apos;)</code>, <code className="font-mono text-[var(--accent)]">power_units BETWEEN 1 AND 100</code>, <code className="font-mono text-[var(--accent)]">operating_status=&apos;ACTIVE&apos;</code>, <code className="font-mono text-[var(--accent)]">email IS NOT NULL</code>.</span>,
-              <span key="p3"><strong className="text-[var(--fg)]">Scraper</strong> — <code className="font-mono text-[var(--accent)]">agent-fmcsa-scraper</code> runs every Monday 4am ET. Run summary lands in <code className="font-mono text-[var(--accent)]">fmcsa_scraper_runs</code>.</span>,
-              <span key="p4"><strong className="text-[var(--fg)]">Outreach</strong> — <code className="font-mono text-[var(--accent)]">agent-fmcsa-outreach</code> Tue/Wed/Thu 9am ET, 50/day cap. Below-satisfactory carriers skip bulk auto-outreach; Joshua handles those personally.</span>,
+              <span key="p1"><strong className="text-[var(--fg)]">Source</strong> · FMCSA SAFER bulk census (free, monthly) for the universe + Carrier Snapshot (free) for safety rating + new-entrant status. No paid APIs.</span>,
+              <span key="p2"><strong className="text-[var(--fg)]">Filter at ingest</strong> · <code className="font-mono text-[var(--accent)]">state IN (&apos;MI&apos;,&apos;OH&apos;,&apos;IN&apos;,&apos;IL&apos;,&apos;WI&apos;)</code>, <code className="font-mono text-[var(--accent)]">power_units BETWEEN 1 AND 100</code>, <code className="font-mono text-[var(--accent)]">operating_status=&apos;ACTIVE&apos;</code>, <code className="font-mono text-[var(--accent)]">email IS NOT NULL</code>.</span>,
+              <span key="p3"><strong className="text-[var(--fg)]">Scraper</strong> · <code className="font-mono text-[var(--accent)]">agent-fmcsa-scraper</code> runs every Monday 4am ET. Run summary lands in <code className="font-mono text-[var(--accent)]">fmcsa_scraper_runs</code>.</span>,
+              <span key="p4"><strong className="text-[var(--fg)]">Outreach</strong> · <code className="font-mono text-[var(--accent)]">agent-fmcsa-outreach</code> Tue/Wed/Thu 9am ET, 50/day cap. Below-satisfactory carriers skip bulk auto-outreach; Joshua handles those personally.</span>,
             ],
           }}
         />
@@ -278,7 +278,7 @@ export default function ProspectsPage() {
           )}
         </div>
 
-        {/* Fleet distribution — updates per tab */}
+        {/* Fleet distribution · updates per tab */}
         <FleetDistribution data={distData} label={distLabel} />
 
         {/* 7-tab nav */}
@@ -296,7 +296,7 @@ export default function ProspectsPage() {
           ]}
         />
 
-        {/* CARRIER TABLES — new / below_sat / all / this_week */}
+        {/* CARRIER TABLES · new / below_sat / all / this_week */}
         {(tab === "new" || tab === "below_sat" || tab === "all" || tab === "this_week") && (
           <div className="x3-card overflow-hidden mt-4">
             <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
@@ -308,8 +308,8 @@ export default function ProspectsPage() {
                   {tab === "all"       && "📋 All in-region carriers"}
                 </div>
                 <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">
-                  {tab === "new"       && "Highest intent — they're still building compliance habits. Auto-outreach goes here first."}
-                  {tab === "below_sat" && "Joshua handles personally — bulk auto-outreach is paused for these."}
+                  {tab === "new"       && "Highest intent · they're still building compliance habits. Auto-outreach goes here first."}
+                  {tab === "below_sat" && "Joshua handles personally · bulk auto-outreach is paused for these."}
                   {tab === "this_week" && "Carriers that showed up in this week's scrape but not the prior one."}
                   {tab === "all"       && "Full ICP-filtered universe. Use search/filters to narrow."}
                 </div>

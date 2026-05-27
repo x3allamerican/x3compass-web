@@ -88,7 +88,7 @@ export default function BackgroundChecksPage() {
   const [tokenPath, setTokenPath] = useState<string | null>(null);
   const [reportsError, setReportsError] = useState<string | null>(null);
 
-  // X3 Compass view — vendor_orders rows for this carrier
+  // X3 Compass view · vendor_orders rows for this carrier
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -99,7 +99,7 @@ export default function BackgroundChecksPage() {
     if (!userLoading && !user) window.location.href = "/signin?return_to=/app/background-checks";
   }, [user, userLoading]);
 
-  // Session-token for Checkr embeds — per-embed scope path
+  // Session-token for Checkr embeds · per-embed scope path
   // NewInvitation needs ["order","disclosure"]; ReportsOverview needs ["report"]
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +112,7 @@ export default function BackgroundChecksPage() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Render Checkr embeds — each gets a scope-specific token path
+  // Render Checkr embeds · each gets a scope-specific token path
   useEffect(() => {
     if (!sdkReady || !tokenPath || !window.Checkr) return;
     if (!newInviteRef.current || !reportsRef.current) return;
@@ -196,19 +196,19 @@ export default function BackgroundChecksPage() {
       <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
 
         {/* ============================================================
-            EDUCATION HUB — universal pattern across every X3 surface
+            EDUCATION HUB · universal pattern across every X3 surface
             (matches app.x3compass.com/background-tracker design)
             ============================================================ */}
         <EducationHubCard
           surface="Background Tracker"
-          subtitle="Pre-employment background screening, FCRA compliance, ongoing rechecks, and adverse action procedures — per 49 CFR 391.23 + FCRA."
+          subtitle="Pre-employment background screening, FCRA compliance, ongoing rechecks, and adverse action procedures · per 49 CFR 391.23 + FCRA."
           audiences={[
             {
               label: "For Drivers",
               subtitle: "Job applicants + hires",
               tone: "cyan",
               icon: "👤",
-              body: "Your background check matters — but it's not a guarantee of disqualification. Know what's checked, what to dispute, how to explain a past, and your FCRA rights through the process.",
+              body: "Your background check matters · but it's not a guarantee of disqualification. Know what's checked, what to dispute, how to explain a past, and your FCRA rights through the process.",
               bullets: [
                 "What's checked (MVR, criminal, employment, D&A)",
                 "FCRA rights + consent",
@@ -277,7 +277,7 @@ export default function BackgroundChecksPage() {
           </div>
         </div>
 
-        {/* KPI strip — pulled from vendor_orders (works whether or not the embed loads) */}
+        {/* KPI strip · pulled from vendor_orders (works whether or not the embed loads) */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <X3KPITile label="Total orders"        value={stats.total}     sub="this carrier"                  tone="navy" />
           <X3KPITile label="In flight"           value={stats.inFlight}  sub="invited + in-progress"         tone="navy" />
@@ -290,7 +290,7 @@ export default function BackgroundChecksPage() {
           <div className="x3-card overflow-hidden">
             <div className="px-5 py-3 border-b border-[var(--border)]">
               <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-1">Order a new check</div>
-              <p className="text-[12px] text-[var(--fg-muted)]">Driver name + email. Checkr emails them a secure link to provide SSN/DOB/consent — you never touch PII.</p>
+              <p className="text-[12px] text-[var(--fg-muted)]">Driver name + email. Checkr emails them a secure link to provide SSN/DOB/consent · you never touch PII.</p>
             </div>
             <div className="p-3 bg-white" style={{ minHeight: 480 }}>
               <div id="x3-checkr-new-invitation" ref={newInviteRef} />
@@ -299,7 +299,7 @@ export default function BackgroundChecksPage() {
             </div>
             {lastInvitation && (
               <div className="m-3 p-3 rounded-lg border border-emerald-500/40 bg-emerald-100 dark:bg-emerald-500/15 text-[12px] text-emerald-900 dark:text-emerald-100">
-                <strong>✓ Invitation sent</strong> — refresh below to see it in the X3 view.
+                <strong>✓ Invitation sent</strong> · refresh below to see it in the X3 view.
                 <pre className="text-[11px] text-emerald-800 dark:text-emerald-200 mt-1 overflow-auto">{JSON.stringify(lastInvitation, null, 2)}</pre>
               </div>
             )}
@@ -316,7 +316,7 @@ export default function BackgroundChecksPage() {
               {sdkFailed && <div className="min-h-[400px] grid place-items-center text-rose-700 text-[13px] p-6 text-center">Embed unavailable. Scroll down for the X3 view of all orders.</div>}
               {reportsError && (
                 <div className="m-3 p-3 rounded-lg border border-rose-500/40 bg-rose-100 dark:bg-rose-500/15 text-[12px] text-rose-900 dark:text-rose-100">
-                  <strong>ReportsOverview error.</strong> Falling back to the X3 view below — all your orders are still visible there.
+                  <strong>ReportsOverview error.</strong> Falling back to the X3 view below · all your orders are still visible there.
                   <details className="mt-2"><summary className="cursor-pointer text-[11px]">Show details</summary><pre className="text-[11px] text-rose-800 dark:text-rose-200 mt-1 overflow-auto whitespace-pre-wrap">{reportsError}</pre></details>
                 </div>
               )}
@@ -324,7 +324,7 @@ export default function BackgroundChecksPage() {
           </div>
         </div>
 
-        {/* X3 view of vendor_orders — works even if Checkr embed fails */}
+        {/* X3 view of vendor_orders · works even if Checkr embed fails */}
         <div className="x3-card overflow-hidden">
           <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
             <div>

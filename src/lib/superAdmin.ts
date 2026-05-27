@@ -9,7 +9,7 @@ const SUPER_ADMIN_EMAILS = [
 ];
 
 /**
- * useIsSuperAdmin — returns true if the current authenticated user is an X3 internal super-admin.
+ * useIsSuperAdmin · returns true if the current authenticated user is an X3 internal super-admin.
  * Used by AppShell to gate the X3 Admin sidebar section (Control Center, Finance, Marketing, etc.)
  *
  * v1 implementation: check email against allow-list.
@@ -28,7 +28,7 @@ export function useIsSuperAdmin(): boolean {
         if (user?.email && SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
           setIsSuperAdmin(true);
         }
-      } catch { /* not signed in — not super-admin */ }
+      } catch { /* not signed in · not super-admin */ }
     })();
     return () => { cancelled = true; };
   }, []);

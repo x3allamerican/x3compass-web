@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 type Tone = "navy" | "green" | "red" | "amber";
 
 /**
- * X3AdminHero — Hero banner for X3 internal admin pages (notifications, settings,
+ * X3AdminHero · Hero banner for X3 internal admin pages (notifications, settings,
  * audit-log, prospects, etc.). Dark gradient, eyebrow + title + intro, with optional
  * collapsible "Data Source" disclosure block.
  */
@@ -44,7 +44,7 @@ export function X3AdminHero({
 }
 
 /**
- * X3KPITile — Single KPI card. Used in 6-up KPI grids on admin pages.
+ * X3KPITile · Single KPI card. Used in 6-up KPI grids on admin pages.
  */
 export function X3KPITile({
   label,
@@ -73,7 +73,7 @@ export function X3KPITile({
 }
 
 /**
- * X3AdminTabs — Horizontal tab bar for admin sub-views. Active tab gets accent color.
+ * X3AdminTabs · Horizontal tab bar for admin sub-views. Active tab gets accent color.
  */
 export function X3AdminTabs<K extends string = string>({
   tabs,

@@ -41,7 +41,7 @@ function adaptDemoInspection(d: typeof DEMO_INSPECTIONS[number]): I & { _demoDri
 }
 
 // ============================================================
-// COLOR PALETTE — same theme-aware tokens as Accidents
+// COLOR PALETTE · same theme-aware tokens as Accidents
 // ============================================================
 const LEVEL_COLORS = {
   1: "bg-red-700 text-white border-red-800 dark:bg-rose-500/45 dark:text-rose-50 dark:border-rose-300/80",
@@ -73,7 +73,7 @@ function outcomeFor(r: I): { key: keyof typeof OUTCOME_COLORS; label: string } {
 }
 
 // ============================================================
-// DEFINITIONS CARD — FMCSA inspection levels + outcome classifications
+// DEFINITIONS CARD · FMCSA inspection levels + outcome classifications
 // (Mirrors the X3 Fleet Safety app's definitions content + Accidents card style)
 // ============================================================
 function DefinitionsCard() {
@@ -90,27 +90,27 @@ function DefinitionsCard() {
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">CVSA INSPECTION LEVELS</div>
           <div className="space-y-3.5">
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[1]} size="sm">LEVEL I</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>North American Standard</strong> — most thorough roadside. Driver credentials (CDL, med card, RODS/HOS, Clearinghouse) + 37 vehicle components (brakes, tires, lighting, steering, suspension, coupling, exhaust, fuel, frame, cargo securement). ~30 min.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[2]} size="sm">LEVEL II</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Walk-around vehicle inspection</strong> — same vehicle items as Level I but inspector does not go under the vehicle. Driver credentials still verified.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[3]} size="sm">LEVEL III</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Driver-only</strong> — credentials, RODS/HOS, drug & alcohol status, seat belt, Clearinghouse check. No vehicle inspection.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[4]} size="sm">LEVEL IV</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Special study</strong> — one-time examination of a specific item, typically as part of a research project (e.g. a tire study). Rare.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[5]} size="sm">LEVEL V</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Vehicle-only</strong> — same as Level I vehicle components, but no driver is present (e.g. terminal yard, scale).</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[6]} size="sm">LEVEL VI</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Enhanced for radioactive shipments</strong> — Level I plus additional requirements specific to highway-route-controlled-quantity radioactive material.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[1]} size="sm">LEVEL I</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>North American Standard</strong> · most thorough roadside. Driver credentials (CDL, med card, RODS/HOS, Clearinghouse) + 37 vehicle components (brakes, tires, lighting, steering, suspension, coupling, exhaust, fuel, frame, cargo securement). ~30 min.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[2]} size="sm">LEVEL II</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Walk-around vehicle inspection</strong> · same vehicle items as Level I but inspector does not go under the vehicle. Driver credentials still verified.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[3]} size="sm">LEVEL III</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Driver-only</strong> · credentials, RODS/HOS, drug & alcohol status, seat belt, Clearinghouse check. No vehicle inspection.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[4]} size="sm">LEVEL IV</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Special study</strong> · one-time examination of a specific item, typically as part of a research project (e.g. a tire study). Rare.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[5]} size="sm">LEVEL V</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Vehicle-only</strong> · same as Level I vehicle components, but no driver is present (e.g. terminal yard, scale).</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[6]} size="sm">LEVEL VI</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Enhanced for radioactive shipments</strong> · Level I plus additional requirements specific to highway-route-controlled-quantity radioactive material.</div></div>
           </div>
         </div>
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">OUTCOME CLASSIFICATIONS</div>
           <div className="space-y-3.5">
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.clean} size="sm">CLEAN</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">No violations cited. Counts as a <strong>clean inspection</strong> for CSA scoring — these actually <em>lower</em> your BASIC scores when reported to SAFER.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.clean} size="sm">CLEAN</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">No violations cited. Counts as a <strong>clean inspection</strong> for CSA scoring · these actually <em>lower</em> your BASIC scores when reported to SAFER.</div></div>
             <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.violations} size="sm">VIOLATIONS</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">One or more violations cited but driver / vehicle remained in service. Each violation has a severity weight in the BASIC scoring math. Review for DataQ challenge eligibility.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_v} size="sm">OOS - VEHICLE</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service vehicle</strong> — the truck or trailer is held at the inspection point until the defect is fixed (49 CFR Appendix G). Tow or roadside repair required.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_d} size="sm">OOS - DRIVER</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service driver</strong> — driver may not operate for the remainder of a duty period (49 CFR § 395.13 / § 392.5). Common triggers: HOS overage, no CDL, no med card, suspended license.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_v} size="sm">OOS - VEHICLE</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service vehicle</strong> · the truck or trailer is held at the inspection point until the defect is fixed (49 CFR Appendix G). Tow or roadside repair required.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_d} size="sm">OOS - DRIVER</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service driver</strong> · driver may not operate for the remainder of a duty period (49 CFR § 395.13 / § 392.5). Common triggers: HOS overage, no CDL, no med card, suspended license.</div></div>
             <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_both} size="sm">OOS - BOTH</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">Both vehicle and driver placed out-of-service. Highest-impact outcome; vehicle and driver each require remediation before returning to service.</div></div>
           </div>
         </div>
       </div>
       <div className="text-[11px] text-black dark:text-white mt-4 pt-4 border-t border-blue-200 dark:border-blue-400/60">
-        <strong>Retention:</strong> 49 CFR § 396.9 — keep inspection reports for at least 12 months from date. <strong className="ml-3">DataQs window:</strong> challenge incorrect violations within 30 days via the FMCSA DataQs portal — disputes after this window often time out without review. <strong className="ml-3">SAFER reporting:</strong> roadside inspections appear on your SMS profile within 7–10 business days.
+        <strong>Retention:</strong> 49 CFR § 396.9 · keep inspection reports for at least 12 months from date. <strong className="ml-3">DataQs window:</strong> challenge incorrect violations within 30 days via the FMCSA DataQs portal · disputes after this window often time out without review. <strong className="ml-3">SAFER reporting:</strong> roadside inspections appear on your SMS profile within 7–10 business days.
       </div>
     </div>
   );
@@ -182,8 +182,8 @@ export default function InspectionsPage() {
           </div>
           <select value={filterLevel} onChange={(e)=>setFilterLevel(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All levels</option>
-            <option value="1">Level I — Full</option><option value="2">Level II — Walk-around</option><option value="3">Level III — Driver-only</option>
-            <option value="4">Level IV — Special</option><option value="5">Level V — Vehicle-only</option><option value="6">Level VI — Radioactive</option>
+            <option value="1">Level I · Full</option><option value="2">Level II · Walk-around</option><option value="3">Level III · Driver-only</option>
+            <option value="4">Level IV · Special</option><option value="5">Level V · Vehicle-only</option><option value="6">Level VI · Radioactive</option>
           </select>
           <select value={filterOutcome} onChange={(e)=>setFilterOutcome(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All outcomes</option>
@@ -297,8 +297,8 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
           <Field label="Date *"><input required type="date" className="x3i" value={form.inspection_date||""} onChange={(e)=>setForm({...form,inspection_date:e.target.value})} /></Field>
           <Field label="Level *">
             <select required className="x3i" value={form.level||1} onChange={(e)=>setForm({...form,level:parseInt(e.target.value)})}>
-              <option value={1}>I — Full</option><option value={2}>II — Walk-around</option><option value={3}>III — Driver-only</option>
-              <option value={4}>IV — Special</option><option value={5}>V — Vehicle-only</option><option value={6}>VI — Radioactive</option>
+              <option value={1}>I · Full</option><option value={2}>II · Walk-around</option><option value={3}>III · Driver-only</option>
+              <option value={4}>IV · Special</option><option value={5}>V · Vehicle-only</option><option value={6}>VI · Radioactive</option>
             </select>
           </Field>
           <Field label="State"><input className="x3i" maxLength={2} value={form.state||""} onChange={(e)=>setForm({...form,state:e.target.value.toUpperCase()})} placeholder="TX" /></Field>

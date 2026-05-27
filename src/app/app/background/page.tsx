@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   /app/background — redirect to /app/background-checks
+   /app/background · redirect to /app/background-checks
    ------------------------------------------------------------
    This route was an early static mockup with hard-coded screening
    rows and no Checkr integration. The wired Background Tracker
@@ -10,8 +10,8 @@
    action workflow, Education Hub).
 
    The sidebar already points to /app/background-checks, but if
-   anything still links to /app/background — older marketing
-   pages, deep links, search results — bounce them to the wired
+   anything still links to /app/background · older marketing
+   pages, deep links, search results · bounce them to the wired
    page so users never see the dead mock again.
 
    Joshua: "Please remember Background Check or Tracker is

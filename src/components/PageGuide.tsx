@@ -12,15 +12,15 @@ export type PageGuideStep = {
 };
 
 export type PageGuideConfig = {
-  /** "What this page does" — single sentence shown at the top of the panel */
+  /** "What this page does" · single sentence shown at the top of the panel */
   what: string;
-  /** "Who needs it" — 1-2 sentences explaining when this matters and which carriers need it */
+  /** "Who needs it" · 1-2 sentences explaining when this matters and which carriers need it */
   who: string;
   /** Primary CFR citation backing this page's compliance scope */
   cfr: string;
-  /** "How to get started" — 3-5 ordered steps */
+  /** "How to get started" · 3-5 ordered steps */
   howTo: PageGuideStep[];
-  /** "What to do here every week" — short bullets */
+  /** "What to do here every week" · short bullets */
   weeklyHabits?: string[];
   /** Common audit-day pitfalls related to this page */
   auditTraps?: string[];
@@ -67,7 +67,7 @@ export default function PageGuide(config: PageGuideConfig) {
       {/* EXPANDED CONTENT */}
       {open && (
         <div className="px-5 pb-5 pt-1 border-t border-[var(--border)] grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-          {/* Left column — how-to steps */}
+          {/* Left column · how-to steps */}
           <div className="space-y-5">
             {/* Who needs it */}
             <div>
@@ -104,7 +104,7 @@ export default function PageGuide(config: PageGuideConfig) {
             {config.weeklyHabits && config.weeklyHabits.length > 0 && (
               <div>
                 <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-2">
-                  Once you&apos;re set up — weekly habit
+                  Once you&apos;re set up · weekly habit
                 </div>
                 <ul className="space-y-1.5">
                   {config.weeklyHabits.map((h, i) => (
@@ -118,7 +118,7 @@ export default function PageGuide(config: PageGuideConfig) {
             )}
           </div>
 
-          {/* Right column — audit traps + Ask Compass */}
+          {/* Right column · audit traps + Ask Compass */}
           <div className="space-y-5">
             {config.auditTraps && config.auditTraps.length > 0 && (
               <div

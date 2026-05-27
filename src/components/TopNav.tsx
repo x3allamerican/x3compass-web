@@ -11,7 +11,7 @@ export default function TopNav() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   // INSIDE THE APP, the marketing nav (Home/Services/Skills/Pricing/Hazmat/FAQ/Trust/Blog/...)
-  // is wrong — those are public marketing links. Inside /app/* and /admin/* the topbar
+  // is wrong · those are public marketing links. Inside /app/* and /admin/* the topbar
   // should only show the brand mark, theme toggle, and account controls. The sidebar
   // owns navigation inside the app shell.
   const isAppShell = pathname.startsWith("/app") || pathname.startsWith("/admin");
@@ -48,7 +48,7 @@ export default function TopNav() {
         <BrandMark variant="compass" href="/" size="md" showTagline />
 
 
-        {/* Marketing nav hidden inside the app shell — sidebar handles navigation there.
+        {/* Marketing nav hidden inside the app shell · sidebar handles navigation there.
             On /app/* and /admin/* the topbar only shows the brand + theme + account controls. */}
         {!isAppShell && (
           <nav className="hidden md:flex items-center gap-7 text-[15px] font-semibold">
@@ -70,7 +70,7 @@ export default function TopNav() {
 
         <div className="flex items-center gap-3 flex-shrink-0">
           <ThemeToggle />
-          {/* Inside the app shell: account controls only — sign in / signup CTAs would be confusing for someone already signed in. The sidebar handles sign-out. */}
+          {/* Inside the app shell: account controls only · sign in / signup CTAs would be confusing for someone already signed in. The sidebar handles sign-out. */}
           {isAppShell ? null : loggedIn ? (
             <>
               <Link

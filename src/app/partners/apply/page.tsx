@@ -87,7 +87,7 @@ export default function PartnerApplyPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-7">
-            {/* Section 1 — About you */}
+            {/* Section 1 · About you */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 1 · ABOUT YOU</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,7 +98,7 @@ export default function PartnerApplyPage() {
               </div>
             </div>
 
-            {/* Section 2 — Business */}
+            {/* Section 2 · Business */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 2 · YOUR CONSULTING BUSINESS</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -141,7 +141,7 @@ export default function PartnerApplyPage() {
               </div>
             </div>
 
-            {/* Section 3 — Fit */}
+            {/* Section 3 · Fit */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 3 · WHY COMPASS PARTNER</div>
               <TextAreaField
@@ -167,13 +167,13 @@ export default function PartnerApplyPage() {
                     "Within 30 days of approval",
                     "30-60 days",
                     "60-90 days",
-                    "Exploring — no firm timeline",
+                    "Exploring · no firm timeline",
                   ]}
                 />
               </div>
             </div>
 
-            {/* Section 4 — References */}
+            {/* Section 4 · References */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 4 · CREDIBILITY (OPTIONAL BUT HELPS)</div>
               <TextAreaField
@@ -194,7 +194,7 @@ export default function PartnerApplyPage() {
 
             {/* Acknowledge */}
             <div className="rounded-xl p-4 border border-[var(--accent)]/30 bg-[var(--accent)]/5 text-[12.5px] text-[var(--fg)] leading-relaxed">
-              <strong className="text-[var(--fg)]">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor — no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
+              <strong className="text-[var(--fg)]">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor · no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
             </div>
 
             {error && (

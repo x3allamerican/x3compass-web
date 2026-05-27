@@ -1,6 +1,6 @@
 /**
  * Inline marketing-page preview of the X3 Compass app dashboard.
- * Static, non-interactive, no auth required — gives a visitor an
+ * Static, non-interactive, no auth required · gives a visitor an
  * accurate read on what lives inside the paid product.
  */
 export default function DashboardPreview() {

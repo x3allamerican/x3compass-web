@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   TenantThemeProvider — runtime white-label layer
+   TenantThemeProvider · runtime white-label layer
    ------------------------------------------------------------
    Wraps the AppShell. Reads a tenant config (logo, name, color
    tokens) from React context and injects CSS variables inline
@@ -19,7 +19,7 @@ export type TenantTokens = {
   bg?: string;
   /** Card / panel background */
   surface?: string;
-  /** Accent color — buttons, links, KPI deltas, focus rings */
+  /** Accent color · buttons, links, KPI deltas, focus rings */
   accent?: string;
   /** Border color */
   border?: string;
@@ -64,7 +64,7 @@ type Props = {
 
 export default function TenantThemeProvider({ tenant = DEFAULT_TENANT, children }: Props) {
   // Build a style object with only the tokens the tenant overrides. Empty
-  // string would clear the value, which we don't want — only set tokens that
+  // string would clear the value, which we don't want · only set tokens that
   // were explicitly provided.
   const styleVars = useMemo<React.CSSProperties>(() => {
     const t = tenant.tokens || {};

@@ -18,7 +18,7 @@ const PRICING = [
     desc: "You drive the dashboard. AI does most of the work.",
     bullets: [
       "All 12 brains, all 300 skills",
-      "★ Vendor integrations included — Motive, Samsara, Geotab, Tenstreet, Quest, Checkr, WEX, SambaSafety + more",
+      "★ Vendor integrations included · Motive, Samsara, Geotab, Tenstreet, Quest, Checkr, WEX, SambaSafety + more",
       "CSV import + manual entry on every tracker",
       "Daily compliance digest",
       "One-click audit export",
@@ -62,7 +62,7 @@ const PRICING = [
 ];
 
 const STEPS = [
-  { n: 1, title: "Integrate your vendors (optional)", desc: "Already use Motive, Samsara, Tenstreet, Quest, Checkr, WEX, SambaSafety? One-click OAuth pulls your data in real-time. No vendor? CSV import + manual entry work just as well — no integration required." },
+  { n: 1, title: "Integrate your vendors (optional)", desc: "Already use Motive, Samsara, Tenstreet, Quest, Checkr, WEX, SambaSafety? One-click OAuth pulls your data in real-time. No vendor? CSV import + manual entry work just as well · no integration required." },
   { n: 2, title: "Sign up & import drivers",         desc: "Import via CSV (we provide the template) or add drivers one at a time. We auto-seed every § 391 DQ slot." },
   { n: 3, title: "Upload what you have",              desc: "Drop in med certs, CDL copies, prior-employer inquiries, Clearinghouse queries. Missing slots light up red." },
   { n: 4, title: "Log events as they happen",         desc: "Roadside inspection this morning? Random D&A Tuesday? Two-minute entries thread into CSA and the audit picture automatically." },
@@ -76,14 +76,14 @@ export default function Home() {
   return (
     <SiteShell>
       <div className="bg-[var(--bg)] text-[var(--fg)]">
-        {/* HERO — real highway photo, not a gradient wash */}
+        {/* HERO · real highway photo, not a gradient wash */}
         <section className="relative overflow-hidden">
           {/* Background: real photo */}
           <div className="absolute inset-0 -z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/photos/hero-truck-highway.jpg" alt="" aria-hidden="true" width="2400" height="1600" fetchPriority="high" decoding="async"
                  className="w-full h-full object-cover" />
-            {/* Dark overlay — keeps text readable, gives the hero its mood */}
+            {/* Dark overlay · keeps text readable, gives the hero its mood */}
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)]/85 via-[var(--bg)]/75 to-[var(--bg)]" />
           </div>
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-24 relative">
@@ -98,7 +98,7 @@ export default function Home() {
                 Both work.
               </h1>
               <p className="text-[20px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-3 leading-relaxed">
-                Every FMCSA compliance task — DQ files, MVRs, D&A, CSA, hazmat — answered with the exact CFR section.
+                Every FMCSA compliance task · DQ files, MVRs, D&A, CSA, hazmat · answered with the exact CFR section.
               </p>
               <p className="text-[16px] text-[var(--fg-faint)] max-w-2xl mx-auto mb-8">
                 <strong className="text-[var(--fg)]">$25/driver</strong> DIY · <strong className="text-[var(--fg)]">$50/driver</strong> done-for-you · 7-day free trial, no card
@@ -149,7 +149,7 @@ export default function Home() {
             Twelve brains. <span className="serif-italic" style={{ color: "var(--accent)" }}>One subscription.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-            One brain per regulation. Open the actual CFR part — not a generic vault that makes you learn a new filing system.
+            One brain per regulation. Open the actual CFR part · not a generic vault that makes you learn a new filing system.
           </p>
           <BrainGrid />
         </section>
@@ -164,7 +164,7 @@ export default function Home() {
                 <span className="serif-italic" style={{ color: "var(--accent)" }}>Every signal, one page.</span>
               </h2>
               <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mx-auto mb-8">
-                Sidebar of drivers. KPI strip up top. CSA BASICs, expirations, inspections — all on one screen. Your AI Safety Director sits in the lower right and tells you exactly what to do next.
+                Sidebar of drivers. KPI strip up top. CSA BASICs, expirations, inspections · all on one screen. Your AI Safety Director sits in the lower right and tells you exactly what to do next.
               </p>
             </div>
 
@@ -182,7 +182,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ASK COMPASS DEMO — live, no signup, real eCFR verification */}
+        {/* ASK COMPASS DEMO · live, no signup, real eCFR verification */}
         <section className="border-y border-[var(--border)] bg-[var(--bg)] py-20">
           <div className="max-w-5xl mx-auto px-6">
             <div className="text-center mb-8">
@@ -192,7 +192,7 @@ export default function Home() {
               </h2>
               <p className="text-[16px] text-[var(--fg-muted)] max-w-2xl mx-auto">
                 Type any FMCSA compliance question. Every CFR citation in the answer is checked against the live eCFR.gov
-                registry — verified citations get a green ✓ chip. No signup. 5 free questions per IP per 6 hours.
+                registry · verified citations get a green ✓ chip. No signup. 5 free questions per IP per 6 hours.
               </p>
             </div>
             <AskCompassDemo />
@@ -213,7 +213,7 @@ export default function Home() {
             <span className="serif-italic" style={{ color: "var(--accent)" }}>Get a CFR-cited answer.</span>
           </h2>
           <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-            Every skill is a published, version-controlled prompt. <strong className="text-[var(--fg)]">Click any skill to see a real CFR-cited sample answer</strong> — no signup needed for the preview.
+            Every skill is a published, version-controlled prompt. <strong className="text-[var(--fg)]">Click any skill to see a real CFR-cited sample answer</strong> · no signup needed for the preview.
           </p>
           <SkillsExplorer />
           <div className="text-center mt-10 space-y-4">
@@ -234,7 +234,7 @@ export default function Home() {
 
         {/* 04 · HAZMAT */}
         <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)]">
-          {/* Decorative wash removed — let the content carry the section */}
+          {/* Decorative wash removed · let the content carry the section */}
           <div className="max-w-7xl mx-auto px-6 relative">
             <div className="text-center mb-10">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
@@ -306,7 +306,7 @@ export default function Home() {
                 Honest call-out: we do <span className="text-amber-700 dark:text-amber-300">not</span> have a direct real-time relay to your CSA scores.
               </div>
               <div className="text-[13px] text-[var(--fg-muted)] leading-relaxed">
-                FMCSA publishes CSA / SMS data <strong className="text-[var(--fg)]">monthly</strong> via SAFER — that&apos;s the only public source, and there is no live API anyone can use. Compass auto-pulls your SAFER snapshot every time FMCSA refreshes (~the 15th of each month) and shows you the delta. If a vendor claims real-time CSA data, they&apos;re reading the same monthly SAFER feed you can.
+                FMCSA publishes CSA / SMS data <strong className="text-[var(--fg)]">monthly</strong> via SAFER · that&apos;s the only public source, and there is no live API anyone can use. Compass auto-pulls your SAFER snapshot every time FMCSA refreshes (~the 15th of each month) and shows you the delta. If a vendor claims real-time CSA data, they&apos;re reading the same monthly SAFER feed you can.
               </div>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function Home() {
               Every tier includes all 12 brains and all 300 skills. The only difference is who&apos;s holding the wheel.
             </p>
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg)] mb-12">
-              ★ TRY EVERY BRAIN — PLUS HAZMAT — FREE FOR 7 DAYS. NO CARD REQUIRED.
+              ★ TRY EVERY BRAIN · PLUS HAZMAT · FREE FOR 7 DAYS. NO CARD REQUIRED.
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
               {PRICING.map((p, i) => (

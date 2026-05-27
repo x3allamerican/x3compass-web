@@ -30,11 +30,11 @@ const CAT_ORDER: Record<string, number> = {
 };
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  "DQ Files": "Driver qualification files — § 391.51 the twelve documents",
+  "DQ Files": "Driver qualification files · § 391.51 the twelve documents",
   "Medical": "Medical examiner certificates, sleep apnea, vision standards",
   "MVR": "Motor vehicle records, annual reviews, continuous monitoring",
   "Background": "FCRA-compliant background checks, prior-employer inquiries",
-  "D&A Testing": "Drug & alcohol — pre-employment, random, post-accident, RTD",
+  "D&A Testing": "Drug & alcohol · pre-employment, random, post-accident, RTD",
   "Clearinghouse": "FMCSA Clearinghouse queries and reporting",
   "HOS / ELD": "Hours of service, ELD compliance, RODS, exceptions",
   "Vehicles & PM": "Preventive maintenance, annual DOT inspection, DVIRs",
@@ -166,7 +166,7 @@ export default function SkillsCatalogPage() {
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--fg-faint)]">🔍</span>
             </div>
 
-            {/* Status pill — only shown when there are coming-soon entries */}
+            {/* Status pill · only shown when there are coming-soon entries */}
             {totalComing > 0 && (
               <div className="flex items-center gap-1 rounded-full border border-[var(--border)] p-1 bg-[var(--surface-3)]">
                 {(["all", "published", "coming-soon"] as const).map((opt) => (

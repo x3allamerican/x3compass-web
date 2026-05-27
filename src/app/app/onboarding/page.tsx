@@ -37,7 +37,7 @@ export default function OnboardingPage() {
   async function saveCarrier() {
     setBusy(true); setError(null);
     try {
-      if (!carrier) throw new Error("No carrier — refresh and try again");
+      if (!carrier) throw new Error("No carrier · refresh and try again");
       const sb = getSupabase();
       const { error } = await sb.from("compass_carriers").update({
         name: carrierName.trim(),
@@ -106,7 +106,7 @@ export default function OnboardingPage() {
           </>)}
           {step === 2 && (<>
             <h2 className="text-xl font-extrabold mb-1">2 · Add your first driver</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional — you can skip.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional · you can skip.</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="First"><input className="x3-input" value={driverFirst} onChange={(e) => setDriverFirst(e.target.value)} /></Field>
@@ -128,7 +128,7 @@ export default function OnboardingPage() {
             <h2 className="text-xl font-extrabold mb-1">3 · Pick your plan</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mb-6">7-day free trial active. Card optional today.</p>
             <div className="space-y-3 mb-6">
-              <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills — you operate it." />
+              <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills · you operate it." />
               <PlanCard active={plan === "dfy"} onClick={() => setPlan("dfy")} title="DFY" price="$50" sub="/driver/mo" desc="We operate Compass for you. Concierge included." />
             </div>
             <div className="space-y-3 mb-6">

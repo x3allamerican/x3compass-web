@@ -26,7 +26,7 @@ function BillingInner() {
   }
 
   if (loading) return <div className="min-h-screen bg-[var(--bg)] p-6"><SkeletonShell kpis={3} rows={3} /></div>;
-  if (!carrier) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">No carrier linked yet — refresh.</div>;
+  if (!carrier) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">No carrier linked yet · refresh.</div>;
 
   const isTrial = carrier.subscription_status === "trialing";
   const isActive = carrier.subscription_status === "active";

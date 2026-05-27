@@ -1,7 +1,7 @@
 /**
  * Inline marketing-page preview of the X3 Compass Hazmat Center.
  * Shows: Placard Wizard input + result preview, segregation matrix,
- * UN1203 lookup card. Marketing context — no interaction required.
+ * UN1203 lookup card. Marketing context · no interaction required.
  */
 export default function HazmatPreview() {
   return (

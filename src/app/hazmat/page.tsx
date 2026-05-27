@@ -7,11 +7,11 @@ import PlacardWizardLive from "@/components/PlacardWizardLive";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Hazmat — Placard wizard + 100 hazmat-specific skills",
+  title: "Hazmat · Placard wizard + 100 hazmat-specific skills",
   description: "Interactive placard wizard, 100+ hazmat skills covering Parts 100-180. UN number lookups, segregation tables, shipping paper templates, security plan builder, ERG emergency response.",
   openGraph: {
-    title: "X3 Compass Hazmat — Placard wizard + 100 skills",
-    description: "Placarding, segregation, shipping papers, security plans — every hazmat skill an interstate carrier needs, with live CFR cites.",
+    title: "X3 Compass Hazmat · Placard wizard + 100 skills",
+    description: "Placarding, segregation, shipping papers, security plans · every hazmat skill an interstate carrier needs, with live CFR cites.",
     type: "website",
   },
 };
@@ -40,7 +40,7 @@ const HAZMAT_BRAINS = [
 ];
 
 const HAZMAT_SKILLS = [
-  { cfr: "Part 172",     name: "Hazmat Placarding",        q: "4,000 lbs of UN1203 — what placards?" },
+  { cfr: "Part 172",     name: "Hazmat Placarding",        q: "4,000 lbs of UN1203 · what placards?" },
   { cfr: "§ 177.848",    name: "Segregation Tables",       q: "Class 3 + Class 8 together?" },
   { cfr: "49 CFR 1572",  name: "TSA H Endorsement",        q: "How long is H valid?" },
   { cfr: "§ 172.504",    name: "Placarding Math",          q: "When does aggregate weight kick in?" },
@@ -137,7 +137,7 @@ export default function Hazmat() {
           </div>
         </section>
 
-        {/* PLACARD GRID — DOT-compliant SVG generators (downloadable) */}
+        {/* PLACARD GRID · DOT-compliant SVG generators (downloadable) */}
         <section className="max-w-7xl mx-auto px-6 py-12">
           <div className={`${cardDark} p-6`}>
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">DOT-COMPLIANT PLACARDS · 49 CFR § 172.519</div>
@@ -145,7 +145,7 @@ export default function Hazmat() {
               All 12 placard classes Compass generates.
             </h3>
             <p className="text-[13px] text-[var(--fg-muted)] mb-6">
-              Scalable SVG — pixel-perfect at any size. Right-click any placard below to save it, or use the Placard Wizard to generate one with a specific UN number.
+              Scalable SVG · pixel-perfect at any size. Right-click any placard below to save it, or use the Placard Wizard to generate one with a specific UN number.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {PLACARD_GRID.map((p) => (
@@ -223,7 +223,7 @@ export default function Hazmat() {
               <span className="serif-italic" style={{ color: "var(--accent)" }}>One CFR away.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-              Tap any chip to converse with the brain that owns it. Twelve representative skills shown — full list available in-app.
+              Tap any chip to converse with the brain that owns it. Twelve representative skills shown · full list available in-app.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {HAZMAT_SKILLS.map((s, i) => (
@@ -240,7 +240,7 @@ export default function Hazmat() {
           </div>
         </section>
 
-        {/* PLACARD LIBRARY — real Wikimedia-sourced placards */}
+        {/* PLACARD LIBRARY · real Wikimedia-sourced placards */}
         <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-2)]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · PLACARD LIBRARY</div>
@@ -248,7 +248,7 @@ export default function Hazmat() {
               Every <span className="serif-italic" style={{ color: "var(--accent)" }}>real placard.</span>
             </h2>
             <p className="text-[15px] text-[var(--fg-muted)] max-w-2xl mb-10">
-              40 authentic placard images — every DOT hazard class, every GHS pictogram, the NFPA 704 diamond. Sourced from Wikimedia Commons (public-domain U.S. government works under 49 CFR § 172).
+              40 authentic placard images · every DOT hazard class, every GHS pictogram, the NFPA 704 diamond. Sourced from Wikimedia Commons (public-domain U.S. government works under 49 CFR § 172).
             </p>
 
             {/* DOT placards */}
@@ -306,7 +306,7 @@ export default function Hazmat() {
               <div className="md:col-span-2 text-[12px] text-[var(--fg-muted)] leading-relaxed">
                 <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-3">Attribution + License</div>
                 <p className="mb-2">All 40 placard images sourced from <a href="https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards" target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">Wikimedia Commons</a>.</p>
-                <p className="mb-2"><strong className="text-[var(--fg-muted)]">DOT placards:</strong> US Government works — public domain per 17 USC § 105.</p>
+                <p className="mb-2"><strong className="text-[var(--fg-muted)]">DOT placards:</strong> US Government works · public domain per 17 USC § 105.</p>
                 <p className="mb-2"><strong className="text-[var(--fg-muted)]">GHS + NFPA 704:</strong> released as PD-self by their Wikimedia authors.</p>
                 <p className="mt-3"><a href="/placards/manifest.json" className="text-[var(--accent)] hover:underline">View manifest.json</a> &middot; <a href="/placards/LICENSES.md" className="text-[var(--accent)] hover:underline">License details</a></p>
               </div>

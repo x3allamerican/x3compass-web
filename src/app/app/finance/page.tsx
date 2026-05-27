@@ -162,13 +162,13 @@ export default function FinancePage() {
         <X3AdminHero
           eyebrow="Finance Tracker"
           title={<>Every dollar in. Every dollar out. <span className="text-amber-700 dark:text-amber-400">Auto-synced with Stripe.</span></>}
-          intro={<>Per-client revenue + expected MRR delta + vendor pass-throughs + outstanding invoices. Stripe charges auto-sync on page load. Manual entries (overhead, refunds, vendor costs) land in <code className="font-mono">compass_finance_entries</code>. Money the SaaS earns versus money it spends — the truth-of-record for the business.</>}
+          intro={<>Per-client revenue + expected MRR delta + vendor pass-throughs + outstanding invoices. Stripe charges auto-sync on page load. Manual entries (overhead, refunds, vendor costs) land in <code className="font-mono">compass_finance_entries</code>. Money the SaaS earns versus money it spends · the truth-of-record for the business.</>}
           dataSource={{
             items: [
               <span key="f1"><strong className="text-[var(--fg)]">Stripe charges</strong> auto-pulled per month via <code className="font-mono text-[var(--accent)]">/api/admin/finance?sync=auto</code>. New rows inserted to <code className="font-mono text-[var(--accent)]">compass_finance_entries</code> with <code className="font-mono">type=&apos;money_in&apos;</code>.</span>,
-              <span key="f2"><strong className="text-[var(--fg)]">Expected MRR</strong> = drivers × tier rate (DIY $25, DFY $50, +$99 Hazmat). Per-client view compares actual revenue vs expected — flags <em>OWED</em> when behind, <em>OVERPAID</em> when ahead.</span>,
+              <span key="f2"><strong className="text-[var(--fg)]">Expected MRR</strong> = drivers × tier rate (DIY $25, DFY $50, +$99 Hazmat). Per-client view compares actual revenue vs expected · flags <em>OWED</em> when behind, <em>OVERPAID</em> when ahead.</span>,
               <span key="f3"><strong className="text-[var(--fg)]">Vendor pass-throughs</strong> = costs we incur (MVR, PSP, drug tests, background checks) on behalf of carriers. Tab 3 shows which carriers still owe us reimbursement.</span>,
-              <span key="f4"><strong className="text-[var(--fg)]">12-Month Trend</strong> pulls from <code className="font-mono text-[var(--accent)]">finance_monthly_summary</code> view — revenue, costs, net per month for the last 12.</span>,
+              <span key="f4"><strong className="text-[var(--fg)]">12-Month Trend</strong> pulls from <code className="font-mono text-[var(--accent)]">finance_monthly_summary</code> view · revenue, costs, net per month for the last 12.</span>,
             ],
             footnote: <>Stripe fees estimated at 2.9% + $0.30/charge. Manual ledger entries get a custom <em>type</em>; CSV + JSON exports include everything visible after filters.</>,
           }}
@@ -195,7 +195,7 @@ export default function FinancePage() {
         {error && <div className="rounded-lg border border-rose-700/40 bg-rose-100 dark:bg-rose-900/20 text-rose-900 dark:text-rose-300 px-3 py-2 text-[13px]">{error}</div>}
         {flash && <div className={`rounded-lg border px-3 py-2 text-[13px] ${flash.ok ? "border-emerald-700/40 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300" : "border-rose-700/40 bg-rose-100 dark:bg-rose-900/20 text-rose-900 dark:text-rose-300"}`}>{flash.msg}</div>}
 
-        {/* 6 KPI tiles — X3FS classic 5 + Active clients (SaaS angle) */}
+        {/* 6 KPI tiles · X3FS classic 5 + Active clients (SaaS angle) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <X3KPITile label="Money in"           value={fmt(kpis.money_in_cents)}                   sub={`${clientTotals.active_carriers} paying · ${clientTotals.trialing_carriers} trialing`} tone="green" />
           <X3KPITile label="Vendor pass-thrus"  value={fmt(kpis.paid_vendors_cents)}               sub="billed back to carriers"                                                              tone="navy" />
@@ -376,7 +376,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-[15px] font-extrabold text-[var(--fg)]">📈 12-Month Trend</div>
-                <div className="text-[11px] text-[var(--fg-muted)]">From <code className="font-mono">finance_monthly_summary</code> view — revenue, cost, net per month.</div>
+                <div className="text-[11px] text-[var(--fg-muted)]">From <code className="font-mono">finance_monthly_summary</code> view · revenue, cost, net per month.</div>
               </div>
             </div>
             {trendLoading ? (
@@ -441,7 +441,7 @@ export default function FinancePage() {
         {!loading && tab === "add" && (
           <div className="x3-card p-6 max-w-2xl">
             <h2 className="text-[16px] font-extrabold text-[var(--fg)] mb-1">Add a manual entry</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mb-4">Vendor cost, overhead, refund, or manual money-in (e.g. wire transfer). Stripe charges sync automatically — don&apos;t use this form for those.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-4">Vendor cost, overhead, refund, or manual money-in (e.g. wire transfer). Stripe charges sync automatically · don&apos;t use this form for those.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label="Date"><input type="date" value={form.entry_date} onChange={(e) => setForm({ ...form, entry_date: e.target.value })} className="finance-input" /></Field>
               <Field label="Type">

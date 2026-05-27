@@ -21,7 +21,7 @@ export type DataSourceConfig = {
   csvTemplate: { name: string; columns: string[] };
   /** What the manual entry button says, e.g., "Add log entry" */
   manualLabel: string;
-  /** Current state — defaults to "empty" */
+  /** Current state · defaults to "empty" */
   initialStatus?: "empty" | "connected" | "imported" | "manual";
   /** If connected, which vendor */
   connectedVendor?: string;
@@ -142,7 +142,7 @@ export default function DataSourceCard({
 
         {/* Tab body */}
         <div className="p-5">
-          {/* Option A — Connect */}
+          {/* Option A · Connect */}
           {activeTab === "connect" && (
             <div className="space-y-3">
               <div className="text-[12.5px] text-[var(--fg-muted)] mb-3">
@@ -200,7 +200,7 @@ export default function DataSourceCard({
             </div>
           )}
 
-          {/* Option B — CSV */}
+          {/* Option B · CSV */}
           {activeTab === "csv" && (
             <div className="space-y-4">
               <div className="text-[12.5px] text-[var(--fg-muted)]">
@@ -265,11 +265,11 @@ export default function DataSourceCard({
             </div>
           )}
 
-          {/* Option C — Manual */}
+          {/* Option C · Manual */}
           {activeTab === "manual" && (
             <div className="space-y-4">
               <div className="text-[12.5px] text-[var(--fg-muted)]">
-                Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later — no data is lost.
+                Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later · no data is lost.
               </div>
 
               <div className="rounded-xl p-5 border border-[var(--border)] flex items-center justify-between gap-3" style={{ background: "var(--surface-3)" }}>
@@ -280,7 +280,7 @@ export default function DataSourceCard({
                 <button
                   onClick={() => {
                     if (onManualSelected) {
-                      // Parent owns the modal flow — defer to it instead of showing the built-in placeholder
+                      // Parent owns the modal flow · defer to it instead of showing the built-in placeholder
                       setStatus("manual");
                       setExpanded(false);
                       onManualSelected();

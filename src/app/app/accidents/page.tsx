@@ -21,7 +21,7 @@ type A = {
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
 
 // =========================================================================
-// COLOR PALETTE — matches the FMCSA/DOT criteria reference card
+// COLOR PALETTE · matches the FMCSA/DOT criteria reference card
 // solid bg + white text in light mode; tinted /30 in dark
 // =========================================================================
 const SEV = {
@@ -55,7 +55,7 @@ function Pill({ cls, children, size = "md" }: { cls: string; children: React.Rea
 }
 
 // =========================================================================
-// DEFINITIONS REFERENCE CARD — at the top of the page
+// DEFINITIONS REFERENCE CARD · at the top of the page
 // =========================================================================
 function DefinitionsCard() {
   return (

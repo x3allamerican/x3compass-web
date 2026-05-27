@@ -15,12 +15,12 @@ type Vendor = {
 const VENDOR_META: Record<string, { label: string; description: string; supports_sync: boolean }> = {
   tenstreet: {
     label: "TenStreet",
-    description: "Applicant tracking system (ATS) — pulls completed driver applications into your DQ pipeline.",
+    description: "Applicant tracking system (ATS) · pulls completed driver applications into your DQ pipeline.",
     supports_sync: true,
   },
   driverreach: {
     label: "DriverReach",
-    description: "Recruiting + ATS — drag-and-drop pipeline + DOT-compliant applications.",
+    description: "Recruiting + ATS · drag-and-drop pipeline + DOT-compliant applications.",
     supports_sync: false,  // awaiting API contract
   },
   hireright: {

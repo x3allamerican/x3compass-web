@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   PageHeader — centered title + LIVE/tenant subtitle
+   PageHeader · centered title + LIVE/tenant subtitle
    ------------------------------------------------------------
    Renders at the very top of each page's main content area:
 

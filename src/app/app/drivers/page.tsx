@@ -95,19 +95,19 @@ export default function DriversPage() {
         <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>
       </>}>
       <div className="p-6">
-        {/* Education Hub — matches app.x3compass.com/drivers exactly (For Drivers / For Employers / For C/TPAs + Ask AI Concierge) */}
+        {/* Education Hub · matches app.x3compass.com/drivers exactly (For Drivers / For Employers / For C/TPAs + Ask AI Concierge) */}
         <div className="mb-5">
           <EducationHubCard
             surface="Drivers"
-            subtitle="Driver lifecycle, qualification, supervision, and discipline — based on 49 CFR Parts 383, 391, 392 & 395. Onboarding kits, supervisor playbooks, retention plans."
+            subtitle="Driver lifecycle, qualification, supervision, and discipline · based on 49 CFR Parts 383, 391, 392 & 395. Onboarding kits, supervisor playbooks, retention plans."
             audiences={[
               { label: "For Drivers", subtitle: "CDL / CLP HOLDERS", tone: "cyan", icon: "🧑‍✈️",
-                body: "Know your obligations under 49 CFR — application accuracy, medical card, MVR access, drug & alcohol testing, HOS compliance, and how to report safety concerns without retaliation.",
+                body: "Know your obligations under 49 CFR · application accuracy, medical card, MVR access, drug & alcohol testing, HOS compliance, and how to report safety concerns without retaliation.",
                 bullets: ["Application accuracy (391.21)", "Medical certification (391.41)", "MVR + violations reporting (391.27)", "Drug & alcohol testing (Part 382)", "HOS recordkeeping (Part 395)", "Right to report safety (49 CFR 386.12)", "What's in your DQ file", "Driver onboarding checklist"],
                 cta: "Open Driver guide →", href: "/app/dq-files" },
               { label: "For Employers", subtitle: "MOTOR CARRIERS · HR / SAFETY", tone: "violet", icon: "⏱",
                 body: "Run a defensible driver program: hire right, document everything, supervise actively, discipline progressively, retain proactively. Every gap is a CSA exposure.",
-                bullets: ["DQ file SOP — every required document", "Hiring decision matrix", "Onboarding curriculum (30/60/90)", "Supervisor's daily/weekly playbook", "Progressive discipline policy", "Driver retention SOP", "Annual review process (391.25)", "Termination & documentation SOP"],
+                bullets: ["DQ file SOP · every required document", "Hiring decision matrix", "Onboarding curriculum (30/60/90)", "Supervisor's daily/weekly playbook", "Progressive discipline policy", "Driver retention SOP", "Annual review process (391.25)", "Termination & documentation SOP"],
                 cta: "Open Employer guide →", href: "/app/dq-files" },
               { label: "For C/TPAs", subtitle: "CONSORTIA / THIRD-PARTY ADMINISTRATORS", tone: "amber", icon: "🛡",
                 body: "Driver management as a service. Centralize DQ files, route MVR / D&A / HOS data through one workflow, deliver consolidated reports to client carriers.",
@@ -117,10 +117,10 @@ export default function DriversPage() {
           />
         </div>
 
-        {/* KPI strip — matches live app.x3compass.com (4 mini KPIs: Active Drivers / New This Month / DQ Expiring ≤ 30d / Inactive · Terminated) */}
+        {/* KPI strip · matches live app.x3compass.com (4 mini KPIs: Active Drivers / New This Month / DQ Expiring ≤ 30d / Inactive · Terminated) */}
         {isDemo && (
           <div className="mb-3 text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
-            ★ Demo data — showing Apex Logistics sample roster until your first driver is added
+            ★ Demo data · showing Apex Logistics sample roster until your first driver is added
           </div>
         )}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">

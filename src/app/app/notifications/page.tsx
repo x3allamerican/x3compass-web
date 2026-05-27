@@ -18,12 +18,12 @@ type ApiPayload = {
   recent_log?: LogRow[];
 };
 
-// DEMO_* overlay — keeps the dashboard alive when notification_log is empty.
+// DEMO_* overlay · keeps the dashboard alive when notification_log is empty.
 const DEMO_KPIS = { delivered_30d: 3, total_30d: 3, delivery_rate_pct: 100, sms_credits: 2847, sms_credits_resets_on: new Date().toISOString(), active_rules: 30, critical_rules: 4 };
 const DEMO_RULES: RuleRow[] = [
   { event_type: "account_security",    name: "Account Security Event",      description: "Admin login from new location, password change, etc.", channels: ["email"], recipients: "Defaults", lead_time_days: null, fcra_category: null, explicit: false },
   { event_type: "mvr_annual_due",      name: "Annual MVR Due",              description: "Annual MVR review due. No driving-record events in 12 months.", channels: ["email"], recipients: "Defaults", lead_time_days: 0, fcra_category: null, explicit: true },
-  { event_type: "bg_check_consider",   name: "BG Check Consider",           description: "Background check returned consider — triggers FCRA adverse-action timeline.", channels: ["email"], recipients: "Defaults", lead_time_days: null, fcra_category: "adverse_action", explicit: true },
+  { event_type: "bg_check_consider",   name: "BG Check Consider",           description: "Background check returned consider · triggers FCRA adverse-action timeline.", channels: ["email"], recipients: "Defaults", lead_time_days: null, fcra_category: "adverse_action", explicit: true },
   { event_type: "cdl_expires_30d",     name: "CDL Expiring 30 Days",        description: "Plenty of lead time. Email only.", channels: ["email"], recipients: "Defaults", lead_time_days: 30, fcra_category: null, explicit: true },
   { event_type: "cdl_expires_14d",     name: "CDL Expiring 14 Days",        description: "Still email-only escalation.", channels: ["email"], recipients: "Defaults", lead_time_days: 14, fcra_category: null, explicit: true },
   { event_type: "cdl_expires_7d",      name: "CDL Expiring 7 Days",         description: "Email plus driver-portal banner.", channels: ["email"], recipients: "Defaults", lead_time_days: 7, fcra_category: null, explicit: true },
@@ -41,7 +41,7 @@ const DEMO_CHANNELS: ChannelBd[] = [
 ];
 const DEMO_LOG: LogRow[] = [];
 
-// Theme-aware pills — readable in light AND dark (no white-on-cyan).
+// Theme-aware pills · readable in light AND dark (no white-on-cyan).
 const STATUS_PILL: Record<string, string> = {
   delivered: "bg-emerald-100 dark:bg-emerald-500/45 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
   pending:   "bg-amber-100   dark:bg-amber-500/45   text-amber-900   dark:text-amber-50   border-amber-700   dark:border-amber-300/80",
@@ -122,9 +122,9 @@ export default function NotificationsPage() {
           intro="Configurable rules across MEC, MVR, training, and roster events."
           dataSource={{
             items: [
-              <span key="n1"><strong className="text-[var(--fg)]">Notifications</strong> live in <code className="font-mono text-[var(--accent)]">notification_log</code> — every email, SMS, push, in-app gets a row with channel, recipient, status, timestamp.</span>,
+              <span key="n1"><strong className="text-[var(--fg)]">Notifications</strong> live in <code className="font-mono text-[var(--accent)]">notification_log</code> · every email, SMS, push, in-app gets a row with channel, recipient, status, timestamp.</span>,
               <span key="n2"><strong className="text-[var(--fg)]">Email</strong> via Resend (delivery webhooks update status); <strong className="text-[var(--fg)]">SMS</strong> via Twilio (delivery callbacks); <strong className="text-[var(--fg)]">Push &amp; In-App</strong> via our service worker.</span>,
-              <span key="n3"><strong className="text-[var(--fg)]">Active rules</strong> = <code className="font-mono text-[var(--accent)]">notification_rules</code> rows merged with <code className="font-mono text-[var(--accent)]">notification_event_defaults</code> — explicit rules win, defaults fill gaps.</span>,
+              <span key="n3"><strong className="text-[var(--fg)]">Active rules</strong> = <code className="font-mono text-[var(--accent)]">notification_rules</code> rows merged with <code className="font-mono text-[var(--accent)]">notification_event_defaults</code> · explicit rules win, defaults fill gaps.</span>,
               <span key="n4"><strong className="text-[var(--fg)]">SMS credits</strong> are pre-purchased pool. Each text decrements; auto-top-up at &lt; 500.</span>,
             ],
             footnote: <>Live data via <code className="font-mono text-[var(--accent)]">/api/notifications</code>. Critical alerts always fire regardless of digest mode.</>,
@@ -212,7 +212,7 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        {/* Notification Log — the missing third section */}
+        {/* Notification Log · the missing third section */}
         <div className="x3-card overflow-hidden">
           <div className="px-5 py-3 border-b border-[var(--border)] flex items-center gap-3 flex-wrap">
             <div className="text-[15px] font-extrabold text-[var(--fg)]">Notification Log</div>

@@ -18,8 +18,8 @@ const SERVICE_ITEMS = [
 const ADVISOR_TIMELINE = [
   { when: "Today · 9:14am", actor: "X3 Advisor", msg: "Confirmed Emma Park's Q2 random selection collection completed at Concentra El Paso. Results expected within 48 hr." },
   { when: "Yesterday · 4:38pm", actor: "Compass", msg: "Flagged Emma Cooper Clearinghouse violation report as 90 days overdue. Draft report ready for review." },
-  { when: "May 9 · 11:20am", actor: "X3 Advisor", msg: "Mailed Emma Cooper's adverse-action packet — certified mail tracking 9405 5036 9930 0114 8821 30." },
-  { when: "May 8 · 7:45am", actor: "Compass", msg: "Random selection executed for Q2 — 18 drivers, 50% of CDL roster. List sent to dispatch." },
+  { when: "May 9 · 11:20am", actor: "X3 Advisor", msg: "Mailed Emma Cooper's adverse-action packet · certified mail tracking 9405 5036 9930 0114 8821 30." },
+  { when: "May 8 · 7:45am", actor: "Compass", msg: "Random selection executed for Q2 · 18 drivers, 50% of CDL roster. List sent to dispatch." },
   { when: "May 1 · 2:10pm", actor: "X3 Advisor", msg: "Quarterly review call complete with Joshua. Action items: clear Q1 backlog, enroll all drivers in continuous MVR." },
 ];
 
@@ -45,16 +45,16 @@ export default function DAConciergePage() {
         {/* HOW THIS PAGE WORKS */}
         <PageGuide
           cfr="49 CFR Part 382 + 49 CFR Part 40"
-          what="Done-for-you D&A program management — X3 safety advisor handles your random pool, Clearinghouse reporting, MRO coordination, and incident response."
+          what="Done-for-you D&A program management · X3 safety advisor handles your random pool, Clearinghouse reporting, MRO coordination, and incident response."
           who="DFY-tier customers who want a human handling their D&A program. Best for carriers with 5-100 trucks who don't want a dedicated safety director."
           howTo={[
-            { n: 1, title: "Meet your X3 safety advisor", detail: "DFY customers get a dedicated advisor (Brad Reynolds — 22 years FMCSA). They take over the random pool, Clearinghouse, and MRO communications." },
-            { n: 2, title: "Forward all D&A communications to your advisor", detail: "Lab results, MRO reports, refusals, positive notifications — all routed to your advisor. They handle the workflow and you get a summary." },
+            { n: 1, title: "Meet your X3 safety advisor", detail: "DFY customers get a dedicated advisor (Brad Reynolds · 22 years FMCSA). They take over the random pool, Clearinghouse, and MRO communications." },
+            { n: 2, title: "Forward all D&A communications to your advisor", detail: "Lab results, MRO reports, refusals, positive notifications · all routed to your advisor. They handle the workflow and you get a summary." },
             { n: 3, title: "Review the advisor's activity log weekly", detail: "Compass D&A Concierge shows every action taken on your behalf: random selections sent, lab orders placed, MRO consultations completed." },
           ]}
-          weeklyHabits={["Review the advisor's weekly summary — what tests ran, what came back, what's pending", "Approve any non-routine decisions the advisor flags (e.g., refusal escalations)"]}
-          auditTraps={["Advisor's recommendations not implemented — carrier still responsible if you ignore the advisor", "Test results not reaching the advisor (e.g., still going to a generic inbox)"]}
-          askCompassLinks={[{ label: "What does the X3 safety advisor handle for me?", query: "What does the X3 safety advisor handle" }, { label: "DFY vs DIY — what's the difference?", query: "DFY vs DIY tier differences" }]}
+          weeklyHabits={["Review the advisor's weekly summary · what tests ran, what came back, what's pending", "Approve any non-routine decisions the advisor flags (e.g., refusal escalations)"]}
+          auditTraps={["Advisor's recommendations not implemented · carrier still responsible if you ignore the advisor", "Test results not reaching the advisor (e.g., still going to a generic inbox)"]}
+          askCompassLinks={[{ label: "What does the X3 safety advisor handle for me?", query: "What does the X3 safety advisor handle" }, { label: "DFY vs DIY · what's the difference?", query: "DFY vs DIY tier differences" }]}
         />
 
         {/* Advisor card */}
@@ -104,7 +104,7 @@ export default function DAConciergePage() {
         <div className="rounded-2xl border border-[#1E3556] overflow-hidden" style={{ background: "linear-gradient(180deg, #15233D 0%, #0F1C32 100%)" }}>
           <div className="px-5 py-4 border-b border-[#1E3556]">
             <h3 className="text-[16px] font-extrabold text-white">What X3 staff is handling for you</h3>
-            <p className="text-[13px] text-white/65 mt-0.5">The full Part 382 lifecycle — your only job is to read the morning digest.</p>
+            <p className="text-[13px] text-white/65 mt-0.5">The full Part 382 lifecycle · your only job is to read the morning digest.</p>
           </div>
           <div className="divide-y divide-[#1E3556]">
             {SERVICE_ITEMS.map((s, i) => {

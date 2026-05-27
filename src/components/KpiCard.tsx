@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================
-   KpiCard — hero KPI tile (Bugatti standard)
+   KpiCard · hero KPI tile (Bugatti standard)
    ------------------------------------------------------------
    Used in the Compliance Command Center hero row and replicated
    across every tracker surface. Mirrors the Manus design from
@@ -123,7 +123,7 @@ export default function KpiCard({
         {meta}
       </header>
 
-      {/* VALUE — display size */}
+      {/* VALUE · display size */}
       <div
         style={{
           fontSize: 38,

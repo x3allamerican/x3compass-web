@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * BrandMark — single source of truth for the X3 brand-family logo.
+ * BrandMark · single source of truth for the X3 brand-family logo.
  *
  * Uses the actual high-res master image (1536×1024 PNG from Joshua's design)
  * cropped + composited into per-variant lockups in /public/.
