@@ -196,6 +196,63 @@ export default function BackgroundChecksPage() {
       <div className="px-6 py-6 space-y-6 bg-[var(--bg)] min-h-screen">
 
         {/* ============================================================
+            HERO · matches app.x3compass.com/background-tracker.html
+            Two-column layout: branded headline + 4-KPI strip right.
+            ============================================================ */}
+        <section
+          className="rounded-2xl border border-[var(--border)] overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)",
+            padding: "32px 32px",
+          }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 items-center">
+            <div>
+              <div
+                className="inline-flex items-center gap-1.5 mb-4"
+                style={{
+                  background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--accent) 38%, transparent)",
+                  color: "var(--accent)",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "1.2px",
+                  textTransform: "uppercase",
+                  padding: "5px 12px",
+                  borderRadius: 999,
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                }}
+              >
+                🔐 Driver Screening · FCRA-Compliant
+              </div>
+              <h1
+                style={{
+                  fontSize: "clamp(28px, 4vw, 44px)",
+                  fontWeight: 900,
+                  letterSpacing: "-1px",
+                  lineHeight: 1.1,
+                  margin: "0 0 14px",
+                  color: "var(--fg)",
+                }}
+              >
+                Background checks built for hazmat carriers.
+              </h1>
+              <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.55, margin: 0, maxWidth: 680 }}>
+                Order MVR, criminal, motor vehicle, and drug &amp; alcohol screenings directly from this page.
+                FCRA-grade adverse-action workflows, audit log, and inspector-ready exports
+                · powered by <strong style={{ color: "var(--accent)" }}>Checkr</strong>.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <BgHeroKpi label="Active Checks"     value={String(stats.inFlight || 0)} />
+              <BgHeroKpi label="Completed (90d)"   value={String(stats.completed || 0)} />
+              <BgHeroKpi label="Avg. TAT"          value="3.2 days" />
+              <BgHeroKpi label="FCRA Compliant"    value="✓" tone="ok" />
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================
             EDUCATION HUB · universal pattern across every X3 surface
             (matches app.x3compass.com/background-tracker design)
             ============================================================ */}
@@ -258,6 +315,83 @@ export default function BackgroundChecksPage() {
             },
           ]}
         />
+
+        {/* ============================================================
+            PRICING · pass-through Checkr price list (7 packages)
+            Matches reference table at app.x3compass.com/background-tracker.html
+            ============================================================ */}
+        <section className="x3-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-[var(--border)]">
+            <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] mb-1">Price list</div>
+            <h2 className="text-[18px] font-extrabold text-[var(--fg)] m-0">Pass-through Checkr pricing · no X3 markup.</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mt-1 mb-0">All prices include FCRA-compliant adverse-action workflow.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead className="bg-[var(--surface-2)] text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--fg-muted)]">
+                <tr>
+                  <th className="text-left px-4 py-3">Package</th>
+                  <th className="text-left px-4 py-3">Includes</th>
+                  <th className="text-right px-4 py-3" style={{ width: 140 }}>Price</th>
+                  <th className="px-4 py-3" style={{ width: 130 }}></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {[
+                  { key: "driver_basic_plus", name: "Driver Basic Plus",       tag: { text: "Most Popular",  tone: "popular" }, includes: "SSN trace · Sex offender · Global watchlist · Multi-state criminal · MVR (1 state)", price: "$54.99", strike: null as string | null },
+                  { key: "mvr",               name: "Pre-Employment MVR",     tag: { text: "FMCSA Required", tone: "required" }, includes: "Motor Vehicle Record from every state of CDL holding in past 3 years",                price: "$14.99", strike: "$22.00" },
+                  { key: "annual_mvr",        name: "Annual MVR",             tag: null,                                       includes: "Single-state MVR for the driver's anniversary · auto-pull via Compass Tracker",        price: "$12.99", strike: null },
+                  { key: "da_pre",            name: "DOT Drug & Alcohol (Pre-Employment)", tag: { text: "FMCSA Required", tone: "required" }, includes: "5-panel urinalysis · DOT-certified lab · 24-hr TAT · MRO review", price: "$58.00", strike: null },
+                  { key: "psp",               name: "PSP (Pre-Employment Screening Program)", tag: { text: "FMCSA", tone: "required" }, includes: "5-yr crash history + 3-yr roadside inspection report · FMCSA data direct", price: "$10.00", strike: null },
+                  { key: "clearinghouse",     name: "FMCSA Clearinghouse Query", tag: { text: "Annual", tone: "required" },     includes: "Limited query (annual) · Full query (pre-employment) · drug & alcohol violations",     price: "$1.25 / $25.00", strike: null },
+                  { key: "hme_verify",        name: "Hazmat HME Endorsement Verification", tag: { text: "Hazmat Add-on", tone: "hazmat" }, includes: "Verify driver's active HME (Hazardous Materials Endorsement) via state DMV",        price: "$8.99",  strike: null },
+                ].map((p) => {
+                  const tagBg =
+                    p.tag?.tone === "popular"  ? "rgba(34,211,238,0.16)"  :
+                    p.tag?.tone === "required" ? "rgba(251,191,36,0.18)"  :
+                    p.tag?.tone === "hazmat"   ? "rgba(248,113,113,0.18)" : "transparent";
+                  const tagFg =
+                    p.tag?.tone === "popular"  ? "var(--accent)"  :
+                    p.tag?.tone === "required" ? "var(--warning)" :
+                    p.tag?.tone === "hazmat"   ? "var(--danger)"  : "var(--fg)";
+                  return (
+                    <tr key={p.key} className="hover:bg-[var(--surface-2)]/40">
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[var(--fg)] font-extrabold text-[13.5px]">{p.name}</span>
+                          {p.tag && (
+                            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 4, background: tagBg, color: tagFg, whiteSpace: "nowrap" }}>
+                              {p.tag.text}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--fg-muted)] align-top">{p.includes}</td>
+                      <td className="px-4 py-3 text-right align-top whitespace-nowrap">
+                        <span className="text-[var(--fg)] font-extrabold tabular-nums">{p.price}</span>
+                        {p.strike && <span className="ml-2 text-[11px] line-through text-[var(--fg-faint)] tabular-nums">{p.strike}</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right align-top">
+                        <button
+                          onClick={() => { newInviteRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+                          className="px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--accent)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] whitespace-nowrap"
+                        >
+                          Order →
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3 border-t border-[var(--border)] text-[12px] text-[var(--fg-muted)]">
+            <strong className="text-[var(--fg)]">Volume discounts:</strong> 10+ orders/month auto-tier to 10% off pass-through pricing.
+            Enterprise pricing for fleets over 100 power units · contact{" "}
+            <a href="mailto:partners@x3compass.com" style={{ color: "var(--accent)" }}>partners@x3compass.com</a>.
+            Prices last synced from Checkr partner agreement on 2026-05-19.
+          </div>
+        </section>
 
         {/* Status bar */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-[var(--surface-3)] border border-[var(--border)] rounded-xl px-4 py-3">
@@ -410,5 +544,28 @@ export default function BackgroundChecksPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+/* ============================================================
+   Hero-strip KPI tile · matches .bg-kpi in the static reference
+   (compact label-over-value, accent color for OK indicators).
+   ============================================================ */
+function BgHeroKpi({ label, value, tone }: { label: string; value: string; tone?: "ok" }) {
+  return (
+    <div
+      className="rounded-xl border border-[var(--border)] p-4"
+      style={{ background: "var(--surface-3)" }}
+    >
+      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">
+        {label}
+      </div>
+      <div
+        className="text-[22px] font-black leading-none tabular-nums"
+        style={{ color: tone === "ok" ? "var(--success)" : "var(--fg)" }}
+      >
+        {value}
+      </div>
+    </div>
   );
 }
