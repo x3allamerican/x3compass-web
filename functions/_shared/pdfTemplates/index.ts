@@ -33,25 +33,34 @@ const FOOTER_BRAND_LINE = "X3 Compass · DOT compliance brain · x3compass.com";
  * `font-size: 9pt` and explicit margins. Width must be 100%.
  */
 export function buildHeaderTemplate(subtitle?: string): string {
+  // Dark-navy header band · matches the X3 Compass app chrome (dark navy
+  // sidebars + cyan accents). The white logo PNG was designed for dark
+  // backgrounds, so we give it one. Body content below stays on clean white.
+  //
+  // -webkit-print-color-adjust: exact forces Chromium to honor the
+  // background color in print/PDF mode · without it, the band disappears.
   return `
 <div style="
   width: 100%;
-  padding: 0 0.5in;
+  padding: 8px 0.6in 10px;
+  background: linear-gradient(135deg, #0A1929 0%, #0E2438 100%);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
   font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 9pt;
-  color: #0F172A;
+  color: #E2E8F0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #16C7FF;
-  padding-bottom: 6px;
+  border-bottom: 2px solid #16C7FF;
+  box-sizing: border-box;
 ">
-  <div style="display: flex; align-items: center; gap: 8px;">
-    <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 28px; width: auto;" />
-    <span style="font-weight: 800; letter-spacing: 0.4px;">X3 Compass</span>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <img src="${X3_LOGO_DATA_URI}" alt="X3 Compass" style="height: 30px; width: auto;" />
+    <span style="font-weight: 800; letter-spacing: 0.4px; color: #FFFFFF; font-size: 11pt;">X3 Compass</span>
   </div>
-  ${subtitle ? `<div style="font-size: 8pt; color: #475569; font-weight: 600;">${subtitle}</div>` : ""}
-  <div style="font-size: 8pt; color: #475569;"><span class="date"></span></div>
+  ${subtitle ? `<div style="font-size: 8.5pt; color: #16C7FF; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">${subtitle}</div>` : ""}
+  <div style="font-size: 8pt; color: #94A3B8;"><span class="date"></span></div>
 </div>`.trim();
 }
 
