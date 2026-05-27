@@ -101,7 +101,8 @@ export default function HazmatCenterPage() {
               background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
               color: "var(--accent-fg, #001019)", fontWeight: 800, fontSize: 15,
               padding: "14px 28px", borderRadius: 10, border: 0, cursor: "pointer",
-              boxShadow: "0 8px 24px rgba(34, 211, 238, 0.35), 0 1px 0 rgba(255,255,255,0.18) inset",
+              /* ANTI_SLOP rule #2: tinted shadow on bg hue (not cyan glow). */
+              boxShadow: "0 10px 28px rgba(2, 6, 12, 0.55), 0 1px 0 rgba(255,255,255,0.18) inset",
               letterSpacing: 0, textDecoration: "none",
             }}>
               Add Hazmat Center · $99/mo →
@@ -352,7 +353,8 @@ export default function HazmatCenterPage() {
                 color: "var(--accent-fg, #001019)", fontWeight: 800, fontSize: 14,
                 padding: "12px 22px", borderRadius: 8, textDecoration: "none",
                 whiteSpace: "nowrap",
-                boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)",
+                /* ANTI_SLOP rule #2: shadow tinted on bg hue, not cyan glow. */
+                boxShadow: "0 8px 20px rgba(2, 6, 12, 0.45)",
               }}
             >
               View on GitLab →

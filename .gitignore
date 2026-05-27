@@ -9,3 +9,9 @@ out
 .secrets/
 secrets.env
 *.env.local
+
+# Playwright artifacts (output of test runs)
+playwright-report/
+test-results/
+tests/__screenshots__/*-actual.png
+tests/__screenshots__/*-diff.png

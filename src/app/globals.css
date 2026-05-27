@@ -90,9 +90,14 @@
    over these defaults via CSS specificity.
    ============================================================ */
 [data-x3-shell="app"] {
-  --bg:            #000000;
-  --bg-2:          #0A0F18;
-  --bg-3:          #050810;
+  /* ANTI_SLOP.md rule #1: never #000. Tint near-black toward the
+     cyan brand hue so the accent doesn't read as glowing on a
+     dead-black void. Target: oklch(13% 0.012 215) ~ #04070D.
+     Surfaces step up in 4-5% lightness increments for depth via
+     contrast, NOT via outer glow shadows (rule #2). */
+  --bg:            #04070D;
+  --bg-2:          #0B121E;
+  --bg-3:          #060A12;
   --surface:       #0F1620;
   --surface-2:     #131C2A;
   --surface-3:     #0B121C;
@@ -115,9 +120,11 @@
   --warning:       #FBBF24;
   --danger:        #F87171;
 
-  --card-shadow:   0 1px 0 rgba(255,255,255,0.05), 0 14px 36px rgba(0, 0, 0, 0.55);
+  /* ANTI_SLOP rule #2: shadow tinted on the bg hue (not pure black,
+     not the accent). Reads as elevation, never as glow. */
+  --card-shadow:   0 1px 0 rgba(255,255,255,0.04), 0 18px 40px rgba(2, 6, 12, 0.55);
   --shell-sidebar-width: 264px;
-  --shell-header-height: 110px;
+  --shell-header-height: 134px; /* matches AppShell + AppTopbar locked height */
   --shell-radius: 14px;
 
   /* Base font size bump — Joshua: font is too small */

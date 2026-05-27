@@ -120,7 +120,8 @@ export default function EducationHubCard({ surface, subtitle, conciergeHref = "/
             fontSize: 14,
             fontWeight: 800,
             whiteSpace: "nowrap",
-            boxShadow: "0 6px 24px rgba(34, 211, 238, 0.42), 0 1px 0 rgba(255,255,255,0.18) inset",
+            /* ANTI_SLOP rule #2: shadow tinted on bg hue, never cyan glow. */
+            boxShadow: "0 8px 22px rgba(2, 6, 12, 0.55), 0 1px 0 rgba(255,255,255,0.20) inset",
             letterSpacing: 0.2,
           }}
         >

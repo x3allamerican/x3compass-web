@@ -14,6 +14,7 @@
 stages:
   - build
   - deploy
+  - verify
 
 variables:
   NODE_VERSION: "22"
@@ -50,5 +51,42 @@ deploy:
   environment:
     name: production
     url: https://x3compass.com
+  only:
+    - main
+
+# ============================================================
+# Post-deploy verification — Playwright smoke + visual regression.
+# Runs against the live https://x3compass.com URL after deploy.
+# Failure does NOT roll the deploy back, but flags the pipeline
+# red so we notice within 2-3 min.
+# ============================================================
+verify:
+  stage: verify
+  image: mcr.microsoft.com/playwright:v1.49.0-jammy
+  needs:
+    - deploy
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  script:
+    - node --version
+    - npm ci --no-audit --no-fund
+    # Wait a few seconds for CF cache propagation, then run smoke.
+    # Visual specs are :allow-failure: true via the `allow_failure`
+    # job key below — they catch design regressions but don't gate
+    # the pipeline on AA-pixel diffs from CDN re-encodes.
+    - sleep 15
+    - npm run test:smoke
+    - npm run test:e2e -- tests/visual.spec.ts || true
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+    expire_in: 7 days
+  allow_failure: false
   only:
     - main
