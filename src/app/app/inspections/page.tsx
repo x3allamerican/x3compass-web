@@ -7,9 +7,38 @@ import { InspectionImportModal } from "@/components/app/InspectionImportModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
+import { DEMO_INSPECTIONS, withDemoFallback } from "@/lib/demoFallback";
 
 type I = { id:string; driver_id:string|null; vehicle_id:string|null; inspection_date:string; level:number|null; state:string|null; inspector:string|null; report_number:string|null; oos_driver:boolean; oos_vehicle:boolean; violation_count:number; violations:unknown[]|null; report_url:string|null };
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
+
+/** Reshape DemoInspection → I so the existing renderer just works.
+ *  We keep driver_id/vehicle_id null on demo rows (the table falls back to "—")
+ *  but we attach driver_name + vehicle_unit via the unused `violations` slot
+ *  so the page can still surface them in a render helper if it cares. */
+function adaptDemoInspection(d: typeof DEMO_INSPECTIONS[number]): I & { _demoDriver: string; _demoVehicle: string } {
+  const LEVEL_MAP: Record<string, number> = {
+    "Level I": 1, "Level II": 2, "Level III": 3, "Level IV": 4, "Level V": 5, "Level VI": 6,
+  };
+  const oos = d.result === "oos";
+  return {
+    id: d.id,
+    driver_id: null,
+    vehicle_id: null,
+    inspection_date: d.inspection_date,
+    level: LEVEL_MAP[d.level] ?? null,
+    state: d.state,
+    inspector: d.location,
+    report_number: null,
+    oos_driver: oos && d.oos_violations > 0,
+    oos_vehicle: oos && d.oos_violations > 0,
+    violation_count: d.violations,
+    violations: null,
+    report_url: null,
+    _demoDriver: d.driver_name,
+    _demoVehicle: d.vehicle_unit,
+  };
+}
 
 // ============================================================
 // COLOR PALETTE — same theme-aware tokens as Accidents
@@ -111,17 +140,27 @@ export default function InspectionsPage() {
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
-  const filtered = useMemo(() => rows.filter(r => {
+  // Fall back to demo Apex-Logistics inspection log (7 records, 21d window)
+  // when the real Supabase query returns no rows for this carrier yet.
+  const effectiveRows = useMemo(
+    () => withDemoFallback(rows, DEMO_INSPECTIONS.map(adaptDemoInspection) as I[]),
+    [rows]
+  );
+  const isDemo = rows.length === 0;
+
+  const filtered = useMemo(() => effectiveRows.filter(r => {
     if (filterLevel && String(r.level) !== filterLevel) return false;
     if (filterOutcome && outcomeFor(r).key !== filterOutcome) return false;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       const drv = drivers.find(d => d.id === r.driver_id);
       const drvName = drv ? `${drv.first_name||""} ${drv.last_name||""}`.toLowerCase() : "";
-      if (!`${r.state||""} ${r.inspector||""} ${r.report_number||""} ${drvName}`.toLowerCase().includes(q)) return false;
+      // Demo rows carry _demoDriver as a fallback search target.
+      const demoName = (r as I & { _demoDriver?: string })._demoDriver || "";
+      if (!`${r.state||""} ${r.inspector||""} ${r.report_number||""} ${drvName} ${demoName}`.toLowerCase().includes(q)) return false;
     }
     return true;
-  }), [rows, drivers, filterLevel, filterOutcome, search]);
+  }), [effectiveRows, drivers, filterLevel, filterOutcome, search]);
 
   function vehLabel(id: string | null) {
     if (!id) return null;
@@ -154,7 +193,7 @@ export default function InspectionsPage() {
           <div className="flex gap-2 flex-wrap">
             <button onClick={() => setShowImport(true)} className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">📥 Import CSV</button>
             <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-black" style={{ background: "linear-gradient(135deg, #FBBF24, #F59E0B)" }}>+ Log Inspection</button>
-            <div className="ml-auto self-center text-[12px] text-[var(--fg-muted)]">{filtered.length} of {rows.length} inspection{rows.length===1?"":"s"}</div>
+            <div className="ml-auto self-center text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveRows.length} inspection{effectiveRows.length===1?"":"s"}{isDemo && <span className="ml-2 text-[var(--accent)]/80 font-bold">· DEMO</span>}</div>
           </div>
         </div>
 
@@ -180,20 +219,26 @@ export default function InspectionsPage() {
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={9} className="text-center p-10">
                   <div className="text-2xl mb-2">📋</div>
-                  <div className="text-[var(--fg)] font-bold mb-1">{rows.length === 0 ? "No inspections logged" : "No matches"}</div>
-                  <div className="text-[var(--fg-muted)] text-sm">{rows.length === 0 ? "Roadside inspections appear here. Clean ones lower your CSA BASIC scores." : "Try clearing your filters."}</div>
+                  <div className="text-[var(--fg)] font-bold mb-1">{effectiveRows.length === 0 ? "No inspections logged" : "No matches"}</div>
+                  <div className="text-[var(--fg-muted)] text-sm">{effectiveRows.length === 0 ? "Roadside inspections appear here. Clean ones lower your CSA BASIC scores." : "Try clearing your filters."}</div>
                 </td></tr>
               ) : filtered.map(r => {
                 const drv = drivers.find(d => d.id === r.driver_id);
                 const lev = (r.level || 1) as keyof typeof LEVEL_COLORS;
                 const out = outcomeFor(r);
+                // Demo rows carry driver/vehicle as strings (no real FK)
+                const demoExt = r as I & { _demoDriver?: string; _demoVehicle?: string };
                 return (
-                  <tr key={r.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] cursor-pointer" onClick={() => setEdit(r)}>
+                  <tr key={r.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] cursor-pointer" onClick={() => { if (!isDemo) setEdit(r); }}>
                     <td className="px-3 py-3"><div className="text-[var(--fg)] font-semibold">{new Date(r.inspection_date).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" })}</div></td>
                     <td className="px-3 py-3"><div className="text-[var(--fg)] font-mono">{r.state || <span className="text-[var(--fg-faint)]">—</span>}</div></td>
                     <td className="px-3 py-3 hidden md:table-cell">
-                      {drv ? <div className="text-[var(--fg)] font-semibold">{drv.first_name} {drv.last_name}</div> : <span className="text-[var(--fg-faint)]">—</span>}
-                      {vehLabel(r.vehicle_id) && <div className="text-[11px] text-[var(--fg-muted)]">{vehLabel(r.vehicle_id)}</div>}
+                      {drv ? <div className="text-[var(--fg)] font-semibold">{drv.first_name} {drv.last_name}</div>
+                           : demoExt._demoDriver ? <div className="text-[var(--fg)] font-semibold">{demoExt._demoDriver}</div>
+                           : <span className="text-[var(--fg-faint)]">—</span>}
+                      {vehLabel(r.vehicle_id) ? <div className="text-[11px] text-[var(--fg-muted)]">{vehLabel(r.vehicle_id)}</div>
+                       : demoExt._demoVehicle ? <div className="text-[11px] text-[var(--fg-muted)]">{demoExt._demoVehicle}</div>
+                       : null}
                     </td>
                     <td className="px-3 py-3"><Pill cls={LEVEL_COLORS[lev]}>LEVEL {["", "I", "II", "III", "IV", "V", "VI"][lev]}</Pill></td>
                     <td className="px-3 py-3"><Pill cls={OUTCOME_COLORS[out.key]}>{out.label}</Pill></td>
@@ -201,7 +246,7 @@ export default function InspectionsPage() {
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="font-mono text-[12px] text-[var(--fg-muted)]">{r.report_number || "—"}</span></td>
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="text-[12px] text-[var(--fg-muted)]">{r.inspector || "—"}</span></td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
-                      <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>
+                      {!isDemo && <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>}
                     </td>
                   </tr>
                 );

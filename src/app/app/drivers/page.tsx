@@ -7,6 +7,7 @@ import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
+import { DEMO_DRIVERS, withDemoFallback } from "@/lib/demoFallback";
 
 type Driver = {
   id: string; carrier_id: string;
@@ -50,14 +51,23 @@ export default function DriversPage() {
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
+  // When no real driver rows exist yet (new carrier / empty Supabase table),
+  // fall back to demo data so the page never looks broken on first load.
+  // Once even one real row exists, demo data is dropped automatically.
+  const effectiveDrivers = useMemo(
+    () => withDemoFallback(drivers, DEMO_DRIVERS as Driver[]),
+    [drivers]
+  );
+  const isDemo = drivers.length === 0;
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return drivers.filter(d => {
+    return effectiveDrivers.filter(d => {
       if (statusFilter && d.status !== statusFilter) return false;
       if (!q) return true;
       return `${d.first_name} ${d.last_name} ${d.cdl_number} ${d.email}`.toLowerCase().includes(q);
     });
-  }, [drivers, search, statusFilter]);
+  }, [effectiveDrivers, search, statusFilter]);
 
 
   // KPI counters for the top stat-card row
@@ -65,14 +75,14 @@ export default function DriversPage() {
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const kpis = useMemo(() => {
     let active = 0, pending = 0, cdlExp30 = 0, medExp30 = 0;
-    for (const d of drivers) {
+    for (const d of effectiveDrivers) {
       if (d.status === "active") active++;
       if (d.status === "pending_hire") pending++;
       if (d.cdl_expires_on && d.cdl_expires_on <= in30) cdlExp30++;
       if (d.medical_card_expires_on && d.medical_card_expires_on <= in30) medExp30++;
     }
     return { active, pending, cdlExp30, medExp30 };
-  }, [drivers, in30]);
+  }, [effectiveDrivers, in30]);
   const in60 = new Date(Date.now() + 60*86400000).toISOString().slice(0, 10);
   const isExpiring = (d?: string | null) => !!(d && d >= today && d <= in60);
   const isExpired = (d?: string | null) => !!(d && d < today);
@@ -108,11 +118,16 @@ export default function DriversPage() {
         </div>
 
         {/* KPI strip — matches live app.x3compass.com (4 mini KPIs: Active Drivers / New This Month / DQ Expiring ≤ 30d / Inactive · Terminated) */}
+        {isDemo && (
+          <div className="mb-3 text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
+            ★ Demo data — showing Apex Logistics sample roster until your first driver is added
+          </div>
+        )}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active drivers"           value={kpis.active}    sub={`↑ ${drivers.length} on roster`} tone="ok" />
+          <KpiCard label="Active drivers"           value={kpis.active}    sub={`↑ ${effectiveDrivers.length} on roster`} tone="ok" />
           <KpiCard label="New this month"           value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
           <KpiCard label="DQ expiring ≤ 30d"        value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
-          <KpiCard label="Inactive / Terminated"    value={Math.max(0, drivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
+          <KpiCard label="Inactive / Terminated"    value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
         </div>
 
         {/* Filter bar */}
@@ -127,15 +142,15 @@ export default function DriversPage() {
             <option value="">All statuses</option>
             {STATUSES.map(s => <option key={s} value={s}>{s.replace("_"," ")}</option>)}
           </select>
-          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {drivers.length}</div>
+          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveDrivers.length}</div>
         </div>
 
         <TenantTable<Driver>
           rows={filtered} loading={loading}
-          emptyTitle={drivers.length ? "No matches" : "No drivers yet"}
-          emptyDesc={drivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
-          emptyAction={drivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
-          onRowClick={(d) => setEditDriver(d)}
+          emptyTitle={effectiveDrivers.length ? "No matches" : "No drivers yet"}
+          emptyDesc={effectiveDrivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
+          emptyAction={effectiveDrivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
+          onRowClick={(d) => { if (!isDemo) setEditDriver(d); }}
           columns={[
             { key: "name", label: "Driver", render: (d) =>
               <div>
