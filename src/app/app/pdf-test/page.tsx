@@ -55,6 +55,78 @@ const TEMPLATES: TemplateRow[] = [
 export default function PdfTestPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ slug: string; text: string; detail?: string; setup_doc?: string } | null>(null);
+  // Phase 2 · stamp + merge state
+  const [stampFile, setStampFile] = useState<File | null>(null);
+  const [stampSubtitle, setStampSubtitle] = useState<string>("");
+  // (merge has no extra state · uses sample data inline)
+
+  async function stamp() {
+    if (!stampFile) {
+      setError({ slug: "stamp", text: "Pick a PDF file first" });
+      return;
+    }
+    setBusy("stamp");
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", stampFile);
+      if (stampSubtitle) form.append("subtitle", stampSubtitle);
+      const res = await fetch("/api/pdf/stamp", { method: "POST", body: form });
+      const ct = res.headers.get("Content-Type") || "";
+      if (!res.ok || !ct.includes("application/pdf")) {
+        const j = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        setError({ slug: "stamp", text: j.error || `Stamp failed (HTTP ${res.status})`, detail: j.detail });
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `stamped-${Date.now()}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {
+      setError({ slug: "stamp", text: e instanceof Error ? e.message : "Network error" });
+    }
+    setBusy(null);
+  }
+
+  async function mergeDemoPacket() {
+    setBusy("merge");
+    setError(null);
+    try {
+      const res = await fetch("/api/pdf/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cover: {
+            title: "X3 Compass · Audit Packet",
+            subtitle: "Apex Logistics · USDOT 1234567",
+            meta: [
+              "Prepared by: Joshua Kovarik",
+              `Generated: ${new Date().toLocaleDateString("en-US", { dateStyle: "long" })}`,
+              "Scope: Hazmat + Training · §172 + §391.51",
+            ],
+          },
+          subtitle: "Audit packet · sample",
+          stamp: false, // sources already have Browser Rendering headers · skip the pdf-lib overlay
+          sources: [
+            { template: "hazmat-audit-checklist", data: { carrierName: "Apex Logistics", usdotNumber: "1234567", preparedBy: "Joshua Kovarik" } },
+            { template: "training-certificate", data: { driverName: "Marcus Reyes", courseTitle: "Hazardous Materials General Awareness", certNumber: "X3-2026-DEMO-0001" } },
+            { template: "letterhead-test", data: { carrierName: "Apex Logistics", userName: "Joshua Kovarik" } },
+          ],
+        }),
+      });
+      const ct = res.headers.get("Content-Type") || "";
+      if (!res.ok || !ct.includes("application/pdf")) {
+        const j = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        setError({ slug: "merge", text: j.error || `Merge failed (HTTP ${res.status})`, detail: j.detail });
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `audit-packet-${Date.now()}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {
+      setError({ slug: "merge", text: e instanceof Error ? e.message : "Network error" });
+    }
+    setBusy(null);
+  }
 
   async function generate(t: TemplateRow) {
     setBusy(t.slug);
@@ -148,6 +220,79 @@ export default function PdfTestPage() {
             )}
           </section>
         )}
+
+        {/* Phase 2 · stamp + merge */}
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5" style={{ boxShadow: "var(--card-shadow)" }}>
+          <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-1">🛠 PHASE 2 · pdf-lib stack</div>
+          <h2 className="text-[16px] font-extrabold text-[var(--fg)] m-0">Stamp an existing PDF · merge into an audit packet</h2>
+          <p className="text-[12.5px] text-[var(--fg-muted)] leading-relaxed mt-1.5 mb-4">
+            Stack 2 doesn&apos;t call Cloudflare Browser Rendering. It uses <code className="text-[11px] bg-[var(--surface-3)] px-1.5 rounded">pdf-lib</code> in the Pages Function directly · zero cost per render. Use it to brand PDFs you already have (PHMSA templates, Checkr reports, 3rd-party manifests) or to merge multiple branded PDFs into one audit packet.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Stamp card */}
+            <article className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 flex flex-col gap-3">
+              <div>
+                <div className="text-[9.5px] tracking-[1.2px] uppercase font-bold text-[var(--fg-faint)]">Endpoint</div>
+                <div className="text-[13px] font-extrabold text-[var(--fg)] mt-0.5">Stamp · POST /api/pdf/stamp</div>
+              </div>
+              <p className="text-[11.5px] text-[var(--fg-muted)] m-0 leading-snug">
+                Upload any PDF. We add the X3 navy band + cyan accent + brand footer to every page using pdf-lib (no Browser Rendering call).
+              </p>
+
+              <input
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={(e) => setStampFile(e.target.files?.[0] || null)}
+                disabled={busy !== null}
+                className="text-[12px] text-[var(--fg-muted)] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11.5px] file:font-bold file:bg-[var(--surface-3)] file:text-[var(--fg)] file:cursor-pointer"
+              />
+              <input
+                type="text"
+                value={stampSubtitle}
+                onChange={(e) => setStampSubtitle(e.target.value)}
+                placeholder="Optional band subtitle (e.g. 'Hazmat audit · §172')"
+                disabled={busy !== null}
+                className="px-2 py-1.5 rounded text-[12px] bg-[var(--surface)] border border-[var(--border)] text-[var(--fg)]"
+              />
+
+              <button
+                onClick={stamp}
+                disabled={busy !== null || !stampFile}
+                className="mt-auto px-3 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+              >
+                {busy === "stamp" ? "Stamping…" : "Stamp this PDF →"}
+              </button>
+            </article>
+
+            {/* Merge card */}
+            <article className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 flex flex-col gap-3">
+              <div>
+                <div className="text-[9.5px] tracking-[1.2px] uppercase font-bold text-[var(--fg-faint)]">Endpoint</div>
+                <div className="text-[13px] font-extrabold text-[var(--fg)] mt-0.5">Merge · POST /api/pdf/merge</div>
+              </div>
+              <p className="text-[11.5px] text-[var(--fg-muted)] m-0 leading-snug">
+                The audit-packet builder. Combines multiple PDFs (rendered templates, URLs, or base64 inline) into one branded document with an optional cover page. The flagship use case: FMCSA new-entrant audits.
+              </p>
+              <div className="text-[10.5px] text-[var(--fg-faint)] font-mono bg-[var(--surface-3)] rounded p-2 leading-snug">
+                Cover: &quot;X3 Compass · Audit Packet&quot;<br/>
+                + Hazmat audit checklist<br/>
+                + Training certificate<br/>
+                + Letterhead test
+              </div>
+
+              <button
+                onClick={mergeDemoPacket}
+                disabled={busy !== null}
+                className="mt-auto px-3 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+              >
+                {busy === "merge" ? "Merging…" : "Merge demo audit packet →"}
+              </button>
+            </article>
+          </div>
+        </section>
 
         {/* Footer · what to look for */}
         <section className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5">

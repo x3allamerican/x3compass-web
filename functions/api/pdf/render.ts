@@ -38,8 +38,10 @@ import {
   wrapBody,
   type TemplateOutput,
 } from "../../_shared/pdfTemplates";
+import { logPdfGenerated } from "../../_shared/pdfAudit";
+import { bearerFromRequest, verifySupabaseJwt, type SupaEnv } from "../../_shared/supabase-admin";
 
-interface Env {
+interface Env extends SupaEnv {
   CF_ACCOUNT_ID?: string;
   CF_BROWSER_RENDERING_TOKEN?: string;
 }
@@ -145,6 +147,20 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   const pdfBuf = await cfRes.arrayBuffer();
   const filename = `${templateSlug}-${Date.now()}.pdf`;
   const disposition = body.inline ? "inline" : "attachment";
+
+  // 6. Audit log (best-effort · never blocks the response)
+  try {
+    const token = bearerFromRequest(request);
+    const user = token ? await verifySupabaseJwt(env, token) : null;
+    if (user) {
+      await logPdfGenerated(env, {
+        user_id: user.sub,
+        source: "render",
+        template_slug: templateSlug,
+        byte_size: pdfBuf.byteLength,
+      });
+    }
+  } catch { /* swallow · audit must never break the response */ }
 
   return new Response(pdfBuf, {
     status: 200,
