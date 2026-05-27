@@ -1,0 +1,54 @@
+# ============================================================
+# X3 Compass — GitLab CI/CD pipeline
+# ------------------------------------------------------------
+# Every push to `main` builds the Next.js app and deploys the
+# `out/` static export to Cloudflare Pages (project x3compass-web).
+#
+# Required GitLab CI variables (set via Settings → CI/CD → Variables):
+#   CLOUDFLARE_API_TOKEN   — masked, protected, expanded
+#   CLOUDFLARE_ACCOUNT_ID  — masked, protected, expanded
+#
+# Runtime: gitlab-runner shared runners (free tier, 400 min/month).
+# ============================================================
+
+stages:
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "22"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+build:
+  stage: build
+  image: node:22-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+      - .next/cache/
+  script:
+    - node --version
+    - npm ci --no-audit --no-fund
+    - npm run build
+  artifacts:
+    paths:
+      - out/
+    expire_in: 1 hour
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  image: node:22-alpine
+  needs:
+    - build
+  script:
+    - npx --yes wrangler@latest pages deploy out --project-name=x3compass-web --branch=main --commit-dirty=true
+  environment:
+    name: production
+    url: https://x3compass.com
+  only:
+    - main
