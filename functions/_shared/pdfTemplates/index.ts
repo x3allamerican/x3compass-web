@@ -3326,6 +3326,572 @@ export const driverApplicationForm: TemplateFn<{ carrierName?: string; applicant
 });
 
 /* ============================================================
+   BATCH 9 · FINAL · operational + form templates · 52→60
+   ============================================================ */
+
+/* ---- 52. spill-response-procedure · §171.15 + §172.602 ---- */
+
+export const spillResponseProcedure: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Hazmat Spill Response · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Hazmat spill response · 49 CFR §171.15 + §172.602",
+  bodyHTML: `
+    <h1>Hazmat spill / incident response · driver procedure</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep in the cab with shipping papers</p>
+
+    <div class="callout">
+      A hazmat incident is anything from a small drip to a catastrophic release. Federal law (§171.15) sets the reporting timeline; the Emergency Response Guidebook (ERG) tells you the immediate response. This card walks you through both.
+    </div>
+
+    <h2>I · First 5 minutes</h2>
+    <ol>
+      <li><strong>Safety first</strong> · move yourself + bystanders upwind, uphill, away from the leak · don't be a hero</li>
+      <li><strong>Call 911</strong> · "I have a hazmat release from a commercial vehicle" · give exact location · stay on the line</li>
+      <li><strong>Call the 24-hour emergency response number</strong> on the shipping paper (CHEMTREC: 1-800-424-9300 if no number on paper) · they coordinate with responders</li>
+      <li><strong>Set out warning devices</strong> upwind of the release · keep traffic away from the cloud or pool</li>
+      <li><strong>Stay with the truck</strong> if safe · keep shipping papers + ERG accessible · responders will need them</li>
+    </ol>
+
+    <h2>II · What to tell the dispatcher / responder</h2>
+    <ul>
+      <li><strong>Your exact location</strong> · mile marker, intersection, GPS</li>
+      <li><strong>UN/NA number + proper shipping name</strong> from the shipping paper</li>
+      <li><strong>Hazard class</strong> from the placard + shipping paper</li>
+      <li><strong>Total quantity onboard</strong> · approximate amount released vs still contained</li>
+      <li><strong>Whether anyone is injured</strong> · how many · what condition</li>
+      <li><strong>Weather + wind direction</strong> · drives the response perimeter</li>
+      <li><strong>Whether the leak is contained</strong> · puddle, vapor, ongoing, or stopped</li>
+    </ul>
+
+    <h2>III · Federal reporting · §171.15 immediate notice + §171.16 written report</h2>
+    <p>Carrier must call the National Response Center at <strong>1-800-424-8802</strong> within 12 hours when any of these occur:</p>
+    <ul>
+      <li>A person is killed</li>
+      <li>A person receives injuries requiring hospitalization</li>
+      <li>Estimated property damage exceeds $50,000</li>
+      <li>An evacuation of the general public occurs lasting one or more hours</li>
+      <li>One or more major transportation arteries / facilities are closed for one or more hours</li>
+      <li>The operational flight pattern or routine of an aircraft is altered</li>
+      <li>Fire, breakage, spillage, or suspected contamination occurs involving radioactive material</li>
+      <li>Fire, breakage, spillage, or suspected contamination occurs involving infectious substance</li>
+      <li>A release of marine pollutant in a quantity ≥119 gallons (450 L) or ≥882 lb (400 kg)</li>
+      <li>A situation exists where a continuing danger to life exists at the scene</li>
+    </ul>
+    <p>Written follow-up report (DOT Form F 5800.1) due within 30 days · §171.16.</p>
+
+    <h2>IV · What NOT to do</h2>
+    <ul>
+      <li><strong>Don't smoke or strike a flame</strong> within 100 ft · flammables, oxidizers, even some non-flammables emit explosive vapors</li>
+      <li><strong>Don't touch or breathe</strong> the released material · even if you think it's safe · PPE is required for any direct contact</li>
+      <li><strong>Don't attempt cleanup</strong> beyond stopping the leak (if safe) · spill cleanup is regulated · responders + contractors handle it</li>
+      <li><strong>Don't move the truck</strong> if it would worsen the release · don't drive away · §171.15 + §177.854</li>
+      <li><strong>Don't talk to media or post on social</strong> · refer them to dispatcher / corporate</li>
+    </ul>
+
+    <div class="callout">
+      <strong>The shipping paper + ERG are the two most valuable tools at the scene.</strong> The shipping paper tells responders what's in the truck. The ERG (orange book in the cab) tells them how to handle it. Hand both to the incident commander.
+    </div>
+  `,
+});
+
+/* ---- 53. personal-conveyance-rules · §395.1(g)(2) + FMCSA guidance ---- */
+
+export const personalConveyanceRules: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Personal Conveyance Rules · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Personal conveyance · 49 CFR §395.1(b)(1) · FMCSA guidance",
+  bodyHTML: `
+    <h1>Personal conveyance · what counts and what doesn't</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      Personal conveyance (PC) lets you move a CMV off-duty for personal reasons without those miles counting against your HOS clock. Misused, it's a falsification finding (§395.8(e)) · a 10× CSA severity violation. This guide is what FMCSA actually allows.
+    </div>
+
+    <h2>I · What FMCSA defines as PC (§395.1(b)(1) + 2018 guidance)</h2>
+    <p>PC is the movement of a CMV "for personal reasons unrelated to the work of the motor carrier." Specifically allowed (when carrier policy permits):</p>
+    <ul>
+      <li><strong>Time spent at lodging</strong> · driving from your tractor to a restaurant or to a motel · while still on a rest break</li>
+      <li><strong>Commuting to/from your home</strong> from the carrier's terminal</li>
+      <li><strong>Moving the truck to a safer location</strong> after being told by a safety official to relocate</li>
+      <li><strong>Travel to a nearby reasonable resting place</strong> to obtain required rest after loading or unloading · trip is for the driver's benefit, not the load's</li>
+      <li><strong>Authorized personal entertainment</strong> · trips to a movie, gym, etc. while off-duty + the truck is empty or under no load</li>
+    </ul>
+
+    <h2>II · What does NOT count as PC</h2>
+    <ul>
+      <li><strong>Moving the load closer to its destination</strong> · even by a few miles · this is on-duty driving</li>
+      <li><strong>Repositioning between shippers</strong> · part of the dispatch · on-duty</li>
+      <li><strong>Bobtailing to/from a maintenance shop</strong> · on-duty maintenance time</li>
+      <li><strong>Moving from a loading dock to a nearby parking lot</strong> after delivery if it's required to free the dock · this is on-duty</li>
+      <li><strong>Driving from one drop to the next</strong> while still on the trip · on-duty</li>
+      <li><strong>Any drive that "advances the load" or "advances the commercial purpose"</strong> · the FMCSA test</li>
+    </ul>
+
+    <h2>III · The driver's responsibilities when using PC</h2>
+    <ol>
+      <li><strong>Confirm your carrier's policy permits PC</strong> · §395.1(b)(1) says PC is at the carrier's discretion · some carriers prohibit it entirely</li>
+      <li><strong>Properly annotate the ELD</strong> · select "Off-Duty Personal Use" or PC duty-status modifier · most ELDs require an annotation comment</li>
+      <li><strong>Add a written annotation</strong> describing the purpose · e.g., "PC: drive from rest area to motel for sleep"</li>
+      <li><strong>Be ready to defend it</strong> at roadside · inspector may ask what the trip was for</li>
+      <li><strong>Don't combine PC with on-duty drive in a way that looks evasive</strong> · short PC segments wedged between drive segments will be probed</li>
+    </ol>
+
+    <h2>IV · The FMCSA tests inspectors apply</h2>
+    <table>
+      <thead><tr><th style="width:35%">Test</th><th>If "yes" → PC is OK</th><th>If "no" → on-duty driving</th></tr></thead>
+      <tbody>
+        <tr><td>Is the trip for personal benefit only?</td><td>Yes</td><td>No · on-duty</td></tr>
+        <tr><td>Was the driver off-duty before the trip started?</td><td>Yes</td><td>No · on-duty</td></tr>
+        <tr><td>Is the trip routed to advance the load or the carrier's commercial purpose?</td><td>No</td><td>Yes · on-duty</td></tr>
+        <tr><td>Is the trip "reasonable" in distance + time for the personal reason given?</td><td>Yes</td><td>No · suspicion · on-duty</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>The PC clock isn't unlimited.</strong> If you drove 5 hours of PC to get home for the weekend, an inspector will scrutinize it · 5 hours of PC + commute home isn't "personal," it's an extended trip masquerading as off-duty. Use PC for genuine, reasonable, off-duty trips · not as an HOS workaround.
+    </div>
+  `,
+});
+
+/* ---- 54. eldt-certificate · §380.609 ---- */
+
+export const eldtCertificate: TemplateFn<{ carrierName?: string; driverName?: string; trainingProviderName?: string; courseType?: string; completionDate?: string }> = (data) => ({
+  version: "1.0",
+  title: `ELDT Completion Certificate · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Entry-Level Driver Training · 49 CFR §380.609",
+  bodyHTML: `
+    <h1>Entry-Level Driver Training · completion certificate</h1>
+    <p class="meta">Pursuant to 49 CFR Part 380 Subpart F</p>
+
+    <div class="callout">
+      §380.609 requires entry-level CDL applicants (post 02/07/2022) to complete theory + behind-the-wheel training from an FMCSA-registered Training Provider before applying for a CDL or upgrade. This certificate documents that training.
+    </div>
+
+    <h2>I · Driver information</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:30%">Driver name</td><td>${escapeHtml(data.driverName || "____________________________________")}</td></tr>
+        <tr><td>Date of birth</td><td>____________</td></tr>
+        <tr><td>Driver's license number + state</td><td>____________________________________</td></tr>
+        <tr><td>CDL applicant number (if available)</td><td>____________________________________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Training type completed</h2>
+    <ul>
+      <li>☐ <strong>Class A CDL · initial issuance</strong> (theory + BTW)</li>
+      <li>☐ <strong>Class B CDL · initial issuance</strong> (theory + BTW)</li>
+      <li>☐ <strong>Class A or B upgrade</strong> (from Class B to A) (theory + BTW)</li>
+      <li>☐ <strong>Passenger (P) endorsement</strong> (theory only)</li>
+      <li>☐ <strong>School Bus (S) endorsement</strong> (theory only)</li>
+      <li>☐ <strong>Hazardous Materials (H) endorsement</strong> (theory only)</li>
+    </ul>
+    <p>Course type completed: <strong>${escapeHtml(data.courseType || "____________________________________")}</strong></p>
+
+    <h2>III · Training provider information</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:30%">Training Provider name</td><td>${escapeHtml(data.trainingProviderName || "____________________________________")}</td></tr>
+        <tr><td>FMCSA Training Provider Registry ID</td><td>____________________________________</td></tr>
+        <tr><td>Address</td><td>____________________________________</td></tr>
+        <tr><td>Theory training completion date</td><td>${escapeHtml(data.completionDate || "____________")}</td></tr>
+        <tr><td>Behind-the-wheel completion date</td><td>____________</td></tr>
+        <tr><td>Instructor of record</td><td>____________________________________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · Certification</h2>
+    <p>I certify, on behalf of the Training Provider, that the driver listed above has successfully completed the FMCSA-required entry-level driver training curriculum in accordance with 49 CFR Part 380 Subpart F. The completion record has been or will be submitted to the FMCSA Training Provider Registry within 2 business days of completion as required by §380.725.</p>
+
+    <table style="margin-top: 0.3in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Training Provider authorized signature</div></td><td style="width:40%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Printed name + title</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Phone</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">Driver acknowledges receipt: __________________________________ Date: ____________</p>
+    <p class="meta">This certificate satisfies 49 CFR §380.609. The TPR completion record is the authoritative submission; this paper certificate is a courtesy copy. Carrier must verify the TPR record before placing the driver in safety-sensitive duty (§380.611). Retain in the driver's DQ file for duration of employment + 3 years.</p>
+  `,
+});
+
+/* ---- 55. progressive-discipline-matrix · internal carrier policy ---- */
+
+export const progressiveDisciplineMatrix: TemplateFn<{ carrierName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Progressive Discipline Matrix · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Progressive discipline · carrier policy",
+  bodyHTML: `
+    <h1>Progressive discipline matrix · driver safety</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · internal HR + safety policy</p>
+
+    <div class="callout">
+      Progressive discipline is the documented sequence of consequences for repeated safety violations. Without it, your terminations look arbitrary and your CSA-driver-fitness defense collapses. This matrix is a starting template · adapt to your collective-bargaining + state-law context.
+    </div>
+
+    <h2>I · Tier definitions</h2>
+    <table>
+      <thead><tr><th style="width:18%">Tier</th><th>Examples</th><th>First-offense action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tier 1 · Minor</strong></td><td>Late paperwork · single missed pre-trip item · light DVIR omission</td><td>Coaching note in driver file</td></tr>
+        <tr><td><strong>Tier 2 · Moderate</strong></td><td>HOS warning · repeated minor · single CSA roadside violation</td><td>Written warning + retraining</td></tr>
+        <tr><td><strong>Tier 3 · Serious</strong></td><td>OOS roadside · preventable accident · DVIR falsification</td><td>Suspension pending review + retraining + final written</td></tr>
+        <tr><td><strong>Tier 4 · Severe</strong></td><td>HOS falsification (§395.8(e)) · OOS order violation · §383.51 disqualifying offense</td><td>Termination · D&A re-test if applicable</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Escalation by repeat occurrences (rolling 12-month window)</h2>
+    <table>
+      <thead><tr><th style="width:30%">Behavior pattern</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead>
+      <tbody>
+        <tr><td>Tier 1 violation</td><td>Coaching</td><td>Written warning</td><td>Final warning</td><td>Suspension</td></tr>
+        <tr><td>Tier 2 violation</td><td>Written warning</td><td>Final warning</td><td>Suspension</td><td>Termination</td></tr>
+        <tr><td>Tier 3 violation</td><td>Suspension + final</td><td>Termination</td><td>-</td><td>-</td></tr>
+        <tr><td>Tier 4 violation</td><td>Termination</td><td>-</td><td>-</td><td>-</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Mandatory training triggers</h2>
+    <ul>
+      <li><strong>Any HOS violation</strong> · 1-hour refresher training + driver signs off · retain in DQ file</li>
+      <li><strong>Any OOS roadside</strong> · pre-trip refresher (driver-vehicle inspection) + sit with the mechanic on the corrected defect</li>
+      <li><strong>Any preventable accident</strong> · accident-analysis training + dash-cam review with safety</li>
+      <li><strong>Any reasonable-suspicion D&A test</strong> · referral to EAP regardless of result · driver education on §382 program</li>
+      <li><strong>3+ CSA points in any BASIC in 6 months</strong> · structured one-on-one with safety director · documented corrective plan</li>
+    </ul>
+
+    <h2>IV · Documentation requirements (every step)</h2>
+    <ol>
+      <li><strong>Date + time</strong> of the incident</li>
+      <li><strong>Specific behavior</strong> with CFR citation if applicable</li>
+      <li><strong>Action taken</strong> · coaching / warning / suspension / termination</li>
+      <li><strong>Corrective training assigned + completed</strong> · with date + trainer</li>
+      <li><strong>Driver signature</strong> acknowledging the discipline (or witnessed refusal)</li>
+      <li><strong>Supervisor signature</strong> applying the discipline</li>
+      <li><strong>HR sign-off</strong> for any termination · review for ADA, FMLA, state-law protections</li>
+      <li><strong>File retention</strong> · driver file · duration of employment + 3 years · longer in litigation hold</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The matrix protects you legally; the documentation is the lawsuit defense.</strong> "We always do progressive discipline" is meaningless without per-incident records. Build the file for every driver from Day 1.
+    </div>
+  `,
+});
+
+/* ---- 56. safety-fitness-determination-explainer · §385.5 ---- */
+
+export const safetyFitnessDeterminationExplainer: TemplateFn<{ carrierName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Safety Fitness Determination · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "SFD · 49 CFR §385.5 + §385.13",
+  bodyHTML: `
+    <h1>Safety Fitness Determination · how it works</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      The Safety Fitness Determination (SFD) is the FMCSA's formal rating of your carrier's overall safety. There are three: Satisfactory, Conditional, Unsatisfactory. The rating drives insurance, freight tendering, and (at Unsatisfactory) shutdown.
+    </div>
+
+    <h2>I · The three ratings · §385.5</h2>
+    <table>
+      <thead><tr><th style="width:25%">Rating</th><th>What it means</th><th>Operational impact</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Satisfactory</strong></td><td>Sufficient safety management controls in place</td><td>Full operating authority · normal insurance · normal freight</td></tr>
+        <tr><td><strong>Conditional</strong></td><td>Some controls missing or deficient · safety violations identified</td><td>Operating authority continues · insurance rates jump · shippers + brokers see the rating · freight may dry up</td></tr>
+        <tr><td><strong>Unsatisfactory</strong></td><td>Multiple severe deficiencies · public safety risk</td><td>Operating authority revoked within 45-60 days (HM in 45) unless corrected · most carriers shut down</td></tr>
+        <tr><td><strong>Unrated</strong></td><td>New entrants (first 18 months) + no review yet</td><td>Normal authority · pending the New Entrant audit</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · How a rating gets issued · §385.13</h2>
+    <p>FMCSA issues a safety rating after a Compliance Review (CR), which is a deeper audit than a New Entrant audit. CRs are triggered by:</p>
+    <ul>
+      <li>Two or more alerted BASICs on your SMS profile</li>
+      <li>A fatal accident or pattern of serious crashes</li>
+      <li>A complaint or whistleblower report</li>
+      <li>Random selection</li>
+      <li>Failed New Entrant audit</li>
+    </ul>
+
+    <h2>III · The 6 factors investigators evaluate · §385.7</h2>
+    <ol>
+      <li><strong>Adequacy of safety management controls</strong> · do you have written policies, supervisor training, audit procedures</li>
+      <li><strong>Frequency + severity of regulatory violations</strong> · roadside, audit, accident-related</li>
+      <li><strong>Frequency + severity of CMV accidents</strong> · the Crash Indicator BASIC + the accidents themselves</li>
+      <li><strong>Acute + critical violations found during the review</strong> · 16 acute = auto-conditional / unsatisfactory</li>
+      <li><strong>Past patterns of violations</strong> · whether issues have been corrected</li>
+      <li><strong>Operating practices in the BASICs</strong> · Driver Fitness, HOS, Vehicle Maintenance, etc.</li>
+    </ol>
+
+    <h2>IV · If you get a Conditional or Unsatisfactory · what to do</h2>
+    <ol>
+      <li><strong>Read the rating letter</strong> · it lists specific deficiencies + the regulatory cites</li>
+      <li><strong>Request a Safety Audit (SA)</strong> or Corrective Action Plan (CAP) acceptance within 60 days · §385.17</li>
+      <li><strong>Build the CAP</strong> · for each cited deficiency · what changed, who owns it, when it was implemented, what evidence proves it</li>
+      <li><strong>Submit the CAP to FMCSA</strong> · they accept or reject · accepted means you get a follow-up review chance</li>
+      <li><strong>For Unsatisfactory</strong> · file a petition for administrative review or §385.15 · while doing so, fix everything that's fixable · 45 days for HM, 60 for general freight · then operating authority is revoked</li>
+      <li><strong>If revoked</strong> · you can re-apply for operating authority after demonstrating you've fixed the issues · but it takes 6-18 months</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The SFD is the single most important number in your carrier's life.</strong> Insurance underwriters look at it before they price. Brokers look at it before they tender. Shippers look at it before they list you. A Conditional rating cuts revenue access by 20-50%; Unsatisfactory ends the business.
+    </div>
+  `,
+});
+
+/* ---- 57. shipping-paper-template · §172.201 ---- */
+
+export const shippingPaperTemplate: TemplateFn<{ carrierName?: string; shipperName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Hazmat Shipping Paper · template · ${data.shipperName || "Shipper"}`,
+  headerSubtitle: "Hazmat shipping paper · 49 CFR §172.201",
+  bodyHTML: `
+    <h1>Hazmat shipping paper · template</h1>
+    <p class="meta">${escapeHtml(data.shipperName || "Shipper")} · carrier ${escapeHtml(data.carrierName || "Sample Carrier")}</p>
+
+    <div class="callout">
+      §172.201 + §172.202 require specific information on the shipping paper for any hazmat shipment. This template includes every mandatory field. Missing any field is a violation; misordered fields can also be a violation.
+    </div>
+
+    <h2>I · Header</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:25%">Date prepared</td><td>____________</td><td>Shipment number</td><td>____________</td></tr>
+        <tr><td>Shipper name</td><td>____________________________________</td><td>Shipper address</td><td>____________</td></tr>
+        <tr><td>Consignee name</td><td>____________________________________</td><td>Consignee address</td><td>____________</td></tr>
+        <tr><td>Carrier name + USDOT #</td><td>${escapeHtml(data.carrierName || "____________")} · USDOT ____________</td><td>Driver name + CDL</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Hazmat description (in this required order · §172.202(b))</h2>
+    <p>Each line item must follow this exact sequence:</p>
+    <ol>
+      <li><strong>UN/NA identification number</strong> (e.g., UN1203)</li>
+      <li><strong>Proper shipping name</strong> (e.g., Gasoline)</li>
+      <li><strong>Hazard class or division</strong> (e.g., 3)</li>
+      <li><strong>Packing group (if applicable)</strong> in Roman numerals (e.g., II)</li>
+      <li><strong>Total quantity by mass or volume</strong> (e.g., 250 gallons)</li>
+      <li><strong>Number + type of packages</strong> (e.g., 1 cargo tank)</li>
+    </ol>
+
+    <table>
+      <thead><tr><th style="width:12%">UN/NA #</th><th style="width:30%">Proper shipping name</th><th style="width:10%">Class</th><th style="width:10%">PG</th><th style="width:18%">Quantity</th><th style="width:20%">Packages</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Emergency response phone number · §172.604</h2>
+    <p>Emergency response phone number (24-hour, monitored, with subject-matter knowledge):</p>
+    <p style="border-bottom: 1px solid #94A3B8; font-size: 14pt; padding-bottom: 8px;">_______________________________________________________</p>
+    <p class="meta">Person or organization providing 24-hour service (CHEMTREC, INFOTRAC, or shipper-direct):</p>
+    <p style="border-bottom: 1px solid #94A3B8; padding-bottom: 4px;">_______________________________________________________</p>
+
+    <h2>IV · Shipper's certification · §172.204</h2>
+    <p>"This is to certify that the above-named materials are properly classified, described, packaged, marked, and labeled, and are in proper condition for transportation according to the applicable regulations of the Department of Transportation."</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Shipper signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Printed name + title</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Hazmat employee ID</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">Carrier retains 2 years (§172.201(e)). Driver carries within reach in the cab while in transit (§177.817).</p>
+  `,
+});
+
+/* ---- 58. emergency-response-info-card · §172.602 ---- */
+
+export const emergencyResponseInfoCard: TemplateFn<{ carrierName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Hazmat Emergency Response Info Card · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Hazmat ERG quick card · 49 CFR §172.602",
+  bodyHTML: `
+    <h1>Hazmat emergency response · cab quick card</h1>
+    <p class="meta">For drivers of <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · keep on the driver-side sun visor</p>
+
+    <div class="callout">
+      §172.602 requires drivers transporting hazmat to have emergency-response information within immediate reach. The shipping paper + ERG together satisfy this. This card is the at-a-glance backup · use until ERG can be referenced.
+    </div>
+
+    <h2>I · The 4 phone numbers that matter</h2>
+    <table>
+      <thead><tr><th style="width:35%">Number</th><th>When to call</th></tr></thead>
+      <tbody>
+        <tr><td><strong>911</strong></td><td>Any incident with injury · fire · release · public exposure</td></tr>
+        <tr><td><strong>CHEMTREC: 1-800-424-9300</strong></td><td>24-hour hazmat response advice · if shipping paper doesn't have a number</td></tr>
+        <tr><td><strong>National Response Center: 1-800-424-8802</strong></td><td>For §171.15 reportable incidents · injury, evacuation, road closure, fire, radioactive, marine pollutant</td></tr>
+        <tr><td><strong>Carrier dispatch + safety</strong></td><td>Anytime you call 911 or CHEMTREC · they need to know + coordinate</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · ERG color sections (orange book)</h2>
+    <ul>
+      <li><strong>White section</strong> · instructions on using the ERG · table of contents</li>
+      <li><strong>Yellow section</strong> · lookup by UN/NA number → guide number</li>
+      <li><strong>Blue section</strong> · lookup by chemical name → guide number</li>
+      <li><strong>Orange section</strong> · the actual response guides (3-digit guide numbers · 111-174 + special)</li>
+      <li><strong>Green section</strong> · table of initial isolation + protective action distances for toxic-inhalation-hazard materials</li>
+    </ul>
+
+    <h2>III · The 4 minutes after a release</h2>
+    <ol>
+      <li><strong>Minute 1</strong> · move yourself + bystanders upwind, uphill, 100+ ft away</li>
+      <li><strong>Minute 2</strong> · call 911 · location, UN number, hazard class, total quantity, weather, injuries</li>
+      <li><strong>Minute 3</strong> · call CHEMTREC or shipping-paper emergency number · they coordinate with responders</li>
+      <li><strong>Minute 4</strong> · call carrier dispatch · they trigger insurance, legal, follow-up reporting</li>
+    </ol>
+
+    <h2>IV · What to hand the incident commander</h2>
+    <ul>
+      <li><strong>Shipping paper</strong> · the complete document from the cab</li>
+      <li><strong>ERG</strong> · the orange book · they'll use it on scene</li>
+      <li><strong>Your CDL + hazmat endorsement</strong></li>
+      <li><strong>The carrier's 24-hour emergency contact</strong> · phone + name of dispatcher</li>
+      <li><strong>Approximate quantity released</strong> · vs total onboard</li>
+      <li><strong>Anything you saw</strong> · cause, leak point, color of vapor, smell · without speculating</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Stay with the truck if it's safe</strong> · responders need you to identify cargo + answer technical questions. If you must evacuate, leave the shipping paper + ERG on the dash where it's visible from outside.
+    </div>
+  `,
+});
+
+/* ---- 59. random-pool-quarterly-report · §382.305 + §382.403 ---- */
+
+export const randomPoolQuarterlyReport: TemplateFn<{ carrierName?: string; quarter?: string; year?: string }> = (data) => ({
+  version: "1.0",
+  title: `Random Pool Quarterly Report · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Random pool quarterly · 49 CFR §382.305 + §382.403",
+  bodyHTML: `
+    <h1>Random testing pool · quarterly report</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · quarter <strong>${escapeHtml(data.quarter || "____________")} ${escapeHtml(data.year || "____________")}</strong></p>
+
+    <div class="callout">
+      §382.305 requires evenly-distributed random selections meeting the annual rate (50% drug · 10% alcohol of the average driver count). This quarterly report demonstrates the program is operating to plan. Generated once per quarter · filed with the C-TPA contract + audit-export bundle.
+    </div>
+
+    <h2>I · Pool composition</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:40%">Average driver count this quarter</td><td>____________</td></tr>
+        <tr><td>Drivers added to pool this quarter</td><td>____________</td></tr>
+        <tr><td>Drivers removed (term, role change)</td><td>____________</td></tr>
+        <tr><td>Drivers in pool at quarter-end</td><td>____________</td></tr>
+        <tr><td>C-TPA managing the pool (if applicable)</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Quarterly selection + completion</h2>
+    <table>
+      <thead><tr><th>Month</th><th>Drug selections</th><th>Drug tested</th><th>Alcohol selections</th><th>Alcohol tested</th></tr></thead>
+      <tbody>
+        <tr><td>Month 1</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Month 2</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Month 3</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td><strong>Quarter total</strong></td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Rate-to-plan</h2>
+    <p>FMCSA rates (current period):</p>
+    <ul>
+      <li><strong>Drug:</strong> 50% of average driver count tested per year · target this quarter = 12.5% of pool</li>
+      <li><strong>Alcohol:</strong> 10% of average driver count tested per year · target this quarter = 2.5% of pool</li>
+    </ul>
+    <table>
+      <tbody>
+        <tr><td style="width:40%">Drug tests this quarter</td><td>____________</td><td>% of pool</td><td>____________ %</td></tr>
+        <tr><td>Alcohol tests this quarter</td><td>____________</td><td>% of pool</td><td>____________ %</td></tr>
+        <tr><td>YTD drug %</td><td>____________ %</td><td>YTD alcohol %</td><td>____________ %</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · Results summary</h2>
+    <table>
+      <thead><tr><th>Result type</th><th>Drug</th><th>Alcohol</th></tr></thead>
+      <tbody>
+        <tr><td>Negative</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Positive (verified by MRO)</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Refusal</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Cancelled / invalid</td><td>____________</td><td>____________</td></tr>
+        <tr><td>Reported to Clearinghouse within 3 business days</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>V · Selection method certification</h2>
+    <p>Random selections were made using a scientifically valid random number generator. Selection lists are retained per §382.401(b)(3) for 2 years. The pool roster reflects all CDL drivers performing safety-sensitive functions for the carrier this quarter.</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">DER (Designated Employer Rep) signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">Retain 2 years per §382.401(b)(3). Roll up into annual MIS report (§382.403) when requested.</p>
+  `,
+});
+
+/* ---- 60. supervisor-reasonable-suspicion-training · §382.603 ---- */
+
+export const supervisorReasonableSuspicionTraining: TemplateFn<{ carrierName?: string; supervisorName?: string; trainingDate?: string }> = (data) => ({
+  version: "1.0",
+  title: `Supervisor Reasonable-Suspicion Training · ${data.supervisorName || "Sample Supervisor"}`,
+  headerSubtitle: "Reasonable-suspicion training · 49 CFR §382.603",
+  bodyHTML: `
+    <h1>Supervisor reasonable-suspicion training · completion record</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.supervisorName || "Sample Supervisor")}</strong> · training completed <strong>${escapeHtml(data.trainingDate || "____________")}</strong></p>
+
+    <div class="callout">
+      §382.603 requires every supervisor of CDL drivers to receive at least 60 minutes of training on the physical, behavioral, and performance indicators of probable drug use, plus 60 minutes on the indicators of probable alcohol misuse · before they can make a reasonable-suspicion test call.
+    </div>
+
+    <h2>I · Drug indicators (60 min content)</h2>
+    <ul>
+      <li><strong>Physical indicators</strong> · pupils dilated or constricted · eyes red or glassy · slurred speech · unsteady gait · pale or flushed complexion · sweating or chills · runny nose · pinpoint pupils · needle marks</li>
+      <li><strong>Behavioral indicators</strong> · paranoia · agitation · euphoria · withdrawn · talkative or hyperactive · suspicious behavior · violent outbursts · mood swings · inappropriate laughter · hallucinations</li>
+      <li><strong>Performance indicators</strong> · missed deadlines · errors of judgment · forgetting instructions · poor concentration · unexplained accidents · pattern of tardiness or absence · falling asleep on duty</li>
+      <li><strong>By drug class</strong> · CNS depressants · CNS stimulants · hallucinogens · narcotics · cannabis · inhalants · designer drugs</li>
+    </ul>
+
+    <h2>II · Alcohol indicators (60 min content)</h2>
+    <ul>
+      <li><strong>Physical</strong> · smell of alcohol on breath · slurred or thick speech · bloodshot eyes · unsteady walk · hand tremors · flushed face</li>
+      <li><strong>Behavioral</strong> · belligerence · over-friendliness · emotional outbursts · sleepiness · poor coordination</li>
+      <li><strong>Performance</strong> · poor decisions · slow reaction time · forgetting routine tasks · vehicle damage · sudden change in performance</li>
+    </ul>
+
+    <h2>III · The supervisor's decision process</h2>
+    <ol>
+      <li><strong>Observe</strong> · the indicators must be observable in the moment, not relayed second-hand</li>
+      <li><strong>Document immediately</strong> · note specific behaviors with timestamps · not "he seemed off"</li>
+      <li><strong>Have a second witness if possible</strong> · increases defensibility</li>
+      <li><strong>Direct the driver to the test</strong> · "You're being directed to a reasonable-suspicion drug + alcohol test · do you have any questions?"</li>
+      <li><strong>Transport the driver</strong> · do NOT allow them to drive themselves · DOT-certified collection site</li>
+      <li><strong>Complete the Reasonable-Suspicion Determination Form</strong> · before transport · for the driver's file</li>
+      <li><strong>If driver refuses</strong> · document the refusal · report to Clearinghouse within 3 business days · same consequence as a positive</li>
+    </ol>
+
+    <h2>IV · Certification</h2>
+    <p>I, the undersigned, certify that I have completed at least 60 minutes of training on the indicators of probable drug use AND 60 minutes of training on the indicators of probable alcohol misuse, as required by 49 CFR §382.603, on the date shown. The training covered the physical, behavioral, speech, and performance indicators required by §382.603(b).</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Supervisor signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Trainer signature + name</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Training method (in-person · LMS · blended)</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">Retain for as long as supervisor performs the role + 2 years after (§382.603(c)). One-time training under §382.603 is sufficient unless the supervisor changes roles or the regulations are amended.</p>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -3381,6 +3947,15 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "annual-violation-self-cert": annualViolationSelfCert as TemplateFn,
   "road-test-certificate": roadTestCertificate as TemplateFn,
   "driver-application-form": driverApplicationForm as TemplateFn,
+  "spill-response-procedure": spillResponseProcedure as TemplateFn,
+  "personal-conveyance-rules": personalConveyanceRules as TemplateFn,
+  "eldt-certificate": eldtCertificate as TemplateFn,
+  "progressive-discipline-matrix": progressiveDisciplineMatrix as TemplateFn,
+  "safety-fitness-determination-explainer": safetyFitnessDeterminationExplainer as TemplateFn,
+  "shipping-paper-template": shippingPaperTemplate as TemplateFn,
+  "emergency-response-info-card": emergencyResponseInfoCard as TemplateFn,
+  "random-pool-quarterly-report": randomPoolQuarterlyReport as TemplateFn,
+  "supervisor-reasonable-suspicion-training": supervisorReasonableSuspicionTraining as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
