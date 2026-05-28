@@ -881,6 +881,421 @@ export const hazmatTrainingProviderReference: TemplateFn<{ carrierName?: string;
 });
 
 /* ============================================================
+   BATCH 4 · D&A · DQF · FCRA · MVR · IFTA · Inspections
+   ============================================================ */
+
+/* ---- 13. da-driver-guide · 49 CFR Part 382 ---- */
+
+export const daDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Drug & Alcohol Testing · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "D&A · driver reference · 49 CFR Part 382",
+  bodyHTML: `
+    <h1>Drug & Alcohol testing · driver guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep with your CDL paperwork</p>
+
+    <div class="callout">
+      As a CDL driver, you're subject to DOT drug + alcohol testing under 49 CFR Part 382 and 49 CFR Part 40. This guide explains when you'll be tested, what's tested for, and what counts as a refusal.
+    </div>
+
+    <h2>I · The five situations you can be tested</h2>
+    <table>
+      <thead><tr><th style="width:28%">Type</th><th>When</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-employment</td><td>Before you perform a safety-sensitive function for a new employer · drug test only</td><td><span class="cfr">§382.301</span></td></tr>
+        <tr><td>Random</td><td>Unannounced · selected by computer from the random pool · 50% drug / 10% alcohol annual rate (FMCSA-set)</td><td><span class="cfr">§382.305</span></td></tr>
+        <tr><td>Post-accident</td><td>If accident meets §382.303 thresholds (fatality · injury treated away from scene with citation · disabling damage with citation)</td><td><span class="cfr">§382.303</span></td></tr>
+        <tr><td>Reasonable suspicion</td><td>A trained supervisor observes signs · documents them · sends you for a test</td><td><span class="cfr">§382.307</span></td></tr>
+        <tr><td>Return-to-duty + follow-up</td><td>After a SAP-cleared violation · negative RTD test required · then 6+ unannounced tests in 12 months</td><td><span class="cfr">§382.309, §40.305</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · What's tested for</h2>
+    <ul>
+      <li><strong>Drug panel · 5 substances:</strong> marijuana (THC) · cocaine · opiates (incl. heroin, codeine, morphine, hydrocodone, oxycodone) · amphetamines (incl. methamphetamine, MDMA) · PCP</li>
+      <li><strong>Alcohol:</strong> any concentration ≥ 0.02 BAC pulls you off safety-sensitive duty for 24 hr · ≥ 0.04 BAC is a violation reported to the Clearinghouse</li>
+      <li><strong>Specimen:</strong> oral fluid was added as an option in 2023 · most carriers still use urine</li>
+    </ul>
+
+    <h2>III · What counts as a refusal</h2>
+    <ol>
+      <li><strong>Failing to appear</strong> at the collection site within a reasonable time after notification</li>
+      <li><strong>Leaving the collection site</strong> before the testing process is complete</li>
+      <li><strong>Failing to provide</strong> a urine specimen, oral fluid, or breath sample without a documented medical reason</li>
+      <li><strong>Adulterated or substituted specimen</strong> · MRO determines from lab results</li>
+      <li><strong>Refusing to take a second test</strong> the employer or collector directs</li>
+      <li><strong>Failing to cooperate</strong> with any part of the testing process (e.g., refusing to empty pockets, refusing observed collection when required)</li>
+    </ol>
+
+    <div class="callout">
+      <strong>A refusal is treated the same as a positive test.</strong> The violation goes into the Clearinghouse, you're removed from safety-sensitive duty, and you can't drive a CMV anywhere in the US until you complete the SAP return-to-duty process.
+    </div>
+
+    <h2>IV · Your rights at the collection site</h2>
+    <ul>
+      <li><strong>Privacy</strong> · the collector observes your behavior, not the act of voiding (except in directly-observed cases per §40.67)</li>
+      <li><strong>Split specimen</strong> · for drug tests, the sample is split. If your primary is positive, you have 72 hours to request the split tested at a different lab</li>
+      <li><strong>MRO contact</strong> · if you have a legitimate medical explanation (prescription), you'll be contacted by the Medical Review Officer · don't volunteer that info at the collection site</li>
+      <li><strong>Owe nothing in cash</strong> · the employer pays for the test; you should never be asked to pay at the collection site</li>
+    </ul>
+  `,
+});
+
+/* ---- 14. da-employer-playbook · 49 CFR Part 382 + Part 40 ---- */
+
+export const daEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `D&A Testing Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "D&A · employer playbook · 49 CFR Part 382",
+  bodyHTML: `
+    <h1>D&A testing · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · operating duties under Part 382 + Part 40</p>
+
+    <div class="callout">
+      Every employer of CDL drivers must run a DOT-compliant D&A program: written policy, supervisor training, random pool, post-accident triggers, MRO + SAP relationships, and Clearinghouse reporting. Miss any pillar and the whole program is at risk in an audit.
+    </div>
+
+    <h2>I · The program pillars</h2>
+    <table>
+      <thead><tr><th style="width:30%">Pillar</th><th>What it looks like</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Written D&A policy</td><td>Given to every driver at hire · driver signs receipt</td><td><span class="cfr">§382.601</span></td></tr>
+        <tr><td>Supervisor training</td><td>60 min drug + 60 min alcohol · before they can make reasonable-suspicion calls</td><td><span class="cfr">§382.603</span></td></tr>
+        <tr><td>Random pool</td><td>50% drug / 10% alcohol minimum annual rates · evenly distributed across the year · selection process documented</td><td><span class="cfr">§382.305</span></td></tr>
+        <tr><td>Post-accident testing</td><td>Decision tree applied at every qualifying accident · alcohol within 8 hr · drug within 32 hr</td><td><span class="cfr">§382.303</span></td></tr>
+        <tr><td>MRO relationship</td><td>Medical Review Officer reviews every drug test result · contacts driver re: prescriptions</td><td><span class="cfr">§40 Subpart G</span></td></tr>
+        <tr><td>SAP relationship</td><td>Substance Abuse Professional for any RTD process · you don't need one on retainer, but know where to refer</td><td><span class="cfr">§40 Subpart O</span></td></tr>
+        <tr><td>Clearinghouse reporting</td><td>Violations reported within 3 business days · pre-employment + annual queries</td><td><span class="cfr">§382.701, §382.705</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Post-accident decision tree</h2>
+    <ol>
+      <li><strong>Fatality?</strong> → Test both drug + alcohol regardless of who is at fault</li>
+      <li><strong>Injury treated away from scene + driver issued citation?</strong> → Test both</li>
+      <li><strong>Disabling damage to any vehicle + driver issued citation?</strong> → Test both</li>
+      <li><strong>None of the above?</strong> → No DOT test required (you may still test under company policy)</li>
+    </ol>
+    <p class="meta">Alcohol test must be administered within <strong>8 hours</strong>; drug test within <strong>32 hours</strong>. Document any delay + reason · §382.303(d).</p>
+
+    <h2>III · Random testing math</h2>
+    <ul>
+      <li><strong>Pool roster</strong> · everyone subject to Part 382 (CDL holders in safety-sensitive functions)</li>
+      <li><strong>Selection</strong> · scientifically valid random method · most carriers use the C-TPA's selection engine or a vetted tool</li>
+      <li><strong>Annual rate</strong> · 50% of average driver count tested for drugs each year, 10% for alcohol (FMCSA can change these annually)</li>
+      <li><strong>Distribution</strong> · selections must be evenly spread across the year · don't dump 50% in December</li>
+      <li><strong>Notification</strong> · driver tested immediately after notification · no delay, no "tomorrow"</li>
+    </ul>
+
+    <h2>IV · Recordkeeping</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Keep for</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Negative test results</td><td>1 year</td><td><span class="cfr">§382.401(b)(2)</span></td></tr>
+        <tr><td>Positive results + refusals + violations</td><td>5 years</td><td><span class="cfr">§382.401(b)(1)</span></td></tr>
+        <tr><td>Random selection records</td><td>2 years</td><td><span class="cfr">§382.401(b)(3)</span></td></tr>
+        <tr><td>Supervisor training records</td><td>While supervisor performs the role + 2 years after</td><td><span class="cfr">§382.603</span></td></tr>
+        <tr><td>Policy receipt signatures</td><td>While driver employed + 3 years</td><td><span class="cfr">§382.601(d)</span></td></tr>
+        <tr><td>MIS data (annual MIS report)</td><td>5 years · submit by Mar 15 if requested</td><td><span class="cfr">§382.403</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>The most common audit finding:</strong> the carrier's random pool wasn't actually random · selections favored the same drivers or skipped a quarter. Document your selection method end-to-end · the C-TPA's report is your defense.
+    </div>
+  `,
+});
+
+/* ---- 15. dqf-driver-index · 49 CFR §391.51 ---- */
+
+export const dqfDriverIndex: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `DQ File Index · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Driver Qualification File · 49 CFR §391.51",
+  bodyHTML: `
+    <h1>Driver Qualification File · index</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · the 12 documents §391.51 requires</p>
+
+    <div class="callout">
+      §391.51 says every motor carrier "shall maintain a driver qualification file for each driver it employs." Below is the master index. Missing any single item is a citation. Missing patterns across multiple drivers is an unsatisfactory safety rating.
+    </div>
+
+    <h2>I · The 12 required documents</h2>
+    <table>
+      <thead><tr><th style="width:5%">#</th><th>Document</th><th>CFR</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Driver's application for employment (full §391.21 long-form)</td><td><span class="cfr">§391.21</span></td><td>Duration of employment + 3 yr</td></tr>
+        <tr><td>2</td><td>Initial state MVR (within 30 days of hire)</td><td><span class="cfr">§391.23(a)(1)</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>3</td><td>Previous employer safety performance history inquiries (DOT employment + D&A · 3 years back)</td><td><span class="cfr">§391.23(d)</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>4</td><td>Road test certificate OR equivalent (CDL on file with proper class/endorsements)</td><td><span class="cfr">§391.31 / §391.33</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>5</td><td>Medical examiner's certificate (current · max 24 mo)</td><td><span class="cfr">§391.43</span></td><td>Current + 3 yr after replacement</td></tr>
+        <tr><td>6</td><td>National Registry verification (NRCME ID + date verified)</td><td><span class="cfr">§391.23(m)</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>7</td><td>Annual driver's review of driving record (§391.25 review note)</td><td><span class="cfr">§391.25(c)</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>8</td><td>Annual list of violations (driver self-cert per §391.27) OR annual MVR substitute</td><td><span class="cfr">§391.27</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>9</td><td>Annual MVR (one per year for every state where licensed in last 12 mo)</td><td><span class="cfr">§391.25(a)</span></td><td>Duration + 3 yr</td></tr>
+        <tr><td>10</td><td>Clearinghouse pre-employment full query + driver consent</td><td><span class="cfr">§382.701(a)</span></td><td>3 yr</td></tr>
+        <tr><td>11</td><td>Clearinghouse annual limited query consent (general written) + each query result</td><td><span class="cfr">§382.701(b)</span></td><td>3 yr</td></tr>
+        <tr><td>12</td><td>Entry-level driver training certificate (for new CDL holders post 02/07/2022)</td><td><span class="cfr">§380.609</span></td><td>Duration + 3 yr</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · When each annual task fires</h2>
+    <ul>
+      <li><strong>Annual MVR</strong> · pull one full state MVR every 12 months for every state where the driver was licensed in the past year</li>
+      <li><strong>Annual driver's review</strong> · supervisor sits with the driver, reviews the MVR + safety performance, signs a §391.25(c) note</li>
+      <li><strong>Annual list of violations</strong> · driver self-certifies all moving violations from the past 12 months on a §391.27 form</li>
+      <li><strong>Annual limited Clearinghouse query</strong> · one per driver per year (already has driver's general consent on file)</li>
+    </ul>
+
+    <h2>III · Common audit findings (the gotchas)</h2>
+    <ol>
+      <li><strong>Medical card expired</strong> · driver is still driving · this is an immediate out-of-service for the driver and a citation for you</li>
+      <li><strong>No National Registry verification</strong> · the medical card alone isn't enough · §391.23(m) requires you verify the examiner is registered + record the date you did so</li>
+      <li><strong>Missing previous-employer inquiries</strong> · you must contact each DOT employer from the past 3 years for safety performance + D&A history · keep the actual responses, not just an attempt log</li>
+      <li><strong>Annual review skipped</strong> · easy to fall behind on · most fleets get cited here</li>
+      <li><strong>No ELDT certificate</strong> · for drivers who got their CDL after 02/07/2022 · this lives in the public registry, but you still need a copy in the DQ file</li>
+    </ol>
+
+    <div class="callout">
+      The X3 Compass DQ tracker pulls every status into one view with traffic-light statuses. If a row is yellow or red, click into it to see what's missing + the regulatory cite. Audit-export bundles all 12 documents into a single PDF per driver.
+    </div>
+  `,
+});
+
+/* ---- 16. fcra-background-check-disclosure ---- */
+
+export const fcraBackgroundCheckDisclosure: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `FCRA Disclosure & Authorization · ${data.driverName || "Applicant"}`,
+  headerSubtitle: "FCRA · pre-screening disclosure · 15 U.S.C. §1681b(b)(2)(A)",
+  bodyHTML: `
+    <h1>Disclosure regarding background investigation</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Applicant")}</strong></p>
+
+    <div class="callout">
+      This is the federally-required stand-alone disclosure under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681b(b)(2)(A). It must be presented as its own document · not part of an application packet or employment agreement.
+    </div>
+
+    <h2>Disclosure</h2>
+    <p><strong>${escapeHtml(data.carrierName || "The Company")}</strong> ("the Company") may obtain information about you from a consumer reporting agency for employment purposes. Thus, you may be the subject of a "consumer report" and/or an "investigative consumer report" which may include information about your character, general reputation, personal characteristics, and/or mode of living, and which can involve personal interviews with sources such as your neighbors, friends, or associates. These reports may contain information regarding your criminal history, social security verification, motor vehicle records ("driving records"), verification of your education or employment history, or other background checks.</p>
+
+    <p>You have the right, upon written request made within a reasonable time, to request whether a consumer report has been run about you, and disclosure of the nature and scope of any investigative consumer report. The Company will provide you with the name and contact information of any consumer reporting agency that has prepared a report about you, along with a copy of the FCRA's "Summary of Your Rights Under the Fair Credit Reporting Act."</p>
+
+    <h2>Authorization</h2>
+    <p>I acknowledge receipt of the above disclosure regarding background investigation and the FCRA Summary of Rights and certify that I have read and understand both documents.</p>
+
+    <p>I hereby authorize <strong>${escapeHtml(data.carrierName || "the Company")}</strong> and its designated agents and representatives to conduct a comprehensive review of my background through a consumer report and/or an investigative consumer report. I understand that the scope of the consumer report/investigative consumer report may include, but is not limited to, the following areas: verification of social security number; current and previous residences; employment history including all reasons for termination; education; references; credit history and reports as permissible; criminal history records from any criminal justice agency in any or all federal, state, county jurisdictions; driving records, birth records, and any other public records.</p>
+
+    <p>I further authorize any individual, company, firm, corporation, or public agency (including the Social Security Administration and law enforcement agencies) to divulge any and all information, verbal or written, pertaining to me, to <strong>${escapeHtml(data.carrierName || "the Company")}</strong> or its agents.</p>
+
+    <p>This authorization shall remain valid for the duration of my employment with <strong>${escapeHtml(data.carrierName || "the Company")}</strong> unless revoked by me in writing.</p>
+
+    <table style="margin-top: 0.4in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Applicant signature</div></td><td style="width:40%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Printed name</div></td><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Social Security Number (last 4)</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.3in;">This document is provided for compliance with 15 U.S.C. §1681b(b)(2)(A). The full Summary of Rights under the Fair Credit Reporting Act is provided separately.</p>
+  `,
+});
+
+/* ---- 17. mvr-explainer · 49 CFR §391.25 + §383.51 ---- */
+
+export const mvrExplainer: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `MVR Explainer · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Motor Vehicle Record · driver + carrier reference",
+  bodyHTML: `
+    <h1>Motor Vehicle Record · what's on it, what matters</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      Your MVR is the state DMV's record of every traffic violation, accident, license action, and CDL endorsement attached to your driving history. Carriers pull it before they hire you and at least annually after that. Some pull it monthly via continuous monitoring · this guide explains both modes.
+    </div>
+
+    <h2>I · What an MVR contains</h2>
+    <ul>
+      <li><strong>License status</strong> · valid / suspended / revoked / disqualified · current as of the pull date</li>
+      <li><strong>License class + endorsements</strong> · CDL-A / CDL-B / CDL-C · H (hazmat), N (tanker), T (doubles/triples), P (passenger), S (school bus)</li>
+      <li><strong>Restrictions</strong> · automatic-only, no air-brakes, intrastate-only, corrective lenses, etc.</li>
+      <li><strong>Convictions</strong> · moving violations from the past 3-5 years depending on state · speeding, reckless, DUI, etc.</li>
+      <li><strong>Accidents</strong> · reportable accidents · which state reports varies</li>
+      <li><strong>License actions</strong> · any prior suspension, revocation, or disqualification (state and federal)</li>
+    </ul>
+
+    <h2>II · How often a carrier pulls it</h2>
+    <table>
+      <thead><tr><th style="width:30%">Mode</th><th>Cadence</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-employment MVR</td><td>Within 30 days of hire from every state the driver was licensed in over the past 3 years</td><td><span class="cfr">§391.23(a)(1)</span></td></tr>
+        <tr><td>Annual MVR (minimum)</td><td>Once per year · every state where the driver was licensed in the past 12 months</td><td><span class="cfr">§391.25(a)</span></td></tr>
+        <tr><td>Continuous monitoring (optional but recommended)</td><td>Real-time alerts whenever a new violation or status change posts · vendor-managed</td><td>Industry best practice</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · The disqualifying offenses (§383.51 Table 1)</h2>
+    <p><strong>Major offenses</strong> (1st conviction = 1-year disqualification · 2nd = lifetime):</p>
+    <ul>
+      <li>BAC ≥ 0.04 in a CMV</li>
+      <li>BAC ≥ 0.08 in a non-CMV (when CMV operator)</li>
+      <li>Refusing alcohol test</li>
+      <li>Leaving the scene of an accident</li>
+      <li>Using a CMV in commission of a felony</li>
+      <li>Driving CMV with revoked / suspended / canceled CDL</li>
+      <li>Causing a fatality through negligent operation</li>
+    </ul>
+
+    <p><strong>Serious traffic violations</strong> (3 in 3 years = 120-day disqualification · 2 = 60-day):</p>
+    <ul>
+      <li>Excessive speeding (15+ mph over)</li>
+      <li>Reckless driving</li>
+      <li>Improper / erratic lane change</li>
+      <li>Following too closely</li>
+      <li>Texting while driving in a CMV</li>
+      <li>Using a hand-held mobile in a CMV</li>
+      <li>Driving CMV without CDL / without proper class / without endorsement</li>
+    </ul>
+
+    <h2>IV · What the carrier does with what they find</h2>
+    <ol>
+      <li><strong>Initial MVR</strong> · evaluated against the carrier's hiring standard · disqualifying offenses bar employment</li>
+      <li><strong>Annual review</strong> · supervisor sits with the driver, reviews the MVR, signs a §391.25(c) note · placed in DQ file</li>
+      <li><strong>New violation appears</strong> · carrier evaluates against their progressive discipline matrix · counseling, retraining, suspension, or termination depending on severity</li>
+      <li><strong>License action</strong> · suspension or revocation is immediate removal from safety-sensitive duty · carrier must verify reinstatement before driver returns</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Notify your carrier within 30 days of any conviction</strong> in any state, even if the violation happened in your personal vehicle · §383.31. Failure to notify is itself a disqualifying offense.
+    </div>
+  `,
+});
+
+/* ---- 18. ifta-quarterly-walkthrough · IFTA Articles of Agreement ---- */
+
+export const iftaQuarterlyWalkthrough: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `IFTA Quarterly Filing · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "IFTA · quarterly fuel tax walkthrough",
+  bodyHTML: `
+    <h1>IFTA quarterly filing · walkthrough</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · IFTA fuel-tax reporting</p>
+
+    <div class="callout">
+      IFTA (International Fuel Tax Agreement) lets you file one fuel-tax return covering all 48 contiguous US states + 10 Canadian provinces. You file in your base jurisdiction; that jurisdiction redistributes the tax to the others based on the miles you drove and fuel you bought in each. Miss a filing and you pay penalties + interest in every jurisdiction.
+    </div>
+
+    <h2>I · The four deadlines</h2>
+    <table>
+      <thead><tr><th style="width:25%">Quarter</th><th>Covers</th><th>Due by</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>Jan 1 – Mar 31</td><td>April 30</td></tr>
+        <tr><td>Q2</td><td>Apr 1 – Jun 30</td><td>July 31</td></tr>
+        <tr><td>Q3</td><td>Jul 1 – Sep 30</td><td>October 31</td></tr>
+        <tr><td>Q4</td><td>Oct 1 – Dec 31</td><td>January 31 (following year)</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">If a due date falls on a weekend or holiday, the deadline moves to the next business day. File even if you had zero IFTA miles in a quarter ("zero return") to avoid penalty.</p>
+
+    <h2>II · What you need to file</h2>
+    <ol>
+      <li><strong>Total miles driven</strong> · all jurisdictions combined, every IFTA-qualifying vehicle</li>
+      <li><strong>Miles per jurisdiction</strong> · for every state / province you operated in</li>
+      <li><strong>Total gallons of fuel purchased</strong> · all jurisdictions combined, by fuel type (diesel, gasoline, etc.)</li>
+      <li><strong>Gallons per jurisdiction</strong> · proof of purchase via fuel receipt or fuel-card report</li>
+      <li><strong>Fleet MPG for the quarter</strong> · total miles ÷ total gallons (calculated automatically by your IFTA software)</li>
+    </ol>
+
+    <h2>III · How the math works (simplified)</h2>
+    <ol>
+      <li><strong>Compute fleet MPG</strong> for the quarter (total miles ÷ total gallons)</li>
+      <li><strong>For each jurisdiction:</strong> miles driven ÷ fleet MPG = gallons "consumed" in that jurisdiction</li>
+      <li><strong>Tax owed</strong> in each jurisdiction = consumed gallons × that jurisdiction's tax rate</li>
+      <li><strong>Tax already paid</strong> at the pump in that jurisdiction = gallons purchased there × that rate</li>
+      <li><strong>Net owed / refunded</strong> = tax owed - tax already paid (per jurisdiction)</li>
+      <li><strong>Sum across all jurisdictions</strong> = your IFTA net for the quarter</li>
+    </ol>
+
+    <h2>IV · What records to keep</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Keep for</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Individual Vehicle Mileage Records (IVMRs)</td><td>4 years</td><td>Per-jurisdiction mileage backup · audits go back this far</td></tr>
+        <tr><td>Fuel receipts (every purchase)</td><td>4 years</td><td>Tax-paid credit proof · without it you owe the full tax with no credit</td></tr>
+        <tr><td>Fuel card / GPS reports</td><td>4 years</td><td>Cross-check against receipts + IVMRs</td></tr>
+        <tr><td>Quarterly returns + worksheets</td><td>4 years</td><td>Filed-and-paid evidence</td></tr>
+        <tr><td>License + decals (current + 4 prior years)</td><td>4 years</td><td>Required at roadside inspection</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>The most expensive IFTA mistake:</strong> missing a fuel receipt. Without proof of purchase in jurisdiction X, the auditor disallows your tax-paid credit there · you owe the full tax on the gallons "consumed" in X with zero offset. Scan receipts the day you buy fuel.
+    </div>
+  `,
+});
+
+/* ---- 19. inspections-post-stop-response · 49 CFR §396.9 + §396.11 ---- */
+
+export const inspectionsPostStopResponse: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Post-Inspection Response · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Inspections · post-stop response · 49 CFR §396",
+  bodyHTML: `
+    <h1>Roadside inspection · post-stop response</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · what to do in the 30 days after a roadside</p>
+
+    <div class="callout">
+      A roadside inspection is also a regulatory deadline clock starting. Within 24 hours you owe the driver's report to the carrier; within 15 days you owe certified corrections to FMCSA; within 30 days the violations have hit your CSA score and you should have a documented response. Miss any of these and a "minor" stop becomes an audit trigger.
+    </div>
+
+    <h2>I · The timeline · what's due when</h2>
+    <table>
+      <thead><tr><th style="width:18%">When</th><th>Action</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Roadside</strong></td><td>Driver receives inspection report (Form MCS-63 or state equivalent) · keeps a copy in the cab</td><td><span class="cfr">§396.9(c)</span></td></tr>
+        <tr><td><strong>Within 24 hours</strong></td><td>Driver delivers a copy of the inspection report to the motor carrier</td><td><span class="cfr">§396.9(d)(1)</span></td></tr>
+        <tr><td><strong>Within 15 days</strong></td><td>Carrier signs the certification on the inspection report, documents all corrections, returns the original to the issuing state · violations corrected before the truck moves again</td><td><span class="cfr">§396.9(d)(3)</span></td></tr>
+        <tr><td><strong>Within 30 days</strong></td><td>CSA score updates · review impact, document follow-up training for the driver, file the response in the carrier safety folder</td><td>SMS · industry practice</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · The 5 things to do the day you get the report</h2>
+    <ol>
+      <li><strong>Verify the violations</strong> · read each citation against the actual vehicle / driver / paperwork · sometimes the inspector got it wrong (DataQ candidates)</li>
+      <li><strong>Take the truck out of service</strong> for any OOS violation until corrected · inspector marked it OOS for a reason · §396.9(c)(2) makes it federal violation to move it</li>
+      <li><strong>Document the corrective action</strong> for every violation · who fixed it, when, with what part / repair / retraining record</li>
+      <li><strong>Sit with the driver</strong> · review what happened · log the conversation in the driver's file (this is your trail for progressive discipline if a pattern develops)</li>
+      <li><strong>File the certified copy</strong> · sign §396.9(d)(3) certification on the report, mail/upload to the issuing state · keep a copy in your inspection log</li>
+      <li><strong>Open a DataQ request</strong> if you genuinely believe a violation is wrong · file within 30 days while evidence is fresh</li>
+    </ol>
+
+    <h2>III · The 5 highest-CSA-impact violation patterns</h2>
+    <ul>
+      <li><strong>Driver Out-of-Service</strong> (any reason · HOS, no medical card, suspended CDL) · 7× severity, the worst single hit</li>
+      <li><strong>Vehicle OOS</strong> · brakes out of adjustment, tire defects, lighting · 7× severity</li>
+      <li><strong>Speeding 15+ mph over</strong> · 10× severity (yes, double an OOS)</li>
+      <li><strong>Texting / hand-held mobile in CMV</strong> · 10× severity</li>
+      <li><strong>HOS violation</strong> (drive past 11/14 hr, missing break, no logs) · 7× severity</li>
+    </ul>
+
+    <h2>IV · The DataQ defense · when + how to dispute</h2>
+    <p>If a violation is factually wrong (the inspector cited the wrong cargo class, the brakes were actually in adjustment, the driver wasn't actually over hours), file a DataQ challenge at <em>dataqs.fmcsa.dot.gov</em>:</p>
+    <ol>
+      <li><strong>File within 30 days</strong> of the stop · earlier is much better</li>
+      <li><strong>Upload evidence</strong> · photos, repair invoices, ELD logs, ECM data, the inspection report itself</li>
+      <li><strong>Cite the specific CFR provision</strong> the inspector misapplied</li>
+      <li><strong>Track the response</strong> in your DataQ dashboard · state has 30 days to rule</li>
+      <li><strong>If denied, appeal</strong> to the state-level supervisor · then to FMCSA HQ if needed</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The 15-day certified-correction deadline is not a suggestion.</strong> Missing it converts a violation from "fixable on the score" to "uncertified · violation stays on your CSA permanently." A 30-second signature + a stamped envelope is the most expensive piece of paper in trucking.
+    </div>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -897,6 +1312,13 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "hazmat-driver-guide": hazmatDriverGuide as TemplateFn,
   "hazmat-employer-playbook": hazmatEmployerPlaybook as TemplateFn,
   "hazmat-training-provider-reference": hazmatTrainingProviderReference as TemplateFn,
+  "da-driver-guide": daDriverGuide as TemplateFn,
+  "da-employer-playbook": daEmployerPlaybook as TemplateFn,
+  "dqf-driver-index": dqfDriverIndex as TemplateFn,
+  "fcra-background-check-disclosure": fcraBackgroundCheckDisclosure as TemplateFn,
+  "mvr-explainer": mvrExplainer as TemplateFn,
+  "ifta-quarterly-walkthrough": iftaQuarterlyWalkthrough as TemplateFn,
+  "inspections-post-stop-response": inspectionsPostStopResponse as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
