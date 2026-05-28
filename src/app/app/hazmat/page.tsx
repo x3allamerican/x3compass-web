@@ -20,7 +20,7 @@
      9. Final CTA
    ============================================================ */
 
-import AppShell from "@/components/AppShell";
+import HazmatAppShell from "./HazmatAppShell";
 import HazmatPlacardDemo from "./HazmatPlacardDemo";
 
 const PLACARD_WALL = [
@@ -30,15 +30,12 @@ const PLACARD_WALL = [
 
 export default function HazmatCenterPage() {
   return (
-    <AppShell title="Hazmat Center" crumbs="HAZMAT CENTER · 49 CFR Parts 171-180">
-      {/* Canonical static stylesheet · ensures pixel parity with app.x3compass.com */}
-      {/* eslint-disable-next-line @next/next/no-css-tags */}
-      <link rel="stylesheet" href="/hazmat-center.css" />
+    <HazmatAppShell activeId="hazmat-center" pageTitle="HAZMAT CENTER">
       {/* Static placard renderer (sets window.renderPlacardSvg) · plain <script defer> is
           friendlier to static export than <Script strategy="afterInteractive"/> */}
       <script src="/placard-render.js" defer></script>
 
-      <main className="main" style={{ background: "var(--bg)" }}>
+      <div style={{ background: "transparent" }}>
         {/* ============== HERO v3 ============== */}
         <section className="hz-hero-v3" aria-labelledby="hero-h1">
           <div className="hz-placard-wall" aria-hidden="true">
@@ -321,7 +318,7 @@ export default function HazmatCenterPage() {
             Start 14-Day Trial
           </a>
         </section>
-      </main>
-    </AppShell>
+      </div>
+    </HazmatAppShell>
   );
 }

@@ -1057,7 +1057,7 @@ body[data-page="hazmat-shipping-papers"] .hz-bol-haz [style*="color"] {
    ============================================================ */
 
 /* ====== HERO v2 ====== */
-body[data-page="hazmat-center"] .hz-hero-v2 {
+[data-page="hazmat-center"] .hz-hero-v2 {
   position: relative;
   padding: 56px 48px 48px;
   background:
@@ -1069,13 +1069,13 @@ body[data-page="hazmat-center"] .hz-hero-v2 {
   overflow: hidden;
   margin: 0 0 24px;
 }
-body[data-page="hazmat-center"] .hz-hero-v2::before {
+[data-page="hazmat-center"] .hz-hero-v2::before {
   content: "";
   position: absolute; inset: 0;
   background: radial-gradient(ellipse at 50% -20%, rgba(0,178,253,0.10), transparent 60%);
   pointer-events: none;
 }
-body[data-page="hazmat-center"] .hz-hero-v2-eyebrow {
+[data-page="hazmat-center"] .hz-hero-v2-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   background: rgba(0, 178, 253, 0.16);
   border: 1px solid rgba(0, 178, 253, 0.5);
@@ -1084,7 +1084,7 @@ body[data-page="hazmat-center"] .hz-hero-v2-eyebrow {
   padding: 6px 14px; border-radius: 999px;
   margin-bottom: 22px;
 }
-body[data-page="hazmat-center"] .hz-hero-v2 h1 {
+[data-page="hazmat-center"] .hz-hero-v2 h1 {
   font-size: 56px;
   font-weight: 900;
   line-height: 1.05;
@@ -1093,25 +1093,25 @@ body[data-page="hazmat-center"] .hz-hero-v2 h1 {
   margin: 0 0 18px;
   max-width: 900px;
 }
-body[data-page="hazmat-center"] .hz-hero-v2 h1 em {
+[data-page="hazmat-center"] .hz-hero-v2 h1 em {
   font-style: normal;
   background: linear-gradient(120deg, #00B2FD 30%, #67E8F9 70%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-body[data-page="hazmat-center"] .hz-hero-v2-sub {
+[data-page="hazmat-center"] .hz-hero-v2-sub {
   font-size: 17px;
   line-height: 1.55;
   color: #B8C5D6;
   max-width: 780px;
   margin: 0 0 32px;
 }
-body[data-page="hazmat-center"] .hz-hero-v2-ctas {
+[data-page="hazmat-center"] .hz-hero-v2-ctas {
   display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
   margin-top: 8px;
 }
-body[data-page="hazmat-center"] .hz-cta-primary {
+[data-page="hazmat-center"] .hz-cta-primary {
   background: linear-gradient(135deg, #00B2FD, #0098D9);
   color: #FFFFFF !important;
   font-weight: 800;
@@ -1125,11 +1125,11 @@ body[data-page="hazmat-center"] .hz-cta-primary {
   transition: transform 120ms ease, box-shadow 120ms ease;
   text-decoration: none !important;
 }
-body[data-page="hazmat-center"] .hz-cta-primary:hover {
+[data-page="hazmat-center"] .hz-cta-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 28px rgba(0, 178, 253, 0.55), 0 0 0 1px rgba(0, 178, 253, 0.8);
 }
-body[data-page="hazmat-center"] .hz-cta-secondary {
+[data-page="hazmat-center"] .hz-cta-secondary {
   background: transparent;
   color: #67E8F9 !important;
   font-weight: 700;
@@ -1142,19 +1142,19 @@ body[data-page="hazmat-center"] .hz-cta-secondary {
   font-family: inherit;
   display: inline-flex; align-items: center; gap: 8px;
 }
-body[data-page="hazmat-center"] .hz-cta-secondary:hover {
+[data-page="hazmat-center"] .hz-cta-secondary:hover {
   background: rgba(0, 178, 253, 0.12);
 }
-body[data-page="hazmat-center"] .hz-hero-v2-trust {
+[data-page="hazmat-center"] .hz-hero-v2-trust {
   margin-top: 26px;
   font-size: 11pt;
   color: #94A3B8;
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
 }
-body[data-page="hazmat-center"] .hz-hero-v2-trust strong { color: #CBD5E1; font-weight: 700; }
+[data-page="hazmat-center"] .hz-hero-v2-trust strong { color: #CBD5E1; font-weight: 700; }
 
 /* ====== CREDIBILITY STRIP ====== */
-body[data-page="hazmat-center"] .hz-cred-strip {
+[data-page="hazmat-center"] .hz-cred-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
@@ -1164,26 +1164,26 @@ body[data-page="hazmat-center"] .hz-cred-strip {
   margin: 0 0 36px;
   overflow: hidden;
 }
-body[data-page="hazmat-center"] .hz-cred-item {
+[data-page="hazmat-center"] .hz-cred-item {
   padding: 18px 22px;
   border-right: 1px solid rgba(0, 178, 253, 0.18);
   display: flex; flex-direction: column; gap: 4px;
 }
-body[data-page="hazmat-center"] .hz-cred-item:last-child { border-right: 0; }
-body[data-page="hazmat-center"] .hz-cred-label {
+[data-page="hazmat-center"] .hz-cred-item:last-child { border-right: 0; }
+[data-page="hazmat-center"] .hz-cred-label {
   font-size: 9pt; font-weight: 700; color: #67E8F9;
   letter-spacing: 1.2pt; text-transform: uppercase;
 }
-body[data-page="hazmat-center"] .hz-cred-val {
+[data-page="hazmat-center"] .hz-cred-val {
   font-size: 14pt; font-weight: 700; color: #F8FAFC;
   font-variant-numeric: tabular-nums;
 }
 
 /* ====== STAKES SECTION ====== */
-body[data-page="hazmat-center"] .hz-section-head {
+[data-page="hazmat-center"] .hz-section-head {
   margin: 56px 0 24px;
 }
-body[data-page="hazmat-center"] .hz-section-head h2 {
+[data-page="hazmat-center"] .hz-section-head h2 {
   font-size: 38px;
   font-weight: 900;
   letter-spacing: -0.6px;
@@ -1191,51 +1191,51 @@ body[data-page="hazmat-center"] .hz-section-head h2 {
   margin: 0 0 10px;
   line-height: 1.1;
 }
-body[data-page="hazmat-center"] .hz-section-head p {
+[data-page="hazmat-center"] .hz-section-head p {
   font-size: 16px; color: #B8C5D6; margin: 0;
   max-width: 700px; line-height: 1.55;
 }
-body[data-page="hazmat-center"] .hz-stakes-grid {
+[data-page="hazmat-center"] .hz-stakes-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   margin-bottom: 36px;
 }
-body[data-page="hazmat-center"] .hz-stakes-card {
+[data-page="hazmat-center"] .hz-stakes-card {
   background: linear-gradient(180deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.02));
   border: 1px solid rgba(220, 38, 38, 0.32);
   border-left: 4px solid #DC2626;
   border-radius: 10px;
   padding: 24px 22px 22px;
 }
-body[data-page="hazmat-center"] .hz-stakes-icon {
+[data-page="hazmat-center"] .hz-stakes-icon {
   font-size: 22px;
   margin-bottom: 12px;
 }
-body[data-page="hazmat-center"] .hz-stakes-title {
+[data-page="hazmat-center"] .hz-stakes-title {
   font-size: 10.5pt; font-weight: 700;
   color: #F87171; letter-spacing: 0.8pt; text-transform: uppercase;
   margin-bottom: 8px;
 }
-body[data-page="hazmat-center"] .hz-stakes-stat {
+[data-page="hazmat-center"] .hz-stakes-stat {
   font-size: 36pt; font-weight: 900;
   color: #F8FAFC;
   line-height: 1; letter-spacing: -1.5px;
   margin-bottom: 14px;
   font-variant-numeric: tabular-nums;
 }
-body[data-page="hazmat-center"] .hz-stakes-body {
+[data-page="hazmat-center"] .hz-stakes-body {
   font-size: 14px; color: #CBD5E1; line-height: 1.55;
 }
 
 /* ====== FLAGSHIP TRIO ====== */
-body[data-page="hazmat-center"] .hz-flagship-grid {
+[data-page="hazmat-center"] .hz-flagship-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   margin-bottom: 36px;
 }
-body[data-page="hazmat-center"] .hz-flagship {
+[data-page="hazmat-center"] .hz-flagship {
   background: linear-gradient(180deg, rgba(0,178,253,0.08), rgba(0,102,181,0.03)), #0F1F35;
   border: 1px solid rgba(0, 178, 253, 0.32);
   border-radius: 12px;
@@ -1245,12 +1245,12 @@ body[data-page="hazmat-center"] .hz-flagship {
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
   color: inherit;
 }
-body[data-page="hazmat-center"] .hz-flagship:hover {
+[data-page="hazmat-center"] .hz-flagship:hover {
   transform: translateY(-2px);
   border-color: #00B2FD;
   box-shadow: 0 14px 30px rgba(0, 178, 253, 0.22);
 }
-body[data-page="hazmat-center"] .hz-flagship-icon {
+[data-page="hazmat-center"] .hz-flagship-icon {
   width: 48px; height: 48px;
   background: linear-gradient(135deg, #00B2FD, #0066B5);
   border-radius: 12px;
@@ -1258,19 +1258,19 @@ body[data-page="hazmat-center"] .hz-flagship-icon {
   font-size: 24px; color: #FFFFFF;
   margin-bottom: 18px;
 }
-body[data-page="hazmat-center"] .hz-flagship h3 {
+[data-page="hazmat-center"] .hz-flagship h3 {
   font-size: 22px; font-weight: 800;
   color: #F8FAFC;
   margin: 0 0 12px;
   letter-spacing: -0.3px;
 }
-body[data-page="hazmat-center"] .hz-flagship-val {
+[data-page="hazmat-center"] .hz-flagship-val {
   font-size: 14.5px; line-height: 1.55;
   color: #CBD5E1;
   margin-bottom: 18px;
   flex: 1;
 }
-body[data-page="hazmat-center"] .hz-flagship-cite {
+[data-page="hazmat-center"] .hz-flagship-cite {
   font-size: 10pt; font-weight: 600;
   color: #67E8F9;
   letter-spacing: 0.2pt;
@@ -1281,38 +1281,38 @@ body[data-page="hazmat-center"] .hz-flagship-cite {
   align-self: flex-start;
   margin-bottom: 16px;
 }
-body[data-page="hazmat-center"] .hz-flagship-cta {
+[data-page="hazmat-center"] .hz-flagship-cta {
   font-size: 13px; font-weight: 700;
   color: #00B2FD;
   display: inline-flex; align-items: center; gap: 6px;
 }
-body[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta { color: #67E8F9; }
-body[data-page="hazmat-center"] .hz-flagship-cta::after {
+[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta { color: #67E8F9; }
+[data-page="hazmat-center"] .hz-flagship-cta::after {
   content: " →"; transition: transform 160ms ease;
 }
-body[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta::after { transform: translateX(3px); }
+[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta::after { transform: translateX(3px); }
 
 /* ====== DEMO PANEL (live placard wizard preview) ====== */
-body[data-page="hazmat-center"] .hz-demo {
+[data-page="hazmat-center"] .hz-demo {
   background: #0F1F35;
   border: 1px solid rgba(0, 178, 253, 0.32);
   border-radius: 14px;
   padding: 32px;
   margin: 0 0 36px;
 }
-body[data-page="hazmat-center"] .hz-demo-head {
+[data-page="hazmat-center"] .hz-demo-head {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 22px; gap: 18px; flex-wrap: wrap;
 }
-body[data-page="hazmat-center"] .hz-demo-head h2 {
+[data-page="hazmat-center"] .hz-demo-head h2 {
   font-size: 26px; font-weight: 800; color: #F8FAFC;
   margin: 0; letter-spacing: -0.3px;
 }
-body[data-page="hazmat-center"] .hz-demo-head p {
+[data-page="hazmat-center"] .hz-demo-head p {
   font-size: 14px; color: #B8C5D6; margin: 6px 0 0; line-height: 1.5;
   max-width: 560px;
 }
-body[data-page="hazmat-center"] .hz-demo-live-tag {
+[data-page="hazmat-center"] .hz-demo-live-tag {
   display: inline-flex; align-items: center; gap: 8px;
   background: rgba(34, 197, 94, 0.16);
   color: #4ADE80;
@@ -1321,7 +1321,7 @@ body[data-page="hazmat-center"] .hz-demo-live-tag {
   padding: 5px 12px; border-radius: 999px;
   letter-spacing: 0.3pt;
 }
-body[data-page="hazmat-center"] .hz-demo-live-tag::before {
+[data-page="hazmat-center"] .hz-demo-live-tag::before {
   content: ""; width: 8px; height: 8px; background: #22C55E; border-radius: 50%;
   box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
   animation: hz-pulse 2s ease-in-out infinite;
@@ -1330,7 +1330,7 @@ body[data-page="hazmat-center"] .hz-demo-live-tag::before {
   0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25); }
   50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.10); }
 }
-body[data-page="hazmat-center"] .hz-demo-stage {
+[data-page="hazmat-center"] .hz-demo-stage {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) 1fr;
   gap: 24px;
@@ -1340,12 +1340,12 @@ body[data-page="hazmat-center"] .hz-demo-stage {
   border-radius: 10px;
   padding: 30px;
 }
-body[data-page="hazmat-center"] .hz-demo-input-block label {
+[data-page="hazmat-center"] .hz-demo-input-block label {
   display: block; font-size: 10pt; font-weight: 700;
   color: #67E8F9; letter-spacing: 1pt; text-transform: uppercase;
   margin-bottom: 8px;
 }
-body[data-page="hazmat-center"] .hz-demo-input {
+[data-page="hazmat-center"] .hz-demo-input {
   width: 100%;
   background: #050B16;
   border: 2px solid rgba(0, 178, 253, 0.4);
@@ -1356,15 +1356,15 @@ body[data-page="hazmat-center"] .hz-demo-input {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   letter-spacing: 0.5px;
 }
-body[data-page="hazmat-center"] .hz-demo-input:focus {
+[data-page="hazmat-center"] .hz-demo-input:focus {
   outline: none;
   border-color: #00B2FD;
   box-shadow: 0 0 0 3px rgba(0, 178, 253, 0.2);
 }
-body[data-page="hazmat-center"] .hz-demo-suggestions {
+[data-page="hazmat-center"] .hz-demo-suggestions {
   display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
 }
-body[data-page="hazmat-center"] .hz-demo-chip {
+[data-page="hazmat-center"] .hz-demo-chip {
   background: rgba(0, 178, 253, 0.1);
   border: 1px solid rgba(0, 178, 253, 0.35);
   color: #67E8F9;
@@ -1374,47 +1374,47 @@ body[data-page="hazmat-center"] .hz-demo-chip {
   cursor: pointer;
   font-family: 'JetBrains Mono', monospace;
 }
-body[data-page="hazmat-center"] .hz-demo-chip:hover {
+[data-page="hazmat-center"] .hz-demo-chip:hover {
   background: rgba(0, 178, 253, 0.22);
   border-color: #00B2FD;
 }
-body[data-page="hazmat-center"] .hz-demo-meta {
+[data-page="hazmat-center"] .hz-demo-meta {
   margin-top: 16px; font-size: 12px; color: #94A3B8; line-height: 1.5;
 }
-body[data-page="hazmat-center"] .hz-demo-result {
+[data-page="hazmat-center"] .hz-demo-result {
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
 }
-body[data-page="hazmat-center"] .hz-demo-result-name {
+[data-page="hazmat-center"] .hz-demo-result-name {
   font-size: 14pt; font-weight: 800; color: #F8FAFC;
   margin-bottom: 4px;
 }
-body[data-page="hazmat-center"] .hz-demo-result-class {
+[data-page="hazmat-center"] .hz-demo-result-class {
   font-size: 11pt; color: #67E8F9; margin-bottom: 16px;
   font-weight: 700; letter-spacing: 0.5pt;
 }
-body[data-page="hazmat-center"] .hz-demo-placard-wrap {
+[data-page="hazmat-center"] .hz-demo-placard-wrap {
   display: inline-block;
 }
-body[data-page="hazmat-center"] .hz-demo-cite {
+[data-page="hazmat-center"] .hz-demo-cite {
   margin-top: 16px; font-size: 11pt; color: #94A3B8;
 }
-body[data-page="hazmat-center"] .hz-demo-cite strong {
+[data-page="hazmat-center"] .hz-demo-cite strong {
   color: #67E8F9; font-weight: 700;
 }
-body[data-page="hazmat-center"] .hz-demo-footer {
+[data-page="hazmat-center"] .hz-demo-footer {
   margin-top: 22px;
   text-align: center;
 }
 
 /* ====== INCLUDED GRID (denser secondary tiles) ====== */
-body[data-page="hazmat-center"] .hz-included-grid {
+[data-page="hazmat-center"] .hz-included-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
   margin-bottom: 36px;
 }
-body[data-page="hazmat-center"] .hz-included-item {
+[data-page="hazmat-center"] .hz-included-item {
   background: #0F1F35;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
@@ -1424,23 +1424,23 @@ body[data-page="hazmat-center"] .hz-included-item {
   display: flex; flex-direction: column; gap: 8px;
   transition: border-color 140ms ease, transform 140ms ease;
 }
-body[data-page="hazmat-center"] .hz-included-item:hover {
+[data-page="hazmat-center"] .hz-included-item:hover {
   border-color: rgba(0, 178, 253, 0.55);
   transform: translateY(-1px);
 }
-body[data-page="hazmat-center"] .hz-included-head {
+[data-page="hazmat-center"] .hz-included-head {
   display: flex; align-items: center; justify-content: space-between;
 }
-body[data-page="hazmat-center"] .hz-included-name {
+[data-page="hazmat-center"] .hz-included-name {
   font-size: 15px; font-weight: 800; color: #F8FAFC;
 }
-body[data-page="hazmat-center"] .hz-included-icon {
+[data-page="hazmat-center"] .hz-included-icon {
   font-size: 18px; opacity: 0.9;
 }
-body[data-page="hazmat-center"] .hz-included-desc {
+[data-page="hazmat-center"] .hz-included-desc {
   font-size: 12.5px; line-height: 1.5; color: #B8C5D6;
 }
-body[data-page="hazmat-center"] .hz-included-cite {
+[data-page="hazmat-center"] .hz-included-cite {
   font-size: 9pt; font-weight: 700;
   color: #67E8F9;
   background: rgba(0, 178, 253, 0.10);
@@ -1452,7 +1452,7 @@ body[data-page="hazmat-center"] .hz-included-cite {
 }
 
 /* ====== PROOF / TESTIMONIAL ====== */
-body[data-page="hazmat-center"] .hz-proof {
+[data-page="hazmat-center"] .hz-proof {
   background: linear-gradient(180deg, #0F1F35, #0A1628);
   border: 1px solid rgba(0, 178, 253, 0.22);
   border-radius: 14px;
@@ -1460,7 +1460,7 @@ body[data-page="hazmat-center"] .hz-proof {
   margin-bottom: 36px;
   position: relative;
 }
-body[data-page="hazmat-center"] .hz-proof::before {
+[data-page="hazmat-center"] .hz-proof::before {
   content: '"';
   position: absolute; top: 14px; left: 26px;
   font-size: 120px; font-weight: 900;
@@ -1468,7 +1468,7 @@ body[data-page="hazmat-center"] .hz-proof::before {
   font-family: 'Inter', serif;
   line-height: 1;
 }
-body[data-page="hazmat-center"] .hz-proof-quote {
+[data-page="hazmat-center"] .hz-proof-quote {
   font-size: 19px; line-height: 1.55;
   color: #F8FAFC;
   margin: 0 0 18px;
@@ -1476,24 +1476,24 @@ body[data-page="hazmat-center"] .hz-proof-quote {
   max-width: 800px;
   position: relative;
 }
-body[data-page="hazmat-center"] .hz-proof-cite {
+[data-page="hazmat-center"] .hz-proof-cite {
   font-size: 13px; color: #B8C5D6;
 }
-body[data-page="hazmat-center"] .hz-proof-cite strong { color: #67E8F9; font-weight: 700; }
+[data-page="hazmat-center"] .hz-proof-cite strong { color: #67E8F9; font-weight: 700; }
 
 /* ====== FAQ ====== */
-body[data-page="hazmat-center"] .hz-faq {
+[data-page="hazmat-center"] .hz-faq {
   display: flex; flex-direction: column; gap: 10px;
   margin-bottom: 36px;
 }
-body[data-page="hazmat-center"] .hz-faq-item {
+[data-page="hazmat-center"] .hz-faq-item {
   background: #0F1F35;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   padding: 0;
   overflow: hidden;
 }
-body[data-page="hazmat-center"] .hz-faq-q {
+[data-page="hazmat-center"] .hz-faq-q {
   width: 100%;
   background: transparent;
   border: 0;
@@ -1505,22 +1505,22 @@ body[data-page="hazmat-center"] .hz-faq-q {
   display: flex; align-items: center; justify-content: space-between;
   font-family: inherit;
 }
-body[data-page="hazmat-center"] .hz-faq-q:hover { color: #67E8F9; }
-body[data-page="hazmat-center"] .hz-faq-q::after {
+[data-page="hazmat-center"] .hz-faq-q:hover { color: #67E8F9; }
+[data-page="hazmat-center"] .hz-faq-q::after {
   content: "+";
   font-size: 24px; font-weight: 400;
   color: #00B2FD;
   transition: transform 200ms ease;
 }
-body[data-page="hazmat-center"] .hz-faq-item[open] .hz-faq-q::after { transform: rotate(45deg); }
-body[data-page="hazmat-center"] .hz-faq-a {
+[data-page="hazmat-center"] .hz-faq-item[open] .hz-faq-q::after { transform: rotate(45deg); }
+[data-page="hazmat-center"] .hz-faq-a {
   padding: 0 22px 18px;
   font-size: 14px; line-height: 1.6;
   color: #CBD5E1;
 }
 
 /* ====== FINAL CTA BAR ====== */
-body[data-page="hazmat-center"] .hz-final-cta {
+[data-page="hazmat-center"] .hz-final-cta {
   background:
     radial-gradient(circle at 80% 50%, rgba(0, 178, 253, 0.22), transparent 50%),
     linear-gradient(135deg, #0A1628, #050B16);
@@ -1530,14 +1530,14 @@ body[data-page="hazmat-center"] .hz-final-cta {
   text-align: center;
   margin-bottom: 24px;
 }
-body[data-page="hazmat-center"] .hz-final-cta h2 {
+[data-page="hazmat-center"] .hz-final-cta h2 {
   font-size: 38px; font-weight: 900;
   color: #F8FAFC;
   margin: 0 0 12px;
   letter-spacing: -0.6px;
   line-height: 1.1;
 }
-body[data-page="hazmat-center"] .hz-final-cta p {
+[data-page="hazmat-center"] .hz-final-cta p {
   font-size: 16px; color: #B8C5D6;
   margin: 0 0 28px;
   max-width: 560px;
@@ -1547,22 +1547,22 @@ body[data-page="hazmat-center"] .hz-final-cta p {
 
 /* ====== MOBILE ====== */
 @media (max-width: 900px) {
-  body[data-page="hazmat-center"] .hz-hero-v2 { padding: 36px 24px 32px; }
-  body[data-page="hazmat-center"] .hz-hero-v2 h1 { font-size: 36px; letter-spacing: -1px; }
-  body[data-page="hazmat-center"] .hz-cred-strip { grid-template-columns: repeat(2, 1fr); }
-  body[data-page="hazmat-center"] .hz-cred-item:nth-child(2) { border-right: 0; }
-  body[data-page="hazmat-center"] .hz-cred-item:nth-child(-n+2) { border-bottom: 1px solid rgba(0,178,253,0.18); }
-  body[data-page="hazmat-center"] .hz-stakes-grid,
-  body[data-page="hazmat-center"] .hz-flagship-grid { grid-template-columns: 1fr; }
-  body[data-page="hazmat-center"] .hz-demo-stage { grid-template-columns: 1fr; }
-  body[data-page="hazmat-center"] .hz-final-cta { padding: 32px 24px; }
-  body[data-page="hazmat-center"] .hz-final-cta h2 { font-size: 28px; }
-  body[data-page="hazmat-center"] .hz-section-head h2 { font-size: 28px; }
+  [data-page="hazmat-center"] .hz-hero-v2 { padding: 36px 24px 32px; }
+  [data-page="hazmat-center"] .hz-hero-v2 h1 { font-size: 36px; letter-spacing: -1px; }
+  [data-page="hazmat-center"] .hz-cred-strip { grid-template-columns: repeat(2, 1fr); }
+  [data-page="hazmat-center"] .hz-cred-item:nth-child(2) { border-right: 0; }
+  [data-page="hazmat-center"] .hz-cred-item:nth-child(-n+2) { border-bottom: 1px solid rgba(0,178,253,0.18); }
+  [data-page="hazmat-center"] .hz-stakes-grid,
+  [data-page="hazmat-center"] .hz-flagship-grid { grid-template-columns: 1fr; }
+  [data-page="hazmat-center"] .hz-demo-stage { grid-template-columns: 1fr; }
+  [data-page="hazmat-center"] .hz-final-cta { padding: 32px 24px; }
+  [data-page="hazmat-center"] .hz-final-cta h2 { font-size: 28px; }
+  [data-page="hazmat-center"] .hz-section-head h2 { font-size: 28px; }
 }
 
 /* ============== HERO v3 — placard wall + tanker illustration (May 2026) ============== */
 
-body[data-page="hazmat-center"] .hz-hero-v3 {
+[data-page="hazmat-center"] .hz-hero-v3 {
   position: relative;
   padding: 72px 56px 60px;
   background:
@@ -1578,7 +1578,7 @@ body[data-page="hazmat-center"] .hz-hero-v3 {
 }
 
 /* Placard wall — anchored top-right, tilted, dimmed */
-body[data-page="hazmat-center"] .hz-placard-wall {
+[data-page="hazmat-center"] .hz-placard-wall {
   position: absolute;
   top: -40px;
   right: -80px;
@@ -1592,30 +1592,30 @@ body[data-page="hazmat-center"] .hz-placard-wall {
   -webkit-mask-image: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%);
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
 }
-body[data-page="hazmat-center"] .hz-placard-wall img {
+[data-page="hazmat-center"] .hz-placard-wall img {
   width: 140px;
   height: 140px;
   display: block;
   border-radius: 6px;
   animation: hz-placard-float 8s ease-in-out infinite;
 }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(1) { animation-delay: 0s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(2) { animation-delay: -1.2s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(3) { animation-delay: -2.4s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(4) { animation-delay: -3.6s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(5) { animation-delay: -4.8s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(6) { animation-delay: -6.0s; }
-body[data-page="hazmat-center"] .hz-placard-wall img:nth-child(7) { animation-delay: -7.2s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(1) { animation-delay: 0s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(2) { animation-delay: -1.2s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(3) { animation-delay: -2.4s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(4) { animation-delay: -3.6s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(5) { animation-delay: -4.8s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(6) { animation-delay: -6.0s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(7) { animation-delay: -7.2s; }
 @keyframes hz-placard-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  body[data-page="hazmat-center"] .hz-placard-wall img { animation: none; }
+  [data-page="hazmat-center"] .hz-placard-wall img { animation: none; }
 }
 
 /* Subtle X3 mark tile pattern on top of placard wall */
-body[data-page="hazmat-center"] .hz-hero-v3::before {
+[data-page="hazmat-center"] .hz-hero-v3::before {
   content: "";
   position: absolute; inset: 0;
   background-image:
@@ -1626,7 +1626,7 @@ body[data-page="hazmat-center"] .hz-hero-v3::before {
 }
 
 /* Scan-line texture overlay (CRT instrument-panel feel) */
-body[data-page="hazmat-center"] .hz-hero-v3::after {
+[data-page="hazmat-center"] .hz-hero-v3::after {
   content: "";
   position: absolute; inset: 0;
   background-image: repeating-linear-gradient(
@@ -1642,13 +1642,13 @@ body[data-page="hazmat-center"] .hz-hero-v3::after {
 }
 
 /* Hero content sits above the placard wall + overlays */
-body[data-page="hazmat-center"] .hz-hero-v3 > * {
+[data-page="hazmat-center"] .hz-hero-v3 > * {
   position: relative;
   z-index: 3;
 }
 
 /* Tiered hero typography — bigger, more confident */
-body[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-eyebrow {
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-eyebrow {
   background: rgba(0, 178, 253, 0.18);
   border: 1px solid rgba(0, 178, 253, 0.55);
   backdrop-filter: blur(8px);
@@ -1658,18 +1658,18 @@ body[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-eyebrow {
   letter-spacing: 1pt;
   text-transform: uppercase;
 }
-body[data-page="hazmat-center"] .hz-hero-v3 h1 {
+[data-page="hazmat-center"] .hz-hero-v3 h1 {
   font-size: 64px;
   letter-spacing: -2px;
   max-width: 760px;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
   margin-bottom: 22px;
 }
-body[data-page="hazmat-center"] .hz-hero-v3 h1 em {
+[data-page="hazmat-center"] .hz-hero-v3 h1 em {
   position: relative;
   display: inline-block;
 }
-body[data-page="hazmat-center"] .hz-hero-v3 h1 em::after {
+[data-page="hazmat-center"] .hz-hero-v3 h1 em::after {
   content: "";
   position: absolute;
   left: 0; right: 0; bottom: 2px;
@@ -1679,27 +1679,27 @@ body[data-page="hazmat-center"] .hz-hero-v3 h1 em::after {
   border-radius: 3px;
   filter: blur(2px);
 }
-body[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
   max-width: 620px;
   font-size: 18px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Tactical badge row above the CTAs — "instrument cluster" feel */
-body[data-page="hazmat-center"] .hz-hero-cluster {
+[data-page="hazmat-center"] .hz-hero-cluster {
   display: flex;
   gap: 24px;
   margin: 0 0 26px;
   flex-wrap: wrap;
 }
-body[data-page="hazmat-center"] .hz-hero-cluster-item {
+[data-page="hazmat-center"] .hz-hero-cluster-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding-left: 14px;
   border-left: 2px solid #00B2FD;
 }
-body[data-page="hazmat-center"] .hz-hero-cluster-num {
+[data-page="hazmat-center"] .hz-hero-cluster-num {
   font-family: 'JetBrains Mono', monospace;
   font-size: 24px;
   font-weight: 800;
@@ -1708,7 +1708,7 @@ body[data-page="hazmat-center"] .hz-hero-cluster-num {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5px;
 }
-body[data-page="hazmat-center"] .hz-hero-cluster-label {
+[data-page="hazmat-center"] .hz-hero-cluster-label {
   font-size: 10pt;
   font-weight: 600;
   color: #94A3B8;
@@ -1717,16 +1717,16 @@ body[data-page="hazmat-center"] .hz-hero-cluster-label {
 }
 
 @media (max-width: 900px) {
-  body[data-page="hazmat-center"] .hz-hero-v3 { padding: 40px 24px 36px; }
-  body[data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; letter-spacing: -1px; }
-  body[data-page="hazmat-center"] .hz-placard-wall { display: none; }
-  body[data-page="hazmat-center"] .hz-hero-cluster { gap: 14px; }
+  [data-page="hazmat-center"] .hz-hero-v3 { padding: 40px 24px 36px; }
+  [data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; letter-spacing: -1px; }
+  [data-page="hazmat-center"] .hz-placard-wall { display: none; }
+  [data-page="hazmat-center"] .hz-hero-cluster { gap: 14px; }
 }
 
 /* ============== HERO v8 — Large ambient placard photo (May 2026) ============== */
 
 /* Hero: single column, ample padding-right so headlines don't crash into the photo area */
-body[data-page="hazmat-center"] .hz-hero-v3 {
+[data-page="hazmat-center"] .hz-hero-v3 {
   position: relative;
   min-height: 580px;
   padding: 64px 56px 64px 56px;
@@ -1734,7 +1734,7 @@ body[data-page="hazmat-center"] .hz-hero-v3 {
 }
 
 /* The big atmospheric placard photo — fills the right half, dimmed, masked */
-body[data-page="hazmat-center"] .hz-placard-photo {
+[data-page="hazmat-center"] .hz-placard-photo {
   position: absolute;
   top: 0;
   right: 0;
@@ -1769,7 +1769,7 @@ body[data-page="hazmat-center"] .hz-placard-photo {
     saturate(0.7)
     sepia(0.18) hue-rotate(160deg);
 }
-body[data-page="hazmat-center"] .hz-placard-photo img {
+[data-page="hazmat-center"] .hz-placard-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1778,7 +1778,7 @@ body[data-page="hazmat-center"] .hz-placard-photo img {
 }
 
 /* Tiny CC0 credit chip — discreet, bottom-right of the photo zone */
-body[data-page="hazmat-center"] .hz-hero-v3::after {
+[data-page="hazmat-center"] .hz-hero-v3::after {
   content: "";  /* removed sub-content; credit lives in HTML via a small note below */
 }
 
@@ -1786,51 +1786,51 @@ body[data-page="hazmat-center"] .hz-hero-v3::after {
    Better: re-inject in HTML — but for now a tiny absolute label */
 
 /* Placard wall — restore prominence, but pull it forward in z so it sits above the big photo */
-body[data-page="hazmat-center"] .hz-placard-wall {
+[data-page="hazmat-center"] .hz-placard-wall {
   top: -32px;
   right: -60px;
   opacity: 0.55;
   z-index: 2;
 }
-body[data-page="hazmat-center"] .hz-placard-wall img {
+[data-page="hazmat-center"] .hz-placard-wall img {
   width: 130px;
   height: 130px;
 }
 
 /* All hero text + cluster + CTAs sit above the photo */
-body[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-eyebrow,
-body[data-page="hazmat-center"] .hz-hero-v3 > h1,
-body[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-sub,
-body[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-cluster,
-body[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-ctas {
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-eyebrow,
+[data-page="hazmat-center"] .hz-hero-v3 > h1,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-sub,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-cluster,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-ctas {
   position: relative;
   z-index: 3;
 }
 
-body[data-page="hazmat-center"] .hz-hero-v3 h1 {
+[data-page="hazmat-center"] .hz-hero-v3 h1 {
   font-size: 60px;
   letter-spacing: -1.5px;
   max-width: 700px;
 }
-body[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
   max-width: 620px;
 }
 
 /* Mobile: hide the giant ambient photo, fall back to the placard wall alone */
 @media (max-width: 1100px) {
-  body[data-page="hazmat-center"] .hz-hero-v3 {
+  [data-page="hazmat-center"] .hz-hero-v3 {
     padding: 40px 24px 32px;
     min-height: auto;
   }
-  body[data-page="hazmat-center"] .hz-placard-photo {
+  [data-page="hazmat-center"] .hz-placard-photo {
     display: none;
   }
-  body[data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; }
-  body[data-page="hazmat-center"] .hz-placard-wall { display: none; }
+  [data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; }
+  [data-page="hazmat-center"] .hz-placard-wall { display: none; }
 }
 
 /* Tiny floating CC0 credit — sits in the bottom-right of the hero */
-body[data-page="hazmat-center"] .hz-placard-photo-tag {
+[data-page="hazmat-center"] .hz-placard-photo-tag {
   position: absolute;
   bottom: 14px;
   right: 16px;
@@ -1845,16 +1845,16 @@ body[data-page="hazmat-center"] .hz-placard-photo-tag {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
-body[data-page="hazmat-center"] .hz-placard-photo-tag a {
+[data-page="hazmat-center"] .hz-placard-photo-tag a {
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
 }
-body[data-page="hazmat-center"] .hz-placard-photo-tag a:hover {
+[data-page="hazmat-center"] .hz-placard-photo-tag a:hover {
   color: #67E8F9;
 }
 
 /* Placard wall — hidden for now per UX feedback. Flip display back to flex to restore. */
-body[data-page="hazmat-center"] .hz-placard-wall { display: none !important; }
+[data-page="hazmat-center"] .hz-placard-wall { display: none !important; }
 
 /* ============== Substance Lookup — Big Preview Layout (May 2026) ============== */
 body[data-page="hazmat-substances"] .hz-sub-layout {
