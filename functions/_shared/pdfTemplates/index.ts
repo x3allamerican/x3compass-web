@@ -2811,6 +2811,521 @@ export const inspectionsDriverQuickGuide: TemplateFn<{ carrierName?: string; dri
 });
 
 /* ============================================================
+   BATCH 8 · IFTA driver · accidents/medical card auditor · forms
+   ============================================================ */
+
+/* ---- 44. ifta-driver-guide ---- */
+
+export const iftaDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `IFTA · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "IFTA · driver reference · fuel tax records",
+  bodyHTML: `
+    <h1>IFTA · driver guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      You don't file IFTA · the carrier does. But the carrier's filing depends 100% on what you record: miles per state, gallons purchased + where, and fuel receipts that survive 4 years of audit. This is your part.
+    </div>
+
+    <h2>I · What you must capture on every trip</h2>
+    <ol>
+      <li><strong>Beginning + ending odometer</strong> for the trip</li>
+      <li><strong>Beginning + ending odometer at each state line</strong> · or GPS-equivalent breadcrumbs if your ELD does it</li>
+      <li><strong>Every fuel purchase</strong> · gallons + state of purchase + price + vendor</li>
+      <li><strong>Every fuel receipt</strong> · scanned or paper · with date, vendor name + address, gallons, fuel type</li>
+      <li><strong>Route reasonable</strong> · the trip log should match where the truck actually drove · no "ghost" trips</li>
+    </ol>
+
+    <h2>II · What makes a fuel receipt audit-proof</h2>
+    <ul>
+      <li><strong>Vendor name + address</strong> · printed, not handwritten</li>
+      <li><strong>Date of purchase</strong> · within the quarter you're claiming</li>
+      <li><strong>Vehicle ID or truck number</strong> · written on the receipt if not auto-printed</li>
+      <li><strong>Fuel type</strong> (diesel · gasoline · DEF separately)</li>
+      <li><strong>Number of gallons</strong> · legible</li>
+      <li><strong>Price per gallon</strong></li>
+      <li><strong>Total dollar amount</strong></li>
+      <li><strong>Pump number</strong> · if printed</li>
+    </ul>
+    <p class="meta">If anything is missing or unreadable, the audit will treat the fuel as if it was purchased outside of IFTA jurisdictions · you lose the tax credit.</p>
+
+    <h2>III · The state-line procedure</h2>
+    <ol>
+      <li><strong>Note the odometer</strong> at each state line crossing · before + after</li>
+      <li><strong>If using an ELD with state-line capture</strong> · confirm it's tracking · scroll to mileage-by-state view + verify</li>
+      <li><strong>If hand-tracking</strong> · use the trip envelope or app the carrier provides · take the photo before you cross</li>
+      <li><strong>Match fuel purchases to the state</strong> they were bought in · not the state you happened to be near</li>
+      <li><strong>End-of-day</strong> · review the day's state-line mileage vs your total odometer change · they should add up</li>
+    </ol>
+
+    <h2>IV · What gets you in trouble</h2>
+    <ul>
+      <li><strong>Missing fuel receipts</strong> · #1 driver-caused IFTA cost</li>
+      <li><strong>Forgotten state-line miles</strong> · entire state gets allocated zero · audit math gets ugly</li>
+      <li><strong>Fuel + miles inconsistent</strong> · 500 gallons bought, 800 miles driven · MPG that defies physics</li>
+      <li><strong>Personal use mixed in</strong> · taking the truck home + back doesn't count as carrier miles unless documented</li>
+      <li><strong>Dead-head miles</strong> not recorded · empty miles still count for IFTA · all miles count</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Scan every fuel receipt before you walk away from the pump.</strong> X3 Compass's driver app lets you snap a photo · it auto-extracts the date, gallons, state, vendor, total · and ties it to your trip + truck. One missing receipt costs the carrier the full state tax on those gallons.
+    </div>
+  `,
+});
+
+/* ---- 45. ifta-employer-playbook ---- */
+
+export const iftaEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `IFTA · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "IFTA · employer playbook · base-jurisdiction filing",
+  bodyHTML: `
+    <h1>IFTA · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      IFTA is the highest-blast-radius compliance area that isn't FMCSA-regulated. Penalties compound across jurisdictions, audits go back 4 years, and a single missing receipt can disallow an entire fuel purchase. Treat the IFTA program with the same seriousness as DOT.
+    </div>
+
+    <h2>I · The standing carrier duties</h2>
+    <ol>
+      <li><strong>Register</strong> with your base jurisdiction · obtain IFTA license + decals · place decals on each side of every qualified vehicle</li>
+      <li><strong>Track miles by jurisdiction</strong> for every qualifying vehicle · monthly + roll-up quarterly</li>
+      <li><strong>Track fuel purchases by jurisdiction</strong> · gallons + tax-paid amount</li>
+      <li><strong>File the quarterly return</strong> · April 30 / July 31 / October 31 / January 31</li>
+      <li><strong>Pay the net</strong> due to the base jurisdiction · they redistribute</li>
+      <li><strong>Retain records</strong> for 4 years from due date of the return (or actual filing if later)</li>
+    </ol>
+
+    <h2>II · The data flow</h2>
+    <table>
+      <thead><tr><th style="width:35%">Source</th><th>What you collect</th></tr></thead>
+      <tbody>
+        <tr><td>ELD or GPS</td><td>Miles per jurisdiction per vehicle · timestamped</td></tr>
+        <tr><td>Fuel-card system (Comdata, EFS, etc.)</td><td>Gallons + jurisdiction + price + vehicle</td></tr>
+        <tr><td>Cash / card receipts</td><td>Same fields manually entered + receipt image</td></tr>
+        <tr><td>Trip envelopes</td><td>Driver-recorded miles + fuel for hand-filed routes</td></tr>
+        <tr><td>Bulk fuel deliveries (if you operate a fuel island)</td><td>Gallons dispensed + state where dispensed + tax-paid invoices</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · The quarterly close ritual</h2>
+    <ol>
+      <li><strong>Reconcile ELD miles vs odometer reports</strong> · catch GPS dropouts</li>
+      <li><strong>Reconcile fuel-card data vs receipts</strong> · catch missing transactions</li>
+      <li><strong>Calculate fleet MPG</strong> · total miles ÷ total gallons</li>
+      <li><strong>Allocate gallons consumed per state</strong> · miles in state ÷ fleet MPG</li>
+      <li><strong>Apply state tax rates</strong> · current rate × consumed gallons = tax owed per state</li>
+      <li><strong>Subtract tax-paid credits</strong> · gallons purchased per state × rate = credit per state</li>
+      <li><strong>Net per state · sum across states</strong> · this is the return total</li>
+      <li><strong>File + pay</strong> via your base jurisdiction's IFTA portal</li>
+    </ol>
+
+    <h2>IV · Audit findings + how to avoid them</h2>
+    <ul>
+      <li><strong>Missing receipts</strong> · most common · disallow the tax-paid credit + bill the full tax on consumed gallons · 4 years' worth · brutal · fix by scanning every receipt the day it's purchased</li>
+      <li><strong>Mileage by jurisdiction unsupported</strong> · the ELD output doesn't break out by state, hand records aren't in file · fix by using an ELD with state-line tracking or a dedicated IFTA app</li>
+      <li><strong>MPG outside reasonable range</strong> · 4-12 MPG for diesel CMVs · outside is audit-bait</li>
+      <li><strong>Personal use mileage in business miles</strong> · driver taking truck home counted as business · separate personal use from IFTA</li>
+      <li><strong>No proof of decals on vehicles</strong> · photo each cab's decal annually · file in unit's maintenance record</li>
+      <li><strong>Zero-return not filed</strong> · forgot to file a quarter because there was no activity · still owes the filing · $50-200 penalty + interest</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Run the IFTA reconciliation mid-quarter</strong> · not in the final week. The patterns auditors flag (MPG anomalies, missing receipts, mileage gaps) are easy to fix when caught early + nightmare when found 18 months later in an audit.
+    </div>
+  `,
+});
+
+/* ---- 46. accidents-auditor-export-guide ---- */
+
+export const accidentsAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
+  title: `Accidents · Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Accidents · auditor reference · 49 CFR §390.15",
+  bodyHTML: `
+    <h1>Accidents · auditor export guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · audit window <strong>${escapeHtml(data.auditWindow || "last 3 years")}</strong></p>
+
+    <div class="callout">
+      §390.15 requires every motor carrier to maintain an Accident Register for 3 years. Every DOT-reportable accident must be in it. Investigators cross-reference the register against state SDR data, your insurance claims, and roadside inspection reports involving the same units · gaps trigger deeper review.
+    </div>
+
+    <h2>I · The Accident Register elements (§390.15(b))</h2>
+    <ol>
+      <li>Date of accident</li>
+      <li>City or town + state where accident occurred</li>
+      <li>Driver name</li>
+      <li>Number of injuries</li>
+      <li>Number of fatalities</li>
+      <li>Whether hazardous materials (other than fuel from the tractor tank) were released</li>
+      <li>Copy of any accident report required by State / local authority</li>
+    </ol>
+
+    <h2>II · Per-accident audit pull</h2>
+    <ol>
+      <li><strong>Accident Register entry</strong> · with all 7 elements</li>
+      <li><strong>Police accident report</strong> · attached</li>
+      <li><strong>Post-accident D&A test result + decision documentation</strong> · §382.303 applied · if not tested, the documented reason</li>
+      <li><strong>ELD output</strong> for 24 hours surrounding the accident</li>
+      <li><strong>DVIRs</strong> for the unit covering the 7 days before the accident</li>
+      <li><strong>Maintenance + repair records</strong> for the unit, last 6 months</li>
+      <li><strong>Driver's HOS records</strong> for the 8 days surrounding the accident</li>
+      <li><strong>Driver file</strong> · all §391.51 documents · current at time of accident</li>
+      <li><strong>Insurance claim file</strong> · if any</li>
+      <li><strong>CPDP filing</strong> · if you challenged the crash's preventability · with FMCSA decision letter</li>
+    </ol>
+
+    <h2>III · What investigators cross-reference</h2>
+    <table>
+      <thead><tr><th style="width:40%">Source A</th><th style="width:40%">Source B</th><th>What gets flagged</th></tr></thead>
+      <tbody>
+        <tr><td>State SDR for the same crash</td><td>Your Accident Register</td><td>SDR exists but no register entry · failure to record</td></tr>
+        <tr><td>Driver's HOS records</td><td>Time of crash</td><td>Driver was over 11 hr drive or 14 hr window · acute HOS violation contributing to crash</td></tr>
+        <tr><td>Maintenance records</td><td>Cause of crash</td><td>Mechanical issue caused crash + appears as known defect in prior DVIR · negligent maintenance</td></tr>
+        <tr><td>Post-accident D&A test result</td><td>Crash severity criteria</td><td>Test required by §382.303 but not done + no documented reason</td></tr>
+        <tr><td>Roadside inspection violations</td><td>Crashes following the violation</td><td>Pattern of OOS defects on the unit · CSA + audit risk</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · The X3 Compass accident audit packet</h2>
+    <ol>
+      <li>Navigate to <strong>Audit Export</strong> · select scope <strong>Accidents</strong></li>
+      <li>Select date range</li>
+      <li>Click <strong>Generate audit packet</strong> · X3 builds: Accident Register table + per-accident PDF bundle (register entry, police report, D&A test result, ELD pull, DVIR window, maintenance records, driver file snapshot, CPDP filing)</li>
+      <li>The packet is timestamped + lineage-traced via the audit ledger</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The audit defense is the per-accident packet</strong> · not the register table. Investigators want to see that, for every entry, you can produce the surrounding evidence in seconds. If you can't, the register entry itself becomes suspect.
+    </div>
+  `,
+});
+
+/* ---- 47. medical-card-auditor-export-guide ---- */
+
+export const medicalCardAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
+  title: `Medical Card · Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Medical card · auditor reference · 49 CFR §391.41-§391.45",
+  bodyHTML: `
+    <h1>Medical card · auditor export guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · audit window <strong>${escapeHtml(data.auditWindow || "current + 3 prior years")}</strong></p>
+
+    <div class="callout">
+      Medical-card violations are the #1 driver-related citation in CSA. An auditor will sample drivers + check whether (a) the cert was current at every moment of operation, (b) the examiner was on the NRCME at the time of exam, (c) CDLIS showed certified status.
+    </div>
+
+    <h2>I · Per-driver pull</h2>
+    <ol>
+      <li><strong>Current medical examiner's certificate</strong> · paper copy + scan in driver file</li>
+      <li><strong>Prior medical certificates</strong> · for the audit window · in chronological order</li>
+      <li><strong>NRCME verification log entries</strong> · examiner name + registry ID + date verified · for each exam</li>
+      <li><strong>CDLIS status confirmation</strong> · screenshot or printout showing "certified" with the corresponding effective date</li>
+      <li><strong>Short-cert documentation</strong> · for any 1-year or 3-month card · the underlying condition + treating-provider letter + compliance evidence (CPAP report, A1c result, BP log)</li>
+      <li><strong>FMCSA exemption letters</strong> · for ITDM, vision, hearing, or seizure exemptions if applicable</li>
+    </ol>
+
+    <h2>II · What the auditor looks for</h2>
+    <ul>
+      <li><strong>Gap in coverage</strong> · any day where the driver was on the road without a valid card</li>
+      <li><strong>Examiner not on NRCME at time of exam</strong> · the registry is real-time · check at the time of exam, not the time of audit</li>
+      <li><strong>CDLIS "not certified"</strong> · paper card was current but state wasn't updated · acute OOS</li>
+      <li><strong>Short-cert ignored</strong> · 3-month card became 18 months · no renewal record</li>
+      <li><strong>ITDM driver without exemption</strong> · insulin-treated driver still operating without §391.46 exemption</li>
+      <li><strong>Vision / hearing exemption expired</strong> · annual reverification skipped</li>
+    </ul>
+
+    <h2>III · The verification log format</h2>
+    <table>
+      <thead><tr><th>Driver</th><th>Exam date</th><th>Examiner name</th><th>NRCME #</th><th>Verified by + date</th><th>Cert expires</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Maintain a per-carrier log AND a per-driver file entry. The cross-reference is what defends the program in an audit.</p>
+
+    <h2>IV · The X3 Compass medical-card audit packet</h2>
+    <ol>
+      <li>Navigate to <strong>Audit Export</strong> · select scope <strong>Medical Cards</strong></li>
+      <li>Select drivers + window</li>
+      <li>Click <strong>Generate audit packet</strong> · X3 builds: per-driver cert history, NRCME verification log entries, CDLIS status snapshots, exemption letters, short-cert compliance evidence</li>
+      <li>The packet has version + content hash · audit-traceable</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The verification date matters as much as the cert itself.</strong> A driver presents a card from an unregistered examiner · if you didn't verify NRCME at the time, you don't have a valid medical certification. The §391.23(m) finding is one of the most-cited in any DQF audit.
+    </div>
+  `,
+});
+
+/* ---- 48. inspections-employer-playbook ---- */
+
+export const inspectionsEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Inspections · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Inspections · employer playbook · 49 CFR §396",
+  bodyHTML: `
+    <h1>Roadside inspections · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      Each roadside inspection generates one CSA event. The cumulative score from your inspections drives 4 of the 7 BASICs. Treat the post-inspection workflow as the single highest-leverage operational ritual you run.
+    </div>
+
+    <h2>I · The 24-hour / 15-day / 30-day clock</h2>
+    <table>
+      <thead><tr><th style="width:18%">When</th><th>Carrier action</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Driver delivers report</strong></td><td>Driver hands carrier a copy within 24 hr</td><td><span class="cfr">§396.9(d)(1)</span></td></tr>
+        <tr><td><strong>Within 15 days</strong></td><td>Carrier signs the §396.9(d)(3) certification, documents every correction, returns the original to issuing state</td><td><span class="cfr">§396.9(d)(3)</span></td></tr>
+        <tr><td><strong>Within 30 days</strong></td><td>CSA score updates · review impact · open DataQ challenges for any incorrect violations</td><td>SMS</td></tr>
+        <tr><td><strong>Within 60 days</strong></td><td>Document corrective training, retraining, or progressive discipline for the driver</td><td>Industry practice</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · The post-inspection workflow</h2>
+    <ol>
+      <li><strong>Driver uploads report</strong> · ideally via X3 Compass mobile · scan or photo · within 24 hr</li>
+      <li><strong>Safety reviews</strong> · check every violation against actual vehicle / driver / paperwork · note OOS items</li>
+      <li><strong>Truck stays OOS until corrected</strong> · for any OOS-marked defect · §396.9(c)(2)</li>
+      <li><strong>Mechanic certifies repairs</strong> · on the same report or carrier's internal form</li>
+      <li><strong>Driver review-signs</strong> · before driving the unit again · acknowledges repair</li>
+      <li><strong>Carrier signs §396.9(d)(3) certification</strong> · "this report has been received, the violations listed have been corrected, and a copy of this report is being kept on file"</li>
+      <li><strong>Return original to issuing state</strong> · via mail or upload (state-specific)</li>
+      <li><strong>File a copy</strong> in the unit's maintenance record + the driver's file · 12 months minimum</li>
+      <li><strong>If a violation is wrong</strong> · open DataQ challenge within 30 days · upload evidence</li>
+    </ol>
+
+    <h2>III · The DataQ filter</h2>
+    <p>For every violation, decide:</p>
+    <ul>
+      <li><strong>Accurate + uncontested</strong> · accept · document corrective action · pay any fine · close</li>
+      <li><strong>Accurate but wrong CFR cited</strong> · DataQ challenge to reclassify · reduces severity weight if successful</li>
+      <li><strong>Inaccurate · OOS that wasn't OOS</strong> · DataQ challenge with measurement evidence · high success rate</li>
+      <li><strong>Inaccurate · wrong driver / wrong unit</strong> · DataQ challenge with photo / log evidence · clear-cut</li>
+      <li><strong>Inaccurate · inspector procedural error</strong> · DataQ challenge citing FMCSA Inspection Procedures Manual · narrow but legitimate</li>
+    </ul>
+
+    <h2>IV · Pattern monitoring + driver coaching</h2>
+    <ol>
+      <li><strong>Per-driver inspection rate</strong> · track violations per inspection per driver · spot patterns</li>
+      <li><strong>Per-unit defect history</strong> · same defect twice on the same unit = maintenance program failure</li>
+      <li><strong>Per-state inspection rate</strong> · some states inspect at 3-5× the national rate · expect more events in those lanes</li>
+      <li><strong>Monthly inspection review meeting</strong> · safety + operations + maintenance · review every event from the past 30 days · what went wrong, what changed</li>
+      <li><strong>Driver coaching</strong> · for any driver with 2+ inspections in 30 days with violations · sit-down + retraining + documented in driver file</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The 15-day certified-correction window is the single most-missed compliance deadline in trucking.</strong> A signed certification, mailed in an envelope, takes 5 minutes · missing it locks the violations into your CSA score permanently. X3 Compass auto-generates the §396.9(d)(3) cover letter on inspection upload.
+    </div>
+  `,
+});
+
+/* ---- 49. annual-violation-self-cert · §391.27 driver-completes form ---- */
+
+export const annualViolationSelfCert: TemplateFn<{ carrierName?: string; driverName?: string; certYear?: string }> = (data) => ({
+  version: "1.0",
+  title: `Annual Violation Self-Cert · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Annual violation self-certification · 49 CFR §391.27",
+  bodyHTML: `
+    <h1>Annual driver's certification of violations</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong> · certification for year <strong>${escapeHtml(data.certYear || "____________")}</strong></p>
+
+    <div class="callout">
+      §391.27 requires each commercial motor vehicle driver to furnish their employer, by the anniversary date each year, a list of all motor-vehicle violations of which the driver has been convicted (or forfeited bond / collateral) during the preceding 12 months.
+    </div>
+
+    <h2>I · Driver's certification</h2>
+    <p>I, the undersigned, am required by 49 CFR §391.27 to list, on the form below, all violations of motor vehicle traffic laws and ordinances (other than violations involving only parking) for which I have been convicted, or forfeited bond or collateral, during the past 12 months.</p>
+
+    <h2>II · Violation list (past 12 months)</h2>
+    <table>
+      <thead><tr><th style="width:15%">Date of conviction</th><th style="width:30%">Violation / charge</th><th style="width:18%">Location (city / state)</th><th style="width:22%">Type of CMV / personal vehicle</th><th style="width:15%">Penalty</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <p>☐ <strong>None</strong> · I have not been convicted of, nor forfeited bond or collateral for, any motor-vehicle violation (other than parking) during the past 12 months.</p>
+
+    <h2>III · Certification</h2>
+    <p>I certify that the above information is true and complete to the best of my knowledge. I understand that:</p>
+    <ul>
+      <li>Furnishing false information is grounds for disqualification</li>
+      <li>Omitting a conviction known to me is itself a violation of §391.27</li>
+      <li>My carrier will cross-reference this list against my MVR · any discrepancy will be investigated</li>
+      <li>Any state-issued conviction must be reported to my CDL-issuing state within 30 days · §383.31 · regardless of vehicle (CMV or personal)</li>
+    </ul>
+
+    <table style="margin-top: 0.3in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Driver signature</div></td><td style="width:40%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Driver printed name</div></td><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">CDL number + state</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">This certification satisfies 49 CFR §391.27. File in the driver's DQ file. Retain for the duration of employment plus 3 years.</p>
+  `,
+});
+
+/* ---- 50. road-test-certificate · §391.31 + §391.33 ---- */
+
+export const roadTestCertificate: TemplateFn<{ carrierName?: string; driverName?: string; examinerName?: string; testDate?: string; vehicleType?: string }> = (data) => ({
+  version: "1.0",
+  title: `Road Test Certificate · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Road test certificate · 49 CFR §391.31",
+  bodyHTML: `
+    <h1>Road test certificate</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong> · tested <strong>${escapeHtml(data.testDate || "____________")}</strong></p>
+
+    <div class="callout">
+      §391.31 requires every motor carrier to road-test a driver (or accept §391.33 equivalent CDL on file) before placing them in safety-sensitive duty. This certificate documents the road test and goes in the driver's §391.51 DQ file.
+    </div>
+
+    <h2>I · Vehicle used for the road test</h2>
+    <p><strong>Type of vehicle / configuration:</strong> ${escapeHtml(data.vehicleType || "____________________________________")} (e.g., Class A combination tractor-semitrailer · Class B straight truck · Class C with hazmat / passenger endorsement)</p>
+    <p class="meta">§391.31(d): The road test must be given in the type of motor vehicle that the driver will operate.</p>
+
+    <h2>II · Test items inspected + driver demonstrated · §391.31(c)</h2>
+    <table>
+      <thead><tr><th style="width:65%">Item</th><th style="width:35%">Satisfactory? (✓ / ✗)</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-trip inspection of the vehicle · driver demonstrates DVIR walk-around</td><td>____________</td></tr>
+        <tr><td>Coupling + uncoupling of trailer (if applicable)</td><td>____________</td></tr>
+        <tr><td>Placement of vehicle in operation · proper position, mirrors, controls</td><td>____________</td></tr>
+        <tr><td>Use of vehicle's controls · steering, gearshift, brakes</td><td>____________</td></tr>
+        <tr><td>Operating vehicle in traffic + passing other vehicles</td><td>____________</td></tr>
+        <tr><td>Turning the vehicle · left + right · various street widths</td><td>____________</td></tr>
+        <tr><td>Braking + slowing vehicle by means other than brakes (engine, retarder)</td><td>____________</td></tr>
+        <tr><td>Backing + parking the vehicle · straight, alley dock, parallel</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Examiner's evaluation</h2>
+    <p>Based on the road test, the driver named above:</p>
+    <ul>
+      <li>☐ <strong>Passed</strong> · demonstrates sufficient skill to operate the type of vehicle indicated</li>
+      <li>☐ <strong>Failed</strong> · does not demonstrate sufficient skill · re-test required</li>
+      <li>☐ <strong>Partial pass with corrective training</strong> · skill demonstrated but specific items need remediation before independent operation</li>
+    </ul>
+
+    <p>Corrective training items (if applicable):</p>
+    <p style="border-bottom: 1px solid #94A3B8; min-height: 0.5in;">&nbsp;</p>
+    <p style="border-bottom: 1px solid #94A3B8; min-height: 0.5in;">&nbsp;</p>
+
+    <h2>IV · Certification</h2>
+    <p>I certify that the above-named driver was given a road test under my supervision on the date shown, consisting of the operations and maneuvers described above, in a motor vehicle of the type the driver is to operate. The road test was sufficient to enable me to evaluate the driver's skill to handle the motor vehicle.</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Examiner signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Examiner: ${escapeHtml(data.examinerName || "____________________")}</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Examiner title + qualifications</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">Pursuant to §391.33, a CDL of the proper class held by the driver from a state that requires a road test for that class is an acceptable equivalent. In that case, the CDL copy serves in place of this certificate. Otherwise, file this certificate in the driver's DQ file. Retain for duration of employment + 3 years.</p>
+  `,
+});
+
+/* ---- 51. driver-application-form · §391.21 long-form ---- */
+
+export const driverApplicationForm: TemplateFn<{ carrierName?: string; applicantName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Driver Application for Employment · ${data.applicantName || "Applicant"}`,
+  headerSubtitle: "Driver application · 49 CFR §391.21",
+  bodyHTML: `
+    <h1>Application for employment · CDL driver</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · applicant <strong>${escapeHtml(data.applicantName || "____________")}</strong></p>
+
+    <div class="callout">
+      §391.21 requires the driver application to capture specific information before a motor carrier may employ a driver. This form satisfies §391.21(b)(1)-(11). All sections must be completed; "N/A" if a section does not apply.
+    </div>
+
+    <h2>I · Applicant identification</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:35%">Full legal name</td><td>____________________________________________</td></tr>
+        <tr><td>Date of birth</td><td>____________________________________________</td></tr>
+        <tr><td>Social Security number (last 4)</td><td>____________________________________________</td></tr>
+        <tr><td>Current address</td><td>____________________________________________</td></tr>
+        <tr><td>Phone</td><td>____________________________________________</td></tr>
+        <tr><td>Email</td><td>____________________________________________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · 3-year residence history · §391.21(b)(2)</h2>
+    <table>
+      <thead><tr><th>From / to</th><th>City + state</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________________________________________</td></tr>
+        <tr><td>____________</td><td>____________________________________________</td></tr>
+        <tr><td>____________</td><td>____________________________________________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · License + certifications · §391.21(b)(3)-(5)</h2>
+    <table>
+      <thead><tr><th>State</th><th>License #</th><th>Class + endorsements</th><th>Expires</th><th>Issued</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+    <p>Have you ever held a CDL in any other state? ☐ Yes ☐ No · If yes, list above.</p>
+    <p>Has your CDL ever been suspended, revoked, or canceled? ☐ Yes ☐ No · If yes, explain: ______________________________</p>
+
+    <h2>IV · 10-year employment history · §391.21(b)(10)</h2>
+    <p>List ALL employment, including unemployment + military service, in chronological order from most recent. Specifically identify each employer where you operated a CMV. Use additional sheets if needed.</p>
+    <table>
+      <thead><tr><th style="width:18%">From / to</th><th>Employer + address</th><th>Position</th><th>Reason for leaving</th><th>CMV?</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>Y / N</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>Y / N</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>Y / N</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>Y / N</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td><td>Y / N</td></tr>
+      </tbody>
+    </table>
+
+    <h2>V · Accidents + violations · §391.21(b)(7)-(9)</h2>
+    <p>List all motor-vehicle accidents in which you were involved during the past 3 years:</p>
+    <table>
+      <thead><tr><th style="width:18%">Date</th><th>Location</th><th>Nature (fatality / injury / property)</th><th>Hazmat released?</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+    <p>List all motor-vehicle traffic-law violation convictions during the past 3 years (other than parking):</p>
+    <table>
+      <thead><tr><th style="width:18%">Date</th><th>Charge</th><th>Location</th><th>Penalty</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+        <tr><td>____________</td><td>____________</td><td>____________</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>VI · Driver certification · §391.21(b)(11)</h2>
+    <p>I certify that I am physically qualified to drive a motor vehicle under §391.41 and that my answers above are true and complete to the best of my knowledge. I understand that any false statement may result in disqualification under §391.15.</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Applicant signature</div></td><td style="width:40%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">This form satisfies 49 CFR §391.21. File in the driver's DQ file. Retain for the duration of employment + 3 years (§391.51(d)).</p>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -2858,6 +3373,14 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "mvr-employer-playbook": mvrEmployerPlaybook as TemplateFn,
   "mvr-auditor-export-guide": mvrAuditorExportGuide as TemplateFn,
   "inspections-driver-quickguide": inspectionsDriverQuickGuide as TemplateFn,
+  "ifta-driver-guide": iftaDriverGuide as TemplateFn,
+  "ifta-employer-playbook": iftaEmployerPlaybook as TemplateFn,
+  "accidents-auditor-export-guide": accidentsAuditorExportGuide as TemplateFn,
+  "medical-card-auditor-export-guide": medicalCardAuditorExportGuide as TemplateFn,
+  "inspections-employer-playbook": inspectionsEmployerPlaybook as TemplateFn,
+  "annual-violation-self-cert": annualViolationSelfCert as TemplateFn,
+  "road-test-certificate": roadTestCertificate as TemplateFn,
+  "driver-application-form": driverApplicationForm as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
