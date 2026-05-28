@@ -1,82 +1,45 @@
-"use client";
-
 /* ============================================================
    X3 COMPASS · HAZMAT CENTER (in-app)
    ------------------------------------------------------------
-   Mirrors app.x3compass.com/hazmat-center.html · the canonical
-   static reference Joshua approved. This page reuses the
-   static CSS verbatim from /public/hazmat-center.css so visual
-   parity is automatic — markup must match the static file's
-   hz-* class names exactly.
+   SERVER COMPONENT · prerenders statically (output: "export").
+   Mirrors app.x3compass.com/hazmat-center.html 1:1, using the
+   verbatim static CSS at /public/hazmat-center.css for parity.
+
+   The only interactive island is <HazmatPlacardDemo />, a
+   small client component for the live UN→placard demo.
 
    Sections (in order):
      1. Hero v3 · placard wall + tanker photo + instrument cluster
      2. Credibility strip · 4 stats
-     3. Stakes · "PHMSA doesn't negotiate." 3 cards
-     4. Demo · "Try it before you talk to anyone." live placard
+     3. Stakes · "PHMSA doesn't negotiate." · 3 cards
+     4. Demo · "Try it before you talk to anyone."
      5. Flagship trio · Placard Wizard / Concierge / Audit Vault
-     6. Included · "Seven more tools. Same $99." 7-card grid
+     6. Included · "Seven more tools. Same $99." · 7-card grid
      7. Proof · Marcus Halloran quote
      8. FAQ · 5 questions
      9. Final CTA
    ============================================================ */
 
-import { useEffect, useRef, useState } from "react";
-import Script from "next/script";
 import AppShell from "@/components/AppShell";
-
-const DEMO_DATA: Record<string, { name: string; cls: string; classDesc: string }> = {
-  "1203": { name: "Gasoline",                  cls: "3",   classDesc: "Class 3 · Flammable Liquid · PG II" },
-  "1993": { name: "Flammable Liquid, n.o.s.",  cls: "3",   classDesc: "Class 3 · Flammable Liquid · PG II/III" },
-  "3480": { name: "Lithium-Ion Batteries",     cls: "9",   classDesc: "Class 9 · Misc Dangerous Goods · No PG" },
-  "1830": { name: "Sulfuric Acid",             cls: "8",   classDesc: "Class 8 · Corrosive · PG II" },
-  "1075": { name: "Liquefied Petroleum Gases (LPG)", cls: "2.1", classDesc: "Class 2.1 · Flammable Gas · No PG" },
-};
+import HazmatPlacardDemo from "./HazmatPlacardDemo";
 
 const PLACARD_WALL = [
   "class-3.svg", "class-2.1.svg", "class-8.svg",
   "class-6.1.svg", "class-7.svg", "class-5.1.svg", "class-1.1.svg",
 ];
 
-declare global {
-  // eslint-disable-next-line no-var
-  var renderPlacardSvg: ((cls: string, un: string, size: number) => string) | undefined;
-}
-
 export default function HazmatCenterPage() {
-  const [un, setUn] = useState("1203");
-  const placardWrapRef = useRef<HTMLDivElement | null>(null);
-
-  // Re-render the demo placard whenever the UN changes.
-  useEffect(() => {
-    const data = DEMO_DATA[un];
-    const wrap = placardWrapRef.current;
-    if (!wrap || !data) return;
-    if (typeof window.renderPlacardSvg === "function") {
-      wrap.innerHTML = window.renderPlacardSvg(data.cls, un, 200);
-    } else {
-      // Fallback until placard-render.js loads
-      wrap.innerHTML = `<div style="width:200px;height:200px;background:rgba(0,178,253,0.1);border:2px solid #00B2FD;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#67E8F9;font-weight:800;">UN ${un}</div>`;
-    }
-  }, [un]);
-
-  const handleUnChange = (next: string) => {
-    const cleaned = next.replace(/\D/g, "").trim();
-    setUn(cleaned || "1203");
-  };
-  const data = DEMO_DATA[un] ?? DEMO_DATA["1203"];
-
   return (
     <AppShell title="Hazmat Center" crumbs="HAZMAT CENTER · 49 CFR Parts 171-180">
-      {/* Load the canonical static stylesheet · ensures visual parity */}
+      {/* Canonical static stylesheet · ensures pixel parity with app.x3compass.com */}
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/hazmat-center.css" />
-
-      {/* Load the static placard renderer (sets window.renderPlacardSvg) */}
-      <Script src="/placard-render.js" strategy="afterInteractive" />
+      {/* Static placard renderer (sets window.renderPlacardSvg) · plain <script defer> is
+          friendlier to static export than <Script strategy="afterInteractive"/> */}
+      <script src="/placard-render.js" defer></script>
 
       <main className="main" style={{ background: "var(--bg)" }}>
-        {/* ============== HERO v3 — Placard Wall + Tanker ============== */}
+        {/* ============== HERO v3 ============== */}
         <section className="hz-hero-v3" aria-labelledby="hero-h1">
           <div className="hz-placard-wall" aria-hidden="true">
             {PLACARD_WALL.map((f) => (
@@ -186,7 +149,7 @@ export default function HazmatCenterPage() {
           </div>
         </section>
 
-        {/* ============== DEMO (LIVE) ============== */}
+        {/* ============== DEMO (LIVE · client island) ============== */}
         <section className="hz-demo" id="hz-demo" aria-labelledby="demo-h">
           <div className="hz-demo-head">
             <div>
@@ -195,40 +158,7 @@ export default function HazmatCenterPage() {
             </div>
             <span className="hz-demo-live-tag">LIVE</span>
           </div>
-          <div className="hz-demo-stage">
-            <div className="hz-demo-input-block">
-              <label htmlFor="demo-un-input">UN / NA ID</label>
-              <input
-                id="demo-un-input"
-                className="hz-demo-input"
-                type="text"
-                inputMode="numeric"
-                placeholder="1203"
-                value={un}
-                autoComplete="off"
-                aria-describedby="demo-suggestions"
-                onChange={(e) => handleUnChange(e.target.value)}
-              />
-              <div className="hz-demo-suggestions" id="demo-suggestions" aria-label="Try these examples">
-                {Object.entries(DEMO_DATA).map(([k]) => (
-                  <button key={k} type="button" className="hz-demo-chip" onClick={() => setUn(k)}>
-                    UN {k}
-                  </button>
-                ))}
-              </div>
-              <div className="hz-demo-meta">
-                This is a live preview of the Placard Wizard. The full tool adds mixed-load DANGEROUS detection, specialty markings, Class 1 compatibility groups, and a UN-number plate generator.
-              </div>
-            </div>
-            <div className="hz-demo-result" id="demo-result">
-              <div className="hz-demo-result-name">{data.name}</div>
-              <div className="hz-demo-result-class">{data.classDesc}</div>
-              <div className="hz-demo-placard-wrap" ref={placardWrapRef} aria-live="polite" />
-              <div className="hz-demo-cite">
-                Required placard per <strong>49 CFR § 172.504</strong>
-              </div>
-            </div>
-          </div>
+          <HazmatPlacardDemo />
           <div className="hz-demo-footer">
             <a className="hz-cta-primary" href="/app/hazmat/placard-wizard" style={{ textDecoration: "none", display: "inline-block" }}>
               Run the Full Workflow →
@@ -267,7 +197,7 @@ export default function HazmatCenterPage() {
           </div>
         </section>
 
-        {/* ============== EVERYTHING ELSE INCLUDED ============== */}
+        {/* ============== INCLUDED · 7 MORE TOOLS ============== */}
         <section aria-labelledby="included-h">
           <div className="hz-section-head">
             <h2 id="included-h">Seven more tools. Same $99.</h2>
