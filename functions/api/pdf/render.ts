@@ -101,9 +101,16 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     return json({ ok: false, error: `Template render failed: ${e instanceof Error ? e.message : String(e)}` }, 500);
   }
 
+  // Version + content-hash fingerprint · gives every PDF a stable, tamper-
+  // evident identity that we put in the filename, the footer, and the audit
+  // log. Bumping `version` in the template emits a new identity; identical
+  // content always emits the same hash.
+  const templateVersion = output.version || "1.0";
+  const contentHash = await sha256Short(output.bodyHTML);
+
   const html = wrapBody(output.title, output.bodyHTML);
   const headerTemplate = buildHeaderTemplate(output.headerSubtitle);
-  const footerTemplate = buildFooterTemplate();
+  const footerTemplate = buildFooterTemplate(templateVersion, contentHash);
 
   // 4. POST to Cloudflare Browser Rendering /pdf
   const cfEndpoint = `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/browser-rendering/pdf`;
@@ -145,7 +152,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 
   // 5. Stream the PDF back to the caller
   const pdfBuf = await cfRes.arrayBuffer();
-  const filename = `${templateSlug}-${Date.now()}.pdf`;
+  // Filename pattern: {slug}-v{version}-{hash}.pdf
+  // Example: hos-driver-quickguide-v1.0-a3f9e22b.pdf
+  // Auditors can match this to the compass_pdf_generated row by version+hash.
+  const filename = `${templateSlug}-v${templateVersion}-${contentHash}.pdf`;
   const disposition = body.inline ? "inline" : "attachment";
 
   // 6. Audit log (best-effort · never blocks the response)
@@ -157,6 +167,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         user_id: user.sub,
         source: "render",
         template_slug: templateSlug,
+        template_version: templateVersion,
+        content_hash: contentHash,
         byte_size: pdfBuf.byteLength,
       });
     }
@@ -169,7 +181,21 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       "Content-Length": String(pdfBuf.byteLength),
       "Content-Disposition": `${disposition}; filename="${filename}"`,
       "Cache-Control": "private, no-store",
+      "X-Pdf-Version": templateVersion,
+      "X-Pdf-Content-Hash": contentHash,
       "Access-Control-Allow-Origin": "*",
     },
   });
+}
+
+/**
+ * SHA-256(input).slice(0,4 bytes) as 8 hex chars · stable across reruns,
+ * changes whenever the body HTML changes. Cloudflare Workers expose Web
+ * Crypto natively · no dependencies.
+ */
+async function sha256Short(input: string): Promise<string> {
+  const buf = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", buf);
+  const bytes = new Uint8Array(digest).slice(0, 4);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
 }

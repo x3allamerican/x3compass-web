@@ -9,15 +9,18 @@
  * The endpoint should always return the PDF · audit gaps are surfaced via
  * the doctor-agent reliability stack rather than user-facing errors.
  *
- * Schema (created by 20260527e_pdf_audit.sql):
- *   id              uuid pk
- *   carrier_id      uuid · resolved from carrier_members by user_id
- *   user_id         uuid · the caller's auth.uid()
- *   source          text · 'render' | 'stamp' | 'merge'
- *   template_slug   text · e.g. 'letterhead-test', 'hazmat-audit-checklist',
- *                          a filename for stamp, 'merge:N' for merge with N inputs
- *   byte_size       integer · output PDF size in bytes
- *   generated_at    timestamptz default now()
+ * Schema (created by 20260527e_pdf_audit.sql, extended by
+ * 20260527f_pdf_version_hash.sql to add template_version + content_hash):
+ *   id                uuid pk
+ *   carrier_id        uuid · resolved from carrier_members by user_id
+ *   user_id           uuid · the caller's auth.uid()
+ *   source            text · 'render' | 'stamp' | 'merge'
+ *   template_slug     text · e.g. 'letterhead-test', 'hazmat-audit-checklist',
+ *                              a filename for stamp, 'merge:N' for merge with N inputs
+ *   template_version  text · semver-ish, e.g. '1.0' · only set for 'render'
+ *   content_hash      text · 8-char SHA-256 prefix · matches the PDF footer
+ *   byte_size         integer · output PDF size in bytes
+ *   generated_at      timestamptz default now()
  *
  * RLS · tenant isolation by carrier_id (read-only for the carrier, full
  *       write via service role from this helper).
@@ -37,6 +40,8 @@ export type PdfAuditEntry = {
   user_id: string;
   source: "render" | "stamp" | "merge";
   template_slug: string;
+  template_version?: string;
+  content_hash?: string;
   byte_size: number;
 };
 
@@ -67,6 +72,8 @@ export async function logPdfGenerated(env: SupaEnv, entry: PdfAuditEntry): Promi
       user_id: entry.user_id,
       source: entry.source,
       template_slug: entry.template_slug.slice(0, 120),
+      template_version: entry.template_version || null,
+      content_hash: entry.content_hash || null,
       byte_size: entry.byte_size,
     }),
   }).catch(() => { /* non-fatal */ });

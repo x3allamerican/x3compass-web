@@ -62,9 +62,17 @@ export function buildHeaderTemplate(subtitle?: string): string {
 }
 
 /**
- * Build the shared footerTemplate string · brand line + page X of Y.
+ * Build the shared footerTemplate string · brand line + version/hash + page X of Y.
+ *
+ * The version + content-hash give every generated PDF a tamper-evident
+ * fingerprint that matches the compass_pdf_generated audit row. Auditors can
+ * cross-reference the printed footer against the audit ledger to prove
+ * exactly which template version was in the cab on day X.
  */
-export function buildFooterTemplate(): string {
+export function buildFooterTemplate(version?: string, contentHash?: string): string {
+  const versionTag = version && contentHash
+    ? `<span style="font-family: 'SF Mono', Menlo, Consolas, monospace; color: #94A3B8;">v${escapeHtml(version)} · ${escapeHtml(contentHash)}</span>`
+    : "";
   return `
 <div style="
   width: 100%;
@@ -78,6 +86,7 @@ export function buildFooterTemplate(): string {
   border-top: 1px solid #CBD5E1;
 ">
   <span>${FOOTER_BRAND_LINE}</span>
+  ${versionTag}
   <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
 </div>`.trim();
 }
@@ -134,6 +143,11 @@ function escapeHtml(s: string): string {
 export type TemplateOutput = {
   title: string;
   bodyHTML: string;
+  /**
+   * Semver-ish template version · drives the filename, the footer fingerprint,
+   * and the audit-log row. Bump when content materially changes. Default "1.0".
+   */
+  version?: string;
   /** Optional override for the headerTemplate's subtitle slot */
   headerSubtitle?: string;
   /** Passed straight to Browser Rendering pdfOptions */
@@ -150,6 +164,7 @@ export type TemplateFn<T = Record<string, unknown>> = (data: T) => TemplateOutpu
 /* ---- 1. letterhead-test · minimal does-it-render proof ---- */
 
 export const letterheadTest: TemplateFn<{ carrierName?: string; userName?: string }> = (data) => ({
+  version: "1.0",
   title: "X3 Compass · Letterhead Test",
   headerSubtitle: "Letterhead test · sample document",
   bodyHTML: `
@@ -197,6 +212,7 @@ export const hazmatAuditChecklist: TemplateFn<{
 }> = (data) => {
   const today = new Date().toLocaleDateString("en-US", { dateStyle: "long" });
   return {
+    version: "1.0",
     title: `Hazmat Audit Checklist · ${data.carrierName || "Sample Carrier"}`,
     headerSubtitle: "Hazmat Center · §172 audit packet",
     bodyHTML: `
@@ -262,6 +278,7 @@ export const trainingCertificate: TemplateFn<{
   certNumber?: string;
   expiresOn?: string;
 }> = (data) => ({
+  version: "1.0",
   title: `Training Certificate · ${data.driverName || "Sample Driver"}`,
   headerSubtitle: "Training · § 172.704(d) record",
   bodyHTML: `
@@ -303,6 +320,7 @@ export const trainingCertificate: TemplateFn<{
 /* ---- 4. hos-driver-quickguide · driver cab reference ---- */
 
 export const hosDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
   title: `HOS Quick Guide for Drivers · ${data.driverName || "Sample Driver"}`,
   headerSubtitle: "HOS · driver reference · 49 CFR Part 395",
   bodyHTML: `
@@ -371,6 +389,7 @@ export const hosDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?
 /* ---- 5. hos-supervisor-playbook · daily-ops cheat sheet ---- */
 
 export const hosSupervisorPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
   title: `HOS Supervisor Playbook · ${data.carrierName || "Sample Carrier"}`,
   headerSubtitle: "HOS · carrier safety · supervisor playbook",
   bodyHTML: `
@@ -433,6 +452,7 @@ export const hosSupervisorPlaybook: TemplateFn<{ carrierName?: string; safetyDir
 /* ---- 6. hos-auditor-export-guide · what gets requested in an audit ---- */
 
 export const hosAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
   title: `HOS · Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
   headerSubtitle: "HOS · auditor reference · §395 records",
   bodyHTML: `
@@ -505,6 +525,7 @@ export const hosAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWind
 /* ---- 7. clearinghouse-driver-guide ---- */
 
 export const clearinghouseDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
   title: `FMCSA Clearinghouse · Driver Guide · ${data.driverName || "Sample Driver"}`,
   headerSubtitle: "Clearinghouse · driver reference · 49 CFR §382 Subpart G",
   bodyHTML: `
@@ -555,6 +576,7 @@ export const clearinghouseDriverGuide: TemplateFn<{ carrierName?: string; driver
 /* ---- 8. clearinghouse-employer-playbook ---- */
 
 export const clearinghouseEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
   title: `Clearinghouse Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
   headerSubtitle: "Clearinghouse · employer playbook · 49 CFR §382",
   bodyHTML: `
@@ -615,6 +637,7 @@ export const clearinghouseEmployerPlaybook: TemplateFn<{ carrierName?: string; s
 /* ---- 9. clearinghouse-ctpa-reference ---- */
 
 export const clearinghouseCtpaReference: TemplateFn<{ carrierName?: string; tpaName?: string }> = (data) => ({
+  version: "1.0",
   title: `Clearinghouse C-TPA Reference · ${data.tpaName || "Sample C-TPA"}`,
   headerSubtitle: "Clearinghouse · C-TPA scope · 49 CFR §382.711",
   bodyHTML: `
@@ -677,6 +700,7 @@ export const clearinghouseCtpaReference: TemplateFn<{ carrierName?: string; tpaN
 /* ---- 10. hazmat-driver-guide ---- */
 
 export const hazmatDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
   title: `Hazmat Driver Guide · ${data.driverName || "Sample Driver"}`,
   headerSubtitle: "Hazmat · driver reference · 49 CFR §172",
   bodyHTML: `
@@ -736,6 +760,7 @@ export const hazmatDriverGuide: TemplateFn<{ carrierName?: string; driverName?: 
 /* ---- 11. hazmat-employer-playbook ---- */
 
 export const hazmatEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
   title: `Hazmat Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
   headerSubtitle: "Hazmat · employer playbook · 49 CFR §172 + §107",
   bodyHTML: `
@@ -801,6 +826,7 @@ export const hazmatEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDi
 /* ---- 12. hazmat-training-provider-reference ---- */
 
 export const hazmatTrainingProviderReference: TemplateFn<{ carrierName?: string; trainerName?: string }> = (data) => ({
+  version: "1.0",
   title: `Hazmat Training Provider Reference · ${data.trainerName || "Sample Training Provider"}`,
   headerSubtitle: "Hazmat · training-provider reference · §172.704",
   bodyHTML: `
