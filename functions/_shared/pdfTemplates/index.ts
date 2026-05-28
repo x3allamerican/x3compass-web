@@ -498,6 +498,363 @@ export const hosAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWind
 });
 
 /* ============================================================
+   BATCH 2 · CLEARINGHOUSE audience guides (driver / employer / C-TPA)
+   49 CFR Part 382 Subpart G + §40 SAP rules
+   ============================================================ */
+
+/* ---- 7. clearinghouse-driver-guide ---- */
+
+export const clearinghouseDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  title: `FMCSA Clearinghouse · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Clearinghouse · driver reference · 49 CFR §382 Subpart G",
+  bodyHTML: `
+    <h1>FMCSA Clearinghouse · driver guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep with your CDL paperwork</p>
+
+    <div class="callout">
+      The Drug & Alcohol Clearinghouse is the federal database of CDL driver D&A violations. Employers must query it before they hire you and once a year while you drive for them. You have rights · this guide explains them.
+    </div>
+
+    <h2>I · What's in your record</h2>
+    <table>
+      <thead><tr><th style="width:46%">Event</th><th>How it gets there</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Verified positive drug test</td><td>MRO reports it to the Clearinghouse</td><td><span class="cfr">§382.705(a)</span></td></tr>
+        <tr><td>Alcohol test ≥ 0.04 BAC</td><td>Employer reports the confirmation result</td><td><span class="cfr">§382.705(b)</span></td></tr>
+        <tr><td>Test refusal</td><td>Employer or C-TPA reports the refusal</td><td><span class="cfr">§382.705(b)(4)</span></td></tr>
+        <tr><td>Actual knowledge (admission, citation, observed use)</td><td>Employer reports the determination</td><td><span class="cfr">§382.705(b)(3)</span></td></tr>
+        <tr><td>Return-to-duty completion</td><td>SAP reports it when you complete the program</td><td><span class="cfr">§382.705(d)</span></td></tr>
+        <tr><td>Follow-up testing plan completion</td><td>Employer reports when your plan is finished</td><td><span class="cfr">§382.705(e)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Your consent rights</h2>
+    <ol>
+      <li><strong>Pre-employment full query</strong> · The employer must get your <em>specific electronic consent</em> through the Clearinghouse portal before they can see your full record · <span class="cfr">§382.703(b)</span></li>
+      <li><strong>Annual limited query</strong> · The employer needs your <em>general written consent</em> once (kept in your DQ file) to run limited queries each year</li>
+      <li><strong>Refusing to consent</strong> · is allowed · but the employer must then remove you from safety-sensitive duty until consent is given</li>
+      <li><strong>Free access to your own record</strong> · Log into <em>clearinghouse.fmcsa.dot.gov</em>, click "My Dashboard" · see everything that's been reported about you</li>
+    </ol>
+
+    <h2>III · Return-to-duty process · if a violation is reported</h2>
+    <ol>
+      <li><strong>Removed from driving</strong> · You can't perform any safety-sensitive function (including driving any CMV) until you complete return-to-duty</li>
+      <li><strong>SAP evaluation</strong> · See a DOT-qualified Substance Abuse Professional · they assess and prescribe education/treatment · <span class="cfr">§40.281</span></li>
+      <li><strong>Education or treatment</strong> · Complete what the SAP prescribed</li>
+      <li><strong>SAP follow-up</strong> · Return for a second SAP visit · they confirm you completed the plan</li>
+      <li><strong>Return-to-duty test</strong> · Negative result required before you can drive again · <span class="cfr">§40.305</span></li>
+      <li><strong>Follow-up testing plan</strong> · At least 6 unannounced tests in 12 months · plan can extend to 5 years</li>
+    </ol>
+
+    <div class="callout">
+      <strong>You pay for SAP + treatment unless your employer or insurance covers it</strong> · costs typically run $1,500-3,500. Your job at the new employer is contingent on completing the plan.
+    </div>
+  `,
+});
+
+/* ---- 8. clearinghouse-employer-playbook ---- */
+
+export const clearinghouseEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  title: `Clearinghouse Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Clearinghouse · employer playbook · 49 CFR §382",
+  bodyHTML: `
+    <h1>Clearinghouse · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · operating duties under Part 382 Subpart G</p>
+
+    <div class="callout">
+      Every employer of CDL drivers has four standing Clearinghouse duties: query before hire, query annually, report violations within 3 business days, and pay the per-query fee. The penalties for missing any of them run up to $5,833 per violation (§386 Appendix B, 2024 adjustment).
+    </div>
+
+    <h2>I · The four standing duties</h2>
+    <table>
+      <thead><tr><th style="width:30%">Duty</th><th>What you do</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pre-employment full query</strong></td><td>Get driver's electronic consent in Clearinghouse · run full query · review any violations before allowing safety-sensitive duty</td><td><span class="cfr">§382.701(a)</span></td></tr>
+        <tr><td><strong>Annual limited query</strong></td><td>Once per year on every current driver · checks "is there anything new in the record" · upgrades to full query if hit</td><td><span class="cfr">§382.701(b)</span></td></tr>
+        <tr><td><strong>Report violations</strong></td><td>Within 3 business days of obtaining actual knowledge · positive test · refusal · alcohol ≥0.04</td><td><span class="cfr">§382.705(b)</span></td></tr>
+        <tr><td><strong>Report follow-up completion</strong></td><td>When a driver finishes their SAP-prescribed follow-up testing plan</td><td><span class="cfr">§382.705(e)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Designating a Consortium / Third-Party Administrator (C-TPA)</h2>
+    <p>You may use a C-TPA to run queries and report violations on your behalf · but the regulatory obligation stays with you. Designation is electronic, in the Clearinghouse:</p>
+    <ol>
+      <li><strong>Log into clearinghouse.fmcsa.dot.gov</strong> as the Clearinghouse Administrator for your USDOT</li>
+      <li><strong>Search and select your C-TPA</strong> from the directory · this creates the linkage</li>
+      <li><strong>Set permissions</strong> · query authority · reporting authority · both · <span class="cfr">§382.711</span></li>
+      <li><strong>Audit the relationship quarterly</strong> · the C-TPA can act for you · they can't carry the violation if they miss a query</li>
+    </ol>
+
+    <h2>III · Violations you must report within 3 business days</h2>
+    <ul>
+      <li><strong>Driver refused a required test</strong> · including failure to appear, leaving the collection site, adulterated specimen</li>
+      <li><strong>Actual knowledge of D&A use on duty</strong> · admission, citation for DUI/DWI in a CMV, observation</li>
+      <li><strong>Alcohol ≥ 0.04 BAC confirmation result</strong> · this is the employer's report (positives drug tests are MRO-reported)</li>
+      <li><strong>Negative return-to-duty test</strong> · upon driver's return to safety-sensitive duty after a SAP-cleared violation</li>
+      <li><strong>Follow-up testing plan completion</strong> · when the driver finishes the SAP-prescribed plan</li>
+    </ul>
+
+    <h2>IV · Recordkeeping</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Keep for</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-employment query result + driver consent</td><td>3 years</td><td><span class="cfr">§382.401(b)(1)(vii)</span></td></tr>
+        <tr><td>Annual query result + driver general consent</td><td>3 years</td><td><span class="cfr">§382.401(b)(1)(viii)</span></td></tr>
+        <tr><td>Violation reports filed</td><td>5 years</td><td><span class="cfr">§382.401(b)(1)(i)</span></td></tr>
+        <tr><td>SAP reports + return-to-duty + follow-up testing records</td><td>5 years</td><td><span class="cfr">§382.401(b)(1)(i)</span></td></tr>
+        <tr><td>C-TPA designation documents</td><td>3 years after designation ends</td><td><span class="cfr">§382.711(b)</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Most-cited finding:</strong> employer ran the pre-employment full query but didn't actually read it before putting the driver on the road. The query result must be reviewed and documented as reviewed before safety-sensitive duty begins · <span class="cfr">§382.701(a)(2)</span>.
+    </div>
+  `,
+});
+
+/* ---- 9. clearinghouse-ctpa-reference ---- */
+
+export const clearinghouseCtpaReference: TemplateFn<{ carrierName?: string; tpaName?: string }> = (data) => ({
+  title: `Clearinghouse C-TPA Reference · ${data.tpaName || "Sample C-TPA"}`,
+  headerSubtitle: "Clearinghouse · C-TPA scope · 49 CFR §382.711",
+  bodyHTML: `
+    <h1>Clearinghouse · C-TPA reference</h1>
+    <p class="meta">For ${escapeHtml(data.tpaName ? `${data.tpaName} · ` : "")}operating on behalf of <strong>${escapeHtml(data.carrierName || "designated employers")}</strong></p>
+
+    <div class="callout">
+      A Consortium / Third-Party Administrator can run queries and report violations on behalf of designated employers · but the regulatory obligation stays with the employer. This reference clarifies what you can and can't do under §382.711.
+    </div>
+
+    <h2>I · What the C-TPA can do</h2>
+    <ul>
+      <li><strong>Run pre-employment full queries</strong> when an employer designates you with query authority</li>
+      <li><strong>Run annual limited queries</strong> for every driver on each designating employer's roster</li>
+      <li><strong>Report driver violations</strong> on behalf of an employer with reporting authority designation</li>
+      <li><strong>Report return-to-duty completion + follow-up plan completion</strong> when the employer has assigned you that role</li>
+      <li><strong>Manage the random testing pool</strong> · maintain a consortium under §382.305 and pull selections from it</li>
+    </ul>
+
+    <h2>II · What the C-TPA can NOT do</h2>
+    <ul>
+      <li><strong>Cannot absorb the employer's liability</strong> · if you miss a query, the employer is still cited</li>
+      <li><strong>Cannot designate themselves</strong> · the employer must initiate designation in their Clearinghouse account</li>
+      <li><strong>Cannot release driver records without consent</strong> · driver-specific electronic consent is required for every full query · <span class="cfr">§382.703(b)</span></li>
+      <li><strong>Cannot retain query results indefinitely</strong> · must transmit to the designating employer within a reasonable window and maintain only what §382.401 requires</li>
+    </ul>
+
+    <h2>III · The C-TPA's recordkeeping responsibilities</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Who keeps the original</th><th>C-TPA copy?</th></tr></thead>
+      <tbody>
+        <tr><td>Employer designation document</td><td>FMCSA (electronic in Clearinghouse)</td><td>Yes · keep 3 years after designation ends</td></tr>
+        <tr><td>Query results</td><td>Designating employer</td><td>Copy retained per service agreement; transmit to employer promptly</td></tr>
+        <tr><td>Violation reports filed</td><td>FMCSA Clearinghouse + designating employer</td><td>Copy retained 5 years</td></tr>
+        <tr><td>Random testing pool selection lists</td><td>C-TPA</td><td>Original · 5 years</td></tr>
+        <tr><td>Driver consent records (electronic)</td><td>FMCSA Clearinghouse</td><td>Service-agreement copy recommended</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · Daily ritual for the C-TPA operations team</h2>
+    <ol>
+      <li><strong>Sweep designating employers' rosters</strong> · flag any new hires that haven't had a pre-employment full query yet</li>
+      <li><strong>Run + transmit annual limited queries</strong> per the carrier's calendar (we recommend a quarterly cohort instead of an end-of-year crunch)</li>
+      <li><strong>Process incoming violation notices</strong> · MRO positives, employer-reported refusals · file within 3 business days</li>
+      <li><strong>Monitor follow-up testing plans</strong> · ensure each driver on a plan is sampled per the SAP's prescription</li>
+      <li><strong>Quarterly account audit</strong> · with each designating employer, reconcile: drivers on roster vs drivers queried, violations on file vs violations reported</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The most common C-TPA failure mode is silent drift:</strong> an employer adds a driver mid-month and forgets to notify the C-TPA, the C-TPA misses the pre-employment query, the driver runs for 90 days before the gap is found in audit. X3 Compass closes this loop by syncing the carrier's driver table to the C-TPA's roster nightly.
+    </div>
+  `,
+});
+
+/* ============================================================
+   BATCH 3 · HAZMAT audience guides (driver / employer / training-provider)
+   49 CFR §172.700 series + §172.500 series + §172.200 series
+   ============================================================ */
+
+/* ---- 10. hazmat-driver-guide ---- */
+
+export const hazmatDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  title: `Hazmat Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Hazmat · driver reference · 49 CFR §172",
+  bodyHTML: `
+    <h1>Hazmat · driver quick guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep in the cab with your HM-endorsement docs</p>
+
+    <div class="callout">
+      Hazmat exposure isn't theoretical · a sloppy shipping paper or a missing placard can lead to a 7-figure penalty and a death investigation. This guide is the minimum every hazmat driver carries in the cab.
+    </div>
+
+    <h2>I · Shipping papers · what must be on them</h2>
+    <table>
+      <thead><tr><th style="width:48%">Element</th><th>Why it's there</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>UN/NA identification number</td><td>Tells responders what's onboard</td><td><span class="cfr">§172.202(a)(3)</span></td></tr>
+        <tr><td>Proper shipping name</td><td>Confirms the material's identity</td><td><span class="cfr">§172.202(a)(1)</span></td></tr>
+        <tr><td>Hazard class / division</td><td>Drives placarding, segregation, response</td><td><span class="cfr">§172.202(a)(2)</span></td></tr>
+        <tr><td>Packing group (if applicable)</td><td>Tells packaging + handling intensity</td><td><span class="cfr">§172.202(a)(4)</span></td></tr>
+        <tr><td>Total quantity + units</td><td>Drives reportable-quantity thresholds</td><td><span class="cfr">§172.202(a)(5)</span></td></tr>
+        <tr><td>Emergency response phone number</td><td>24/7, with material expertise behind it</td><td><span class="cfr">§172.604</span></td></tr>
+        <tr><td>Shipper's certification + signature</td><td>Confirms HMR-compliant prep</td><td><span class="cfr">§172.204</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Placards · what + where</h2>
+    <ol>
+      <li><strong>Four placards</strong> · one on each side and each end of the vehicle · <span class="cfr">§172.504(a)</span></li>
+      <li><strong>Match the hazard class</strong> on the shipping paper · use subsidiary placards if the material has more than one</li>
+      <li><strong>Visible from the direction it faces</strong> · readable from at least 50 ft in normal daylight</li>
+      <li><strong>Replace any placard</strong> that's faded, peeling, damaged, or wrong before you move</li>
+      <li><strong>Remove or cover placards</strong> when the vehicle no longer contains hazmat · <span class="cfr">§172.502(a)</span></li>
+    </ol>
+
+    <h2>III · Emergency response info · what to carry</h2>
+    <ul>
+      <li><strong>The shipping paper</strong> within immediate reach in the cab · driver's-side door pocket is standard</li>
+      <li><strong>Emergency response info</strong> · ERG (Emergency Response Guidebook) or shipper-supplied equivalent · <span class="cfr">§172.602</span></li>
+      <li><strong>24-hour response phone number</strong> on the shipping paper · keep your phone charged so responders can reach back-office</li>
+      <li><strong>Driver's hazmat endorsement + medical card</strong></li>
+    </ul>
+
+    <h2>IV · Security awareness · what you're trained on</h2>
+    <p>Every hazmat-licensed driver gets §172.704(a)(4)-(5) training. What you're expected to know:</p>
+    <ol>
+      <li><strong>Recognize a security threat</strong> · suspicious approach to the vehicle, attempted tampering, surveillance</li>
+      <li><strong>Practice route + parking discipline</strong> · don't leave the cab in high-risk areas · use lit + monitored parking</li>
+      <li><strong>Report incidents promptly</strong> · call your dispatcher + 911 · stay with the vehicle if safe</li>
+      <li><strong>Know the in-transit security plan</strong> if your shipment requires one (Table 1 / Table 2 materials)</li>
+    </ol>
+
+    <div class="callout">
+      <strong>If you're in doubt about whether placards or papers are right, do not move.</strong> An $80,000 fine and a CSA hit are 100% preventable by stopping for 10 minutes to call dispatch.
+    </div>
+  `,
+});
+
+/* ---- 11. hazmat-employer-playbook ---- */
+
+export const hazmatEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  title: `Hazmat Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Hazmat · employer playbook · 49 CFR §172 + §107",
+  bodyHTML: `
+    <h1>Hazmat · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · safety + compliance operating reference</p>
+
+    <div class="callout">
+      Hazmat employers have three independent compliance pillars: training (§172.704), security planning (§172.800 for the bad materials), and registration (§107.616 if you transport above threshold). Get the training matrix right · everything else cascades from it.
+    </div>
+
+    <h2>I · The training matrix · §172.704</h2>
+    <table>
+      <thead><tr><th style="width:25%">Training type</th><th>Who needs it</th><th>Recertify</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>General awareness</td><td>Every hazmat employee · what is hazmat, why does it matter</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(1)</span></td></tr>
+        <tr><td>Function-specific</td><td>Each hazmat employee · what they actually do (drive, load, label, prep papers)</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(2)</span></td></tr>
+        <tr><td>Safety</td><td>Every hazmat employee · emergency response, exposure mitigation</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(3)</span></td></tr>
+        <tr><td>Security awareness</td><td>Every hazmat employee · recognize + respond to threats</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(4)</span></td></tr>
+        <tr><td>In-depth security</td><td>Only employees in §172.800 security-plan operations</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(5)</span></td></tr>
+        <tr><td>Modal-specific</td><td>Drivers · §177 training. Loaders · §173 if applicable</td><td>Every 3 years</td><td><span class="cfr">§172.704(a)(2)(ii)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Security plan triggers · §172.800</h2>
+    <p>You must have a written security plan if you offer for transport or transport any of:</p>
+    <ul>
+      <li>Highway-route-controlled radioactive material</li>
+      <li>More than 25 kg of Division 1.1, 1.2, or 1.3 explosives</li>
+      <li>More than 1 L of a Division 6.1 PIH Zone A material</li>
+      <li>A "select agent" / regulated toxin under HHS rules</li>
+      <li>Shipments in a quantity meeting the <span class="cfr">§172.800(b)</span> table</li>
+    </ul>
+    <p>The plan must address: personnel security, unauthorized-access security, en-route security · <span class="cfr">§172.802</span>. Review it annually, after any incident, and any time operations meaningfully change.</p>
+
+    <h2>III · Registration · §107.616</h2>
+    <p>If you offer for transport or transport above-threshold quantities in any single shipment, you must register with PHMSA and pay the annual fee:</p>
+    <ul>
+      <li><strong>Any quantity</strong> of highway-route-controlled radioactive · Division 1.1 / 1.2 / 1.3 explosives ≥25 kg · PIH Zone A ≥1 L</li>
+      <li><strong>3,500 gal of bulk liquid hazmat</strong> (Class 3, 8, 9, etc.) in a packaging</li>
+      <li><strong>5,000 lb of bulk solid hazmat</strong> in a single packaging</li>
+      <li><strong>A quantity that requires a placard</strong> · in interstate or foreign commerce</li>
+    </ul>
+    <p>Registration is annual (July 1 - June 30). Filing is online at <em>portal.phmsa.dot.gov</em>.</p>
+
+    <h2>IV · Recordkeeping</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Keep for</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Training records (per hazmat employee)</td><td>90 days after employment ends</td><td><span class="cfr">§172.704(d)</span></td></tr>
+        <tr><td>Shipping papers (as offerer or carrier)</td><td>2 years (motor carrier · 1 year for water carrier)</td><td><span class="cfr">§172.201(e)</span></td></tr>
+        <tr><td>Incident reports (DOT Form F 5800.1)</td><td>2 years</td><td><span class="cfr">§171.16</span></td></tr>
+        <tr><td>Security plan + revisions</td><td>While in effect, plus 90 days</td><td><span class="cfr">§172.802</span></td></tr>
+        <tr><td>Registration certificate</td><td>While valid + 3 years</td><td><span class="cfr">§107.620(b)</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Most-cited PHMSA finding:</strong> employee got general awareness training but not function-specific. Each hazmat employee needs <em>both</em> · and the function-specific training has to match what they actually do. A loader's training is not the same as a driver's.
+    </div>
+  `,
+});
+
+/* ---- 12. hazmat-training-provider-reference ---- */
+
+export const hazmatTrainingProviderReference: TemplateFn<{ carrierName?: string; trainerName?: string }> = (data) => ({
+  title: `Hazmat Training Provider Reference · ${data.trainerName || "Sample Training Provider"}`,
+  headerSubtitle: "Hazmat · training-provider reference · §172.704",
+  bodyHTML: `
+    <h1>Hazmat · training-provider reference</h1>
+    <p class="meta">For ${escapeHtml(data.trainerName ? `${data.trainerName} · ` : "")}delivering §172.704 training to <strong>${escapeHtml(data.carrierName || "designated carriers")}</strong></p>
+
+    <div class="callout">
+      §172.704 puts the legal training obligation on the employer · but the employer can hire a qualified third party to deliver it. This reference lays out what a training-provider package must include to be defensible in an audit.
+    </div>
+
+    <h2>I · The five training pieces every hazmat employee gets</h2>
+    <ol>
+      <li><strong>General awareness</strong> · familiarize the employee with the regulations + general hazmat concepts · <span class="cfr">§172.704(a)(1)</span></li>
+      <li><strong>Function-specific</strong> · cover the specific HMR requirements applicable to the employee's job functions · <span class="cfr">§172.704(a)(2)</span></li>
+      <li><strong>Safety training</strong> · emergency response, methods + procedures for avoiding accidents, measures to protect self · <span class="cfr">§172.704(a)(3)</span></li>
+      <li><strong>Security awareness</strong> · recognize + respond to security threats · <span class="cfr">§172.704(a)(4)</span></li>
+      <li><strong>In-depth security training</strong> · only for employees of carriers + offerers required to have a §172.800 security plan · <span class="cfr">§172.704(a)(5)</span></li>
+    </ol>
+
+    <h2>II · What the records must show</h2>
+    <table>
+      <thead><tr><th style="width:35%">Required element</th><th>Why</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Hazmat employee's name</td><td>Per-individual training is a federal requirement</td><td><span class="cfr">§172.704(d)(1)</span></td></tr>
+        <tr><td>Most recent training completion date</td><td>Drives the 3-year recertification clock</td><td><span class="cfr">§172.704(d)(2)</span></td></tr>
+        <tr><td>Description, copy, or location of training materials</td><td>Lets the investigator reconstruct what was taught</td><td><span class="cfr">§172.704(d)(3)</span></td></tr>
+        <tr><td>Trainer's name + contact</td><td>Investigator may interview the trainer</td><td><span class="cfr">§172.704(d)(4)</span></td></tr>
+        <tr><td>Certification statement that the employee was tested + passed</td><td>Confirms competence, not just attendance</td><td><span class="cfr">§172.704(d)(5)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Recertification cadence</h2>
+    <ul>
+      <li><strong>Every 3 years</strong> · the full training package · <span class="cfr">§172.704(c)(2)</span></li>
+      <li><strong>Whenever functions change</strong> · new function-specific training before the employee performs the new function</li>
+      <li><strong>New hazmat employees</strong> · must complete training within 90 days of employment · may perform functions before completing IF supervised by trained personnel · <span class="cfr">§172.704(c)(1)</span></li>
+    </ul>
+
+    <h2>IV · What a defensible training-provider package looks like</h2>
+    <ol>
+      <li><strong>A syllabus per audience</strong> · driver / loader / shipping-paper-prep / handler / security-plan-personnel · each mapped to §172.704(a)(1)-(5)</li>
+      <li><strong>An attendance + test record per individual</strong> · with the 5 required elements above</li>
+      <li><strong>A delivery method note</strong> · in-person, LMS, blended · investigators may probe whether the method was sufficient for the function</li>
+      <li><strong>A passing-score record</strong> · a generic "completion" isn't enough · §172.704(d)(5) requires testing</li>
+      <li><strong>A 90-days-after-termination retention policy</strong> · the training-provider hands records to the employer; the employer keeps them per §172.704(d)</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The trainer-of-record matters.</strong> An auditor finding a generic "completion certificate" without trainer attribution will treat it as no record at all. Always include trainer's full name + contact on the certificate.
+    </div>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -508,6 +865,12 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "hos-driver-quickguide": hosDriverQuickGuide as TemplateFn,
   "hos-supervisor-playbook": hosSupervisorPlaybook as TemplateFn,
   "hos-auditor-export-guide": hosAuditorExportGuide as TemplateFn,
+  "clearinghouse-driver-guide": clearinghouseDriverGuide as TemplateFn,
+  "clearinghouse-employer-playbook": clearinghouseEmployerPlaybook as TemplateFn,
+  "clearinghouse-ctpa-reference": clearinghouseCtpaReference as TemplateFn,
+  "hazmat-driver-guide": hazmatDriverGuide as TemplateFn,
+  "hazmat-employer-playbook": hazmatEmployerPlaybook as TemplateFn,
+  "hazmat-training-provider-reference": hazmatTrainingProviderReference as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
