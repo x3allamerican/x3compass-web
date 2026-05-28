@@ -1296,6 +1296,489 @@ export const inspectionsPostStopResponse: TemplateFn<{ carrierName?: string; saf
 });
 
 /* ============================================================
+   BATCH 5 · Accidents · Medical card · CSA · DVIR · Onboarding
+   ============================================================ */
+
+/* ---- 20. accidents-driver-response · 49 CFR §390.5 + §392.4 ---- */
+
+export const accidentsDriverResponse: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Accident Response · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Accidents · driver reference · 49 CFR §390.5",
+  bodyHTML: `
+    <h1>If you're in an accident · driver response</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep with your accident kit</p>
+
+    <div class="callout">
+      A reportable DOT accident (§390.5: fatality, injury treated away from scene, or vehicle towed for disabling damage) triggers federal reporting clocks, possible post-accident D&A testing, and CSA point exposure. Your first 60 minutes determine how the rest plays out.
+    </div>
+
+    <h2>I · On scene · first 15 minutes</h2>
+    <ol>
+      <li><strong>Stop and stay</strong> · leaving the scene of an accident is a disqualifying offense · <span class="cfr">§383.51 Table 1</span></li>
+      <li><strong>Call 911</strong> if anyone is injured or there's any property damage · let dispatch know you've called</li>
+      <li><strong>Set out warning devices</strong> · 3 reflective triangles or LED flares · §392.22 distances (10/100/100 ft for most, 100/100/100 for divided highway)</li>
+      <li><strong>Render aid</strong> within your training · don't move injured parties unless they're in immediate further danger</li>
+      <li><strong>Call your dispatcher</strong> immediately after 911 · do NOT post anything on social media</li>
+    </ol>
+
+    <h2>II · Documentation · first 60 minutes</h2>
+    <ul>
+      <li><strong>Photos</strong> · vehicle damage from 4 angles, license plates of all vehicles, the scene wide, skid marks, road conditions, weather visible</li>
+      <li><strong>Other party info</strong> · name, DL number, phone, insurance carrier + policy #, vehicle plate + VIN</li>
+      <li><strong>Witnesses</strong> · names + phone numbers · ask politely · don't argue with them about what happened</li>
+      <li><strong>Officer info</strong> · responding officer name, badge #, agency, report case number</li>
+      <li><strong>Your own log</strong> · timeline of what you were doing, where you were going, weather, road condition · write it within 60 minutes before memory fades</li>
+    </ul>
+
+    <h2>III · What NOT to say</h2>
+    <ul>
+      <li><strong>Never say "I'm sorry"</strong> at the scene · even if you feel it · it's quoted as an admission of fault</li>
+      <li><strong>Never speculate</strong> on speed, distance, or cause to the other driver, witnesses, or the officer · "I'd rather not estimate; the report will show it" is fine</li>
+      <li><strong>Never sign anything</strong> handed to you by the other driver or their insurer at the scene</li>
+      <li><strong>Don't admit to mechanical issues</strong> with the truck unless they're documented · "the brakes were soft" said on scene becomes the carrier's CSA citation later</li>
+      <li><strong>No social media</strong> · photos, posts, comments · nothing · for at least 30 days</li>
+    </ul>
+
+    <h2>IV · Post-accident D&A test triggers</h2>
+    <p>You'll be sent for a DOT alcohol + drug test if ANY of these are true · <span class="cfr">§382.303</span>:</p>
+    <ul>
+      <li><strong>Anyone was killed</strong> · regardless of who's at fault</li>
+      <li><strong>Anyone was injured + treated away from the scene</strong> AND you received a moving-violation citation</li>
+      <li><strong>Any vehicle was towed due to disabling damage</strong> AND you received a moving-violation citation</li>
+    </ul>
+    <p class="meta">Alcohol within 8 hours, drug within 32 hours. Test even if you have to take a cab to the clinic.</p>
+
+    <div class="callout">
+      <strong>Refusing the post-accident test is a Clearinghouse violation</strong> · same penalty as a positive · SAP-cleared return-to-duty required before you drive again.
+    </div>
+  `,
+});
+
+/* ---- 21. accidents-employer-response ---- */
+
+export const accidentsEmployerResponse: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Accident Response · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Accidents · employer playbook · 49 CFR §390 + §392",
+  bodyHTML: `
+    <h1>Accident response · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · what the carrier does in the 30 days after a crash</p>
+
+    <div class="callout">
+      An accident is a regulatory event, not just an insurance event. The FMCSA Accident Register has to capture it, post-accident testing must be coordinated, and the CSA score will be hit within 30 days. Run the playbook even when it "wasn't your driver's fault."
+    </div>
+
+    <h2>I · The first 60 minutes</h2>
+    <ol>
+      <li><strong>Driver welfare first</strong> · confirm they're physically OK · transport to medical evaluation if any doubt</li>
+      <li><strong>Dispatch the post-accident test</strong> if §382.303 triggers are met · alcohol within 8 hr, drug within 32 hr</li>
+      <li><strong>Notify insurance</strong> · the policy almost always requires immediate notice; delay can void coverage</li>
+      <li><strong>Recover the truck + ELD data</strong> · download last 24 hr of ELD output before the device is unplugged or unit is scrapped</li>
+      <li><strong>Open an internal incident file</strong> · driver name, date/time, location, severity, photos, citations issued</li>
+    </ol>
+
+    <h2>II · The FMCSA Accident Register · §390.15</h2>
+    <table>
+      <thead><tr><th style="width:40%">Element</th><th>What goes in</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Date</td><td>Date of the accident</td><td><span class="cfr">§390.15(b)(1)</span></td></tr>
+        <tr><td>City + state</td><td>Where it happened</td><td><span class="cfr">§390.15(b)(2)</span></td></tr>
+        <tr><td>Driver name</td><td>Driver of record</td><td><span class="cfr">§390.15(b)(3)</span></td></tr>
+        <tr><td>Number of injuries</td><td>Treated away from scene</td><td><span class="cfr">§390.15(b)(4)</span></td></tr>
+        <tr><td>Number of fatalities</td><td>Within 30 days of crash counts</td><td><span class="cfr">§390.15(b)(5)</span></td></tr>
+        <tr><td>Whether hazmat released</td><td>Hazardous materials spilled / vented</td><td><span class="cfr">§390.15(b)(6)</span></td></tr>
+        <tr><td>Police report copy</td><td>Attach to register entry</td><td><span class="cfr">§390.15(b)(7)</span></td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Retention: <strong>3 years</strong> from the date of each entry. Investigators will pull this in any safety audit.</p>
+
+    <h2>III · Coordinating the post-accident D&A test</h2>
+    <ol>
+      <li><strong>Apply the §382.303 decision tree</strong> · fatality / citation-with-injury / citation-with-tow</li>
+      <li><strong>Tell the driver to go to your designated collection site</strong> · provide cab fare / ride if needed · don't let them drive themselves to alcohol test if any suspicion of impairment</li>
+      <li><strong>If test was missed</strong> (driver hospitalized, etc.) · document the reason in writing · <span class="cfr">§382.303(d)</span> permits this but you must prove it</li>
+      <li><strong>Track the result</strong> · MRO contacts driver for positive · employer reports refusal or positive to Clearinghouse within 3 business days</li>
+    </ol>
+
+    <h2>IV · CSA exposure + DataQ defense</h2>
+    <p>The crash itself enters your Crash Indicator BASIC after the SDR (State Data Report) posts. You can challenge crash <em>recordability</em> via the Crash Preventability Determination Program (CPDP):</p>
+    <ul>
+      <li><strong>Eligible scenarios</strong> · struck in rear, struck while legally parked, struck while waiting at red light, animal strike, struck by suicide attempt, and ~15 other patterns</li>
+      <li><strong>File within 24 months</strong> via dataqs.fmcsa.dot.gov · earlier is much better</li>
+      <li><strong>Evidence required</strong> · police report, dash cam, ECM data, witness statements · stronger evidence = higher success rate</li>
+      <li><strong>If determined "not preventable"</strong> · the crash is flagged on your SMS profile but doesn't count against your Crash Indicator</li>
+    </ul>
+
+    <div class="callout">
+      <strong>The crash file you build in the first 60 minutes determines whether you win or lose a CPDP challenge 18 months later.</strong> Standardize the kit: dash cam pull, ELD pull, ECM pull, photos from the responding driver, scene diagram. X3 Compass's accident workflow generates this packet automatically when a crash is logged.
+    </div>
+  `,
+});
+
+/* ---- 22. medical-card-driver-guide · 49 CFR §391.41-§391.49 ---- */
+
+export const medicalCardDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Medical Card · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Medical card · driver reference · 49 CFR §391.41",
+  bodyHTML: `
+    <h1>DOT medical card · driver guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      To operate a CMV in interstate commerce you must hold a current Medical Examiner's Certificate · physically dated by a DOT-certified examiner. Without it, you're out of service at the next inspection. This is the most common single OOS violation for drivers.
+    </div>
+
+    <h2>I · The exam basics</h2>
+    <ul>
+      <li><strong>Who can sign your card</strong> · only a medical professional on the FMCSA National Registry of Certified Medical Examiners (NRCME). Verify them at <em>nationalregistry.fmcsa.dot.gov</em> before you spend money on the exam</li>
+      <li><strong>Maximum certificate length</strong> · 24 months · most drivers · <span class="cfr">§391.43(h)</span></li>
+      <li><strong>Shorter certificates</strong> · 1 year (controlled hypertension, sleep apnea on CPAP), 3 months (uncontrolled diabetes work-up), single-trip · the examiner decides</li>
+      <li><strong>Cost</strong> · typically $80-150 · pay out of pocket unless employer covers</li>
+    </ul>
+
+    <h2>II · What the examiner is looking at</h2>
+    <table>
+      <thead><tr><th style="width:30%">Area</th><th>What they check</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Vision</td><td>20/40 each eye + binocular · 70° peripheral · color vision (red, green, amber)</td><td><span class="cfr">§391.41(b)(10)</span></td></tr>
+        <tr><td>Hearing</td><td>Forced whisper at 5 ft or 40 dB audiometric average at 500/1000/2000 Hz</td><td><span class="cfr">§391.41(b)(11)</span></td></tr>
+        <tr><td>Blood pressure</td><td>< 140/90 ideal · 140-159/90-99 = 1 yr cert · 160-179/100-109 = 3 mo + recert</td><td>FMCSA guidance</td></tr>
+        <tr><td>Diabetes</td><td>Insulin-treated requires separate ITDM exemption · oral meds can be approved if A1c controlled</td><td><span class="cfr">§391.46</span></td></tr>
+        <tr><td>Sleep apnea</td><td>BMI screening · CPAP compliance proof if treated · ≥4 hr/night ≥70% of nights</td><td>MRB guidance</td></tr>
+        <tr><td>Cardiac history</td><td>Recent MI, bypass, defibrillator implant · wait periods + cardiologist clearance</td><td><span class="cfr">§391.41(b)(4)</span></td></tr>
+        <tr><td>Mental health</td><td>Medication-controlled conditions usually OK · severe untreated conditions disqualify</td><td><span class="cfr">§391.41(b)(8-9)</span></td></tr>
+        <tr><td>Substance use</td><td>Current alcoholism / drug use is disqualifying · SAP-cleared past use is OK</td><td><span class="cfr">§391.41(b)(12-13)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · The exam day · what to bring</h2>
+    <ol>
+      <li><strong>Driver license</strong> · CDL or regular</li>
+      <li><strong>List of all medications</strong> · prescription + OTC · including dosage</li>
+      <li><strong>Eyeglasses + contacts</strong> · whichever you wear</li>
+      <li><strong>Hearing aids</strong> · if you use them</li>
+      <li><strong>Specialist letters</strong> · for any cardiac, diabetes, sleep apnea, mental health condition · the examiner needs the treating doctor's note saying you're stable</li>
+      <li><strong>CPAP compliance report</strong> · download from your machine for the past 90 days · without it, sleep apnea drivers may not pass</li>
+    </ol>
+
+    <h2>IV · What to do with the card after the exam</h2>
+    <ol>
+      <li><strong>Take a photo of both sides</strong> · keep on your phone</li>
+      <li><strong>Submit to your state CDL agency</strong> · most states accept upload through the DMV portal · this updates your CDL with the new expiration · without this, your CDL goes to "not certified" status and you're OOS</li>
+      <li><strong>Give a copy to your safety director</strong> · paper or scan · they need it for your DQ file within 24 hr of the exam</li>
+      <li><strong>Carry the original in your wallet or cab</strong> · you can be asked for it at any roadside</li>
+      <li><strong>Calendar the next exam</strong> · 60 days before expiration · don't wait until the last week</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The single most common driver OOS:</strong> medical card expired and not noticed. Set the recert calendar reminder the day you walk out of the exam. X3 Compass tracks this automatically and pings you + your carrier 60, 30, and 7 days out.
+    </div>
+  `,
+});
+
+/* ---- 23. medical-card-employer-tracker ---- */
+
+export const medicalCardEmployerTracker: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Medical Card · Employer Tracker Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Medical card · employer tracker · 49 CFR §391.41-§391.45",
+  bodyHTML: `
+    <h1>Medical card · employer tracker guide</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · operating duties under §391.41-§391.45</p>
+
+    <div class="callout">
+      A driver with an expired medical card is an instant federal violation for both the driver and you. Tracking the expiration date is on you · the driver doesn't always remember, doesn't always update the state, and roadside inspectors don't care whose fault it is.
+    </div>
+
+    <h2>I · The four employer obligations</h2>
+    <ol>
+      <li><strong>Verify the examiner</strong> on the National Registry (NRCME) and document the verification date · <span class="cfr">§391.23(m)</span></li>
+      <li><strong>Obtain a copy of the medical certificate</strong> · in the driver's DQ file within a reasonable time after the exam · <span class="cfr">§391.43(g)</span></li>
+      <li><strong>Track expiration</strong> and remove the driver from CMV operation the day it expires · <span class="cfr">§391.45</span></li>
+      <li><strong>Confirm state CDLIS upload</strong> · the certificate must be on file with the state CDL agency · if it's not, the CDL status goes to "not certified" and the driver is OOS regardless of the paper card</li>
+    </ol>
+
+    <h2>II · The tracking cadence X3 Compass uses</h2>
+    <table>
+      <thead><tr><th style="width:25%">Days before expiration</th><th>What X3 Compass does</th><th>Who gets notified</th></tr></thead>
+      <tbody>
+        <tr><td><strong>60 days</strong></td><td>First reminder · book the exam</td><td>Driver + safety director</td></tr>
+        <tr><td><strong>30 days</strong></td><td>Escalation reminder · exam must be on calendar</td><td>Driver + safety director + dispatcher</td></tr>
+        <tr><td><strong>7 days</strong></td><td>Urgent reminder · OOS imminent</td><td>Driver + safety director + dispatcher · daily until resolved</td></tr>
+        <tr><td><strong>Day of expiration</strong></td><td>Driver placed on hold in tracker · audit-log entry</td><td>Safety director · escalate to operations</td></tr>
+        <tr><td><strong>After exam</strong></td><td>Card uploaded · CDLIS verification check · examiner re-verified on NRCME</td><td>Driver + safety director · cleared to drive</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Short-cert drivers · why they need closer attention</h2>
+    <ul>
+      <li><strong>1-year card</strong> · controlled hypertension, diabetes on oral meds, sleep apnea on CPAP · monitor compliance proof annually</li>
+      <li><strong>3-month card</strong> · uncontrolled hypertension under treatment, recent cardiac event, diabetes work-up · driver is on probationary medical clearance · ride along with operations + insurance to make sure ongoing exposure is acceptable</li>
+      <li><strong>Insulin-treated diabetes</strong> · separate ITDM exemption required · <span class="cfr">§391.46</span> · annual reverification of A1c + treating-provider letter</li>
+      <li><strong>Vision / hearing exemption</strong> · separate FMCSA exemption letter required · keep with the DQ file</li>
+    </ul>
+
+    <h2>IV · The most common DOT audit findings</h2>
+    <ol>
+      <li><strong>Card expired · driver still on the road</strong> · OOS for driver + violation for carrier</li>
+      <li><strong>No NRCME verification</strong> · the examiner is on the registry but you didn't document checking · §391.23(m) violation</li>
+      <li><strong>State CDLIS shows "not certified"</strong> · driver had a current paper card but never submitted it to the state · OOS for driver regardless</li>
+      <li><strong>Short-cert driver not on recert calendar</strong> · 1-year card became 18-month gap before the next exam</li>
+      <li><strong>Insulin-treated driver without ITDM exemption</strong> on file · disqualifying</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The fix is automation, not vigilance.</strong> No safety director can mentally track 50 drivers' medical card expirations. X3 Compass's medical-card tracker is one of the highest-leverage features for any fleet · it eliminates the single most common OOS violation.
+    </div>
+  `,
+});
+
+/* ---- 24. csa-scorecard-explainer · CSA SMS / BASICs ---- */
+
+export const csaScorecardExplainer: TemplateFn<{ carrierName?: string }> = (data) => ({
+  version: "1.0",
+  title: `CSA Scorecard · How It Works · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "CSA · scorecard explainer · FMCSA SMS",
+  bodyHTML: `
+    <h1>CSA Scorecard · how it actually works</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · plain-English explainer of the FMCSA Safety Measurement System</p>
+
+    <div class="callout">
+      Your CSA score is the single most important number in trucking sales. Insurance pricing, shipper qualification, broker tendering, and FMCSA enforcement targeting all start with it. Understand how it's calculated and the levers move themselves.
+    </div>
+
+    <h2>I · The 7 BASICs (categories the FMCSA scores you on)</h2>
+    <table>
+      <thead><tr><th style="width:30%">BASIC</th><th>What's measured</th><th>Intervention threshold</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Unsafe Driving</strong></td><td>Speeding, reckless, improper lane change, hand-held mobile, texting · roadside violations</td><td>65th percentile (passenger), 60th (HM)</td></tr>
+        <tr><td><strong>Hours of Service</strong></td><td>Drive past 11 hr / 14 hr window, missing break, log violations</td><td>65th percentile</td></tr>
+        <tr><td><strong>Driver Fitness</strong></td><td>License + medical card violations, missing CDL endorsements</td><td>80th percentile</td></tr>
+        <tr><td><strong>Controlled Substances / Alcohol</strong></td><td>Possession + use violations at roadside (not Clearinghouse hits)</td><td>80th percentile</td></tr>
+        <tr><td><strong>Vehicle Maintenance</strong></td><td>Brake adjustment, tires, lights, defective parts · highest violation count by frequency</td><td>80th percentile</td></tr>
+        <tr><td><strong>Hazmat Compliance</strong></td><td>Shipping papers, placards, packaging, training</td><td>80th percentile (HM carriers only)</td></tr>
+        <tr><td><strong>Crash Indicator</strong></td><td>State-Data-Reported crashes · weighted by severity · 65th percentile threshold</td><td>Internal-only for now</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · How violations turn into points</h2>
+    <ol>
+      <li><strong>Violation severity weight</strong> · FMCSA assigns each violation a 1-10 weight · texting in CMV = 10, headlight out = 1</li>
+      <li><strong>Time weight</strong> · violations from the past 6 months count fully · 6-12 months ago count 2× · 12-24 months ago count 1×</li>
+      <li><strong>OOS multiplier</strong> · OOS violations get +2 added to severity</li>
+      <li><strong>Sum weighted violations</strong> · per BASIC · per carrier</li>
+      <li><strong>Normalize</strong> · weighted violations ÷ inspections (or VMT for Unsafe Driving) · adjusts for fleet size</li>
+      <li><strong>Percentile rank</strong> · against carriers in your safety event group · this is what gets published</li>
+    </ol>
+
+    <h2>III · The thresholds that matter</h2>
+    <ul>
+      <li><strong>Below threshold</strong> · BASIC shows on your profile but no alert · normal operating zone</li>
+      <li><strong>At or above threshold</strong> · BASIC is alerted · FMCSA flags you for possible intervention · insurance rates go up · brokers + shippers see the alert</li>
+      <li><strong>Investigation</strong> · two or more alerted BASICs typically triggers a compliance review · CR can end with conditional / unsatisfactory rating</li>
+      <li><strong>Unsatisfactory</strong> · you cannot operate interstate · 45 days to fix or shut down</li>
+    </ul>
+
+    <h2>IV · The three highest-leverage moves</h2>
+    <ol>
+      <li><strong>Pre-trip inspections done right</strong> · most Vehicle Maintenance violations come from things the driver could've seen and reported · DVIR culture is everything</li>
+      <li><strong>HOS hygiene via ELD coaching</strong> · the violations that bite are the ones you didn't know about until the roadside printout · proactive HOS audit queries pull them out monthly</li>
+      <li><strong>DataQ challenges on every bad citation</strong> · 30% of contested violations get removed · if you don't file, the score eats them forever</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The score is a lagging indicator.</strong> What lives in your DVIRs, HOS audit logs, and DataQ workflow today shows up in your CSA score 30-90 days from now. Coach the leading indicators, not the score.
+    </div>
+  `,
+});
+
+/* ---- 25. dvir-driver-quickguide · 49 CFR §396.11 + §396.13 ---- */
+
+export const dvirDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `DVIR · Driver Quick Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "DVIR · driver reference · 49 CFR §396.11",
+  bodyHTML: `
+    <h1>Driver Vehicle Inspection Report · quick guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep in the cab</p>
+
+    <div class="callout">
+      The pre-trip + post-trip inspection isn't paperwork · it's the single biggest CSA Vehicle Maintenance lever you control. The same defects that earn 10× severity points at a roadside inspection are the ones a 5-minute walk-around would have caught.
+    </div>
+
+    <h2>I · Pre-trip · what you actually look at</h2>
+    <ol>
+      <li><strong>Walk-around · driver side</strong> · tires + tread + inflation, lug nuts, mud flaps, lights (clearance, marker, turn, brake), reflectors, fuel cap, leaks</li>
+      <li><strong>Front</strong> · headlights (low + high), turn signals, wipers, hood latch, condition of bumper</li>
+      <li><strong>Passenger side</strong> · same as driver side · check cargo securement if applicable</li>
+      <li><strong>Rear</strong> · brake lights (have a buddy or use a wall + reverse light reflection), turn signals, license plate light, mud flaps, ICC bumper</li>
+      <li><strong>Trailer</strong> · kingpin, fifth wheel coupling locked, glad-hand seals, brake hoses, ABS connector, trailer lights, doors locked + seal intact</li>
+      <li><strong>Under the hood</strong> · oil + coolant + power-steering + windshield washer levels, belts (no fraying), battery secure</li>
+      <li><strong>Inside cab</strong> · gauge readings normal at start, parking brake holds, service brake firm, steering free-play < 10° of slack, mirrors clean + adjusted, seat belt + horn + wipers work</li>
+      <li><strong>Brake test</strong> · low-air warning at 60 psi, emergency activates at 20-45 psi (tractor), service brake doesn't bleed off (1 psi/min static)</li>
+    </ol>
+
+    <h2>II · Post-trip · what changes</h2>
+    <p>End-of-day inspection focuses on defects you found or developed during the trip:</p>
+    <ul>
+      <li><strong>Service brakes</strong> · pulling, soft pedal, grinding, fade</li>
+      <li><strong>Parking brake</strong> · holds the truck</li>
+      <li><strong>Steering</strong> · play, hard turning</li>
+      <li><strong>Lighting + reflectors</strong> · anything burned out</li>
+      <li><strong>Tires</strong> · any cuts, separations, low pressure that developed</li>
+      <li><strong>Horn · wipers · mirrors</strong> · still work</li>
+      <li><strong>Coupling devices</strong> · fifth wheel still secure</li>
+      <li><strong>Wheels + rims</strong> · cracks, loose lugs</li>
+      <li><strong>Emergency equipment</strong> · triangles, fire extinguisher in working order</li>
+    </ul>
+
+    <h2>III · When you find a defect</h2>
+    <ol>
+      <li><strong>Don't drive it</strong> if the defect would cause a breakdown or accident · §396.11(c) says you must report any defect that affects safe operation</li>
+      <li><strong>Report it on the DVIR</strong> · paper or electronic · specific (not "rear lights bad" but "right rear turn signal inoperative")</li>
+      <li><strong>Tag the unit OOS</strong> for any OOS-level defect (brake adjustment >X, tire tread <2/32 steer or <4/32 drive, etc.)</li>
+      <li><strong>Get the carrier's mechanic to certify the repair</strong> on the same DVIR · driver review-signs after</li>
+      <li><strong>Keep a copy</strong> · driver retains one, carrier retains the original</li>
+    </ol>
+
+    <h2>IV · What good DVIR culture looks like</h2>
+    <ul>
+      <li><strong>Pre-trip takes 15-30 minutes</strong> · not 5 · if you can't see the inside of every tire, you're not really looking</li>
+      <li><strong>You write defects daily</strong> · "no defects" every single trip is a red flag for carrier safety + insurance</li>
+      <li><strong>You learn the truck</strong> · the same trailer, the same tractor, day after day · you notice when something changed</li>
+      <li><strong>You trust the safety director</strong> not to retaliate · DVIR-flagging culture only works if findings get fixed, not punished</li>
+    </ul>
+
+    <div class="callout">
+      <strong>The defects you don't report end up on a CSA inspection 30 days later.</strong> Brakes out of adjustment is the #1 cited violation in trucking by frequency · and it's 100% preventable by a real pre-trip.
+    </div>
+  `,
+});
+
+/* ---- 26. dvir-employer-playbook · §396.11 + §396.13 + §396.17 ---- */
+
+export const dvirEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `DVIR · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "DVIR · employer playbook · 49 CFR §396",
+  bodyHTML: `
+    <h1>DVIR · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · operating duties under §396</p>
+
+    <div class="callout">
+      The carrier owns the maintenance program. The DVIR is the line of evidence connecting a driver's report to a mechanic's certified repair · without that closed loop you can't defend your Vehicle Maintenance BASIC. This is also the most-cited area in any DOT audit.
+    </div>
+
+    <h2>I · The four required maintenance pillars · §396.3 + §396.11 + §396.17</h2>
+    <table>
+      <thead><tr><th style="width:30%">Pillar</th><th>What it is</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Daily DVIR (driver side)</td><td>Every driver, every day, every CMV they operated · pre-trip + post-trip · written report for any defect</td><td><span class="cfr">§396.11</span></td></tr>
+        <tr><td>Repair certification</td><td>Mechanic-certified statement on the DVIR that defects were repaired (or that no repair was needed)</td><td><span class="cfr">§396.11(c)(3)</span></td></tr>
+        <tr><td>Periodic (annual) inspection</td><td>Every CMV gets a §396.17 inspection at least every 12 months by a qualified inspector · documentation on the unit + at the carrier</td><td><span class="cfr">§396.17, §396.21</span></td></tr>
+        <tr><td>Roadside / post-event records</td><td>Every roadside inspection, every CSA event, every accident-related maintenance fact</td><td><span class="cfr">§396.9</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · The DVIR closed-loop workflow</h2>
+    <ol>
+      <li><strong>Driver submits DVIR</strong> · pre-trip + post-trip · any defect logged</li>
+      <li><strong>Safety / dispatch sees the report</strong> · any defect tagged as OOS holds the unit until repaired</li>
+      <li><strong>Mechanic repairs the defect</strong> · documents the parts + labor</li>
+      <li><strong>Mechanic certifies the DVIR</strong> · signature confirming repair was made (or that no repair was needed)</li>
+      <li><strong>Next driver review-signs</strong> · before operating the unit, the next driver acknowledges the repair was made and the unit is safe</li>
+      <li><strong>DVIR retained 3 months</strong> · for paper · electronic systems typically retain longer for analytics</li>
+    </ol>
+
+    <h2>III · The annual §396.17 inspection · what investigators look for</h2>
+    <ul>
+      <li><strong>Date</strong> within the past 12 months</li>
+      <li><strong>Inspector signature + qualification documentation</strong> · they must meet §396.19 qualifications</li>
+      <li><strong>Identification of the vehicle</strong> · VIN, fleet number</li>
+      <li><strong>Items inspected</strong> · the §396 Appendix G list (51 items across brakes, fuel system, lighting, etc.)</li>
+      <li><strong>Result for each item</strong> · pass / fail / repair</li>
+      <li><strong>Periodic-inspection sticker on the vehicle</strong> · driver can show it at roadside</li>
+    </ul>
+
+    <h2>IV · What gets cited in audits</h2>
+    <ol>
+      <li><strong>DVIRs missing for some days</strong> · gap days where the unit drove without a daily inspection report on file</li>
+      <li><strong>"No defects" every single day</strong> · investigator pattern-recognizes this as not really inspecting · they'll cross-reference against the roadside inspections that found defects on those same days</li>
+      <li><strong>Mechanic certification missing</strong> · driver reported a defect, no mechanic sign-off, but the unit kept driving</li>
+      <li><strong>No annual periodic inspection on file</strong> · or expired by more than 12 months</li>
+      <li><strong>Inspector not qualified</strong> · §396.19 requires specific training + experience · a "shop guy" doesn't necessarily count</li>
+      <li><strong>OOS defect found at roadside</strong> that was either on a prior DVIR (proves you ignored it) or that obviously existed for weeks (proves DVIRs are fictional)</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The audit-proof DVIR program isn't about volume · it's about closure.</strong> Every defect logged, every defect either repaired or documented as not requiring repair, every driver review-signing the next morning. X3 Compass's DVIR module forces the closed loop and surfaces gaps before the auditor does.
+    </div>
+  `,
+});
+
+/* ---- 27. driver-onboarding-packet-index · §391 full hire workflow ---- */
+
+export const driverOnboardingPacketIndex: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Driver Onboarding Packet · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Onboarding · packet index · 49 CFR §391",
+  bodyHTML: `
+    <h1>New driver onboarding · packet index</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      Every new CDL driver hire generates ~20 documents across §391 (Driver Qualification), §382 (D&A), FCRA (consumer reports), §172.704 (Hazmat if applicable), and company policy. This packet index lists what must exist before the driver's first safety-sensitive trip.
+    </div>
+
+    <h2>I · Day 1 · pre-screening (driver hasn't been hired yet)</h2>
+    <ol>
+      <li><strong>Driver's application</strong> · long-form per §391.21 · 3 years of address + 10 years of employment history</li>
+      <li><strong>FCRA disclosure + authorization</strong> · standalone form · 15 U.S.C. §1681b(b)(2)(A)</li>
+      <li><strong>D&A consent</strong> · for pre-employment drug test + previous-employer D&A inquiries</li>
+      <li><strong>Clearinghouse full-query consent</strong> · electronic consent in clearinghouse.fmcsa.dot.gov</li>
+      <li><strong>State MVR consent</strong> · for every state the driver has been licensed in (past 3 years)</li>
+    </ol>
+
+    <h2>II · Day 1-3 · verification (running in parallel)</h2>
+    <ol>
+      <li><strong>Initial MVRs</strong> · pulled from every relevant state · §391.23(a)(1)</li>
+      <li><strong>Clearinghouse pre-employment full query</strong> · run with driver's electronic consent · §382.701(a)</li>
+      <li><strong>Pre-employment DOT drug test</strong> · drug only, no alcohol · negative result required before safety-sensitive duty</li>
+      <li><strong>Previous-employer DOT employment + D&A inquiries</strong> · for every DOT-regulated employer in the past 3 years · §391.23(d) + §40.25</li>
+      <li><strong>Background check</strong> · if your hiring standard includes it · ordered through Checkr or similar with FCRA-compliant disclosure</li>
+      <li><strong>Medical certificate verification</strong> · examiner verified on NRCME · certificate copy in file · CDLIS shows current</li>
+    </ol>
+
+    <h2>III · Day 3-7 · once cleared (driver is now hireable)</h2>
+    <ol>
+      <li><strong>Road test or CDL-on-file equivalent</strong> · §391.31 / §391.33 · usually a road test for first hire</li>
+      <li><strong>Entry-level driver training (ELDT) certificate</strong> · for CDL holders licensed after 02/07/2022 · §380.609 · from the FMCSA Training Provider Registry</li>
+      <li><strong>D&A policy receipt</strong> · driver acknowledges receipt of the written policy · §382.601</li>
+      <li><strong>Hazmat training documentation</strong> · only if the role requires HM endorsement work · §172.704 · within 90 days of employment</li>
+      <li><strong>Annual general written consent for limited Clearinghouse queries</strong> · §382.701(b)</li>
+      <li><strong>I-9 + W-4</strong> · standard employment forms (not DOT, but day-1 standard)</li>
+      <li><strong>Direct deposit + benefits enrollment</strong> · company-specific</li>
+    </ol>
+
+    <h2>IV · Within 30 days · audit-ready DQ file complete</h2>
+    <p>By day 30, the driver's file should contain all 12 §391.51 documents (see the DQF Driver Index). The most-missed items at this stage:</p>
+    <ul>
+      <li><strong>NRCME verification date recorded</strong> · not just the medical card</li>
+      <li><strong>Previous-employer responses received</strong> · not just "we tried" attempt logs · the actual responses or non-response documentation</li>
+      <li><strong>Hazmat function-specific training</strong> · within 90 days · don't drift past it</li>
+      <li><strong>ELDT certificate</strong> · for any post-Feb-2022 CDL · easy to forget for in-house transfers</li>
+      <li><strong>Annual driver review</strong> calendared 12 months from hire</li>
+    </ul>
+
+    <div class="callout">
+      <strong>X3 Compass's onboarding workflow generates this packet</strong> from the moment a driver enters the system · every required document has a status pill (Open / In progress / Complete) and the safety director can't mark the hire complete until every document is green.
+    </div>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -1319,6 +1802,14 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "mvr-explainer": mvrExplainer as TemplateFn,
   "ifta-quarterly-walkthrough": iftaQuarterlyWalkthrough as TemplateFn,
   "inspections-post-stop-response": inspectionsPostStopResponse as TemplateFn,
+  "accidents-driver-response": accidentsDriverResponse as TemplateFn,
+  "accidents-employer-response": accidentsEmployerResponse as TemplateFn,
+  "medical-card-driver-guide": medicalCardDriverGuide as TemplateFn,
+  "medical-card-employer-tracker": medicalCardEmployerTracker as TemplateFn,
+  "csa-scorecard-explainer": csaScorecardExplainer as TemplateFn,
+  "dvir-driver-quickguide": dvirDriverQuickGuide as TemplateFn,
+  "dvir-employer-playbook": dvirEmployerPlaybook as TemplateFn,
+  "driver-onboarding-packet-index": driverOnboardingPacketIndex as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
