@@ -2293,6 +2293,524 @@ export const eldMalfunctionPolicy: TemplateFn<{ carrierName?: string }> = (data)
 });
 
 /* ============================================================
+   BATCH 7 · Hub matrix completion · 8 more templates
+   ============================================================ */
+
+/* ---- 36. da-auditor-export-guide ---- */
+
+export const daAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
+  title: `D&A Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "D&A · auditor reference · 49 CFR §382.401",
+  bodyHTML: `
+    <h1>D&A program · auditor export guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · audit window <strong>${escapeHtml(data.auditWindow || "last 2 years")}</strong></p>
+
+    <div class="callout">
+      In a compliance review, FMCSA investigators want to see your D&A program as a documented system: policy on file, supervisor training current, random pool defensible, post-accident procedure followed, MRO + SAP relationships intact, Clearinghouse reports filed. This guide lists what to hand over and in what order.
+    </div>
+
+    <h2>I · The standard D&A pull</h2>
+    <ol>
+      <li><strong>Written D&A policy</strong> · current version + revision history · <span class="cfr">§382.601</span></li>
+      <li><strong>Policy receipts</strong> · signed acknowledgments from every driver · current + departed in past 3 years</li>
+      <li><strong>Random testing pool</strong> · roster of who is in the pool + selection method documentation · <span class="cfr">§382.305</span></li>
+      <li><strong>Random selection records</strong> · every selection list for the past 2 years + dates tested + result</li>
+      <li><strong>Supervisor training records</strong> · 60 min drug + 60 min alcohol · for every supervisor authorized to call reasonable suspicion · <span class="cfr">§382.603</span></li>
+      <li><strong>Post-accident testing log</strong> · every qualifying accident + decision (test / no test) + reason if not tested · <span class="cfr">§382.303</span></li>
+      <li><strong>All test results</strong> · pre-employment, random, reasonable-suspicion, post-accident, RTD, follow-up · for the audit window</li>
+      <li><strong>MRO contract</strong> + most-recent verification letters · <span class="cfr">§40 Subpart G</span></li>
+      <li><strong>SAP referrals + RTD records</strong> · for any driver with a violation in the window</li>
+      <li><strong>Clearinghouse query + report logs</strong> · pre-employment full · annual limited · violation reports filed within 3 business days · <span class="cfr">§382.701, §382.705</span></li>
+      <li><strong>Annual MIS report</strong> · if requested for any year in the audit window · <span class="cfr">§382.403</span></li>
+    </ol>
+
+    <h2>II · What investigators look for in each pillar</h2>
+    <table>
+      <thead><tr><th style="width:35%">Pillar</th><th>Common findings</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Policy</strong></td><td>Policy is generic + not specific to your operation · driver receipts missing for some drivers · old version with outdated CFR citations</td></tr>
+        <tr><td><strong>Random pool</strong></td><td>Selections cluster in one quarter · same drivers picked repeatedly · selection method undocumented · pool roster doesn't match safety-sensitive driver list</td></tr>
+        <tr><td><strong>Post-accident</strong></td><td>Qualifying accident with no test on file + no documented reason · alcohol test outside the 8-hour window with no explanation</td></tr>
+        <tr><td><strong>Supervisor training</strong></td><td>Supervisor making reasonable-suspicion calls without training records · expired training (drift past 3 years if applicable)</td></tr>
+        <tr><td><strong>Reporting</strong></td><td>Positive test on file but no Clearinghouse report within 3 business days · or report filed but driver still in safety-sensitive duty</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · The X3 Compass audit packet</h2>
+    <ol>
+      <li>Navigate to <strong>Audit Export</strong> · select scope <strong>D&A</strong></li>
+      <li>Select the audit window</li>
+      <li>Click <strong>Generate audit packet</strong> · X3 builds a single PDF with policy + receipts + selection records + supervisor training + test results + Clearinghouse activity · indexed</li>
+      <li>The packet has version + content hash · cross-referenceable with the compass_pdf_generated ledger</li>
+    </ol>
+
+    <h2>IV · The 5 questions D&A investigators always ask</h2>
+    <ol>
+      <li>Show me your random selection method · who runs it, what tool</li>
+      <li>Pick a random month · show me the selection list + the tests that resulted</li>
+      <li>Walk me through what happens when a driver tests positive · MRO → SAP → RTD → follow-up</li>
+      <li>Show me a supervisor's reasonable-suspicion training record + a real reasonable-suspicion incident</li>
+      <li>Pick a driver hired in the past 12 months · show me the pre-employment query + drug test result + policy receipt</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Don't try to look perfect.</strong> Demonstrate a functioning system with gaps that you found + closed yourself. Auditors trust carriers that catch their own misses more than carriers who claim to have none.
+    </div>
+  `,
+});
+
+/* ---- 37. dqf-employer-playbook ---- */
+
+export const dqfEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `DQF · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "DQF · employer playbook · 49 CFR §391.51",
+  bodyHTML: `
+    <h1>Driver Qualification Files · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      The carrier maintains a complete DQ file for every CDL driver per §391.51. Every missing document is a citation; missing patterns across multiple drivers is an unsatisfactory safety rating. This playbook tells you what to check, when, and who owns each piece.
+    </div>
+
+    <h2>I · The carrier's standing duties</h2>
+    <ol>
+      <li><strong>Build the DQ file at hire</strong> · 12 documents per §391.51 within 30 days of safety-sensitive duty start</li>
+      <li><strong>Maintain the file</strong> · annual MVR, annual review, annual violation cert, medical card recerts, Clearinghouse limited query each year</li>
+      <li><strong>Verify the NRCME entry</strong> for the medical examiner + document the verification date · <span class="cfr">§391.23(m)</span></li>
+      <li><strong>Confirm CDLIS shows "certified"</strong> · the medical card on file isn't enough · state must show certified status · driver is OOS if not</li>
+      <li><strong>Retain the file</strong> · duration of employment + 3 years for most items · 5 years for D&A · <span class="cfr">§391.51 + §382.401</span></li>
+    </ol>
+
+    <h2>II · The annual maintenance calendar</h2>
+    <table>
+      <thead><tr><th style="width:25%">When</th><th>Task</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Each driver's hire-anniversary month</td><td>Pull annual MVR (every state where licensed in past 12 mo) · run annual limited Clearinghouse query · conduct + sign §391.25(c) annual review</td><td><span class="cfr">§391.25, §382.701(b)</span></td></tr>
+        <tr><td>Each driver's hire-anniversary month</td><td>Driver completes annual violation self-certification form</td><td><span class="cfr">§391.27</span></td></tr>
+        <tr><td>60 / 30 / 7 days before med-card expiration</td><td>Reminders to driver + safety director · book the exam · receive new card + verify CDLIS</td><td><span class="cfr">§391.45</span></td></tr>
+        <tr><td>Roadside inspection received</td><td>Add to driver file · review violations against progressive discipline matrix · DataQ challenges if appropriate</td><td><span class="cfr">§396.9</span></td></tr>
+        <tr><td>Any new accident</td><td>Update §390.15 Accident Register · post-accident D&A decision applied · file accident report in driver file</td><td><span class="cfr">§390.15, §382.303</span></td></tr>
+        <tr><td>Driver termination</td><td>Retention clock starts · 3 years for most §391 items · 5 years for D&A · file move to "terminated" with retention metadata</td><td><span class="cfr">§391.51(d)</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Common findings across audits</h2>
+    <ul>
+      <li><strong>No NRCME verification date</strong> · medical card is there but you never documented checking the registry · this is the single most-cited DQF finding</li>
+      <li><strong>Annual review skipped</strong> · driver's been there 2+ years with no §391.25(c) reviews on file</li>
+      <li><strong>Previous-employer responses missing</strong> · §391.23(d) inquiry attempt logs exist but the actual responses don't · investigators want the responses, not "we tried"</li>
+      <li><strong>MVR pulled only from one state</strong> · driver was licensed in 2 states in past 12 months, only one was pulled</li>
+      <li><strong>ELDT certificate missing</strong> · for any driver who got CDL after 02/07/2022 · easy to miss for in-house upgrades</li>
+      <li><strong>Annual limited Clearinghouse query absent</strong> · pre-employment full was done but the recurring annual was forgotten · §382.701(b) violation</li>
+    </ul>
+
+    <h2>IV · The 5 audit-defense moves</h2>
+    <ol>
+      <li><strong>Single source of truth</strong> · all 12 documents per driver in one system (X3 Compass DQF tracker) · status pills make gaps visible</li>
+      <li><strong>Pre-flight check at 60 / 30 / 7 days</strong> for everything that expires · medical, MVR, Clearinghouse, annual review</li>
+      <li><strong>Audit-export bundle</strong> · one button generates a per-driver PDF with all 12 documents · investigator-ready</li>
+      <li><strong>Document patterns of corrective action</strong> · not just the violation, but what you did about it · this is what auditors weigh</li>
+      <li><strong>Quarterly self-audit</strong> · don't wait for FMCSA to find your gaps · run the audit yourself, fix what you find, document the fix</li>
+    </ol>
+
+    <div class="callout">
+      <strong>A clean DQF program isn't about more paperwork.</strong> It's about a system where every required document has a single owner, a single status, a single expiration date, and an automated reminder. The X3 Compass DQF tracker does all four.
+    </div>
+  `,
+});
+
+/* ---- 38. dqf-auditor-export-guide ---- */
+
+export const dqfAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
+  title: `DQF · Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "DQF · auditor reference · 49 CFR §391.51",
+  bodyHTML: `
+    <h1>DQF · auditor export guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · audit window <strong>${escapeHtml(data.auditWindow || "current + 3 prior years")}</strong></p>
+
+    <div class="callout">
+      In a safety audit or compliance review, FMCSA investigators pull a sample of driver files and check them against the §391.51 12-document standard. This guide lists what to hand over per driver and the order investigators look at things.
+    </div>
+
+    <h2>I · Per-driver pull (for each sampled driver)</h2>
+    <ol>
+      <li>Driver's application for employment (§391.21 long-form)</li>
+      <li>Initial MVR (within 30 days of hire) for every state licensed in past 3 years</li>
+      <li>Previous-employer safety performance + D&A inquiries + responses</li>
+      <li>Road test certificate or CDL-on-file equivalent</li>
+      <li>Current medical examiner's certificate</li>
+      <li>NRCME verification date (registry-check documentation)</li>
+      <li>Most recent annual driver review (§391.25(c) signed note)</li>
+      <li>Driver's most recent annual self-certification of violations (§391.27)</li>
+      <li>Annual MVRs for every year of employment</li>
+      <li>Clearinghouse pre-employment full query + driver consent</li>
+      <li>Clearinghouse annual limited query results + general written consent</li>
+      <li>Entry-level driver training (ELDT) certificate (if CDL post-02/07/2022)</li>
+    </ol>
+
+    <h2>II · The investigator's typical review order</h2>
+    <ol>
+      <li><strong>Skim the application</strong> · 3 years of address + 10 years of employment · gaps trigger follow-up questions</li>
+      <li><strong>Check the medical card</strong> · current? on the NRCME-verified examiner's letterhead? CDLIS status?</li>
+      <li><strong>Check the MVRs</strong> · annual cadence intact? from every state where licensed?</li>
+      <li><strong>Check the Clearinghouse trail</strong> · pre-employment + annual limited every year · driver consent documented</li>
+      <li><strong>Check the annual review</strong> · §391.25(c) note · who reviewed, when, what they found</li>
+      <li><strong>Cross-reference with roadside inspections</strong> · any violations on roadside not addressed in the file = corrective-action gap</li>
+      <li><strong>Cross-reference with the Accident Register</strong> · any accidents in §390.15 not reflected in the driver's file = consistency gap</li>
+    </ol>
+
+    <h2>III · Auto-fail findings (16 in §385 Appendix A)</h2>
+    <p>These come up first in any audit · most are DQF-anchored:</p>
+    <ul>
+      <li>Driver without a valid CDL (no copy in file)</li>
+      <li>Driver with suspended / revoked CDL on the road</li>
+      <li>Disqualified driver (§391.15) on the road</li>
+      <li>Driver without a current medical card (or expired)</li>
+      <li>No pre-employment D&A test</li>
+      <li>No random testing program</li>
+      <li>No DQ file maintained</li>
+      <li>Knowingly using a positive / refused driver</li>
+    </ul>
+    <p class="meta">Any single one of these in your driver sample is an automatic conditional rating.</p>
+
+    <h2>IV · The X3 Compass per-driver audit packet</h2>
+    <ol>
+      <li>Navigate to <strong>Audit Export</strong> · select scope <strong>DQF</strong></li>
+      <li>Select drivers (all, sample, or specific list)</li>
+      <li>Click <strong>Generate audit packet</strong> · X3 builds one PDF per driver with all 12 documents in regulatory order</li>
+      <li>Each packet has a version + content hash in the footer · audit-traceable</li>
+    </ol>
+
+    <div class="callout">
+      <strong>You don't need every file to be perfect.</strong> You need a documented system where issues are caught + corrected. An audit-export bundle that shows "this gap was found Aug 12 + closed Aug 18" beats a clean file with no provenance.
+    </div>
+  `,
+});
+
+/* ---- 39. background-checks-driver-guide ---- */
+
+export const backgroundChecksDriverGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Background Checks · Driver Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Background checks · driver reference · FCRA + DOT",
+  bodyHTML: `
+    <h1>Background checks · driver guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""}</p>
+
+    <div class="callout">
+      As part of CDL hiring, you'll be subject to multiple background checks: state MVR, Clearinghouse, prior-employer safety inquiries, criminal history, drug + alcohol test history, and sometimes credit. The FCRA gives you specific rights at every step.
+    </div>
+
+    <h2>I · What gets checked</h2>
+    <table>
+      <thead><tr><th style="width:30%">Check</th><th>Source</th><th>Your rights</th></tr></thead>
+      <tbody>
+        <tr><td>State MVR</td><td>State DMV records</td><td>You'll be given a copy if any adverse action results</td></tr>
+        <tr><td>Clearinghouse</td><td>FMCSA D&A database</td><td>Full-query consent is electronic + driver-specific</td></tr>
+        <tr><td>Previous-employer safety</td><td>Past 3 years of DOT employers</td><td>You sign a separate consent · responses go to current carrier</td></tr>
+        <tr><td>Criminal history</td><td>County / state / federal · via CRA (Consumer Reporting Agency)</td><td>Standalone FCRA disclosure + authorization · you must sign before pull</td></tr>
+        <tr><td>D&A testing history</td><td>Past 3 years of DOT employers (via §40.25)</td><td>Separate written consent · sent to past employers directly</td></tr>
+        <tr><td>Credit report (rare for CDL)</td><td>Credit bureau · only if role involves financial trust</td><td>FCRA disclosure + signed consent · standalone</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Your FCRA rights · 15 U.S.C. §1681 et seq.</h2>
+    <ol>
+      <li><strong>You get a stand-alone disclosure</strong> · the form notifying you that a consumer report will be ordered · NOT buried inside the application</li>
+      <li><strong>You give written authorization</strong> · you can decline, but the carrier may withdraw the offer</li>
+      <li><strong>You receive a copy of the report</strong> on request</li>
+      <li><strong>You get a "Summary of Your Rights"</strong> · federally-mandated document explaining your protections</li>
+      <li><strong>Pre-adverse action notice</strong> · if the carrier intends to deny based on the report, they must tell you, give you a copy of the report, and wait ~5 business days for you to dispute</li>
+      <li><strong>Adverse action notice</strong> · after the decision · names the CRA, says you can dispute, repeats your rights</li>
+    </ol>
+
+    <h2>III · If the report has something wrong</h2>
+    <ol>
+      <li><strong>Get a copy</strong> · the carrier or the CRA will provide it on request</li>
+      <li><strong>Identify the specific item</strong> · "this conviction is from a person with my name but different SSN" or "this is older than 7 years and should not be reported under FCRA §605"</li>
+      <li><strong>Dispute with the CRA</strong> · they have 30 days to investigate + respond</li>
+      <li><strong>Dispute directly with the source</strong> · the court, the employer, the agency that supplied the data</li>
+      <li><strong>Notify the carrier</strong> in writing that you're disputing · this stops the adverse-action clock until resolution</li>
+      <li><strong>If the dispute is upheld</strong> · the corrected report is provided to the carrier · they reconsider</li>
+    </ol>
+
+    <h2>IV · What you'll be asked to sign during hire</h2>
+    <ol>
+      <li><strong>FCRA disclosure + authorization</strong> (stand-alone) · for the consumer report</li>
+      <li><strong>Clearinghouse full-query consent</strong> (electronic, in clearinghouse.fmcsa.dot.gov)</li>
+      <li><strong>Clearinghouse annual limited-query consent</strong> (general written · one signature covers all future annual queries)</li>
+      <li><strong>State MVR consent</strong> · per state, for every state where you've been licensed</li>
+      <li><strong>D&A testing history consent</strong> (§40.25) · for previous-employer inquiries</li>
+      <li><strong>DOT safety-performance consent</strong> (§391.23(d)) · combined with §40.25 in most carriers' packets</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Read every form before you sign.</strong> If a form bundles consent with employment terms or buries the disclosure inside the application, it's not FCRA-compliant. You can ask for a stand-alone version.
+    </div>
+  `,
+});
+
+/* ---- 40. background-checks-employer-playbook ---- */
+
+export const backgroundChecksEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Background Checks · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "Background checks · employer playbook · FCRA + DOT",
+  bodyHTML: `
+    <h1>Background checks · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      Hiring a CDL driver involves stacking checks across the DOT regulations (§391.23, §382.701, §40.25) AND the FCRA. Each check has its own consent form, its own pull timing, and its own adverse-action procedure. Get the sequencing wrong and you're exposed to FCRA class-action litigation.
+    </div>
+
+    <h2>I · The pre-hire check stack</h2>
+    <table>
+      <thead><tr><th style="width:35%">Check</th><th>Vendor / Source</th><th>CFR / Statute</th></tr></thead>
+      <tbody>
+        <tr><td>State MVR (all states past 3 yr)</td><td>State DMV or aggregator</td><td><span class="cfr">§391.23(a)(1)</span></td></tr>
+        <tr><td>Clearinghouse pre-employment full</td><td>clearinghouse.fmcsa.dot.gov</td><td><span class="cfr">§382.701(a)</span></td></tr>
+        <tr><td>Pre-employment DOT drug test</td><td>DOT-certified collection site + lab + MRO</td><td><span class="cfr">§382.301</span></td></tr>
+        <tr><td>Previous-employer DOT safety history</td><td>Direct inquiry letters or via Checkr</td><td><span class="cfr">§391.23(d)</span></td></tr>
+        <tr><td>Previous-employer D&A testing history</td><td>Direct inquiry letters · separate from §391.23(d) but usually combined</td><td><span class="cfr">§40.25</span></td></tr>
+        <tr><td>Criminal background check (optional)</td><td>Checkr or equivalent CRA</td><td>FCRA 15 U.S.C. §1681</td></tr>
+        <tr><td>Medical card verification</td><td>NRCME + CDLIS check</td><td><span class="cfr">§391.23(m), §391.45</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · The FCRA-compliant sequencing</h2>
+    <ol>
+      <li><strong>Standalone FCRA disclosure</strong> presented · its own document · driver signs the authorization separately</li>
+      <li><strong>Run the consumer report</strong> via Checkr or your CRA · you receive the report</li>
+      <li><strong>If the report supports an offer</strong> · proceed to normal hiring · keep the report on file</li>
+      <li><strong>If the report could trigger denial</strong> · DO NOT decline yet · send the <strong>pre-adverse action notice</strong> per FCRA §1681b(b)(3) · include a copy of the report + Summary of Your Rights</li>
+      <li><strong>Wait 5 business days</strong> for the driver to dispute</li>
+      <li><strong>If no dispute or dispute resolved against driver</strong> · proceed with <strong>adverse action notice</strong> · names the CRA, repeats dispute rights</li>
+      <li><strong>Document everything</strong> · the timeline is the lawsuit-defense, not the substance of the decision</li>
+    </ol>
+
+    <h2>III · The most common FCRA mistakes</h2>
+    <ul>
+      <li><strong>Disclosure not stand-alone</strong> · embedded in the employment application · class-action target</li>
+      <li><strong>Authorization missing</strong> · disclosure signed but no separate authorization line · violates §1681b(b)(2)(A)</li>
+      <li><strong>Pre-adverse action skipped</strong> · denial letter sent without giving driver a chance to dispute · single biggest litigation risk</li>
+      <li><strong>5-day waiting period not honored</strong> · sent pre-adverse on Monday, denied on Tuesday</li>
+      <li><strong>Adverse action notice missing</strong> · driver was told verbally but never got the FCRA-mandated written notice with CRA contact info</li>
+    </ul>
+
+    <h2>IV · The recordkeeping requirements</h2>
+    <table>
+      <thead><tr><th>Record</th><th>Retain for</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>FCRA disclosure + signed authorization</td><td>5 years after end of employment</td><td>FCRA + EEOC</td></tr>
+        <tr><td>Consumer reports + adverse action correspondence</td><td>5 years after action</td><td>FCRA</td></tr>
+        <tr><td>DOT employment + D&A inquiry responses</td><td>Duration of employment + 3 years</td><td><span class="cfr">§391.51(d)</span></td></tr>
+        <tr><td>Clearinghouse query results + consents</td><td>3 years</td><td><span class="cfr">§382.401(b)(1)(vii)</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Don't DIY background checks for CDL drivers.</strong> Use a vendor (Checkr, HireRight, etc.) that handles the FCRA sequencing automatically and that integrates with your DQF tracker. X3 Compass + Checkr integration handles every step from disclosure through adverse action.
+    </div>
+  `,
+});
+
+/* ---- 41. mvr-employer-playbook ---- */
+
+export const mvrEmployerPlaybook: TemplateFn<{ carrierName?: string; safetyDirectorName?: string }> = (data) => ({
+  version: "1.0",
+  title: `MVR · Employer Playbook · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "MVR · employer playbook · 49 CFR §391.25 + §383.51",
+  bodyHTML: `
+    <h1>MVR · employer playbook</h1>
+    <p class="meta">For ${escapeHtml(data.safetyDirectorName ? `${data.safetyDirectorName} · ` : "")}<strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong></p>
+
+    <div class="callout">
+      The MVR is your most-frequently-pulled piece of driver evidence. Done right, it catches problems before they show up on a roadside inspection. Done wrong (annual-only, single state, no continuous monitoring) it's a paper trail to a CSA Driver Fitness alert.
+    </div>
+
+    <h2>I · The pull cadence + decision matrix</h2>
+    <table>
+      <thead><tr><th style="width:25%">Mode</th><th>When</th><th>What you do with it</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-employment</td><td>Within 30 days of hire · every state licensed past 3 yr</td><td>Evaluate against hiring standard · disqualifying offenses bar employment · file in DQ</td></tr>
+        <tr><td>Annual</td><td>Once per year · every state licensed in past 12 mo</td><td>Add to DQ file · feed annual §391.25(c) review · update the §383.51 disqualifying-offense scoreboard</td></tr>
+        <tr><td>Continuous monitoring</td><td>Real-time vendor alerts (Samba Safety, etc.)</td><td>Same-day notice of any new violation, license status change, or accident</td></tr>
+        <tr><td>Post-incident</td><td>After any accident, roadside violation, or driver self-cert disclosure</td><td>Re-evaluate driver fitness · document corrective action</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · The §383.51 disqualifying offense scoreboard</h2>
+    <p>Auto-disqualification, regardless of company policy:</p>
+    <ul>
+      <li><strong>1st major offense</strong> (Table 1) · 1-year disqualification · 3-year if hazmat</li>
+      <li><strong>2nd major offense</strong> · lifetime disqualification (10-year possible reinstatement)</li>
+      <li><strong>2 serious offenses</strong> in 3 years · 60-day disqualification</li>
+      <li><strong>3 serious offenses</strong> in 3 years · 120-day disqualification</li>
+      <li><strong>2 railroad-crossing offenses</strong> · 120-day</li>
+      <li><strong>3 RR-crossing offenses</strong> · 1-year</li>
+      <li><strong>1 OOS order violation</strong> · 180-day</li>
+    </ul>
+    <p>You must track these per driver against this scoreboard · the state will eventually catch a third serious, but your CSA score takes the hit in the meantime.</p>
+
+    <h2>III · Company policy on top of §383.51</h2>
+    <p>Most carriers add stricter internal standards · examples:</p>
+    <ul>
+      <li>No DUI within 7 years (federal is lifetime for 2nd · most carriers tighten to "never")</li>
+      <li>No more than 2 moving violations in 3 years</li>
+      <li>No at-fault accident within 3 years</li>
+      <li>No preventable accident with injury within 5 years</li>
+      <li>Lock out any state where the license is suspended</li>
+    </ul>
+    <p class="meta">Document your standard + apply it uniformly · disparate-impact / discrimination claims start when "policy" varies by candidate.</p>
+
+    <h2>IV · The annual review pattern</h2>
+    <ol>
+      <li><strong>Pull annual MVR</strong> 30 days before driver's hire anniversary</li>
+      <li><strong>Compare to last year's MVR</strong> · any new violations? new accidents? license action?</li>
+      <li><strong>Have the driver complete §391.27 violation self-cert</strong> · driver lists all moving violations from past 12 mo · cross-check against the MVR</li>
+      <li><strong>Sit with the driver</strong> · review findings · §391.25(c) signed note</li>
+      <li><strong>Determine action</strong> · qualified / corrective action / disqualified · document in driver file</li>
+      <li><strong>File the annual review</strong> · with next-review-due date calendared</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Continuous MVR monitoring catches problems annual pulls miss.</strong> A driver picks up a DUI in their personal vehicle on Saturday · with continuous monitoring you see it Monday morning · with annual pulls you might not see it until 11 months later. The cost is ~$1-3/driver/month and prevents single biggest preventable insurance hit.
+    </div>
+  `,
+});
+
+/* ---- 42. mvr-auditor-export-guide ---- */
+
+export const mvrAuditorExportGuide: TemplateFn<{ carrierName?: string; auditWindow?: string }> = (data) => ({
+  version: "1.0",
+  title: `MVR · Auditor Export Guide · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "MVR · auditor reference · 49 CFR §391.25 + §391.27",
+  bodyHTML: `
+    <h1>MVR · auditor export guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · audit window <strong>${escapeHtml(data.auditWindow || "last 3 years")}</strong></p>
+
+    <div class="callout">
+      Investigators check MVR records to verify the annual cadence (§391.25), the driver self-certifications (§391.27), and that the carrier acted on what the MVRs showed. Findings here roll up into Driver Fitness BASIC + the §391.51 DQF citation count.
+    </div>
+
+    <h2>I · The standard MVR pull (per driver)</h2>
+    <ol>
+      <li><strong>Initial MVRs at hire</strong> · every state licensed in the 3 years before hire · within 30 days of hire</li>
+      <li><strong>Annual MVRs</strong> · every state licensed in the 12 months prior to each annual review · one per year of employment</li>
+      <li><strong>Driver's §391.27 annual self-certification of violations</strong> · for each year</li>
+      <li><strong>§391.25(c) signed annual review note</strong> · for each year</li>
+      <li><strong>Continuous monitoring alerts</strong> · if you use a vendor · receipt + carrier action for each alert</li>
+      <li><strong>Roadside inspection reports</strong> involving this driver · for cross-reference</li>
+    </ol>
+
+    <h2>II · What investigators cross-reference</h2>
+    <table>
+      <thead><tr><th style="width:40%">Source A</th><th style="width:40%">Source B</th><th>What gets flagged</th></tr></thead>
+      <tbody>
+        <tr><td>MVR conviction</td><td>Driver's §391.27 self-cert</td><td>Driver omitted a conviction · falsification</td></tr>
+        <tr><td>MVR conviction</td><td>§391.25(c) annual review note</td><td>Carrier saw it but did nothing · failure to act</td></tr>
+        <tr><td>Roadside inspection violation</td><td>MVR conviction record</td><td>Conviction missing from MVR · DMV reporting lag · update needed</td></tr>
+        <tr><td>License status "suspended" on MVR</td><td>Driver's HOS or trip records</td><td>Driver operated CMV during suspension · acute violation</td></tr>
+        <tr><td>License "not certified" on CDLIS</td><td>Driver's medical card on file</td><td>Card on file but state not updated · driver is OOS</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Most common findings</h2>
+    <ul>
+      <li><strong>Missing annual MVR</strong> for a year of employment · classic §391.25 violation</li>
+      <li><strong>MVR pulled from only one state</strong> · driver had licenses in 2+ states during the period</li>
+      <li><strong>Driver self-cert missing</strong> · annual MVR was pulled but the driver's §391.27 form isn't in file</li>
+      <li><strong>Annual review note missing</strong> · MVR + self-cert there, but no §391.25(c) note documenting the review</li>
+      <li><strong>Disqualifying offense ignored</strong> · MVR shows a §383.51 disqualifying offense, but no record of removal from CMV operation</li>
+    </ul>
+
+    <h2>IV · The X3 Compass MVR audit packet</h2>
+    <ol>
+      <li>Navigate to <strong>Audit Export</strong> · select scope <strong>MVR</strong></li>
+      <li>Select drivers (all or sampled)</li>
+      <li>Click <strong>Generate audit packet</strong> · X3 builds a per-driver PDF: initial MVR(s), annual MVRs, §391.27 self-certs, §391.25(c) review notes, continuous-monitoring alerts</li>
+      <li>The packet has a version + content hash · matches the audit ledger row</li>
+    </ol>
+
+    <div class="callout">
+      <strong>The cleanest MVR audit defense is the boring one</strong>: same cadence, same documents, same review form, every driver, every year. The fanciest continuous-monitoring stack means nothing if you can't show the regulatory baseline.
+    </div>
+  `,
+});
+
+/* ---- 43. inspections-driver-quickguide ---- */
+
+export const inspectionsDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Roadside Inspection · Driver Quick Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Inspections · driver reference · 49 CFR §396",
+  bodyHTML: `
+    <h1>Roadside inspection · driver quick guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep in the cab</p>
+
+    <div class="callout">
+      A clean roadside inspection takes 15-30 minutes. A messy one can take 90 and end with the truck OOS. The difference is mostly what's prepared in the cab, what you hand over fast, and how you talk to the inspector.
+    </div>
+
+    <h2>I · What to have ready in the cab</h2>
+    <ul>
+      <li><strong>CDL + medical card</strong> · both within reach of the driver's seat</li>
+      <li><strong>Vehicle registration + IRP cab card</strong> · in the document holder</li>
+      <li><strong>Current periodic inspection sticker</strong> visible on the unit · or the §396.17 form in the cab</li>
+      <li><strong>Current annual federal inspection record</strong> · paper or accessible electronic</li>
+      <li><strong>Insurance card</strong> · FMCSA financial responsibility certificate</li>
+      <li><strong>Permit book</strong> · IFTA license + decals, IRP, fuel-tax permits, oversize permits if applicable</li>
+      <li><strong>Shipping papers</strong> · for hazmat or any specific cargo · driver's-side door pocket</li>
+      <li><strong>ELD + user manual</strong> · paper or PDF on phone · know how to do data transfer</li>
+      <li><strong>8 blank paper RODS forms</strong> · for malfunction backup</li>
+      <li><strong>3 reflective triangles + fire extinguisher (current)</strong> · accessible</li>
+    </ul>
+
+    <h2>II · The 6 inspection levels</h2>
+    <table>
+      <thead><tr><th style="width:18%">Level</th><th>What's inspected</th></tr></thead>
+      <tbody>
+        <tr><td>Level I</td><td>Full driver + vehicle inspection · most common · 37 items</td></tr>
+        <tr><td>Level II</td><td>Walk-around · driver + vehicle but no under-vehicle</td></tr>
+        <tr><td>Level III</td><td>Driver-only · CDL, medical, logs, paperwork · no vehicle</td></tr>
+        <tr><td>Level IV</td><td>Special · single feature focus (specific defect, specific commodity)</td></tr>
+        <tr><td>Level V</td><td>Vehicle-only · driver not present (post-crash etc.)</td></tr>
+        <tr><td>Level VI</td><td>Enhanced NAS · radioactive material shipments only</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · How to behave during the inspection</h2>
+    <ol>
+      <li><strong>Pull over safely + completely</strong> · use turn signals, four-ways, full stop</li>
+      <li><strong>Roll down the window + stay in the truck</strong> until the inspector tells you to exit</li>
+      <li><strong>Greet the inspector politely</strong> · "Officer · what do you need?"</li>
+      <li><strong>Hand over documents one at a time as requested</strong> · don't dump the whole permit book on them</li>
+      <li><strong>Answer questions directly + briefly</strong> · "where are you headed" "Chicago" · not a life story</li>
+      <li><strong>Don't argue with anything cited at the scene</strong> · "OK officer" · save the fight for DataQs</li>
+      <li><strong>Read the inspection report before signing</strong> · confirm your name, CDL #, unit #, citations match what you saw</li>
+      <li><strong>Get your copy</strong> · don't leave the scene without it · §396.9(c)</li>
+    </ol>
+
+    <h2>IV · If you get OOS</h2>
+    <ul>
+      <li><strong>Driver OOS</strong> · medical card expired, CDL suspended, HOS violated, alcohol/drug evidence · you can't drive until the issue is corrected</li>
+      <li><strong>Vehicle OOS</strong> · brake adjustment, tire tread, lighting · the unit doesn't move until repaired + re-inspected</li>
+      <li><strong>Call dispatch immediately</strong> · they coordinate roadside repair, alternate driver, or tow</li>
+      <li><strong>Don't drive the unit</strong> even if the violation seems minor · moving an OOS vehicle is a federal violation + automatic 180-day disqualification</li>
+      <li><strong>Document the timeline</strong> · when you noticed the issue, what the inspector said, when dispatch was called, who arrived to fix it</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Most violations are won or lost in the cab before the inspector arrives.</strong> A 10-minute pre-trip + a complete document binder catches 80% of what gets cited. The other 20% is on the carrier's maintenance program · which doesn't fall on you at the scene.
+    </div>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -2332,6 +2850,14 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "cargo-securement-driver-quickguide": cargoSecurementDriverQuickGuide as TemplateFn,
   "annual-vehicle-inspection-report": annualVehicleInspectionReport as TemplateFn,
   "eld-malfunction-policy": eldMalfunctionPolicy as TemplateFn,
+  "da-auditor-export-guide": daAuditorExportGuide as TemplateFn,
+  "dqf-employer-playbook": dqfEmployerPlaybook as TemplateFn,
+  "dqf-auditor-export-guide": dqfAuditorExportGuide as TemplateFn,
+  "background-checks-driver-guide": backgroundChecksDriverGuide as TemplateFn,
+  "background-checks-employer-playbook": backgroundChecksEmployerPlaybook as TemplateFn,
+  "mvr-employer-playbook": mvrEmployerPlaybook as TemplateFn,
+  "mvr-auditor-export-guide": mvrAuditorExportGuide as TemplateFn,
+  "inspections-driver-quickguide": inspectionsDriverQuickGuide as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
