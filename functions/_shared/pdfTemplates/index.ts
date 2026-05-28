@@ -1779,6 +1779,520 @@ export const driverOnboardingPacketIndex: TemplateFn<{ carrierName?: string; dri
 });
 
 /* ============================================================
+   BATCH 6 · New Entrant · Forms · DataQ · Securement · ELD Policy
+   ============================================================ */
+
+/* ---- 28. new-entrant-audit-prep · 49 CFR §385 Subpart D ---- */
+
+export const newEntrantAuditPrep: TemplateFn<{ carrierName?: string; usdotNumber?: string }> = (data) => ({
+  version: "1.0",
+  title: `New Entrant Audit Prep · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "New Entrant · audit prep · 49 CFR §385 Subpart D",
+  bodyHTML: `
+    <h1>New Entrant Safety Audit · prep guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong>${data.usdotNumber ? ` · USDOT ${escapeHtml(data.usdotNumber)}` : ""}</p>
+
+    <div class="callout">
+      Within 12 months of getting a USDOT number, every new motor carrier gets a safety audit. Fail it and you're shut down. The audit is a checklist, not a mystery · this guide is exactly what FMCSA looks at.
+    </div>
+
+    <h2>I · The 16 automatic-failure findings · §385 Appendix A</h2>
+    <ul>
+      <li><strong>Using a driver</strong> not holding a valid CDL when required · §383.23</li>
+      <li><strong>Using a driver</strong> with a suspended / revoked / cancelled CDL · §383.51</li>
+      <li><strong>Using a driver disqualified</strong> under §391.15</li>
+      <li><strong>Operating a CMV</strong> without proper liability insurance · §387</li>
+      <li><strong>Operating a CMV</strong> without periodic inspection · §396.17</li>
+      <li><strong>Operating a CMV</strong> placed out of service before correction · §396.9</li>
+      <li><strong>Using a driver</strong> without a current medical card · §391.45</li>
+      <li><strong>Failure to require</strong> a pre-employment drug test · §382.301</li>
+      <li><strong>Failure to implement</strong> a random drug + alcohol testing program · §382.305</li>
+      <li><strong>Failure to test</strong> after an accident meeting §382.303 criteria</li>
+      <li><strong>Using a driver</strong> the carrier knows has tested positive or refused · §382.501</li>
+      <li><strong>Failure to maintain</strong> driver qualification files · §391.51</li>
+      <li><strong>Failure to maintain</strong> accident register · §390.15</li>
+      <li><strong>Knowingly using a driver</strong> over hours · §395.3</li>
+      <li><strong>Knowingly false statements</strong> on RODS · §395.8</li>
+      <li><strong>Operating</strong> in violation of an OOS order · §396.9</li>
+    </ul>
+
+    <h2>II · What the auditor will ask you to produce</h2>
+    <table>
+      <thead><tr><th style="width:40%">Document</th><th>Who has it</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>Operating authority + USDOT number</td><td>FMCSA portal</td><td><span class="cfr">§387</span></td></tr>
+        <tr><td>Insurance filings (BMC-91 / 34 / etc.)</td><td>Insurance broker</td><td><span class="cfr">§387.7</span></td></tr>
+        <tr><td>DQ file for every driver</td><td>You · 12 documents each</td><td><span class="cfr">§391.51</span></td></tr>
+        <tr><td>D&A testing program records (random pool, results, training)</td><td>You + C-TPA</td><td><span class="cfr">§382.401</span></td></tr>
+        <tr><td>Clearinghouse pre-employment + annual queries</td><td>You · printed query confirmations</td><td><span class="cfr">§382.701</span></td></tr>
+        <tr><td>Accident Register (3 years)</td><td>You</td><td><span class="cfr">§390.15</span></td></tr>
+        <tr><td>HOS records (RODS / ELD output 6 months back)</td><td>You · ELD vendor + paper</td><td><span class="cfr">§395.8</span></td></tr>
+        <tr><td>Vehicle list + maintenance + §396.17 annual inspections</td><td>You</td><td><span class="cfr">§396.3, §396.17</span></td></tr>
+        <tr><td>DVIRs (3 months)</td><td>You · paper or electronic</td><td><span class="cfr">§396.11</span></td></tr>
+        <tr><td>Hazmat training + security plan if applicable</td><td>You</td><td><span class="cfr">§172.704, §172.800</span></td></tr>
+        <tr><td>Written safety + D&A policies</td><td>You · driver receipts on file</td><td><span class="cfr">§382.601</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · The audit timeline</h2>
+    <ol>
+      <li><strong>FMCSA notifies you</strong> 30+ days out · in-person or virtual, your choice</li>
+      <li><strong>You confirm</strong> the date and provide initial documents (insurance, vehicle list, driver list) within their requested window</li>
+      <li><strong>The audit happens</strong> · 1-2 days · auditor pulls documents, interviews you, may interview drivers</li>
+      <li><strong>You get a result letter</strong> within 90 days · Pass · Pass with corrective action · or Fail</li>
+      <li><strong>If failed</strong> · 60 days to correct · re-audit · second fail = revoked operating authority</li>
+    </ol>
+
+    <h2>IV · The 5 highest-leverage prep moves</h2>
+    <ol>
+      <li><strong>Generate an audit-export bundle</strong> the week before · X3 Compass packages every DQ file, every Accident Register entry, 6 months of HOS, every DVIR into one organized PDF set</li>
+      <li><strong>Pre-audit your own random testing pool</strong> · confirm the 50% / 10% rates have been met for the past 12 months · if not, ramp now and document the catch-up plan</li>
+      <li><strong>Verify every driver's NRCME entry</strong> · most-cited finding · the examiner registry check date is the thing carriers forget</li>
+      <li><strong>Re-run pre-employment Clearinghouse queries</strong> · confirm you have a printed result for every driver · not just an "I think we did it"</li>
+      <li><strong>Stage a mock interview</strong> · sit a driver down and ask them the 5 questions the auditor will ask · gaps in their understanding are gaps in your policy</li>
+    </ol>
+
+    <div class="callout">
+      <strong>You don't need to be perfect to pass.</strong> You need to demonstrate a functioning safety program with documented evidence. The 16 acute-violation findings above are the ones that auto-fail. Everything else is correctable.
+    </div>
+  `,
+});
+
+/* ---- 29. annual-driver-review-form · §391.25 ---- */
+
+export const annualDriverReviewForm: TemplateFn<{ carrierName?: string; driverName?: string; reviewDate?: string }> = (data) => ({
+  version: "1.0",
+  title: `Annual Driver Review · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Annual driver review · 49 CFR §391.25",
+  bodyHTML: `
+    <h1>Annual driver review</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong> · review date <strong>${escapeHtml(data.reviewDate || "____________")}</strong></p>
+
+    <div class="callout">
+      §391.25 requires the carrier to evaluate each driver's driving record at least once every 12 months. The review must consider any evidence the driver has violated FMCSRs, driven negligently, or been disqualified under §391.15. This form documents that review.
+    </div>
+
+    <h2>I · Documents reviewed</h2>
+    <table>
+      <thead><tr><th style="width:65%">Document</th><th>Reviewed</th></tr></thead>
+      <tbody>
+        <tr><td>Annual MVR (from every state where licensed in the past 12 months)</td><td>☐</td></tr>
+        <tr><td>Driver's annual list of violations (§391.27 self-certification)</td><td>☐</td></tr>
+        <tr><td>Roadside inspection reports from the past 12 months</td><td>☐</td></tr>
+        <tr><td>D&A test results (positives, refusals, return-to-duty status)</td><td>☐</td></tr>
+        <tr><td>Clearinghouse annual limited query result</td><td>☐</td></tr>
+        <tr><td>Accident reports involving this driver in the past 12 months</td><td>☐</td></tr>
+        <tr><td>Customer complaints / safety reports about this driver</td><td>☐</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Findings</h2>
+    <p>List each violation, accident, complaint, or other concern · "None" if applicable:</p>
+    <table>
+      <thead><tr><th style="width:18%">Date</th><th style="width:50%">Description</th><th>Action taken</th></tr></thead>
+      <tbody>
+        <tr><td>____________</td><td>____________________________________________</td><td>__________________</td></tr>
+        <tr><td>____________</td><td>____________________________________________</td><td>__________________</td></tr>
+        <tr><td>____________</td><td>____________________________________________</td><td>__________________</td></tr>
+        <tr><td>____________</td><td>____________________________________________</td><td>__________________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Assessment</h2>
+    <p>Based on the review of the documents listed above, the supervisor's evaluation of this driver's continued qualification under 49 CFR §391:</p>
+    <ul>
+      <li>☐ <strong>Qualified · no corrective action needed</strong></li>
+      <li>☐ <strong>Qualified · with corrective action</strong> (counseling, retraining, written warning)</li>
+      <li>☐ <strong>Disqualified under §391.15</strong> · driver removed from CMV operation</li>
+      <li>☐ <strong>Probationary status</strong> · 90-day re-review required</li>
+    </ul>
+
+    <h2>IV · Corrective action / next steps</h2>
+    <p style="border-bottom: 1px solid #94A3B8; min-height: 0.6in;">&nbsp;</p>
+    <p style="border-bottom: 1px solid #94A3B8; min-height: 0.6in;">&nbsp;</p>
+    <p style="border-bottom: 1px solid #94A3B8; min-height: 0.6in;">&nbsp;</p>
+
+    <table style="margin-top: 0.3in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Supervisor signature</div></td><td style="width:40%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Supervisor printed name + title</div></td><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Next review due</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">This form satisfies the documentation requirement of 49 CFR §391.25(c)(2). File in the driver's DQ file. Retain for the duration of employment plus 3 years.</p>
+  `,
+});
+
+/* ---- 30. previous-employer-inquiry · §391.23(d) + §40.25 ---- */
+
+export const previousEmployerInquiry: TemplateFn<{ carrierName?: string; driverName?: string; priorEmployerName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Previous Employer Inquiry · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Previous employer inquiry · §391.23(d) + §40.25",
+  bodyHTML: `
+    <h1>Previous employer safety performance + D&A inquiry</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong></p>
+
+    <div class="callout">
+      §391.23(d) requires us to investigate a driver's safety performance history with each DOT-regulated employer from the past 3 years. §40.25 requires the same for DOT D&A testing history. This form combines both inquiries.
+    </div>
+
+    <h2>I · To the previous employer</h2>
+    <p>Dear ${escapeHtml(data.priorEmployerName || "Prior Employer")},</p>
+    <p>The above-named driver has applied for employment with <strong>${escapeHtml(data.carrierName || "our company")}</strong>. The driver has signed a written authorization (attached) consenting to the release of their safety performance and DOT drug + alcohol testing history. We are requesting this information pursuant to 49 CFR §391.23(d) and §40.25.</p>
+    <p>You are required by federal law to respond to this inquiry within 30 days. Please complete Sections II and III below and return to the address on file. Indicate "N/A" or "None" where applicable.</p>
+
+    <h2>II · DOT safety performance history (§391.23(d))</h2>
+    <table>
+      <thead><tr><th style="width:65%">Question</th><th>Response</th></tr></thead>
+      <tbody>
+        <tr><td>Was the driver employed by your company in a DOT safety-sensitive function?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>Dates of employment (from / to)</td><td>____________</td></tr>
+        <tr><td>Reason for leaving (voluntary / discharge / layoff / other)</td><td>____________</td></tr>
+        <tr><td>Did the driver have any accidents recorded in our §390.15 Accident Register?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>If yes, please list date, location, severity</td><td>____________</td></tr>
+        <tr><td>Did the driver have any FMCSA-recordable accidents in the 3 years prior to leaving?</td><td>☐ Yes ☐ No</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · DOT drug + alcohol testing history (§40.25)</h2>
+    <table>
+      <thead><tr><th style="width:65%">Question</th><th>Response</th></tr></thead>
+      <tbody>
+        <tr><td>Was the driver subject to your DOT drug + alcohol testing program?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>Did the driver have a verified positive DOT drug test in the past 3 years?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>Did the driver have an alcohol confirmation test ≥ 0.04 BAC in the past 3 years?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>Did the driver refuse to be tested in the past 3 years?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>Did the driver have an "actual knowledge" violation (per §382.107) in the past 3 years?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>If any of the above is "Yes", did the driver complete the return-to-duty process with a qualified SAP?</td><td>☐ Yes ☐ No</td></tr>
+        <tr><td>If RTD was completed · was the driver compliant with the follow-up testing plan as of separation?</td><td>☐ Yes ☐ No</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · Certification</h2>
+    <p>I certify that the information provided above is, to the best of my knowledge, accurate and complete. I am authorized to release this information on behalf of the named employer.</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Authorized signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Printed name + title</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Phone</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">Federal law (§40.25 + §391.23) requires response within 30 days of receipt. Failure to respond is itself a federal violation for the prior employer.</p>
+  `,
+});
+
+/* ---- 31. da-policy-receipt · §382.601 ---- */
+
+export const daPolicyReceipt: TemplateFn<{ carrierName?: string; driverName?: string; policyVersion?: string }> = (data) => ({
+  version: "1.0",
+  title: `D&A Policy Receipt · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "D&A policy receipt · 49 CFR §382.601",
+  bodyHTML: `
+    <h1>Drug & alcohol policy · receipt acknowledgment</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · for <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong> · policy version ${escapeHtml(data.policyVersion || "1.0")}</p>
+
+    <div class="callout">
+      §382.601 requires every CDL driver to receive a written copy of the carrier's drug + alcohol policy and acknowledge receipt. This signed acknowledgment is one of the required §391.51 DQ-file documents.
+    </div>
+
+    <h2>I · What the policy covered</h2>
+    <p>I confirm I received and read the ${escapeHtml(data.carrierName || "carrier's")} written Drug & Alcohol Policy, which included:</p>
+    <ul>
+      <li>The identity of the person designated to answer driver questions about the program</li>
+      <li>The categories of drivers subject to the policy</li>
+      <li>Sufficient information about the safety-sensitive functions performed by drivers</li>
+      <li>Specific information about conduct that is prohibited (§382.201 through §382.215)</li>
+      <li>The circumstances under which a driver will be tested</li>
+      <li>The procedures used to test for drugs (urine) and alcohol (breath / oral fluid)</li>
+      <li>The requirement that the driver submit to drug and alcohol testing</li>
+      <li>An explanation of what constitutes a refusal and the consequences</li>
+      <li>The consequences of a verified positive test or refusal · including referral to a SAP and the return-to-duty process</li>
+      <li>The consequences of having an alcohol concentration of 0.02 to less than 0.04 (24-hour removal)</li>
+      <li>Information concerning the effects of alcohol and controlled substances on health, work, and personal life · signs and symptoms · available methods of intervention</li>
+    </ul>
+
+    <h2>II · My acknowledgments</h2>
+    <ol>
+      <li>I understand that I am subject to pre-employment, random, post-accident, reasonable-suspicion, and return-to-duty / follow-up drug and alcohol testing as a condition of operating any commercial motor vehicle for ${escapeHtml(data.carrierName || "the carrier")}</li>
+      <li>I understand that a verified positive drug test result, an alcohol concentration ≥ 0.04, or a refusal to test is a violation and will result in immediate removal from safety-sensitive duty</li>
+      <li>I understand that a violation will be reported to the FMCSA Drug & Alcohol Clearinghouse</li>
+      <li>I understand that I must complete the return-to-duty process with a qualified Substance Abuse Professional before returning to safety-sensitive duty</li>
+      <li>I understand that any cost not covered by insurance is my personal responsibility</li>
+      <li>I have had the opportunity to ask questions about the policy and any unanswered questions have been resolved to my satisfaction</li>
+    </ol>
+
+    <table style="margin-top: 0.3in;">
+      <tbody>
+        <tr><td style="width:60%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Driver signature</div></td><td style="width:40%; padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">Driver printed name</div></td><td style="padding: 16px 8px;"><div class="signature-line"></div><div class="signature-label">CDL number</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">This receipt satisfies 49 CFR §382.601(d). Retain in the driver's DQ file for the duration of employment plus 3 years.</p>
+  `,
+});
+
+/* ---- 32. dataq-challenge-template · DataQs / CSA SMS ---- */
+
+export const dataqChallengeTemplate: TemplateFn<{ carrierName?: string; usdotNumber?: string; inspectionReportNumber?: string }> = (data) => ({
+  version: "1.0",
+  title: `DataQ Challenge Template · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "DataQ · challenge template · dataqs.fmcsa.dot.gov",
+  bodyHTML: `
+    <h1>DataQ Challenge · template</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong>${data.usdotNumber ? ` · USDOT ${escapeHtml(data.usdotNumber)}` : ""}${data.inspectionReportNumber ? ` · Inspection Report ${escapeHtml(data.inspectionReportNumber)}` : ""}</p>
+
+    <div class="callout">
+      DataQs is the FMCSA's formal mechanism to challenge an inaccurate inspection violation, crash report, or other safety-data point. Roughly 30% of challenges succeed. The challenges that win are specific, evidence-backed, and filed quickly.
+    </div>
+
+    <h2>I · Before you file · the 4 questions to answer</h2>
+    <ol>
+      <li><strong>What's actually wrong?</strong> · "I disagree" doesn't win · "the inspector cited §393.75(a) but the tire tread measured 8/32 in inches, exceeding the §393.75(c)(1) minimum" wins</li>
+      <li><strong>What evidence do I have?</strong> · photos · maintenance records · ELD logs · ECM data · the inspection report itself · a third-party measurement</li>
+      <li><strong>What's the regulatory basis?</strong> · cite the exact CFR provision the inspector misapplied · don't argue policy, argue the regulation</li>
+      <li><strong>Did I file within 30 days?</strong> · DataQs allows challenges up to 24 months, but the state has stronger memory closer to the event</li>
+    </ol>
+
+    <h2>II · The 5 highest-success challenge patterns</h2>
+    <ul>
+      <li><strong>Wrong CFR cited</strong> · inspector tagged §392.5 (alcohol) but the situation was §392.4 (drugs) · or vice versa · clean technical fix</li>
+      <li><strong>Wrong driver / wrong vehicle</strong> · inspector recorded a unit number or CDL # that wasn't yours that day</li>
+      <li><strong>OOS that wasn't actually OOS</strong> · brake adjustment measured within tolerance · tire tread within tolerance · provide your own measurement from the repair</li>
+      <li><strong>Falsified citation</strong> · the violation didn't happen · ECM / ELD / dash cam show the truth</li>
+      <li><strong>Inspector procedural error</strong> · the inspection wasn't completed per the FMCSA Inspection Procedures Manual · narrow but legitimate</li>
+    </ul>
+
+    <h2>III · Sample challenge narrative</h2>
+    <p class="meta" style="background: #FEF3C7; padding: 12px 16px; border-left: 3px solid #D97706; border-radius: 4px;">"On [DATE], at the [LOCATION] inspection (Report #[NUMBER]), the inspector cited the vehicle for [VIOLATION] under [CFR]. We respectfully challenge this citation on the following basis:</p>
+    <p class="meta" style="background: #FEF3C7; padding: 12px 16px; border-left: 3px solid #D97706; border-radius: 4px;">1. The actual condition: [WHAT WAS TRUE] · evidenced by [PHOTO / MAINTENANCE RECORD / MEASUREMENT].</p>
+    <p class="meta" style="background: #FEF3C7; padding: 12px 16px; border-left: 3px solid #D97706; border-radius: 4px;">2. The applicable regulation [CFR.x.y.z] permits [SPECIFIC CONDITION]. The vehicle / driver / paperwork met that standard at the time of inspection.</p>
+    <p class="meta" style="background: #FEF3C7; padding: 12px 16px; border-left: 3px solid #D97706; border-radius: 4px;">3. Attached evidence: [PHOTOS / RECORDS / ELD PRINTOUT].</p>
+    <p class="meta" style="background: #FEF3C7; padding: 12px 16px; border-left: 3px solid #D97706; border-radius: 4px;">Requested resolution: Remove the cited violation from the inspection record and corresponding SMS BASIC score."</p>
+
+    <h2>IV · The DataQ process · how it actually moves</h2>
+    <ol>
+      <li><strong>You file</strong> at dataqs.fmcsa.dot.gov · upload evidence · ticket number assigned</li>
+      <li><strong>State DOT reviews</strong> · 30-90 days · they may contact the inspector for response</li>
+      <li><strong>Decision posted</strong> · in your DataQs dashboard · supporting reasoning included</li>
+      <li><strong>If denied</strong> · request supervisor review at the same state agency · then FMCSA HQ review if needed</li>
+      <li><strong>SMS update</strong> · if granted, the violation is removed within 60-90 days of decision · score recalculates</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Don't waste challenges on judgment calls you'll lose.</strong> "The inspector should have given me a warning instead" is not a basis. "The inspector cited the wrong CFR" is.
+    </div>
+  `,
+});
+
+/* ---- 33. cargo-securement-driver-quickguide · §393 Subpart I ---- */
+
+export const cargoSecurementDriverQuickGuide: TemplateFn<{ carrierName?: string; driverName?: string }> = (data) => ({
+  version: "1.0",
+  title: `Cargo Securement · Driver Quick Guide · ${data.driverName || "Sample Driver"}`,
+  headerSubtitle: "Cargo securement · driver reference · 49 CFR §393 Subpart I",
+  bodyHTML: `
+    <h1>Cargo securement · quick guide</h1>
+    <p class="meta">For <strong>${escapeHtml(data.driverName || "Sample Driver")}</strong>${data.carrierName ? ` · ${escapeHtml(data.carrierName)}` : ""} · keep in the cab</p>
+
+    <div class="callout">
+      Cargo that comes loose at highway speed kills people. §393 Subpart I sets the federal standards for tiedowns, working load limits (WLL), and securement systems. Roadside inspectors check this at every Level 1 inspection.
+    </div>
+
+    <h2>I · The general rule (every load, every time)</h2>
+    <p>Cargo must be secured to prevent it from:</p>
+    <ul>
+      <li><strong>Forward</strong> · 0.8 g deceleration · roughly a hard stop from highway speed</li>
+      <li><strong>Rearward</strong> · 0.5 g · roughly hard acceleration</li>
+      <li><strong>Sideways</strong> · 0.5 g · sharp lane change or curve</li>
+      <li><strong>Vertical</strong> · 0.2 g · bumps, dips, hills</li>
+    </ul>
+    <p class="meta">A tiedown's working load limit must be calculated for these forces. Multiple tiedowns combine their WLLs.</p>
+
+    <h2>II · Minimum number of tiedowns · §393.110</h2>
+    <table>
+      <thead><tr><th style="width:50%">Cargo length</th><th>Minimum tiedowns</th></tr></thead>
+      <tbody>
+        <tr><td>5 ft or less · weighing more than 1,100 lb</td><td>2</td></tr>
+        <tr><td>Greater than 5 ft and 10 ft or less</td><td>2</td></tr>
+        <tr><td>Greater than 10 ft</td><td>2 for first 10 ft + 1 for each additional 10 ft or fraction</td></tr>
+        <tr><td>Articles secured against a fixed structure (bulkhead, headboard)</td><td>1 fewer tiedown if structure can withstand the §393 forces</td></tr>
+      </tbody>
+    </table>
+
+    <p>The aggregate Working Load Limit of all tiedowns combined must be ≥ 50% of the cargo weight.</p>
+
+    <h2>III · Special commodity rules · §393.116-§393.136</h2>
+    <ul>
+      <li><strong>Logs · §393.116</strong> · centered + bunked · ends extending forward of bunks prohibited · chains or wire rope</li>
+      <li><strong>Dressed lumber · §393.118</strong> · 2 tiedowns per bundle + cross-tied to vehicle</li>
+      <li><strong>Metal coils · §393.120</strong> · eyes vertical · eyes lengthwise · or eyes crosswise · each has specific tiedown patterns</li>
+      <li><strong>Paper rolls · §393.122</strong> · upright · banded + chocked / supported · tiedowns over each roll</li>
+      <li><strong>Concrete pipe · §393.124</strong> · cradled + tiedowns sized to pipe weight</li>
+      <li><strong>Intermodal containers · §393.126</strong> · all 4 corners locked to chassis or trailer</li>
+      <li><strong>Automobiles · §393.128</strong> · 4 tiedowns minimum per vehicle</li>
+      <li><strong>Heavy equipment · §393.130</strong> · 4 tiedowns + brake set + transmission in low gear · attach to designated tiedown points</li>
+      <li><strong>Roll-on/roll-off containers · §393.132</strong> · twist locks + tiedowns</li>
+      <li><strong>Boulders · §393.136</strong> · larger boulders require special handling</li>
+    </ul>
+
+    <h2>IV · Tiedown condition · what disqualifies a strap or chain</h2>
+    <ul>
+      <li><strong>Cuts, tears, or holes</strong> in webbing · any visible damage</li>
+      <li><strong>Knots</strong> in the tiedown (they reduce WLL by up to 50%)</li>
+      <li><strong>Frayed or worn webbing</strong> showing more than 25% loss of material</li>
+      <li><strong>Burns, melting, or weld spatter</strong> on the strap</li>
+      <li><strong>Cracked or deformed hardware</strong> · ratchets, hooks, J-hooks</li>
+      <li><strong>Missing or unreadable WLL labels</strong> · a strap without a visible WLL stamp is no-go</li>
+      <li><strong>Chains with cracked / gouged / nicked / stretched links</strong></li>
+    </ul>
+
+    <div class="callout">
+      <strong>Inspect cargo and tiedowns within the first 50 miles of every trip · and every 150 miles thereafter</strong> · <span class="cfr">§392.9(b)</span>. Document the recheck. If a tiedown loosens mid-trip, stop and re-tension before continuing.
+    </div>
+  `,
+});
+
+/* ---- 34. annual-vehicle-inspection-report · §396.17 + Appendix G ---- */
+
+export const annualVehicleInspectionReport: TemplateFn<{ carrierName?: string; vehicleId?: string; inspectorName?: string; inspectionDate?: string }> = (data) => ({
+  version: "1.0",
+  title: `Annual Vehicle Inspection · ${data.vehicleId || "Unit"}`,
+  headerSubtitle: "Annual inspection · 49 CFR §396.17 + Appendix G",
+  bodyHTML: `
+    <h1>Annual vehicle inspection report</h1>
+    <p class="meta">${escapeHtml(data.carrierName || "Sample Carrier")} · Unit <strong>${escapeHtml(data.vehicleId || "____________")}</strong> · inspected <strong>${escapeHtml(data.inspectionDate || "____________")}</strong> by <strong>${escapeHtml(data.inspectorName || "____________")}</strong></p>
+
+    <div class="callout">
+      §396.17 requires every CMV to be inspected at least every 12 months. The inspector must be qualified per §396.19. This form covers the §396 Appendix G inspection items.
+    </div>
+
+    <h2>I · Brake system</h2>
+    <table>
+      <thead><tr><th style="width:65%">Item</th><th>Pass / Fail / Repaired</th></tr></thead>
+      <tbody>
+        <tr><td>Service brakes · adjustment, condition</td><td>____________</td></tr>
+        <tr><td>Parking brake · holds vehicle</td><td>____________</td></tr>
+        <tr><td>Brake drums or rotors · no cracks or excessive wear</td><td>____________</td></tr>
+        <tr><td>Brake hoses + tubing · no leaks, no chafing, secure</td><td>____________</td></tr>
+        <tr><td>Air system · low-air warning, governor, dryer, tanks</td><td>____________</td></tr>
+        <tr><td>ABS system · functional, warning lights off after start</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>II · Coupling devices, lighting, fuel, steering, tires, wheels</h2>
+    <table>
+      <thead><tr><th style="width:65%">Item</th><th>P / F / R</th></tr></thead>
+      <tbody>
+        <tr><td>Fifth wheel · mount, lock, condition</td><td>____________</td></tr>
+        <tr><td>Pintle hook / trailer hitch · condition + safety chains</td><td>____________</td></tr>
+        <tr><td>All exterior lighting · headlights, turn, brake, tail, marker, ID</td><td>____________</td></tr>
+        <tr><td>Reflectors + reflective tape · condition + placement</td><td>____________</td></tr>
+        <tr><td>Fuel system · no leaks, cap secure, mounted properly</td><td>____________</td></tr>
+        <tr><td>Steering · no excessive free play, no looseness in linkage</td><td>____________</td></tr>
+        <tr><td>Tires · tread depth (4/32 drive, 2/32 trailer), inflation, no cuts</td><td>____________</td></tr>
+        <tr><td>Wheels + rims · no cracks, all lug nuts present + tight</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>III · Frame, suspension, exhaust, windshield + glazing</h2>
+    <table>
+      <thead><tr><th style="width:65%">Item</th><th>P / F / R</th></tr></thead>
+      <tbody>
+        <tr><td>Frame · no cracks, deformations, or excessive corrosion</td><td>____________</td></tr>
+        <tr><td>Suspension · springs, U-bolts, shackles, axles · no defects</td><td>____________</td></tr>
+        <tr><td>Exhaust system · leaks, mounting, no exhaust into cab</td><td>____________</td></tr>
+        <tr><td>Windshield · no cracks in driver's view, no obstructions</td><td>____________</td></tr>
+        <tr><td>Side + rear glass · no breakage in driver's view</td><td>____________</td></tr>
+        <tr><td>Windshield wipers + washers · functional</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>IV · Emergency equipment + interior</h2>
+    <table>
+      <thead><tr><th style="width:65%">Item</th><th>P / F / R</th></tr></thead>
+      <tbody>
+        <tr><td>3 reflective triangles · in vehicle, accessible</td><td>____________</td></tr>
+        <tr><td>Fire extinguisher · charged, mounted, inspection date current</td><td>____________</td></tr>
+        <tr><td>Spare fuses (if not circuit breakers)</td><td>____________</td></tr>
+        <tr><td>Horn · functional</td><td>____________</td></tr>
+        <tr><td>Mirrors · both rear-view, condition + adjustment</td><td>____________</td></tr>
+        <tr><td>Seat belts · functional, mounting secure</td><td>____________</td></tr>
+        <tr><td>Heater + defroster · functional</td><td>____________</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Inspector certification</h2>
+    <p>I, the undersigned qualified inspector per §396.19, certify that the items above were inspected and that the vehicle complies with the standards of 49 CFR §396, Appendix G as of the inspection date.</p>
+
+    <table style="margin-top: 0.2in;">
+      <tbody>
+        <tr><td style="width:55%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Inspector signature</div></td><td style="width:45%; padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Date</div></td></tr>
+        <tr><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Printed name + qualification</div></td><td style="padding: 12px 8px;"><div class="signature-line"></div><div class="signature-label">Next inspection due</div></td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.15in;">A copy of this report (or §396.21 sticker on the unit) must be retained for 14 months after the inspection date. <span class="cfr">§396.21(b)(2)</span></p>
+  `,
+});
+
+/* ---- 35. eld-malfunction-policy · §395.34 + §395.22 ---- */
+
+export const eldMalfunctionPolicy: TemplateFn<{ carrierName?: string }> = (data) => ({
+  version: "1.0",
+  title: `ELD Malfunction Policy · ${data.carrierName || "Sample Carrier"}`,
+  headerSubtitle: "ELD malfunction policy · 49 CFR §395.34",
+  bodyHTML: `
+    <h1>ELD malfunction policy</h1>
+    <p class="meta">For <strong>${escapeHtml(data.carrierName || "Sample Carrier")}</strong> · written policy per 49 CFR §395.34</p>
+
+    <div class="callout">
+      §395.34 requires every motor carrier using ELDs to have a written policy covering how drivers respond to ELD malfunctions and how the carrier repairs them. This template is suitable for use as the carrier's standing policy.
+    </div>
+
+    <h2>I · Scope</h2>
+    <p>This policy applies to every driver and every commercial motor vehicle operated by ${escapeHtml(data.carrierName || "the Company")} that is subject to 49 CFR Part 395 (Hours of Service) and is required to use an Electronic Logging Device.</p>
+
+    <h2>II · Driver responsibilities when an ELD malfunction occurs</h2>
+    <ol>
+      <li><strong>Notice the malfunction</strong> · the ELD will display a visible alert · note the date, time, and malfunction code</li>
+      <li><strong>Note the malfunction</strong> on the driver's record of duty status (RODS) within 24 hours · §395.34(a)(2)</li>
+      <li><strong>Provide written notice</strong> to ${escapeHtml(data.carrierName || "the carrier")} within 24 hours · accepted via text, email, or in-app notification to dispatch · §395.34(a)(2)</li>
+      <li><strong>Switch to paper RODS</strong> for the rest of the day and continuing days until the malfunction is repaired · reconstruct the past 7 consecutive days of RODS using paper forms if not already on ELD · §395.34(a)(3)</li>
+      <li><strong>Continue paper RODS</strong> for up to 8 days after the malfunction was first noticed, unless the ELD is repaired or replaced sooner · §395.34(d)</li>
+      <li><strong>Carry a supply of blank paper RODS forms</strong> sufficient for at least 8 days at all times · §395.8(a)(1)(iii)</li>
+    </ol>
+
+    <h2>III · Carrier responsibilities</h2>
+    <ol>
+      <li><strong>Confirm receipt</strong> of the driver's malfunction notice in writing (email reply, dispatch log entry, ticket assignment)</li>
+      <li><strong>Begin repair or replacement</strong> within a reasonable time · within 8 days of receiving notice the ELD must be repaired, replaced, or serviced · §395.34(d)</li>
+      <li><strong>If repair won't fit in 8 days</strong> · file a written extension request with the FMCSA Field Office prior to expiration of the 8-day period · §395.34(b)(2)</li>
+      <li><strong>Document every malfunction</strong> in the malfunction log · driver, unit, date noticed, repair date, repair description · retain for 6 months · §395.34(d)</li>
+      <li><strong>Verify replacement / repair</strong> · check that the ELD vendor is still on the FMCSA Registered ELDs list, that data transfer + display functions work, and that the device is configured for the correct driver and vehicle</li>
+    </ol>
+
+    <h2>IV · The malfunction codes (display + meaning)</h2>
+    <table>
+      <thead><tr><th style="width:25%">Code</th><th>What it means</th><th>CFR</th></tr></thead>
+      <tbody>
+        <tr><td>P (Power)</td><td>ELD failed to power up</td><td><span class="cfr">§395.22(g)(1)</span></td></tr>
+        <tr><td>E (Engine sync)</td><td>ELD can't talk to the engine ECM</td><td><span class="cfr">§395.22(g)(2)</span></td></tr>
+        <tr><td>T (Timing)</td><td>Time drift > 10 minutes from UTC</td><td><span class="cfr">§395.22(g)(3)</span></td></tr>
+        <tr><td>L (Positioning)</td><td>GPS signal lost > 60 min cumulative in 24 hr</td><td><span class="cfr">§395.22(g)(4)</span></td></tr>
+        <tr><td>R (Data recording)</td><td>ELD can't record the required data</td><td><span class="cfr">§395.22(g)(5)</span></td></tr>
+        <tr><td>S (Data transfer)</td><td>ELD can't transfer data to the FMCSA in the required format</td><td><span class="cfr">§395.22(g)(6)</span></td></tr>
+        <tr><td>O (Other)</td><td>Anything else flagged by the device</td><td>§395.22(g)(7)</td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta" style="margin-top: 0.2in;">Adopted by ${escapeHtml(data.carrierName || "the carrier")} pursuant to 49 CFR §395.34. Effective from date of last revision. All drivers receive a copy as part of the §382.601 written policy packet.</p>
+  `,
+});
+
+/* ============================================================
    REGISTRY
    ============================================================ */
 
@@ -1810,6 +2324,14 @@ export const TEMPLATES: Record<string, TemplateFn> = {
   "dvir-driver-quickguide": dvirDriverQuickGuide as TemplateFn,
   "dvir-employer-playbook": dvirEmployerPlaybook as TemplateFn,
   "driver-onboarding-packet-index": driverOnboardingPacketIndex as TemplateFn,
+  "new-entrant-audit-prep": newEntrantAuditPrep as TemplateFn,
+  "annual-driver-review-form": annualDriverReviewForm as TemplateFn,
+  "previous-employer-inquiry": previousEmployerInquiry as TemplateFn,
+  "da-policy-receipt": daPolicyReceipt as TemplateFn,
+  "dataq-challenge-template": dataqChallengeTemplate as TemplateFn,
+  "cargo-securement-driver-quickguide": cargoSecurementDriverQuickGuide as TemplateFn,
+  "annual-vehicle-inspection-report": annualVehicleInspectionReport as TemplateFn,
+  "eld-malfunction-policy": eldMalfunctionPolicy as TemplateFn,
 };
 
 export type TemplateSlug = keyof typeof TEMPLATES;
