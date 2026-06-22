@@ -356,7 +356,7 @@ export default function Hazmat() {
         <Related
           links={[
             { href: "/case-studies/sample", title: "Sample audit walkthrough", desc: "See where hazmat preparation lands in a 6-day compliance review." },
-            { href: "/skills", title: "All 300 skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
+            { href: "/skills", title: "All 67,750+ skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
             { href: "/pricing", title: "Pricing + ROI", desc: "Hazmat add-on +$99/mo flat on any tier." },
           ]}
         />

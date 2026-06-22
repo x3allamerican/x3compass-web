@@ -17,7 +17,7 @@ const PRICING = [
     headline: "$25", unit: "per driver / mo",
     desc: "You drive the dashboard. AI does most of the work.",
     bullets: [
-      "All 12 brains, all 300 skills",
+      "All 12 brains, all 67,750+ skills",
       "★ Vendor integrations included · Motive, Samsara, Geotab, Tenstreet, Quest, Checkr, WEX, SambaSafety + more",
       "CSV import + manual entry on every tracker",
       "Daily compliance digest",
@@ -89,7 +89,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 pt-20 pb-24 relative">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-6">
-                EST. 2025 · 300 SKILLS · 12 BRAINS · BUILT BY FLEET OPERATORS
+                EST. 2026 · 67,750+ CFR-CITED SKILLS · 12 BRAINS · BUILT BY FLEET OPERATORS
               </div>
               <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[60px] md:text-[72px] mb-6">
                 An AI Safety Director.
@@ -122,7 +122,7 @@ export default function Home() {
         <section className="border-y border-[var(--border)] bg-[var(--bg-3)]">
           <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { count: 300, prefix: "",  suffix: "", desc: "FMCSA skills, every one CFR-cited",        key: "skills" },
+              { count: 67750, prefix: "",  suffix: "+", desc: "CFR-cited skills, every one tied to the reg", key: "skills" },
               { count: 12,  prefix: "",  suffix: "", desc: "Specialized brains, one per compliance domain", key: "brains" },
               { count: 25,  prefix: "$", suffix: "", desc: "per driver, DIY · or $50 done-for-you",      key: "price" },
             ].map((s, i) => (
@@ -201,13 +201,13 @@ export default function Home() {
 
         <FounderNote />
 
-        {/* 03 · 300 SKILLS */}
+        {/* 03 · 67,750+ CFR-CITED SKILLS */}
         <section id="skills" className="max-w-7xl mx-auto px-6 py-24">
           <div className="inline-flex gap-1 mb-3">
             <span className="w-7 h-[3px] bg-[var(--accent)]" />
             <span className="w-7 h-[3px] bg-white/30" />
           </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 300 PUBLISHED SKILLS</div>
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 67,750+ CFR-CITED SKILLS</div>
           <h2 className="text-[40px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
             Ask any FMCSA question.{" "}
             <span className="serif-italic" style={{ color: "var(--accent)" }}>Get a CFR-cited answer.</span>
@@ -222,7 +222,7 @@ export default function Home() {
                 href="/skills"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--fg)] border border-[var(--accent)]/50 hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]"
               >
-                ★ Browse all 300 skills · filter & search →
+                ★ Browse all 67,750+ skills · filter & search →
               </Link>
             </div>
             <div className="text-[13px] text-[var(--fg-muted)]">
@@ -325,7 +325,7 @@ export default function Home() {
               <span className="serif-italic" style={{ color: "var(--accent)" }}>Or let us drive it for you.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-3">
-              Every tier includes all 12 brains and all 300 skills. The only difference is who&apos;s holding the wheel.
+              Every tier includes all 12 brains and all 67,750+ skills. The only difference is who&apos;s holding the wheel.
             </p>
             <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg)] mb-12">
               ★ TRY EVERY BRAIN · PLUS HAZMAT · FREE FOR 7 DAYS. NO CARD REQUIRED.

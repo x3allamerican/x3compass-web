@@ -213,7 +213,7 @@ export default function SkillsExplorer() {
             {/* CTA footer */}
             <div className="px-6 py-5 border-t border-[#1E3556] bg-[#0A1929]/60 rounded-b-2xl">
               <div className="text-[13px] text-white/70 mb-3">
-                This is one of <strong className="text-white">300 published skills.</strong> Every Compass answer cites the actual CFR · and runs against your fleet&apos;s real data.
+                This is one of <strong className="text-white">67,750+ CFR-cited skills.</strong> Every Compass answer cites the actual CFR · and runs against your fleet&apos;s real data.
               </div>
               <div className="flex flex-wrap gap-2 items-center justify-between">
                 <div className="text-[11px] text-white/45">

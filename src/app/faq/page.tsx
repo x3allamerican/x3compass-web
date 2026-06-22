@@ -5,17 +5,17 @@ const FAQS = [
   {
     section: "GENERAL",
     items: [
-      { q: "What is X3 Compass?", a: "X3 Compass is the AI Safety Director for motor carriers running 1–100 power units. Twelve specialized brains (DQ Files, MVR, HOS, D&A, CSA, Training, Hazmat, etc.), 300 published FMCSA skills, all answers grounded in the actual CFR." },
+      { q: "What is X3 Compass?", a: "X3 Compass is the AI Safety Director for motor carriers running 1–100 power units. Twelve specialized brains (DQ Files, MVR, HOS, D&A, CSA, Training, Hazmat, etc.), 67,750+ CFR-cited skills, all answers grounded in the actual CFR." },
       { q: "Who is it for?", a: "Owner-operators, small fleets, and mid-size carriers who can't justify a full-time $100K/yr Safety Director. Two flavors: DIY at $25/driver if you want to drive the dashboard yourself, or DFY at $50/driver if you want a real X3 safety advisor managing it for you." },
       { q: "How is this different from X3 Fleet Safety?", a: "X3 Fleet Safety is the human-led compliance service · a real safety advisor working your account, billed at $50/driver. X3 Compass is the AI platform that powers it (and that you can run yourself at $25/driver). Same DOT expertise. Different delivery model." },
-      { q: "Is this a real product or vaporware?", a: "Real. Twelve brains live, dashboard built, 100 skills published on GitHub (github.com/x3fleetsafety/skills) with the other 200 in the pipeline. You can start a 7-day trial right now." },
+      { q: "Is this a real product or vaporware?", a: "Real. Twelve brains are live, the dashboard is built, and every answer is backed by a 67,750-document CFR knowledge base. You can start a 7-day trial right now." },
     ],
   },
   {
     section: "PRICING & BILLING",
     items: [
       { q: "How much does it cost?", a: "DIY (Compass AI) is $25 per driver per month. DFY (Compass Concierge) is $50 per driver per month. Enterprise (100+ trucks) is custom pricing · call us. Hazmat add-on is +$99/month on any tier." },
-      { q: "Is there a free trial?", a: "Yes · 7 days, no credit card required. Every brain, all 300 skills, and the Hazmat add-on are included in the trial. After 7 days you pick a plan or cancel." },
+      { q: "Is there a free trial?", a: "Yes · 7 days, no credit card required. Every brain, all 67,750+ skills, and the Hazmat add-on are included in the trial. After 7 days you pick a plan or cancel." },
       { q: "Can I switch between DIY and DFY?", a: "Yes, any time. Upgrade to DFY when you want a human in the loop, downgrade back to DIY when you're confident running it yourself. We pro-rate the change." },
       { q: "Annual discount?", a: "Yes · pay annually and get 2 months free (16% off). Toggle on the pricing page." },
       { q: "What if I have more than 100 drivers?", a: "That's Enterprise. Call us. Volume pricing, dedicated advisor team, white-label dashboard for partners, SSO, custom CFR skills." },

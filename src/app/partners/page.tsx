@@ -47,7 +47,7 @@ const COMPONENTS = [
     desc: "Cold-email templates, LinkedIn sequences, carrier-discovery scripts, proposal frameworks. Pre-built for the safety-consultant-to-motor-carrier sale.",
     retail: "$500-1,500 from agencies" },
   { n: "12", title: "Plus everything Direct gets", badge: "FULL PRODUCT",
-    desc: "All 12 brains, 300 skills, vendor integrations, audit export, hazmat add-on at wholesale, continuous updates. Partners are first-in-line for new features.",
+    desc: "All 12 brains, 67,750+ skills, vendor integrations, audit export, hazmat add-on at wholesale, continuous updates. Partners are first-in-line for new features.",
     retail: "$25/driver Direct retail" },
 ];
 
@@ -111,7 +111,7 @@ export default function PartnersPage() {
                 <span className="serif-italic" style={{ color: "var(--accent)" }}>We run the platform.</span>
               </h1>
               <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
-                A white-label AI compliance platform for independent safety consultants. Your brand on the dashboard. Your carriers log into <em>your</em> tool. Powered by 300 published FMCSA skills + 12 specialized brains, sitting invisibly behind your business.
+                A white-label AI compliance platform for independent safety consultants. Your brand on the dashboard. Your carriers log into <em>your</em> tool. Powered by 67,750+ CFR-cited skills + 12 specialized brains, sitting invisibly behind your business.
               </p>
               <div className="flex gap-3 justify-center flex-wrap mb-4">
                 <Link href="#apply" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>

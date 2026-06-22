@@ -62,7 +62,7 @@ export default function AskCompassPage() {
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full grid place-items-center text-[var(--bg)] font-black text-2xl mx-auto mb-5" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>∞</div>
             <h1 className="text-2xl font-extrabold mb-2">{user ? `Hi${(user.email||"").split("@")[0] ? ", " + (user.email||"").split("@")[0] : ""} · ask me anything FMCSA-related.` : "Ask me anything FMCSA-related."}</h1>
-            <p className="text-[var(--fg-muted)] mb-8">{carrier?.name && `On behalf of ${carrier.name}. `}300+ CFR-cited skills. Powered by Claude.</p>
+            <p className="text-[var(--fg-muted)] mb-8">{carrier?.name && `On behalf of ${carrier.name}. `}67,750+ CFR-cited skills. Powered by Claude.</p>
             <div className="grid md:grid-cols-2 gap-2 max-w-2xl mx-auto">
               {STARTERS.map((s) => (
                 <button key={s} onClick={() => send(s)} disabled={busy} className="text-left p-3 rounded-lg bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] text-[13px] text-[var(--fg-muted)] disabled:opacity-50">{s}</button>

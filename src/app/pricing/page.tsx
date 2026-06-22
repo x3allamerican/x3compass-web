@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const PLANS = [
-  { name: "DIY", price: 25, blurb: "AI Safety Director + 300+ FMCSA skills · you operate it.", features: ["AI brain across 12 compliance domains","300+ CFR-cited skills","DataQ dispute drafter","Placard wizard + 100 hazmat skills (with add-on)","Driver Qualification File generator","Auto MVR pull cadence","Email support"], cta: { label: "Start 7-day free trial", href: "/signup?plan=diy" } },
+  { name: "DIY", price: 25, blurb: "AI Safety Director + 67,750+ CFR-cited skills · you operate it.", features: ["AI brain across 12 compliance domains","67,750+ CFR-cited skills","DataQ dispute drafter","Placard wizard + 100 hazmat skills (with add-on)","Driver Qualification File generator","Auto MVR pull cadence","Email support"], cta: { label: "Start 7-day free trial", href: "/signup?plan=diy" } },
   { name: "DFY", price: 50, blurb: "Done-for-you. We operate Compass on your account.", features: ["Everything in DIY","Dedicated safety advisor","Monthly compliance review call","FMCSA audit prep included","We file MVRs, drug tests, Clearinghouse","Priority slack + phone support","Same-day DataQ dispute filing"], featured: true, cta: { label: "Start 7-day free trial", href: "/signup?plan=dfy" } },
   { name: "Enterprise", price: null, blurb: "100+ trucks, multi-yard, integrations, custom SLAs.", features: ["Everything in DFY","Multi-tenant org structure","SSO + SCIM","Custom integrations","Dedicated CSM + named legal counsel","Custom data residency","MSA + signed BAA"], cta: { label: "Talk to us", href: "/partners" } },
 ];

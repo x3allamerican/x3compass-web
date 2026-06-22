@@ -24,7 +24,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <ul className="space-y-2 text-[14px]">
                 <li><Link href="/#services" className="hover:text-white">Twelve brains</Link></li>
                 <li><Link href="/app" className="hover:text-white">App / Dashboard</Link></li>
-                <li><Link href="/#skills" className="hover:text-white">300 skills</Link></li>
+                <li><Link href="/#skills" className="hover:text-white">67,750+ skills</Link></li>
                 <li><Link href="/hazmat" className="hover:text-white">Hazmat Center</Link></li>
                 <li><Link href="/#pricing" className="hover:text-white">Pricing</Link></li>
               </ul>

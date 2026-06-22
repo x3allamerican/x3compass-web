@@ -117,7 +117,7 @@ export default function SkillsCatalogPage() {
               THE COMPASS SKILL LIBRARY · OPEN-SOURCED ON GITHUB
             </div>
             <h1 className="text-[36px] sm:text-[48px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-              All 300 FMCSA skills.{" "}
+              All 67,750+ CFR-cited skills.{" "}
               <span className="serif-italic" style={{ color: "var(--accent)" }}>One library.</span>
             </h1>
             <p className="text-[16px] text-[var(--fg-muted)] max-w-3xl mb-8">
