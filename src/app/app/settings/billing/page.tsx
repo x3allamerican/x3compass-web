@@ -44,7 +44,7 @@ function BillingInner() {
         <div className="rounded-2xl p-6 mb-6 bg-[var(--surface-3)] border border-[var(--border)]">
           <div className="text-[11px] tracking-[.18em] uppercase text-[var(--fg-muted)] font-bold mb-3">Plan</div>
           <div className="flex items-center justify-between mb-1">
-            <div className="text-xl font-extrabold">{(carrier.service_tier || "diy").toUpperCase()} {carrier.hazmat_addon ? "+ Hazmat" : ""}</div>
+            <div className="text-xl font-extrabold">X3 Compass</div>
             <div className={`text-[12px] font-bold uppercase tracking-[.14em] ${isActive ? "text-green-700 dark:text-green-400" : isTrial ? "text-[var(--accent)]" : isPastDue ? "text-orange-700 dark:text-orange-400" : "text-[var(--fg-muted)]"}`}>{carrier.subscription_status}</div>
           </div>
           {isTrial && carrier.trial_ends_at && <div className="text-[12px] text-[var(--fg-muted)]">Trial ends {new Date(carrier.trial_ends_at).toLocaleDateString()}</div>}
@@ -57,7 +57,7 @@ function BillingInner() {
           </button>
           <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] block">
             <div className="text-xl font-extrabold mb-1">Switch plan</div>
-            <div className="text-[12px] text-[var(--fg-muted)]">Compare DIY vs DFY vs Enterprise</div>
+            <div className="text-[12px] text-[var(--fg-muted)]">Graduated per-driver · every X3 product included</div>
           </Link>
         </div>
         {error && <div className="mt-6 text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}

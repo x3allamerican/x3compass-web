@@ -6,6 +6,7 @@ import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { SkeletonShell } from "@/components/Skeleton";
+import { monthlyFor, effectiveRate, usd } from "@/lib/pricing";
 
 type Step = 1 | 2 | 3;
 
@@ -23,8 +24,6 @@ export default function OnboardingPage() {
   const [driverEmail, setDriverEmail] = useState("");
   const [driverCdlState, setDriverCdlState] = useState("");
   const [driverCdlNumber, setDriverCdlNumber] = useState("");
-  const [plan, setPlan] = useState<"diy" | "dfy">("diy");
-  const [hazmat, setHazmat] = useState(false);
   const [drivers, setDrivers] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +69,7 @@ export default function OnboardingPage() {
     setBusy(true); setError(null);
     try {
       const data = await apiFetch<{ ok: boolean; url?: string; error?: string }>("/api/stripe/create-checkout-session", {
-        method: "POST", body: JSON.stringify({ plan, drivers, hazmat }),
+        method: "POST", body: JSON.stringify({ drivers }),
       });
       if (!data.ok || !data.url) throw new Error(data.error || "Checkout failed");
       window.location.href = data.url;
@@ -125,21 +124,21 @@ export default function OnboardingPage() {
             </div>
           </>)}
           {step === 3 && (<>
-            <h2 className="text-xl font-extrabold mb-1">3 · Pick your plan</h2>
+            <h2 className="text-xl font-extrabold mb-1">3 · Your plan</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mb-6">7-day free trial active. Card optional today.</p>
-            <div className="space-y-3 mb-6">
-              <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills · you operate it." />
-              <PlanCard active={plan === "dfy"} onClick={() => setPlan("dfy")} title="DFY" price="$50" sub="/driver/mo" desc="We operate Compass for you. Concierge included." />
+            <div className="rounded-lg border border-[var(--accent)] bg-[var(--surface-3)] p-5 mb-6">
+              <div className="flex items-baseline justify-between mb-1">
+                <div className="font-extrabold text-base">X3 Compass</div>
+                <div><span className="font-extrabold text-lg">{usd(effectiveRate(drivers))}</span><span className="text-[12px] text-[var(--fg-muted)]">/driver/mo</span></div>
+              </div>
+              <div className="text-[12px] text-[var(--fg-muted)]">Every X3 product included · graduated per-driver ($50 → $25 as you grow) · $100/mo minimum.</div>
             </div>
             <div className="space-y-3 mb-6">
               <Field label="Number of drivers"><input className="x3-input" type="number" min={1} value={drivers} onChange={(e) => setDrivers(Math.max(1, Number(e.target.value)))} /></Field>
-              <label className="flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)]">
-                <input type="checkbox" checked={hazmat} onChange={(e) => setHazmat(e.target.checked)} />
-                <div className="flex-1">
-                  <div className="text-sm font-bold">+ Hazmat add-on</div>
-                  <div className="text-[11px] text-[var(--fg-muted)]">Placard wizard, hazmat skills · $99/mo flat</div>
-                </div>
-              </label>
+              <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                <div className="text-sm font-bold">Estimated monthly</div>
+                <div className="text-lg font-extrabold">{usd(monthlyFor(drivers))}<span className="text-[11px] font-normal text-[var(--fg-muted)]">/mo</span></div>
+              </div>
             </div>
             {error && <Err msg={error} />}
             <div className="flex gap-3">
@@ -167,14 +166,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Err({ msg }: { msg: string }) {
   return <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
 }
-function PlanCard({ active, onClick, title, price, sub, desc }: { active: boolean; onClick: () => void; title: string; price: string; sub: string; desc: string }) {
-  return (
-    <button onClick={onClick} className={`w-full text-left p-4 rounded-lg border ${active ? "border-[var(--accent)] bg-[var(--surface-3)]" : "border-[var(--border)] bg-[var(--bg)]"}`}>
-      <div className="flex items-baseline justify-between mb-1">
-        <div className="font-extrabold text-base">{title}</div>
-        <div><span className="font-extrabold text-lg">{price}</span><span className="text-[12px] text-[var(--fg-muted)]">{sub}</span></div>
-      </div>
-      <div className="text-[12px] text-[var(--fg-muted)]">{desc}</div>
-    </button>
-  );
-}
+

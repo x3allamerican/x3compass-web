@@ -7,6 +7,7 @@ import { X3AdminTabs } from "@/components/X3AdminHero";
 import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
+import { monthlyFor, effectiveRate, usd } from "@/lib/pricing";
 
 type CarrierFull = {
   id: string; name: string; dba: string | null;
@@ -33,7 +34,6 @@ const TABS: { key: "profile" | "team" | "billing"; label: React.ReactNode }[] = 
   { key: "billing", label: <>💳 Billing</> },
 ];
 
-const SERVICE_TIER_PRICE: Record<string, number> = { diy: 10, dfy: 50, hazmat: 75 };
 
 export default function SettingsPage() {
   const { user, carrier, refresh: refreshUser, signOut } = useUser();
@@ -170,9 +170,9 @@ export default function SettingsPage() {
   }
 
   const driverCount = form.drivers_count || 0;
-  const tierLabel = (form.service_tier || "diy").toUpperCase();
-  const pricePerDriver = SERVICE_TIER_PRICE[form.service_tier || "diy"] + (form.hazmat_addon ? 25 : 0);
-  const estMonthly = useMemo(() => `$${(driverCount * pricePerDriver).toLocaleString()}`, [driverCount, pricePerDriver]);
+  const tierLabel = "X3 Compass";
+  const pricePerDriver = Math.round(effectiveRate(driverCount));
+  const estMonthly = useMemo(() => usd(monthlyFor(driverCount)), [driverCount]);
 
   if (loading) return <AppShell title="Settings"><div className="p-6"><SkeletonShell kpis={3} rows={4} /></div></AppShell>;
 
@@ -185,7 +185,7 @@ export default function SettingsPage() {
             <div>
               <div className="text-[var(--fg)] font-bold">{user?.email}</div>
               <div className="text-[12px] text-[var(--fg-muted)]">
-                Owner · <strong className="text-[var(--fg)]">{tierLabel}</strong>{form.hazmat_addon ? " + Hazmat" : ""} · <span className="text-[var(--accent)]">{form.subscription_status}</span>
+                Owner · <strong className="text-[var(--fg)]">{tierLabel}</strong> · <span className="text-[var(--accent)]">{form.subscription_status}</span>
                 {form.trial_ends_at && form.subscription_status === "trialing" && <> · trial ends {new Date(form.trial_ends_at).toLocaleDateString()}</>}
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function SettingsPage() {
             <Block title="Current plan">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center bg-gradient-to-r from-[var(--surface-2)] to-[var(--bg)] border border-[var(--border)] rounded-xl p-5">
                 <div>
-                  <div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-extrabold">{tierLabel}{form.hazmat_addon ? " + Hazmat" : ""}</div>
+                  <div className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-extrabold">{tierLabel}</div>
                   <div className="text-[36px] font-black text-[var(--fg)] leading-none">${pricePerDriver}<span className="text-[12px] font-bold text-[var(--fg-muted)]">/driver/mo</span></div>
                   <div className="text-[11px] text-[var(--fg-muted)] mt-1">Month-to-month · cancel anytime · billed on the 1st</div>
                 </div>

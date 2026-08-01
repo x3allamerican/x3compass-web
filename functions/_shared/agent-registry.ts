@@ -11,6 +11,7 @@
  *   "error"   — a required prerequisite is missing (env var, table, vendor down)
  */
 import type { AdminEnv } from "./admin-auth";
+import { monthlyCents } from "./pricing";
 import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
 
@@ -685,9 +686,10 @@ interface FtEnv extends Env {
 }
 
 const TIER_REVENUE_ACCOUNT: Record<string, string> = {
-  diy:        "4000",
-  dfy:        "4010",
-  enterprise: "4020",
+  compass:    "4000",
+  diy:        "4000", // legacy rows map to the same account
+  dfy:        "4000",
+  enterprise: "4000",
 };
 const STRIPE_FEE_ACCOUNT     = "5000";
 const STRIPE_PENDING_ACCOUNT = "1200";
@@ -722,8 +724,8 @@ async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
     if (existing.length > 0) { skipped++; continue; }
 
     const carrier = c.customer ? byCust.get(c.customer) : undefined;
-    const tier = (carrier?.service_tier || "diy").toLowerCase();
-    const revAccount = TIER_REVENUE_ACCOUNT[tier] || TIER_REVENUE_ACCOUNT.diy;
+    const tier = (carrier?.service_tier || "compass").toLowerCase();
+    const revAccount = TIER_REVENUE_ACCOUNT[tier] || TIER_REVENUE_ACCOUNT.compass;
     const fee = c.balance_transaction?.fee || Math.round(c.amount * 0.029 + 30);
     const net = c.amount - fee;
     const entryDate = new Date(c.created * 1000).toISOString().slice(0, 10);
@@ -938,14 +940,12 @@ async function agentFpaManager(env: FtEnv): Promise<AgentResult> {
   const drivers = await supa.select("compass_drivers", "select=carrier_id,status") as Array<{ carrier_id: string; status: string | null }>;
   const driversBy = new Map<string, number>();
   for (const d of drivers) if ((d.status || "active").toLowerCase() === "active") driversBy.set(d.carrier_id, (driversBy.get(d.carrier_id) || 0) + 1);
-  const TIER: Record<string, number> = { diy: 2500, dfy: 5000, enterprise: 0 };
   let currentMrr = 0, activeCarriers = 0;
   for (const c of carriers) {
     if (c.subscription_status !== "active") continue;
     activeCarriers++;
     const drv = driversBy.get(c.id) || 0;
-    const rate = TIER[(c.service_tier || "diy").toLowerCase()] || 0;
-    currentMrr += drv * rate + (c.hazmat_addon ? 9900 : 0);
+    currentMrr += monthlyCents(drv); // graduated per-driver, every product included
   }
 
   // Simple forecast: assume 5% monthly growth, 3% monthly churn (placeholders we'll calibrate later)

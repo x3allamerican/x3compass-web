@@ -8,7 +8,6 @@ function SignUpInner() {
   const router = useRouter();
   const params = useSearchParams();
   const returnTo = params?.get("return_to") || "/app/onboarding";
-  const planParam = params?.get("plan") || "diy";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [carrierName, setCarrierName] = useState("");
@@ -26,18 +25,18 @@ function SignUpInner() {
         email, password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?return_to=${encodeURIComponent(returnTo)}`,
-          data: { carrier_name: carrierName, usdot_number: usdot, intended_plan: planParam },
+          data: { carrier_name: carrierName, usdot_number: usdot, intended_plan: "compass" },
         },
       });
       if (error) throw error;
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("x3-signup-stash", JSON.stringify({ carrier_name: carrierName, usdot_number: usdot, plan: planParam }));
+        sessionStorage.setItem("x3-signup-stash", JSON.stringify({ carrier_name: carrierName, usdot_number: usdot }));
       }
       if (!data.session) { setStep("verify"); return; }
       await fetch("/api/auth/post-signup", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
-        body: JSON.stringify({ carrier_name: carrierName, usdot_number: usdot, plan: planParam }),
+        body: JSON.stringify({ carrier_name: carrierName, usdot_number: usdot }),
       });
       router.push(returnTo.startsWith("/") ? returnTo : "/app/onboarding");
     } catch (err) { setError(err instanceof Error ? err.message : "Sign-up failed"); }
@@ -73,7 +72,7 @@ function SignUpInner() {
             <>
               <div className="mb-6">
                 <h2 className="text-[22px] font-extrabold mb-1">Start your 7-day free trial</h2>
-                <p className="text-[12px] text-[var(--fg-muted)]">No card required. Plan: <strong className="text-[var(--accent)] uppercase">{planParam}</strong></p>
+                <p className="text-[12px] text-[var(--fg-muted)]">No card required. One plan · every X3 product included.</p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div><label className="text-[11px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1.5 block">Company name</label>

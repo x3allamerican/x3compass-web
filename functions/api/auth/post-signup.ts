@@ -26,7 +26,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
     const carrierName = (body.carrier_name || "").trim();
     if (!carrierName) return json({ ok: false, error: "carrier_name required" }, 400);
-    const plan = (body.plan || "diy").toLowerCase();
+    // Single plan — DIY/DFY retired 2026-07-31.
     const usdot = (body.usdot_number || "").trim() || null;
     const supa = supaFetch(ctx.env);
 
@@ -41,7 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const carrierRows = (await supa.insert("compass_carriers", {
       name: carrierName,
       usdot_number: usdot,
-      service_tier: plan === "dfy" ? "dfy" : plan === "enterprise" ? "enterprise" : "diy",
+      service_tier: "compass",
       primary_contact_email: user.email || null,
       subscription_status: "trialing",
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -65,7 +65,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
           body: new URLSearchParams({
             email: user.email || "", name: carrierName,
             "metadata[carrier_id]": carrier.id,
-            "metadata[plan]": plan,
+            "metadata[plan]": "compass",
             "metadata[usdot_number]": usdot || "",
           }).toString(),
         });
