@@ -38,17 +38,17 @@ export default function PlacardWizardLive() {
   // Placarding decision
   const placardRequired = useMemo(() => {
     if (!subject) return null;
-    if (subject.placardThresholdLb === null) return { required: true, reason: "Table 1 — any quantity requires placarding" };
+    if (subject.placardThresholdLb === null) return { required: true, reason: "Table 1 · any quantity requires placarding" };
     const w = typeof weight === "number" ? weight : 0;
     return {
       required: w >= subject.placardThresholdLb,
       reason: w >= subject.placardThresholdLb
         ? `Aggregate weight ${w.toLocaleString()} lbs ≥ ${subject.placardThresholdLb.toLocaleString()} lb threshold`
-        : `Aggregate weight ${w.toLocaleString()} lbs is below the ${subject.placardThresholdLb.toLocaleString()} lb threshold — no placarding required`,
+        : `Aggregate weight ${w.toLocaleString()} lbs is below the ${subject.placardThresholdLb.toLocaleString()} lb threshold · no placarding required`,
     };
   }, [subject, weight]);
 
-  // Segregation conflicts — find common classes that conflict with this one
+  // Segregation conflicts · find common classes that conflict with this one
   const segregationConflicts = useMemo(() => {
     if (!subject) return [];
     const ours = subject.subclass ?? subject.class;
@@ -133,8 +133,8 @@ export default function PlacardWizardLive() {
               style={{
                 background: placardRequired.required
                   ? "linear-gradient(135deg, rgba(225, 29, 44, 0.10), rgba(15, 28, 50, 0.5))"
-                  : "linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(15, 28, 50, 0.5))",
-                borderColor: placardRequired.required ? "rgba(225, 29, 44, 0.40)" : "rgba(34, 211, 238, 0.30)",
+                  : "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+                borderColor: placardRequired.required ? "rgba(225, 29, 44, 0.40)" : "rgba(2, 6, 12, 0.45)",
               }}
             >
               <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-2">
@@ -183,8 +183,8 @@ export default function PlacardWizardLive() {
                         key={c.cls}
                         className={`text-[10px] font-bold px-2 py-1 rounded ${
                           c.code === "X"
-                            ? "bg-rose-500/15 text-rose-300 border border-rose-500/40"
-                            : "bg-amber-500/15 text-amber-300 border border-amber-500/40"
+                            ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/40"
+                            : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/40"
                         }`}
                       >
                         Class {c.cls} · {c.label}
@@ -237,8 +237,8 @@ export default function PlacardWizardLive() {
             </>
           ) : subject ? (
             <div className="rounded-lg p-4 border border-emerald-500/40 bg-emerald-500/5 text-center">
-              <div className="text-emerald-300 text-[32px] mb-1">✓</div>
-              <div className="text-[12px] text-[var(--fg-muted)]">Under threshold — no placard required at this weight</div>
+              <div className="text-emerald-700 dark:text-emerald-300 text-[32px] mb-1">✓</div>
+              <div className="text-[12px] text-[var(--fg-muted)]">Under threshold · no placard required at this weight</div>
             </div>
           ) : (
             <div className="text-[11px] text-[var(--fg-faint)] italic text-center">

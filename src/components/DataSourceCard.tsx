@@ -21,7 +21,7 @@ export type DataSourceConfig = {
   csvTemplate: { name: string; columns: string[] };
   /** What the manual entry button says, e.g., "Add log entry" */
   manualLabel: string;
-  /** Current state — defaults to "empty" */
+  /** Current state · defaults to "empty" */
   initialStatus?: "empty" | "connected" | "imported" | "manual";
   /** If connected, which vendor */
   connectedVendor?: string;
@@ -29,6 +29,14 @@ export type DataSourceConfig = {
   lastSync?: string;
   /** Count of records currently in the tracker */
   recordCount?: number;
+  /** Fires when the user picks a vendor (Option A "Connect"). Parent can use
+   *  this to render vendor-specific UI like a Checkr embed or continuous-monitoring panel. */
+  onVendorSelected?: (vendorName: string) => void;
+  /** Fires when the user picks Option B (CSV import) and uploads a file. */
+  onCsvUploaded?: (file: File) => void;
+  /** Fires when the user picks Option C (Manual entry). Parent typically opens an
+   *  add-record modal in response. */
+  onManualSelected?: () => void;
 };
 
 export default function DataSourceCard({
@@ -41,6 +49,9 @@ export default function DataSourceCard({
   connectedVendor,
   lastSync,
   recordCount = 0,
+  onVendorSelected,
+  onCsvUploaded,
+  onManualSelected,
 }: DataSourceConfig) {
   const [status, setStatus] = useState(initialStatus);
   const [expanded, setExpanded] = useState(initialStatus === "empty");
@@ -131,7 +142,7 @@ export default function DataSourceCard({
 
         {/* Tab body */}
         <div className="p-5">
-          {/* Option A — Connect */}
+          {/* Option A · Connect */}
           {activeTab === "connect" && (
             <div className="space-y-3">
               <div className="text-[12.5px] text-[var(--fg-muted)] mb-3">
@@ -165,13 +176,14 @@ export default function DataSourceCard({
                     <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]/60">
                       <div className="text-[10.5px] text-[var(--fg-faint)]">
                         {v.cost && <span>{v.cost}</span>}
-                        {v.status === "beta" && <span className="ml-2 text-amber-300">· Beta</span>}
+                        {v.status === "beta" && <span className="ml-2 text-amber-700 dark:text-amber-300">· Beta</span>}
                         {v.status === "manual-pull" && <span className="ml-2 text-[var(--fg-muted)]">· Manual data pull</span>}
                       </div>
                       <button
                         onClick={() => {
                           setStatus("connected");
                           setExpanded(false);
+                          onVendorSelected?.(v.name);
                         }}
                         className="text-[11px] font-bold text-[var(--bg)] px-3 py-1.5 rounded-full"
                         style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
@@ -188,7 +200,7 @@ export default function DataSourceCard({
             </div>
           )}
 
-          {/* Option B — CSV */}
+          {/* Option B · CSV */}
           {activeTab === "csv" && (
             <div className="space-y-4">
               <div className="text-[12.5px] text-[var(--fg-muted)]">
@@ -224,7 +236,7 @@ export default function DataSourceCard({
               {/* CSV upload */}
               <div
                 className="rounded-xl p-6 border-2 border-dashed border-[var(--accent)]/40 text-center cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors"
-                style={{ background: "rgba(34, 211, 238, 0.03)" }}
+                style={{ background: "rgba(2, 6, 12, 0.45)" }}
                 onClick={() => fileInputRef.current?.click()}
               >
                 <input
@@ -238,6 +250,7 @@ export default function DataSourceCard({
                       setCsvFileName(f.name);
                       setStatus("imported");
                       setExpanded(false);
+                      onCsvUploaded?.(f);
                     }
                   }}
                 />
@@ -252,11 +265,11 @@ export default function DataSourceCard({
             </div>
           )}
 
-          {/* Option C — Manual */}
+          {/* Option C · Manual */}
           {activeTab === "manual" && (
             <div className="space-y-4">
               <div className="text-[12.5px] text-[var(--fg-muted)]">
-                Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later — no data is lost.
+                Smallest fleets often start here. Add records one at a time. You can switch to CSV or vendor integration later · no data is lost.
               </div>
 
               <div className="rounded-xl p-5 border border-[var(--border)] flex items-center justify-between gap-3" style={{ background: "var(--surface-3)" }}>
@@ -265,7 +278,16 @@ export default function DataSourceCard({
                   <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">Best for fleets &lt; 5 drivers, or for adding one-off records.</div>
                 </div>
                 <button
-                  onClick={() => setShowManualModal(true)}
+                  onClick={() => {
+                    if (onManualSelected) {
+                      // Parent owns the modal flow · defer to it instead of showing the built-in placeholder
+                      setStatus("manual");
+                      setExpanded(false);
+                      onManualSelected();
+                    } else {
+                      setShowManualModal(true);
+                    }
+                  }}
                   className="text-[12px] font-bold text-[var(--bg)] px-4 py-2 rounded-full whitespace-nowrap"
                   style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                 >

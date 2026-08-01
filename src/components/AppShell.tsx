@@ -1,10 +1,16 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import TopNav from "@/components/TopNav";
+import SidebarV2 from "@/components/SidebarV2";
+import TenantThemeProvider, { DEFAULT_TENANT, TenantConfig } from "@/components/TenantThemeProvider";
+import AppTopbar from "@/components/AppTopbar";
+import PageHeader from "@/components/PageHeader";
 import { useUser } from "@/lib/useUser";
 import { useIsSuperAdmin } from "@/lib/superAdmin";
+import ConciergeModal from "@/components/ConciergeModal";
+import EducationHubModal from "@/components/EducationHubModal";
 
 type NavItem = { href: string; label: string; icon: string };
 
@@ -24,6 +30,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
   { title: "Compliance Trackers", items: [
     { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
     { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
+    { href: "/app/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
     { href: "/app/background-checks",  label: "Background Tracker", icon: "🛡" },
     { href: "/app/ifta",               label: "IFTA Concierge",     icon: "⛽" },
   ]},
@@ -32,7 +39,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/csa",             label: "CSA Scores",        icon: "📊" },
     { href: "/app/document-lookup", label: "Document Lookup",   icon: "🔍" },
     { href: "/app/ask",             label: "Ask Compass",       icon: "∞" },
-    { href: "/hazmat",              label: "Hazmat Center",     icon: "⚠️" },
+    { href: "/app/hazmat",          label: "Hazmat Center",     icon: "⚠️" },
     { href: "/app/audit-export",    label: "Audit Export",      icon: "📄" },
   ]},
   { title: "Client Admin", items: [
@@ -42,7 +49,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/import",         label: "Bulk Import",    icon: "⤴" },
   ]},
 ];
-// X3 Admin section — only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
+// X3 Admin section · only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
 const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: true, items: [
   { href: "/app/control-center", label: "Control Center",  icon: "🎛" },
   { href: "/app/finance-team",   label: "AI Finance Team", icon: "💰" },
@@ -54,12 +61,50 @@ const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: tru
   { href: "/app/integrations",   label: "Integrations",    icon: "🔌" },
 ]};
 
-export default function AppShell({ children, title, crumbs, actions }: { children: React.ReactNode; title?: string; crumbs?: string; actions?: React.ReactNode }) {
+// Next.js 16 static-export requires components using useSearchParams() to be
+// wrapped in a Suspense boundary. The exported default wraps AppShellInner.
+type AppShellProps = { children: React.ReactNode; title?: string; crumbs?: string; actions?: React.ReactNode };
+
+export default function AppShell(props: AppShellProps) {
+  return (
+    <Suspense fallback={null}>
+      <AppShellInner {...props} />
+    </Suspense>
+  );
+}
+
+function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, carrier, loading, signOut } = useUser();
   const isSuperAdmin = useIsSuperAdmin();
   const asideRef = useRef<HTMLElement>(null);
+
+  // Sidebar v2 is the default as of Sprint 1 (Phase B). The Manus group
+  // structure (Driver Brain, Vehicle Brain, Ops Brain, Audit & Reports,
+  // Finance, Integrations, Hazmat Center PRO) is the only sidebar shipped.
+  // Legacy flat sidebar branch below is dead code, retained briefly for
+  // diff review and will be removed in Sprint 2.
+  const useV2 = true;
+  // Suppress unused-var lint on searchParams until we re-wire query handling.
+  void searchParams;
+
+  // FORCE DARK MODE inside the app shell. The static Manus design is always
+  // dark (true black + cyan). Light mode on /app/* renders washed-out gray
+  // which Joshua flagged as off-brand. The marketing site keeps the toggle.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const html = document.documentElement;
+    const wasLight = html.classList.contains("light");
+    html.classList.remove("light");
+    return () => {
+      // When AppShell unmounts (user navigates back to marketing), restore
+      // their previous theme preference so the marketing site doesn't get
+      // surprise-darkened.
+      if (wasLight) html.classList.add("light");
+    };
+  }, []);
 
   // Persist sidebar scroll position across page navigations.
   // The sidebar re-mounts on every /app/* route change because AppShell is rendered
@@ -84,22 +129,35 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   useEffect(() => {
     if (!loading && !user) {
       const here = pathname && pathname !== "/" ? `?return_to=${encodeURIComponent(pathname)}` : "";
-      router.replace(`/signin${here}`);
+      // Static export + router.replace can be flaky. window.location.href
+      // is reliable and works identically from a UX standpoint here since
+      // we're leaving the app shell anyway.
+      if (typeof window !== "undefined") {
+        window.location.href = `/signin${here}`;
+      }
     }
   }, [user, loading, pathname, router]);
 
+  // SAFETY NET REMOVED. The 3s timeout was kicking authenticated users
+  // back to /signin on slow refreshes (Supabase session validation can
+  // take longer than 3s on slower connections, but the user IS signed in).
+  // The try/catch in useUser already guarantees loading: false fires on
+  // any error, which triggers the natural redirect above. No timeout needed.
+
   if (loading || !user) {
+    // Auth gate: minimal spinner ONLY, no misleading "Sign in" button.
+    // The useEffect above redirects to /signin if !loading && !user.
+    // The safety-net effect (4s timeout) force-redirects if loading hangs.
+    // Showing a Sign in button here trapped users in a UX loop where they
+    // thought they had to sign in even when already authenticated.
     return (
-      <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
-        <TopNav />
-        <div className="flex-1 grid place-items-center">
-          <div className="text-center px-6">
-            <div className="w-14 h-14 rounded-full grid place-items-center text-[var(--bg)] font-black text-[22px] mx-auto mb-4" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>∞</div>
-            <div className="text-[14px] text-[var(--fg-muted)] font-semibold mb-2">Checking your session…</div>
-            <div className="text-[12px] text-[var(--fg-faint)]">If this takes more than a moment, you&apos;ll be redirected to sign in.</div>
-          </div>
+      <TenantThemeProvider>
+        <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "var(--bg)", color: "var(--fg)" }}>
+          <div className="w-12 h-12 rounded-full grid place-items-center mb-4" style={{ border: "3px solid var(--surface-2)", borderTopColor: "var(--accent)", animation: "x3-spin 0.9s linear infinite" }} aria-label="Loading" />
+          <div className="text-[12px]" style={{ color: "var(--fg-faint)" }}>Loading X3 Compass…</div>
+          <style>{`@keyframes x3-spin { to { transform: rotate(360deg); } }`}</style>
         </div>
-      </div>
+      </TenantThemeProvider>
     );
   }
 
@@ -111,22 +169,102 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
   const userLabel = (user.user_metadata?.full_name as string) || user.email || "Signed in";
   const carrierLabel = carrier ? `${carrier.name}${carrier.subscription_status === "trialing" ? " · trial" : ""}` : "No carrier";
 
+  // Build a TenantConfig from the loaded carrier. In Sprint 3 this will read
+  // per-tenant logo + token overrides from a carriers.tenant_theme column.
+  const tenant: TenantConfig = carrier
+    ? { id: String(carrier.id ?? carrier.usdot_number ?? "carrier"),
+        name: carrier.name ?? "Your fleet",
+        dotNumber: carrier.usdot_number ?? undefined,
+        productName: "X3 Compass" }
+    : DEFAULT_TENANT;
+
   return (
-    <div className="bg-[var(--bg)] min-h-screen text-[var(--fg)] flex flex-col">
-      <TopNav />
-      {carrier?.subscription_status === "trialing" && carrier.trial_ends_at && (
-        <div className="bg-cyan-900/40 border-b border-cyan-700/30 px-6 py-2 text-[12px] text-cyan-100 flex items-center justify-between">
-          <span>✨ Free trial — ends <strong>{new Date(carrier.trial_ends_at).toLocaleDateString()}</strong>.</span>
-          <Link href="/app/settings/billing" className="text-[var(--accent)] font-bold hover:underline">Add payment →</Link>
-        </div>
-      )}
+    <TenantThemeProvider tenant={tenant}>
+    {/* No TopNav inside the app shell · AppTopbar is the top bar, sidebar owns navigation.
+        Eliminates the empty marketing-style header that was bleeding into the app. */}
+    <div className="min-h-screen text-[var(--fg)] grid" style={{ gridTemplateColumns: "240px 1fr", gridTemplateRows: "auto 1fr", background: "var(--bg)" }}>
+
+      {/* TOP-LEFT BOX · X3 Compass logo. STICKY so the whole top row stays
+          locked while content scrolls. Same minHeight as the AppTopbar on the
+          right so the two cells stay flush. Joshua: top row is now locked
+          across every /app/* surface; no per-page logo overrides allowed. */}
+      <Link
+        href="/app"
+        aria-label="X3 Compass · Home"
+        className="x3-logo-box"
+        style={{
+          gridColumn: 1,
+          gridRow: 1,
+          background: "var(--bg)",
+          borderRight: "2px solid rgba(255, 255, 255, 0.55)",
+          borderBottom: "2px solid rgba(255, 255, 255, 0.55)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "4px 10px",
+          textDecoration: "none",
+          minHeight: 88,
+          position: "sticky",
+          top: 0,
+          zIndex: 31,
+        }}
+      >
+        {/* Logo: real X3 COMPASS artwork from the brand PNG, retinted to
+            var(--accent) via CSS mask. The PNG provides the EXACT shape (X3
+            mark + COMPASS wordmark as designed); --accent provides the live
+            color so it ALWAYS matches the topbar banner / sidebar icons /
+            KPI cyan. Tenant white-label automatically recolors the logo. */}
+        <span
+          role="img"
+          aria-label="X3 Compass"
+          style={{
+            display: "block",
+            height: 78,
+            width: 200,
+            maxWidth: "100%",
+            backgroundColor: "var(--accent)",
+            WebkitMaskImage: 'url("/x3-compass-logo-alpha.png")',
+            maskImage: 'url("/x3-compass-logo-alpha.png")',
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            maskPosition: "center",
+          }}
+        />
+      </Link>
+
+      {/* TOP-RIGHT BOX · topbar with title + subtitle + user widgets */}
+      <div style={{ gridColumn: 2, gridRow: 1 }}>
+        <AppTopbar
+          title={title || "Dashboard"}
+          userEmail={user.email ?? null}
+          userName={(user.user_metadata?.full_name as string) || null}
+          userRole={isSuperAdmin ? "Founder" : "Fleet Manager"}
+          live
+          notificationCount={0}
+          stats={{
+            drivers: typeof carrier?.driver_count === "number" ? carrier.driver_count : undefined,
+            vehicles: typeof carrier?.vehicle_count === "number" ? carrier.vehicle_count : undefined,
+            dotStatus: carrier?.dot_status ?? null,
+          }}
+        />
+      </div>
+
+      {/* Past-due banner spans both columns of the bottom row */}
       {carrier?.subscription_status === "past_due" && (
-        <div className="bg-orange-900/40 border-b border-orange-700/30 px-6 py-2 text-[12px] text-orange-100 flex items-center justify-between">
+        <div style={{ gridColumn: "1 / -1" }} className="bg-orange-900/40 border-b border-orange-700/30 px-6 py-2 text-[12px] text-orange-100 flex items-center justify-between">
           <span>⚠ Last payment failed. Update your card to keep access.</span>
-          <Link href="/app/settings/billing" className="text-orange-300 font-bold hover:underline">Update card →</Link>
+          <Link href="/app/settings/billing" className="text-orange-700 dark:text-orange-300 font-bold hover:underline">Update card →</Link>
         </div>
       )}
-      <div className="grid grid-cols-[260px_1fr] max-md:grid-cols-[72px_1fr] flex-1">
+
+      {/* BOTTOM ROW · sidebar + main content as two more boxes */}
+      <div className="contents max-md:grid-cols-[72px_1fr]" style={{ display: "contents" }}>
+        {useV2 ? (
+          <SidebarV2 isSuperAdmin={isSuperAdmin} />
+        ) : (
         <aside ref={asideRef} className="border-r border-[var(--border)] bg-[var(--surface)] sticky top-16 h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
           <div className="px-3 pt-4 pb-3 border-b border-[var(--border)]">
             <div className="text-[11px] tracking-[.16em] uppercase font-extrabold text-[var(--accent)] px-2">Workspace</div>
@@ -167,20 +305,36 @@ export default function AppShell({ children, title, crumbs, actions }: { childre
             <button onClick={signOut} className="w-full text-[11px] text-[var(--fg-muted)] hover:text-[var(--fg)] px-2 py-1.5 rounded max-md:hidden text-left">Sign out →</button>
           </div>
         </aside>
+        )}
         <div className="min-w-0 flex flex-col">
-          <header className="sticky top-16 z-20 bg-[var(--bg)]/85 backdrop-blur-md border-b border-[var(--border)]">
-            <div className="px-6 h-16 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                {crumbs && <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-1">{crumbs}</div>}
-                <h1 className="text-[var(--fg)] font-extrabold text-[19px] truncate">{title ?? ""}</h1>
+          {/* Per-page sub-header · only renders when title/crumbs/actions are provided.
+              The AppTopbar above already shows "AI SAFETY DIRECTOR" + tenant context,
+              so most pages skip this. Surface-specific pages can still pass title/actions. */}
+          {(title || crumbs || actions) && (
+            <header className="sticky top-[88px] z-20" style={{ background: "color-mix(in srgb, var(--bg) 85%, transparent)", backdropFilter: "blur(8px)", borderBottom: "1px solid var(--border)" }}>
+              <div className="px-6 h-14 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  {crumbs && <div className="text-[11px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-0.5">{crumbs}</div>}
+                  {title && <h1 className="text-[var(--fg)] font-extrabold text-[28px] leading-tight truncate">{title}</h1>}
+                </div>
+                {actions && <div className="flex items-center gap-2">{actions}</div>}
               </div>
-              <div className="flex items-center gap-2">{actions}<button className="w-9 h-9 rounded-full grid place-items-center text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-white/5" aria-label="Notifications">🔔</button></div>
-            </div>
-          </header>
+            </header>
+          )}
           <main className="flex-1">{children}</main>
         </div>
       </div>
-      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(34, 211, 238, 0.15), 0 12px 32px rgba(34, 211, 238, 0.4)" }} aria-label="Ask Compass">∞</Link>
+      {/* SIGNATURE: the floating Ask Compass button is the ONE element in
+          the app permitted to keep a cyan halo. Joshua: "AI Concierge as
+          star of the show." Every other cyan-glow shadow site got swapped
+          to the tinted-bg shadow per ANTI_SLOP rule #2. */}
+      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(22, 199, 255, 0.15), 0 12px 32px rgba(22, 199, 255, 0.40)" }} aria-label="Ask Compass">∞</Link>
+      {/* Site-wide in-page overlays — any page can open either by dispatching
+       *  the x3:open-education-hub / x3:open-concierge events. The
+       *  EducationHubCard's two pills already wire both events. */}
+      <ConciergeModal />
+      <EducationHubModal />
     </div>
+    </TenantThemeProvider>
   );
 }

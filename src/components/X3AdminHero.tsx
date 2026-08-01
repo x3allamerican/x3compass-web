@@ -1,65 +1,101 @@
 "use client";
-import React from "react";
+import { ReactNode } from "react";
+
+type Tone = "navy" | "green" | "red" | "amber";
 
 /**
- * Dark navy hero + amber "Where this data comes from" callout — shared across
- * every X3 Admin page (Finance, Notifications, Audit Log, FMCSA Prospects, Marketing).
- * Mirrors app.x3fleetsafety.com/admin styling: navy hero with gold eyebrow label,
- * yellow-amber rules-of-the-road box right below.
+ * X3AdminHero · Hero banner for X3 internal admin pages (notifications, settings,
+ * audit-log, prospects, etc.). Dark gradient, eyebrow + title + intro, with optional
+ * collapsible "Data Source" disclosure block.
  */
 export function X3AdminHero({
-  eyebrow, title, intro, dataSource,
+  eyebrow,
+  title,
+  intro,
+  dataSource,
 }: {
   eyebrow: string;
-  title: React.ReactNode;
-  intro?: React.ReactNode;
-  dataSource?: { items: React.ReactNode[]; footnote?: React.ReactNode };
+  title: ReactNode;
+  intro: ReactNode;
+  dataSource?: { items: ReactNode[] };
 }) {
   return (
-    <div className="space-y-3">
-      <div className="rounded-2xl p-6 sm:p-8 border border-[#1E3556]" style={{ background: "linear-gradient(180deg, #0F2438 0%, #0B1B2E 100%)" }}>
-        <div className="text-[11px] tracking-[.18em] uppercase font-extrabold text-[#FACC15] mb-3">{eyebrow}</div>
-        <h2 className="text-[24px] sm:text-[30px] font-extrabold tracking-tight leading-[1.15] text-white mb-2">{title}</h2>
-        {intro && <div className="text-[14px] text-white/80 leading-relaxed max-w-4xl">{intro}</div>}
+    <section className="rounded-xl overflow-hidden border border-[var(--border)] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="px-6 py-7 text-white">
+        <div className="text-[11px] font-bold uppercase tracking-widest text-cyan-300 mb-2">{eyebrow}</div>
+        <h1 className="text-2xl md:text-3xl font-black leading-tight mb-3 text-white">{title}</h1>
+        <div className="text-[14px] leading-relaxed text-slate-200 max-w-3xl">{intro}</div>
       </div>
-      {dataSource && (
-        <div className="rounded-xl border border-[#FACC15]/40 p-4" style={{ background: "rgba(250, 204, 21, 0.06)" }}>
-          <div className="text-[12px] font-bold text-[#FACC15] mb-2">📍 Where this data comes from</div>
-          <ul className="text-[13px] text-[var(--fg-muted)] space-y-1.5 leading-relaxed">
-            {dataSource.items.map((it, i) => <li key={i}>• {it}</li>)}
+      {dataSource && dataSource.items?.length > 0 && (
+        <details className="bg-slate-950/60 border-t border-slate-700/50 group">
+          <summary className="cursor-pointer px-6 py-3 text-[12px] font-bold text-slate-300 hover:text-white flex items-center gap-2 select-none">
+            <span className="transition-transform group-open:rotate-90">▶</span>
+            Data Source &amp; Methodology
+          </summary>
+          <ul className="px-6 pb-5 pt-1 space-y-2 text-[12.5px] text-slate-300 leading-relaxed">
+            {dataSource.items.map((item, i) => (
+              <li key={i} className="pl-4 border-l-2 border-cyan-500/40">{item}</li>
+            ))}
           </ul>
-          {dataSource.footnote && <div className="text-[12px] text-[var(--fg-faint)] italic mt-3">{dataSource.footnote}</div>}
-        </div>
+        </details>
       )}
-    </div>
+    </section>
   );
 }
 
+/**
+ * X3KPITile · Single KPI card. Used in 6-up KPI grids on admin pages.
+ */
 export function X3KPITile({
-  label, value, sub, tone = "default",
+  label,
+  value,
+  sub,
+  tone = "navy",
 }: {
   label: string;
-  value: React.ReactNode;
-  sub?: React.ReactNode;
-  tone?: "default" | "green" | "red" | "navy" | "amber";
+  value: string | number;
+  sub?: string;
+  tone?: Tone;
 }) {
-  const valueColor = tone === "green" ? "var(--success)" : tone === "red" ? "var(--danger)" : tone === "amber" ? "#B45309" : tone === "navy" ? "var(--fg)" : "var(--fg)";
+  const toneClasses: Record<Tone, string> = {
+    navy:  "bg-slate-100  dark:bg-slate-500/30  text-slate-900  dark:text-slate-50  border-slate-700  dark:border-slate-300/80",
+    green: "bg-emerald-100 dark:bg-emerald-500/30 text-emerald-900 dark:text-emerald-50 border-emerald-700 dark:border-emerald-300/80",
+    red:   "bg-rose-100    dark:bg-rose-500/30    text-rose-900    dark:text-rose-50    border-rose-700    dark:border-rose-300/80",
+    amber: "bg-amber-100   dark:bg-amber-500/30   text-amber-900   dark:text-amber-50   border-amber-700   dark:border-amber-300/80",
+  };
   return (
-    <div className="x3-card p-4">
-      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-2 flex items-center gap-1.5">
-        {label}
-      </div>
-      <div className="text-[26px] font-black leading-none" style={{ color: valueColor }}>{value}</div>
-      {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-2">{sub}</div>}
+    <div className={`rounded-xl border p-3 ${toneClasses[tone]}`}>
+      <div className="text-[10px] font-bold uppercase tracking-wider opacity-80">{label}</div>
+      <div className="text-2xl font-black mt-1 leading-none">{value}</div>
+      {sub && <div className="text-[11px] mt-1 opacity-75 leading-tight">{sub}</div>}
     </div>
   );
 }
 
-export function X3AdminTabs({ tabs, active, onChange }: { tabs: { key: string; label: React.ReactNode }[]; active: string; onChange: (key: string) => void }) {
+/**
+ * X3AdminTabs · Horizontal tab bar for admin sub-views. Active tab gets accent color.
+ */
+export function X3AdminTabs<K extends string = string>({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { key: K; label: ReactNode }[];
+  active: K;
+  onChange: (k: K) => void;
+}) {
   return (
-    <div className="border-b border-[var(--border)] flex gap-1 overflow-x-auto">
+    <div className="flex items-center gap-1 flex-wrap border-b border-[var(--border)]">
       {tabs.map((t) => (
-        <button key={t.key} onClick={() => onChange(t.key)} className={`px-4 py-2.5 text-[13px] font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${active === t.key ? "border-[#FACC15] text-[var(--fg)]" : "border-transparent text-[var(--fg-muted)] hover:text-[var(--fg)]"}`}>
+        <button
+          key={t.key}
+          onClick={() => onChange(t.key)}
+          className={`px-4 py-2 text-[13px] font-bold rounded-t-lg transition-colors -mb-px border-b-2 ${
+            active === t.key
+              ? "text-[var(--accent)] border-[var(--accent)] bg-[var(--surface-2)]"
+              : "text-[var(--muted)] border-transparent hover:text-[var(--fg)] hover:bg-[var(--surface-2)]"
+          }`}
+        >
           {t.label}
         </button>
       ))}

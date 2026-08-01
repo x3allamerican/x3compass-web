@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
+import { SkeletonShell } from "@/components/Skeleton";
 
 function BillingInner() {
   const { user, carrier, loading } = useUser();
@@ -24,8 +25,8 @@ function BillingInner() {
     finally { setPortalLoading(false); }
   }
 
-  if (loading) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">Loading…</div>;
-  if (!carrier) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">No carrier linked yet — refresh.</div>;
+  if (loading) return <div className="min-h-screen bg-[var(--bg)] p-6"><SkeletonShell kpis={3} rows={3} /></div>;
+  if (!carrier) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">No carrier linked yet · refresh.</div>;
 
   const isTrial = carrier.subscription_status === "trialing";
   const isActive = carrier.subscription_status === "active";
@@ -44,7 +45,7 @@ function BillingInner() {
           <div className="text-[11px] tracking-[.18em] uppercase text-[var(--fg-muted)] font-bold mb-3">Plan</div>
           <div className="flex items-center justify-between mb-1">
             <div className="text-xl font-extrabold">{(carrier.service_tier || "diy").toUpperCase()} {carrier.hazmat_addon ? "+ Hazmat" : ""}</div>
-            <div className={`text-[12px] font-bold uppercase tracking-[.14em] ${isActive ? "text-green-400" : isTrial ? "text-[var(--accent)]" : isPastDue ? "text-orange-400" : "text-[var(--fg-muted)]"}`}>{carrier.subscription_status}</div>
+            <div className={`text-[12px] font-bold uppercase tracking-[.14em] ${isActive ? "text-green-700 dark:text-green-400" : isTrial ? "text-[var(--accent)]" : isPastDue ? "text-orange-700 dark:text-orange-400" : "text-[var(--fg-muted)]"}`}>{carrier.subscription_status}</div>
           </div>
           {isTrial && carrier.trial_ends_at && <div className="text-[12px] text-[var(--fg-muted)]">Trial ends {new Date(carrier.trial_ends_at).toLocaleDateString()}</div>}
         </div>
@@ -59,7 +60,7 @@ function BillingInner() {
             <div className="text-[12px] text-[var(--fg-muted)]">Compare DIY vs DFY vs Enterprise</div>
           </Link>
         </div>
-        {error && <div className="mt-6 text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+        {error && <div className="mt-6 text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
       </div>
     </div>
   );
@@ -67,7 +68,7 @@ function BillingInner() {
 
 function Banner({ kind, children }: { kind: "success" | "info" | "warn"; children: React.ReactNode }) {
   const map = {
-    success: { bg: "bg-emerald-900/30", border: "border-emerald-700/40", text: "text-emerald-200" },
+    success: { bg: "bg-emerald-900/30", border: "border-emerald-700/40", text: "text-emerald-800 dark:text-emerald-200" },
     info: { bg: "bg-cyan-900/30", border: "border-cyan-700/40", text: "text-cyan-200" },
     warn: { bg: "bg-orange-900/30", border: "border-orange-700/40", text: "text-orange-200" },
   }[kind];

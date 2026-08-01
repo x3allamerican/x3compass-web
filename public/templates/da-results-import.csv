@@ -1,0 +1,16 @@
+driver_id,test_date,test_type,panel,result,result_detail,mro_verified_at,ccf_specimen_id
+# Replace driver_id with the compass_drivers.id UUID for each driver in your fleet.
+# test_date · YYYY-MM-DD · the date the specimen was collected
+# test_type · pre_employment | random | reasonable_suspicion | post_accident | return_to_duty | follow_up
+# panel     · DOT_5_panel | DOT_BAT | non_DOT_panel | other (default DOT_5_panel)
+# result    · negative | negative_dilute | positive | adulterated | substituted | refusal | cancelled | pending
+# result_detail   · optional · e.g., "amphetamines + cocaine" or "0.04 BAC"
+# mro_verified_at · optional · YYYY-MM-DD when the MRO verified the result (required for positives in your audit file)
+# ccf_specimen_id · optional · the chain-of-custody form number from your TPA
+#
+# Positive | adulterated | substituted | refusal results MUST be reported to the FMCSA
+# Clearinghouse within 3 business days per §382.705(b)(1). We surface a prompt after upload.
+00000000-0000-0000-0000-000000000001,2026-05-20,pre_employment,DOT_5_panel,negative,,2026-05-21,CCF-XYZ-100123
+00000000-0000-0000-0000-000000000001,2026-05-22,random,DOT_5_panel,negative,,2026-05-23,CCF-XYZ-100456
+00000000-0000-0000-0000-000000000002,2026-05-15,post_accident,DOT_5_panel,positive,amphetamines,2026-05-17,CCF-XYZ-099887
+00000000-0000-0000-0000-000000000003,2026-05-18,random,DOT_BAT,negative,0.00 BAC,,

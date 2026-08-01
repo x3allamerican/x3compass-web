@@ -1,159 +1,332 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * Homepage AI Concierge demo · inline working box.
+ * Mirrors the in-app Concierge: preset action pills, textarea,
+ * cyan Send button, answer display below.
+ *
+ * Wired to /api/ask Pages Function. Falls back to graceful error
+ * message if the endpoint is rate-limited or unavailable.
+ */
 
-const PROMPTS = [
-  "4,000 lbs of UN1203 — do I need a placard?",
-  "When does a CDL holder have to notify their employer of a license suspension?",
-  "What's the post-accident drug-test window?",
-  "How long must I keep DQ files after a driver leaves?",
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+
+const PRESETS = [
+  "What's the random drug-test rate for 2025 under § 382.305?",
+  "When does a driver need to be in the Clearinghouse?",
+  "What documents go in a § 391.51 DQ file?",
+  "Can I use a UN 1203 placard for residue under § 172.514?",
+  "What's the post-accident drug test trigger under § 382.303?",
+  "How long do I retain a roadside inspection under § 396.9?",
 ];
 
-type Response = {
-  content: string;
-  cited_sections: string[];
-  unverified_citations: string[];
-  citation_quality_score: number | null;
-};
+type Source = { id: string; name: string; cfr: string };
+
+type AnswerState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "answer"; text: string; citations: string[]; sources: Source[] }
+  | { status: "error"; message: string };
+
+// Extract any "§ 123.45" or "§ 123.45(a)(1)" patterns Compass returns so we can
+// render them as the green ✓ citation chips at the bottom of the answer panel.
+function extractCfrCitations(text: string): string[] {
+  const matches = text.match(/§\s*\d{2,3}\.\d{1,3}(?:\([a-z0-9]+\))*/gi) || [];
+  // Dedupe while preserving order.
+  const seen = new Set<string>();
+  return matches.filter((c) => {
+    const k = c.replace(/\s+/g, " ").trim();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
 
 export default function AskCompassDemo() {
-  const [prompt, setPrompt] = useState("");
-  const [resp, setResp] = useState<Response | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<AnswerState>({ status: "idle" });
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  async function ask(q: string) {
-    setLoading(true); setErr(null); setResp(null);
-    try {
-      const r = await fetch("/api/ask-demo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: q }),
-      });
-      const d = await r.json();
-      if (!r.ok || !d.ok) {
-        setErr(d.error || `Error ${r.status}`);
-      } else {
-        setResp(d);
-      }
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Network error");
-    } finally { setLoading(false); }
+  // Reset everything back to the empty preset+textarea state.
+  // Used by the ✕ close button and the "Ask another question" CTA.
+  function reset(focus = true) {
+    setAnswer({ status: "idle" });
+    setQuestion("");
+    if (focus) {
+      // Defer until after render so the textarea is mounted.
+      requestAnimationFrame(() => textareaRef.current?.focus());
+    }
   }
 
-  const verifiedCount = resp ? resp.cited_sections.length - resp.unverified_citations.length : 0;
-  const isVerified = (sec: string) => resp ? !resp.unverified_citations.includes(sec) : true;
+  const ask = useCallback(async (q: string) => {
+    if (!q.trim()) return;
+    setAnswer({ status: "loading" });
+    try {
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // /api/ask contract: { messages: [{role,content}], context? }
+        // → returns { ok: true, content: string } | { ok: false, error: string }
+        body: JSON.stringify({
+          messages: [{ role: "user", content: q.trim() }],
+        }),
+      });
+
+      // Try to parse JSON regardless of status so we can surface the real error.
+      let data: { ok?: boolean; content?: string; sources?: Source[]; error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON body */ }
+
+      if (!res.ok || data.ok === false) {
+        const msg =
+          res.status === 429
+            ? "You've used your 5 free questions for this 6-hour window. Start a free trial to keep going."
+            : data.error
+            ? `Concierge: ${data.error}`
+            : `Couldn't reach the Concierge right now (${res.status}). Try again in a moment.`;
+        setAnswer({ status: "error", message: msg });
+        return;
+      }
+
+      const text: string = (data.content ?? "").trim() || "No answer returned.";
+      const sources: Source[] = Array.isArray(data.sources) ? data.sources : [];
+      setAnswer({
+        status: "answer",
+        text,
+        citations: extractCfrCitations(text),
+        sources,
+      });
+    } catch {
+      setAnswer({
+        status: "error",
+        message: "Network hiccup. Try one of the preset questions or refresh the page.",
+      });
+    }
+  }, []);
+
+  function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    ask(question);
+  }
+
+  function onPreset(q: string) {
+    setQuestion(q);
+    ask(q);
+  }
+
+  // Pre-fill + auto-submit on mount from either:
+  //   - URL param `?q=<question>` (from /skills card navigation)
+  //   - Custom DOM event "ask-compass:submit" with detail.q (from same-page skill cards)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlQ = params.get("q");
+    if (urlQ && urlQ.trim()) {
+      setQuestion(urlQ);
+      ask(urlQ);
+      // Clean the URL so a refresh doesn't re-fire the question.
+      const clean = window.location.pathname + window.location.hash;
+      window.history.replaceState(null, "", clean);
+    }
+
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ q?: string }>;
+      const q = ce.detail?.q;
+      if (q && q.trim()) {
+        setQuestion(q);
+        ask(q);
+      }
+    };
+    window.addEventListener("ask-compass:submit", handler);
+    return () => window.removeEventListener("ask-compass:submit", handler);
+  }, [ask]);
 
   return (
-    <div className="x3-card overflow-hidden">
-      {/* Input row */}
-      <div className="p-5 border-b border-[var(--border)]">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-8 h-8 rounded-full grid place-items-center font-black text-[14px] text-[var(--accent-fg)] bg-[var(--accent)]">∞</span>
-          <div className="text-[15px] font-bold text-[var(--fg)]">Ask Compass — live demo</div>
-          <div className="ml-auto text-[10px] tracking-wider uppercase font-bold text-[var(--fg-faint)]">No signup · 5 free questions / 6 hours</div>
+    <div
+      id="ask-compass-demo"
+      className="relative rounded-2xl border border-[#1E3556] overflow-hidden scroll-mt-24 bg-black"
+    >
+      {/* Top accent stripe · matches Brain card style */}
+      <div
+        aria-hidden="true"
+        className="absolute left-0 right-0 top-0 h-[3px]"
+        style={{
+          background:
+            "linear-gradient(90deg, #16C7FF 0%, #16C7FF 50%, #5EE5FF 100%)",
+        }}
+      />
+
+      <div className="p-6 sm:p-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black"
+            style={{
+              background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
+              color: "var(--bg)",
+            }}
+            aria-hidden="true"
+          >
+            AI
+          </div>
+          <div className="text-left">
+            <div className="text-[15px] font-bold text-[var(--fg)]">AI Concierge</div>
+            <div className="text-[12px] text-[var(--fg-faint)]">
+              Live · powered by 300 CFR-cited skills
+            </div>
+          </div>
         </div>
-        <form
-          onSubmit={(e) => { e.preventDefault(); if (prompt.trim()) ask(prompt.trim()); }}
-          className="flex gap-2"
-        >
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+
+        {/* Preset action pills */}
+        <div className="mb-5">
+          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2 text-left">
+            Common questions
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS.map((q, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onPreset(q)}
+                className="text-left text-[13px] px-3 py-2 rounded-full border border-[#16C7FF]/40 bg-[#16C7FF]/5 text-[var(--fg)] hover:bg-[#16C7FF]/15 hover:border-[#16C7FF]/70 transition-colors"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Input + Send */}
+        <form onSubmit={onSubmit} className="relative">
+          <textarea
+            ref={textareaRef}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
             placeholder="Ask any FMCSA compliance question…"
-            disabled={loading}
-            maxLength={800}
-            className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-3 text-[14px] text-[var(--fg)] placeholder:text-[var(--fg-faint)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-60"
+            rows={3}
+            className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--fg)] placeholder:text-[var(--fg-faint)] p-4 pr-32 text-[15px] focus:outline-none focus:border-[#16C7FF]/60"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                ask(question);
+              }
+            }}
           />
           <button
             type="submit"
-            disabled={loading || !prompt.trim()}
-            className="px-5 py-3 rounded-lg font-bold text-[14px] text-[var(--accent-fg)] bg-[var(--accent)] hover:bg-[var(--accent-2)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+            disabled={answer.status === "loading" || !question.trim()}
+            className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full font-bold text-[14px] text-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--accent), var(--accent-2))",
+              boxShadow: "0 4px 14px rgba(22,199,255,0.35)",
+            }}
           >
-            {loading ? "…" : "Ask →"}
+            {answer.status === "loading" ? "Asking…" : "Send →"}
           </button>
         </form>
-        {/* Quick-pick prompts */}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {PROMPTS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => { setPrompt(p); ask(p); }}
-              disabled={loading}
-              className="text-[11px] text-[var(--fg-muted)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] px-2.5 py-1 rounded-full transition-colors disabled:opacity-40"
-            >
-              {p}
-            </button>
-          ))}
+
+        {/* Hint line */}
+        <div className="mt-3 text-[11px] tracking-[.14em] uppercase font-bold text-[var(--fg-faint)] text-left">
+          Press Enter to send · Shift+Enter for a new line · 5 free questions per 6 hours
         </div>
-      </div>
 
-      {/* Response area */}
-      <div className="p-5 min-h-[180px]">
-        {!resp && !loading && !err && (
-          <div className="text-[var(--fg-faint)] text-[14px] py-6">
-            Ask a question above, or click a quick-pick. The answer will appear here with every CFR citation
-            checked against the live <span className="font-mono text-[var(--fg-muted)]">ecfr.gov</span>{" "}
-            registry. Verified citations get a ✓ chip.
-          </div>
-        )}
+        {/* Answer panel */}
+        {answer.status !== "idle" && (
+          <div className="mt-6 border-t border-[var(--border)] pt-6">
+            {answer.status === "loading" && (
+              <div className="flex items-center gap-3 text-[14px] text-[var(--fg-muted)]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#16C7FF] animate-pulse" />
+                Looking it up in 49 CFR…
+              </div>
+            )}
 
-        {loading && (
-          <div className="text-[var(--fg-muted)] text-[14px] py-6 flex items-center gap-3">
-            <span className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
-            Thinking… (checking each cited section against eCFR live)
-          </div>
-        )}
-
-        {err && (
-          <div className="text-[13px] text-[var(--danger)] py-4">
-            {err}{" "}
-            <a href="/signup" className="ml-2 underline font-bold">Sign up for unlimited access →</a>
-          </div>
-        )}
-
-        {resp && (
-          <div className="space-y-4">
-            {/* Quality chip */}
-            <div className="flex flex-wrap items-center gap-2">
-              {resp.cited_sections.length === 0 ? (
-                <span className="text-[11px] text-[var(--fg-muted)]">No CFR citations in this answer</span>
-              ) : resp.citation_quality_score === 1.0 ? (
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--success)] bg-[var(--success)]/10 border border-[var(--success)]/30 px-2 py-1 rounded-full">
-                  <span>✓</span> {verifiedCount} of {resp.cited_sections.length} CFR citations verified against eCFR
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--warning)] bg-[var(--warning)]/10 border border-[var(--warning)]/30 px-2 py-1 rounded-full">
-                  <span>⚠</span> {verifiedCount}/{resp.cited_sections.length} verified — {resp.unverified_citations.length} could not be confirmed
-                </span>
-              )}
-              {resp.cited_sections.map((sec) => (
-                <span
-                  key={sec}
-                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                    isVerified(sec)
-                      ? "text-[var(--success)] bg-[var(--success)]/10 border border-[var(--success)]/30"
-                      : "text-[var(--warning)] bg-[var(--warning)]/10 border border-[var(--warning)]/30"
-                  }`}
+            {answer.status === "error" && (
+              <div className="relative rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 text-[14px] text-[var(--fg-muted)]">
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  aria-label="Clear error and ask another question"
+                  className="absolute top-2 right-2 w-7 h-7 inline-flex items-center justify-center rounded-full text-[var(--fg-faint)] hover:text-[var(--fg)] hover:bg-[var(--bg-3)] transition-colors"
+                  title="Clear"
                 >
-                  {isVerified(sec) ? "✓ " : "⚠ "}{sec}
-                </span>
-              ))}
-            </div>
+                  ✕
+                </button>
+                <div className="pr-8">{answer.message}</div>
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  className="mt-3 text-[13px] font-bold text-[#16C7FF] hover:underline"
+                >
+                  Try another question →
+                </button>
+              </div>
+            )}
 
-            {/* The answer */}
-            <div className="prose prose-invert max-w-none text-[14px] text-[var(--fg)] leading-relaxed whitespace-pre-wrap font-sans">
-              {resp.content}
-            </div>
+            {answer.status === "answer" && (
+              <div className="relative rounded-xl border border-[#16C7FF]/30 bg-[var(--bg)] p-5">
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  aria-label="Clear answer and start over"
+                  className="absolute top-3 right-3 w-8 h-8 inline-flex items-center justify-center rounded-full text-[var(--fg-faint)] hover:text-[var(--fg)] hover:bg-[var(--bg-3)] transition-colors text-[15px]"
+                  title="Clear answer"
+                >
+                  ✕
+                </button>
+                <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3 pr-10">
+                  Concierge answer
+                </div>
+                <div className="text-[15px] text-[var(--fg)] leading-relaxed whitespace-pre-wrap">
+                  {answer.text}
+                </div>
+                {answer.citations.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap gap-2">
+                    {answer.citations.map((c, i) => (
+                      <span
+                        key={i}
+                        className="text-[11px] font-bold font-mono text-[#16C7FF] bg-[#16C7FF]/10 border border-[#16C7FF]/30 px-2 py-1 rounded-full"
+                      >
+                        ✓ {c}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {answer.sources.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                    <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--fg-faint)] mb-2">
+                      Grounded in {answer.sources.length} X3 Compass {answer.sources.length === 1 ? "skill" : "skills"}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {answer.sources.map((s) => (
+                        <span
+                          key={s.id}
+                          title={`${s.name} · ${s.cfr}`}
+                          className="text-[12px] font-medium text-[var(--fg)] bg-[var(--bg-3)] border border-[var(--border)] px-2.5 py-1 rounded-md"
+                        >
+                          {s.name}
+                          <span className="ml-2 font-mono text-[10px] text-[#16C7FF]">{s.cfr}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* Trust footer */}
-            <div className="text-[11px] text-[var(--fg-faint)] pt-3 border-t border-[var(--border)]">
-              This is one of 300+ skills inside Compass. Citation verification, multi-turn conversations, document
-              upload, and your own carrier&apos;s data all unlock at $25/driver.{" "}
-              <a href="/signup" className="text-[var(--accent)] font-bold hover:underline">Start your 7-day trial →</a>
-            </div>
+                {/* Reset CTA · returns user to the empty preset+textarea state */}
+                <div className="mt-5 pt-5 border-t border-[var(--border)] flex items-center justify-between gap-3">
+                  <div className="text-[12px] text-[var(--fg-faint)]">
+                    Was this helpful? Ask a follow-up or start fresh.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => reset()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold border border-[#16C7FF]/40 bg-[#16C7FF]/5 text-[#16C7FF] hover:bg-[#16C7FF]/15 hover:border-[#16C7FF]/70 transition-colors"
+                  >
+                    ↻ Ask another question
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

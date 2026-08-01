@@ -1,25 +1,37 @@
 "use client";
-import { useUser } from "./useUser";
+import { useEffect, useState } from "react";
+import { getSupabase } from "./supabase";
 
-/**
- * Returns true if the current user is an X3 super-admin (Joshua or anyone with
- * user_metadata.role === 'super_admin'). Used to gate the X3 ADMIN sidebar section
- * and any cross-tenant operations console.
- *
- * Real auth gate (server-side) belongs in Supabase RLS + Pages Functions.
- * This hook is for UI visibility only — never for security.
- */
-const SUPER_ADMIN_EMAILS = new Set<string>([
+const SUPER_ADMIN_EMAILS = [
   "joshua@x3compass.com",
   "joshua@x3fleetsafety.com",
   "joshuakovarik@yahoo.com",
-]);
+];
 
+/**
+ * useIsSuperAdmin · returns true if the current authenticated user is an X3 internal super-admin.
+ * Used by AppShell to gate the X3 Admin sidebar section (Control Center, Finance, Marketing, etc.)
+ *
+ * v1 implementation: check email against allow-list.
+ * v2 will switch to: SELECT compass_super_admins WHERE user_id = auth.uid()
+ */
 export function useIsSuperAdmin(): boolean {
-  const { user } = useUser();
-  if (!user) return false;
-  const email = (user.email || "").toLowerCase().trim();
-  if (SUPER_ADMIN_EMAILS.has(email)) return true;
-  const role = (user.user_metadata as Record<string, unknown> | undefined)?.role;
-  return role === "super_admin";
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = getSupabase();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (user?.email && SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+          setIsSuperAdmin(true);
+        }
+      } catch { /* not signed in · not super-admin */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return isSuperAdmin;
 }

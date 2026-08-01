@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const DRIVER_TEMPLATE = `first_name,last_name,email,phone,date_of_birth,license_number,license_state,license_class,license_expiration,medical_cert_expiration,hire_date,status
 John,Doe,john.doe@example.com,555-123-4567,1985-03-12,D1234567,TX,A,2028-04-30,2027-02-15,2024-01-15,active
@@ -80,17 +80,17 @@ export function DriverImportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div
         className="bg-[var(--surface-2)] rounded-2xl border border-[var(--border)] max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <h2 className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import drivers</h2>
+            <h2 id="modal-title" className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import drivers</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mt-1">CSV upload · existing drivers (by CDL #) are updated, not duplicated.</p>
           </div>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -138,11 +138,11 @@ export function DriverImportModal({
           )}
 
           {error && (
-            <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-300">{error}</div>
+            <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-700 dark:text-rose-300">{error}</div>
           )}
 
           {result && (
-            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-300"}`}>
+            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               <div className="font-bold mb-1">{result.ok ? "✓ Import complete" : "⚠ Import finished with errors"}</div>
               <div className="text-[12px]">
                 Submitted: <strong>{result.submitted}</strong> · Saved: <strong>{result.inserted + result.updated}</strong>
@@ -150,7 +150,7 @@ export function DriverImportModal({
                 {result.errors.length ? <> · Errors: <strong>{result.errors.length}</strong></> : null}
               </div>
               {result.errors.length > 0 && (
-                <ul className="mt-2 text-[11px] text-amber-200 space-y-0.5 max-h-32 overflow-y-auto">
+                <ul className="mt-2 text-[11px] text-amber-800 dark:text-amber-200 space-y-0.5 max-h-32 overflow-y-auto">
                   {result.errors.slice(0, 10).map((e, i) => <li key={i}>Row {e.row + 1}: {e.reason}</li>)}
                   {result.errors.length > 10 && <li>…and {result.errors.length - 10} more</li>}
                 </ul>

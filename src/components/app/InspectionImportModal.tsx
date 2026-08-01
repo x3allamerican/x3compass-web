@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const TEMPLATE = `inspection_date,driver_first_name,driver_last_name,license_plate,level,state,inspector,report_number,oos_driver,oos_vehicle,violation_count,report_url
 2026-04-12,James,Carter,7XYZ123,1,TX,Officer 4287,INS-238411,false,false,2,
@@ -35,14 +35,14 @@ export function InspectionImportModal({ carrierId, onClose, onImported }: { carr
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="bg-[var(--surface-2)] rounded-2xl border border-[var(--border)] max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <h2 className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import inspections</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mt-1">49 CFR § 396.9 — roadside inspection records.</p>
+            <h2 id="modal-title" className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import inspections</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mt-1">49 CFR § 396.9 · roadside inspection records.</p>
           </div>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>
         <div className="p-6 space-y-5">
           <div>
@@ -68,9 +68,9 @@ export function InspectionImportModal({ carrierId, onClose, onImported }: { carr
               </div>
             </div>
           )}
-          {error && <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-300">{error}</div>}
+          {error && <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-700 dark:text-rose-300">{error}</div>}
           {result && (
-            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-300"}`}>
+            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               <div className="font-bold mb-1">{result.ok ? "✓ Import complete" : "⚠ Import finished with errors"}</div>
               <div className="text-[12px]">Submitted: <strong>{result.submitted}</strong> · Saved: <strong>{result.inserted + result.updated}</strong>{result.errors.length ? <> · Errors: <strong>{result.errors.length}</strong></> : null}</div>
             </div>

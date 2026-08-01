@@ -61,8 +61,8 @@ export default function AskCompassPage() {
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full grid place-items-center text-[var(--bg)] font-black text-2xl mx-auto mb-5" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>∞</div>
-            <h1 className="text-2xl font-extrabold mb-2">{user ? `Hi${(user.email||"").split("@")[0] ? ", " + (user.email||"").split("@")[0] : ""} — ask me anything FMCSA-related.` : "Ask me anything FMCSA-related."}</h1>
-            <p className="text-[var(--fg-muted)] mb-8">{carrier?.name && `On behalf of ${carrier.name}. `}300+ CFR-cited skills. Powered by Claude.</p>
+            <h1 className="text-2xl font-extrabold mb-2">{user ? `Hi${(user.email||"").split("@")[0] ? ", " + (user.email||"").split("@")[0] : ""} · ask me anything FMCSA-related.` : "Ask me anything FMCSA-related."}</h1>
+            <p className="text-[var(--fg-muted)] mb-8">{carrier?.name && `On behalf of ${carrier.name}. `}Backed by a 67,000-document CFR knowledge base. Powered by Claude.</p>
             <div className="grid md:grid-cols-2 gap-2 max-w-2xl mx-auto">
               {STARTERS.map((s) => (
                 <button key={s} onClick={() => send(s)} disabled={busy} className="text-left p-3 rounded-lg bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] text-[13px] text-[var(--fg-muted)] disabled:opacity-50">{s}</button>
@@ -80,7 +80,7 @@ export default function AskCompassPage() {
               </div>
             ))}
             {busy && <div className="flex gap-3"><div className="w-8 h-8 rounded-full grid place-items-center font-black text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>∞</div><div className="rounded-2xl px-4 py-3 bg-[var(--surface-3)] border border-[var(--border)] text-[var(--fg-muted)] text-sm">Thinking…</div></div>}
-            {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+            {error && <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
             <div ref={endRef} />
           </div>
         )}

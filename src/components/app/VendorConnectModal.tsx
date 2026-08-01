@@ -15,12 +15,12 @@ type Vendor = {
 const VENDOR_META: Record<string, { label: string; description: string; supports_sync: boolean }> = {
   tenstreet: {
     label: "TenStreet",
-    description: "Applicant tracking system (ATS) — pulls completed driver applications into your DQ pipeline.",
+    description: "Applicant tracking system (ATS) · pulls completed driver applications into your DQ pipeline.",
     supports_sync: true,
   },
   driverreach: {
     label: "DriverReach",
-    description: "Recruiting + ATS — drag-and-drop pipeline + DOT-compliant applications.",
+    description: "Recruiting + ATS · drag-and-drop pipeline + DOT-compliant applications.",
     supports_sync: false,  // awaiting API contract
   },
   hireright: {
@@ -61,11 +61,11 @@ const VENDOR_META: Record<string, { label: string; description: string; supports
 };
 
 function badgeForStatus(status: string, envConfigured?: boolean): { label: string; cls: string } {
-  if (status === "connected")  return { label: "Connected",   cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
-  if (status === "syncing")    return { label: "Syncing…",    cls: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" };
-  if (status === "error")      return { label: "Error",       cls: "bg-rose-500/15 text-rose-300 border-rose-500/30" };
-  if (status === "configured") return { label: "Configured",  cls: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" };
-  if (envConfigured)           return { label: "Ready to sync", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+  if (status === "connected")  return { label: "Connected",   cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30" };
+  if (status === "syncing")    return { label: "Syncing…",    cls: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30" };
+  if (status === "error")      return { label: "Error",       cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30" };
+  if (status === "configured") return { label: "Configured",  cls: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30" };
+  if (envConfigured)           return { label: "Ready to sync", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30" };
   return { label: "Available", cls: "bg-[var(--surface-3)] text-[var(--fg-muted)] border-[var(--border)]" };
 }
 
@@ -140,7 +140,7 @@ export function VendorConnectModal({
             <h2 className="text-[20px] font-extrabold text-[var(--fg)]">{title || "Connect a vendor"}</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mt-1">{subtitle || "Pull data automatically from your existing systems."}</p>
           </div>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-3">
@@ -193,7 +193,7 @@ export function VendorConnectModal({
                     </div>
                   </div>
                   {r && (
-                    <div className={`mt-2 text-[12px] rounded-lg p-2 ${r.ok ? "bg-emerald-500/10 text-emerald-300" : "bg-rose-500/10 text-rose-300"}`}>
+                    <div className={`mt-2 text-[12px] rounded-lg p-2 ${r.ok ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "bg-rose-500/10 text-rose-700 dark:text-rose-300"}`}>
                       {r.msg}
                     </div>
                   )}

@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
+import { SkeletonRow } from "@/components/Skeleton";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
 import { AccidentImportModal } from "@/components/app/AccidentImportModal";
 import { useUser } from "@/lib/useUser";
@@ -20,7 +21,7 @@ type A = {
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
 
 // =========================================================================
-// COLOR PALETTE — matches the FMCSA/DOT criteria reference card
+// COLOR PALETTE · matches the FMCSA/DOT criteria reference card
 // solid bg + white text in light mode; tinted /30 in dark
 // =========================================================================
 const SEV = {
@@ -54,7 +55,7 @@ function Pill({ cls, children, size = "md" }: { cls: string; children: React.Rea
 }
 
 // =========================================================================
-// DEFINITIONS REFERENCE CARD — at the top of the page
+// DEFINITIONS REFERENCE CARD · at the top of the page
 // =========================================================================
 function DefinitionsCard() {
   return (
@@ -198,7 +199,7 @@ export default function AccidentsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} className="text-center p-10 text-[var(--fg-muted)] text-sm">Loading…</td></tr>
+                <>{Array.from({length:5}).map((_,i)=><SkeletonRow key={i} cols={9} />)}</>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={9} className="text-center p-10">
                   <div className="text-2xl mb-2">📋</div>
@@ -339,7 +340,7 @@ function AccidentFormModal({ carrier_id, drivers, vehicles, accident, onClose, o
         <Field label="Description"><textarea className="x3i" rows={3} value={form.description||""} onChange={(e)=>setForm({...form,description:e.target.value})} /></Field>
         {error && <Err msg={error} />}
         <div className="flex justify-between items-center pt-2">
-          <div>{accident && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete record</button>}</div>
+          <div>{accident && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-700 dark:text-red-400 hover:text-red-700 dark:text-red-300">Delete record</button>}</div>
           <ModalActions onClose={onClose} busy={busy} submitLabel={accident ? "Save changes" : "Log accident"} />
         </div>
       </form>

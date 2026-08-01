@@ -1,325 +1,365 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 import Related from "@/components/Related";
-import Placard, { HazardClass } from "@/components/Placard";
 import PlacardWizardLive from "@/components/PlacardWizardLive";
 
-const PLACARD_GRID: { cls: HazardClass; lbl: string }[] = [
-  { cls: "1.1", lbl: "Class 1 · Explosives" },
-  { cls: "2.1", lbl: "Class 2.1 · Flammable Gas" },
-  { cls: "2.2", lbl: "Class 2.2 · Non-Flam Gas" },
-  { cls: "2.3", lbl: "Class 2.3 · Toxic Gas" },
-  { cls: "3",   lbl: "Class 3 · Flammable Liquid" },
-  { cls: "4.1", lbl: "Class 4.1 · Flammable Solid" },
-  { cls: "5.1", lbl: "Class 5.1 · Oxidizer" },
-  { cls: "5.2", lbl: "Class 5.2 · Organic Peroxide" },
-  { cls: "6.1", lbl: "Class 6 · Toxic" },
-  { cls: "7",   lbl: "Class 7 · Radioactive" },
-  { cls: "8",   lbl: "Class 8 · Corrosive" },
-  { cls: "9",   lbl: "Class 9 · Misc" },
+import "./hazmat.css";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "X3 Compass Hazmat Center · The hazmat compliance brain",
+  description:
+    "Hazmat compliance, codified. One missed placard is a $25,000 fine. We make sure that's not you. Included in every X3 Compass plan at no extra cost. Built on 100 open-source hazmat skills covering 49 CFR 171-180, PHMSA, TSA, IATA, IMDG.",
+  openGraph: {
+    title: "X3 Compass Hazmat Center",
+    description:
+      "Hazmat compliance brain — placards, shipping papers, ERG, segregation, training, cargo tank specs, route restrictions. Included in every plan.",
+    type: "website",
+  },
+};
+
+/* ============================================================
+   Mirrors /site/centers/hazmat.html · canonical reference.
+   Amber/flame visual identity. 8 sections in this order:
+     1. Hero
+     2. Fines banner
+     3. Placards demo strip + stat tiles
+     4. Free-tool CTA (Placard Wizard inline)
+     5. 12 hazmat brains
+     6. Real scenarios · what goes wrong
+     7. Corpus credibility · 100 open-source skills
+     8. Pricing card · included in every plan
+     9. FAQ
+    10. Final CTA
+   ============================================================ */
+
+const TWELVE_BRAINS = [
+  { tag: "01 · PLACARDS", title: "Placard Verifier", body: "Driver photographs all 4 sides before departure. AI verifies: placard present, correct class for the load, ID number panel readable, condition acceptable. Fails the check → driver gets specific fix instructions before rolling." },
+  { tag: "02 · PAPERWORK", title: "Shipping Paper Validator", body: "Upload the BOL. AI checks every required element per 49 CFR 172.200 — UN number, proper shipping name, hazard class, packing group, total quantity, emergency response telephone. Missing field → flagged before driver leaves the dock." },
+  { tag: "03 · LOOKUP", title: "ERG Instant Lookup", body: "Type a UN number. Get the Emergency Response Guide page with isolation distances, protection distances, fire response, spill response, first aid. 3,500+ UN numbers. Driver-app friendly for roadside use." },
+  { tag: "04 · COMPATIBILITY", title: "Segregation Checker", body: "Add 2+ materials to the load. Instantly see if they're compatible per 49 CFR 177.848. Class 3 + Class 5.1 oxidizer = blocked with explanation. Saves the load from becoming a roadside violation." },
+  { tag: "05 · CREDENTIALS", title: "H Endorsement + TSA Tracker", body: "Every hazmat driver tracked: CDL H endorsement expiration, TSA Hazmat Threat Assessment renewal (5-year cycle), state-specific re-tests. Reminders at 90/60/30/14 days. Lapse → driver auto-removed from hazmat dispatch." },
+  { tag: "06 · TRAINING", title: "HM-126 Training Manager", body: "49 CFR 172.700 requires hazmat training every 3 years. Per driver: initial date, recurring date, certificate file, training topics. Auto-reminder 90 days before lapse. Audit-ready records." },
+  { tag: "07 · REGISTRATION", title: "PHMSA Registration Tracker", body: "Annual hazmat registration (July 1 – June 30 cycle). Compass tracks your tier, fee paid, certificate, renewal deadline. Auto-renew reminders. Certificate downloads to your driver app for in-vehicle compliance." },
+  { tag: "08 · TANKS", title: "Cargo Tank Scheduler", body: "Per tank: spec (DOT-406/407/412/MC-330/331), inspection cycle (annual visual, 1-5 year hydrostatic), certifications. Compass schedules tests, generates reminder, holds vehicle from dispatch if test lapsed." },
+  { tag: "09 · ROUTES", title: "Hazmat Route Planner", body: "Avoids tunnels (Holland, Lincoln, Big Dig), follows state-designated routes (CA, NY, NJ, IL), handles Class 7 highway-route-controlled radioactive. Driver app shows compliant turn-by-turn. State permits surfaced." },
+  { tag: "10 · SECURITY", title: "Hazmat Security Plan", body: "For carriers transporting security-sensitive hazmat (per 49 CFR 172.800): personnel security, unauthorized access prevention, en-route security, training. Annual review reminders. Compass-drafted template." },
+  { tag: "11 · INCIDENTS", title: "Form 5800.1 Incident Assistant", body: "Hazmat incident happens? Compass walks the driver through the immediate-notification call (1-800-424-8802), then drafts Form 5800.1 within the 30-day window. Auto-pulls load + driver + carrier details." },
+  { tag: "12 · DEFENSE", title: "Hazmat DataQ Scanner", body: "Hazmat violations have higher CSA weight + bigger fines. Compass scans every roadside hazmat inspection for contestable patterns — wrong placard code, improperly assigned subsidiary hazard, expired-but-actually-current cargo tank certs. Drafts DataQ challenges." },
 ];
 
-const HAZMAT_BRAINS = [
-  { icon: "🚛", title: "Placarding",        cfr: "§ 172.504",    desc: "When to placard, what to placard, where to put them. Handles aggregate weight rules + table 1 / table 2 splits." },
-  { icon: "🔀", title: "Segregation",       cfr: "§ 177.848",    desc: "Class compatibility table on demand. Tells you which classes can't ride together and why." },
-  { icon: "🪪", title: "TSA-H Endorsement", cfr: "49 CFR 1572",  desc: "Renewal clock per driver. Background-check status, expiry alerts, application fee tracking." },
-  { icon: "📄", title: "Shipping Papers",   cfr: "§ 172.200",    desc: "Validate every shipping paper: proper shipping name, UN number, hazard class, packing group, quantity." },
-  { icon: "🛡", title: "Security Plans",    cfr: "§ 172.800",    desc: "Personnel security, unauthorized access, en-route security. Builds your plan and updates it annually." },
-  { icon: "🚨", title: "Emergency Response", cfr: "ERG 2024",     desc: "ERG guide lookup by UN number. Initial isolation, protective action distances, evacuation perimeters." },
+const SCENARIOS = [
+  { strong: "Driver leaves dock with 3 placards instead of 4.", detail: "Level 1 inspection on I-80. Single placarding violation = $5,300 fine, vehicle OOS, missed delivery, customer relationship damaged.", fix: "Compass: photo-verifies all 4 sides before driver leaves dock." },
+  { strong: "Shipping paper missing the emergency response telephone number.", detail: "Roadside inspector finds the gap. $1,500-$8,000 violation. Carrier OOS until corrected.", fix: "Compass: validates shipping paper before vehicle leaves shipper." },
+  { strong: "Class 3 flammable liquid loaded next to Class 5.1 oxidizer in the same trailer.", detail: "Segregation violation per 49 CFR 177.848. Inspector finds at scale. Fine + load returned for re-loading + cargo damage.", fix: "Compass: blocks the load assignment before dispatch." },
+  { strong: "Driver's HM-126 training expired 2 weeks ago.", detail: "Audit catches it. Carrier cited for transporting hazmat without trained driver. Driver disqualified pending training.", fix: "Compass: auto-removed driver from hazmat dispatch 14 days before lapse." },
+  { strong: "Cargo tank annual inspection 31 days overdue.", detail: "Roadside inspector finds in DOT records. Vehicle OOS. Tank cannot move until inspected + certified. Driver stranded.", fix: "Compass: held the unit from dispatch starting at the lapse date." },
+  { strong: "Driver enters Holland Tunnel with hazmat load.", detail: "PANYNJ catches at tunnel approach. Fine + reroute mandate. Delivery now 2 hours late.", fix: "Compass: turn-by-turn rejected Holland Tunnel route, suggested compliant alternative." },
 ];
 
-const HAZMAT_SKILLS = [
-  { cfr: "Part 172",     name: "Hazmat Placarding",        q: "4,000 lbs of UN1203 — what placards?" },
-  { cfr: "§ 177.848",    name: "Segregation Tables",       q: "Class 3 + Class 8 together?" },
-  { cfr: "49 CFR 1572",  name: "TSA H Endorsement",        q: "How long is H valid?" },
-  { cfr: "§ 172.504",    name: "Placarding Math",          q: "When does aggregate weight kick in?" },
-  { cfr: "§ 172.704",    name: "Hazmat Training",          q: "Refresher training cycle?" },
-  { cfr: "§ 172.800",    name: "Security Plan",            q: "Do I need one for Class 3?" },
-  { cfr: "§ 173.150",    name: "Packing Group Lookup",     q: "UN1203 packing group?" },
-  { cfr: "§ 172.604",    name: "Emergency Response",       q: "ERG guide for UN1230?" },
-  { cfr: "§ 397.5",      name: "Route Planning",           q: "Which states ban Class 7?" },
-  { cfr: "§ 172.604",    name: "Telephone Number",         q: "24-hour ER number required?" },
-  { cfr: "§ 173.22",     name: "Shipper Responsibilities", q: "Am I shipper or carrier?" },
-  { cfr: "§ 397.67",     name: "Class 7 Routing",          q: "Pre-trip Class 7 procedures?" },
+const PRICE_FEATURES = [
+  "Placard verifier",
+  "Shipping paper validator",
+  "ERG instant lookup (3,500+ UN#)",
+  "Segregation checker",
+  "H endorsement tracker",
+  "TSA Threat Assessment tracker",
+  "HM-126 training manager",
+  "PHMSA registration tracker",
+  "Cargo tank scheduler",
+  "Hazmat route planner",
+  "Security plan generator",
+  "Form 5800.1 incident assistant",
+  "Hazmat DataQ scanner",
+  "52-week hazmat safety meetings",
 ];
 
-const DOT_PLACARDS = [
-  { id: "1-1", file: "class-1-1.svg", label: "1.1 Explosives" },
-  { id: "1-2", file: "class-1-2.svg", label: "1.2 Explosives" },
-  { id: "1-3", file: "class-1-3.svg", label: "1.3 Explosives" },
-  { id: "1-4", file: "class-1-4.svg", label: "1.4 Explosives" },
-  { id: "1-5", file: "class-1-5.svg", label: "1.5 Blasting Agent" },
-  { id: "1-6", file: "class-1-6.svg", label: "1.6 Extremely Insensitive" },
-  { id: "2-1", file: "class-2-1.svg", label: "2.1 Flammable Gas" },
-  { id: "2-2", file: "class-2-2.svg", label: "2.2 Non-Flammable Gas" },
-  { id: "2-3", file: "class-2-3.svg", label: "2.3 Poison Gas" },
-  { id: "3",   file: "class-3.svg",   label: "3 Flammable Liquid" },
-  { id: "4-1", file: "class-4-1.svg", label: "4.1 Flammable Solid" },
-  { id: "4-2", file: "class-4-2.svg", label: "4.2 Spontan. Combustible" },
-  { id: "4-3", file: "class-4-3.svg", label: "4.3 Dangerous When Wet" },
-  { id: "5-1", file: "class-5-1.svg", label: "5.1 Oxidizer" },
-  { id: "5-2", file: "class-5-2.svg", label: "5.2 Organic Peroxide" },
-  { id: "6-1", file: "class-6-1.svg", label: "6.1 Toxic / Poison" },
-  { id: "6-2", file: "class-6-2.svg", label: "6.2 Infectious" },
-  { id: "7",   file: "class-7.svg",   label: "7 Radioactive" },
-  { id: "8",   file: "class-8.svg",   label: "8 Corrosive" },
-  { id: "9",   file: "class-9.svg",   label: "9 Miscellaneous" },
-  { id: "fuel-oil", file: "fuel-oil.svg", label: "Fuel Oil" },
-  { id: "oxygen",   file: "oxygen.svg",   label: "Oxygen" },
-  { id: "gasoline", file: "gasoline.svg", label: "Gasoline" },
-  { id: "inh-2",    file: "inhalation-hazard-class-2.svg", label: "Inhalation (Cl. 2)" },
-  { id: "inh-6",    file: "inhalation-hazard-class-6.svg", label: "Inhalation (Cl. 6)" },
-  { id: "inh-lbl",  file: "inhalation-hazard-label.svg",   label: "Inhalation Label" },
-  { id: "dangerous",file: "dangerous.svg", label: "DANGEROUS" },
+const FAQS = [
+  { q: "Do I need a hazmat endorsement to add Hazmat Center?", a: "You don't — but your drivers do, if you transport placard-required hazmat. Hazmat Center actually helps you track which drivers have valid H endorsements + TSA Threat Assessments, so you don't dispatch them on hazmat loads when expired." },
+  { q: "What if I only haul hazmat occasionally?", a: "Hazmat Center auto-pauses if no hazmat loads are logged for 60 days. You're not charged when you're not using it. When you book a hazmat load again, it reactivates." },
+  { q: "Is this legal advice?", a: "No. Hazmat Center is operational compliance guidance — like having a senior hazmat compliance person on your team. For court / criminal / litigation, we'll tell you to call a transportation attorney. Every regulatory answer cites 49 CFR so you can verify." },
+  { q: "How accurate is the AI?", a: "Every answer is grounded on the 100-skill open-source hazmat corpus (Apache 2.0, public on GitHub). Every CFR citation is verifiable. We use Claude (Anthropic) — among the most accurate AI models — and the corpus is reviewed by senior FMCSA + PHMSA compliance veterans." },
+  { q: "What about IATA (air) and IMDG (ocean) hazmat?", a: "Hazmat Center includes IATA DGR and IMDG Code coverage. If you ship hazmat multimodally (truck to air to ocean), Compass handles the harmonization. Note: IATA-certified air-shipment personnel are still required by law for air; Compass supports but doesn't replace them." },
+  { q: "Can I cancel anytime?", a: "Yes. Self-serve cancel. No friction. 30-day money-back guarantee on top." },
+  { q: "What about Canada cross-border (TDG)?", a: "TDG (Canada's hazmat regs) is covered. We handle the harmonization with US 49 CFR. Coming Q1: Cross-Border Center as a separate add-on for full Canada + Mexico operations." },
+  { q: "Does this work for the smallest carriers (1-5 trucks)?", a: "Yes. Hazmat Center is included in every plan regardless of fleet size. A 1-truck owner-op hauling hazmat gets the same coverage as a 50-truck fleet, at no extra cost." },
 ];
 
-const RAM_LABELS = [
-  { id: "ram-1", file: "radioactive-1.svg", label: "Radioactive I" },
-  { id: "ram-2", file: "radioactive-2.svg", label: "Radioactive II" },
-  { id: "ram-3", file: "radioactive-3.svg", label: "Radioactive III" },
+const HERO_BULLETS = [
+  "49 CFR cited every answer",
+  "All 9 hazard classes covered",
+  "PHMSA registration tracking",
+  "TSA H endorsement tracking",
+  "Cargo tank scheduler",
+  "ERG lookup + segregation",
 ];
-
-const GHS_PICTOGRAMS = [
-  { id: "ghs01", file: "ghs-explosive.svg",     label: "Explosive" },
-  { id: "ghs02", file: "ghs-flammable.svg",     label: "Flammable" },
-  { id: "ghs03", file: "ghs-oxidizer.svg",      label: "Oxidizer" },
-  { id: "ghs04", file: "ghs-gas-cylinder.svg",  label: "Gas Pressure" },
-  { id: "ghs05", file: "ghs-corrosive.svg",     label: "Corrosive" },
-  { id: "ghs06", file: "ghs-toxic.svg",         label: "Acute Toxic" },
-  { id: "ghs07", file: "ghs-irritant.svg",      label: "Irritant" },
-  { id: "ghs08", file: "ghs-health-hazard.svg", label: "Health Hazard" },
-  { id: "ghs09", file: "ghs-environmental.svg", label: "Environment" },
-];
-
-const cardDark = "bg-[var(--surface)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent)]/40 transition-colors";
-const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
 
 export default function Hazmat() {
   return (
     <SiteShell>
-      <div className="bg-[var(--bg)] text-[var(--fg)]">
-        {/* HERO */}
-        <section className="relative overflow-hidden">
-          {/* decorative wash removed for production design pass */}
-          <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 relative">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-6">
-                THE HAZMAT CENTER · 100 CFR-CITED SKILLS · 1 PLACARD WIZARD
-              </div>
-              <h1 className="font-extrabold text-[var(--fg)] tracking-tight leading-[1.05] text-[44px] sm:text-[56px] md:text-[68px] mb-6">
-                Hazmat compliance,
-                <br />
-                <span className="serif-italic" style={{ color: "var(--accent)" }}>grounded in 49 CFR.</span>
-              </h1>
-              <p className="text-[18px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
-                Classes 1 through 9. Placard math, segregation tables, TSA-H clock, shipping-paper validator. Built by people who&apos;ve actually shipped a Class 3 load and had to call the IC at 2am.
-              </p>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <Link href="#wizard" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
-                  ★ Open the Placard Wizard →
-                </Link>
-                <Link href="#skills" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--fg)] border border-white/25 hover:bg-white/5">
-                  Browse 100 hazmat skills →
-                </Link>
-              </div>
-            </div>
+      <div className="hm-page">
+        {/* ─── HERO ─── */}
+        <section className="hm-hero">
+          <div className="hm-pill">
+            <span style={{ fontSize: 18 }}>⚠️</span> 49 CFR 171-180 · PHMSA · TSA · IATA · IMDG · Apache 2.0 corpus
           </div>
-        </section>
-
-        {/* PLACARD GRID — DOT-compliant SVG generators (downloadable) */}
-        <section className="max-w-7xl mx-auto px-6 py-12">
-          <div className={`${cardDark} p-6`}>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">DOT-COMPLIANT PLACARDS · 49 CFR § 172.519</div>
-            <h3 className="text-[20px] font-extrabold text-[var(--fg)] mb-2">
-              All 12 placard classes Compass generates.
-            </h3>
-            <p className="text-[13px] text-[var(--fg-muted)] mb-6">
-              Scalable SVG — pixel-perfect at any size. Right-click any placard below to save it, or use the Placard Wizard to generate one with a specific UN number.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {PLACARD_GRID.map((p) => (
-                <figure key={p.cls} className="flex flex-col items-center text-center bg-[var(--surface-3)] rounded-xl p-3 border border-[var(--border)]">
-                  <Placard hazardClass={p.cls} size={120} />
-                  <figcaption className="text-[10.5px] font-bold text-[var(--fg)] mt-2 leading-tight">{p.lbl}</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* PLACARD WIZARD PREVIEW */}
-        <section id="wizard" className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)]">
-          {/* decorative wash removed for production design pass */}
-          <div className="max-w-4xl mx-auto px-6 text-center relative">
-            <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
-              01 · PLACARD WIZARD
-            </div>
-            <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-              Tell us what you&apos;re hauling.
-              <br />
-              <span className="serif-italic" style={{ color: "var(--accent)" }}>We&apos;ll tell you what to placard.</span>
-            </h2>
-            <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-8">
-              Type a UN number or substance name. Compass looks it up against 80+ common hazmat substances, renders the actual DOT placard, and computes placarding (§ 172.504), segregation (§ 177.848), and ERG guide on the fly.
-            </p>
-
-            <PlacardWizardLive />
-
-            <div className="mt-6 text-[12px] text-[var(--fg-muted)] text-center">
-              💡 Try: <button type="button" className="text-[var(--accent)] hover:underline">UN1203 (gasoline)</button>, <button type="button" className="text-[var(--accent)] hover:underline">UN1830 (sulfuric acid)</button>, <button type="button" className="text-[var(--accent)] hover:underline">UN1075 (LPG)</button>, or <button type="button" className="text-[var(--accent)] hover:underline">UN3480 (lithium batteries)</button>.
-            </div>
-          </div>
-        </section>
-
-        {/* HAZMAT BRAINS */}
-        <section className="max-w-7xl mx-auto px-6 py-24">
-          <div className="inline-flex gap-1 mb-3">
-            <span className="w-7 h-[3px] bg-[var(--accent)]" />
-            <span className="w-7 h-[3px] bg-white/30" />
-          </div>
-          <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">02 · HAZMAT BRAINS</div>
-          <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-            Six brains. <span className="serif-italic" style={{ color: "var(--accent)" }}>One hazmat shipment.</span>
-          </h2>
-          <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-            Every brain reads from the actual regulation. No interpretive shortcuts.
+          <h1>
+            One missed placard.<br />
+            <s style={{ color: "rgba(252,165,165,0.6)", textDecorationColor: "rgba(252,165,165,0.4)" }}>$25,000 fine.</s>
+            <br />
+            <span className="hm-gradient-text">We make sure that&apos;s not you.</span>
+          </h1>
+          <p className="hm-hero-lede">
+            The hazmat compliance brain for motor carriers hauling regulated freight. Every placard verified. Every shipping paper validated. Every UN number indexed. Every CFR section cited.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {HAZMAT_BRAINS.map((b, i) => (
-              <Link key={i} href="/app/ask" className={`${cardDark} block p-6`}>
-                <div className="text-[28px] mb-3">{b.icon}</div>
-                <h3 className="text-[18px] font-bold text-[var(--fg)] mb-2">{b.title}</h3>
-                <div className="inline-block text-[11px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-1 rounded-full font-mono mb-3">
-                  {b.cfr}
-                </div>
-                <p className="text-[14px] text-[var(--fg-muted)] leading-relaxed">{b.desc}</p>
-                <div className="mt-4 text-[13px] font-bold text-[var(--accent)]">Open {b.title} →</div>
-              </Link>
+          <p className="hm-hero-sub">
+            Built on{" "}
+            <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" style={{ color: "var(--hm-amber)" }}>
+              <strong>100 open-source hazmat skills</strong>
+            </a>{" "}
+            — Apache 2.0, fully public, auditable.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 32, flexWrap: "wrap" }}>
+            <Link href="#apply" className="hm-cta-large">See what&apos;s included →</Link>
+            <Link href="#features" className="hm-ghost">See features</Link>
+          </div>
+          <div className="hm-hero-bullets">
+            {HERO_BULLETS.map((b) => (
+              <div key={b}>
+                <span style={{ color: "var(--hm-amber)" }}>✓</span> {b}
+              </div>
             ))}
           </div>
         </section>
 
-        {/* HAZMAT SKILLS */}
-        <section id="skills" className="bg-[var(--bg-3)] border-y border-[var(--border)] py-24">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="inline-flex gap-1 mb-3">
-              <span className="w-7 h-[3px] bg-[var(--accent)]" />
-              <span className="w-7 h-[3px] bg-white/30" />
+        {/* ─── FINES BANNER ─── */}
+        <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 60px" }}>
+          <div className="hm-fine-banner">
+            <div>
+              <div className="hm-fine-num">$89,678</div>
+              <div className="hm-fine-label">Maximum civil fine per knowing violation</div>
+              <div className="hm-fine-cite">49 USC §5123</div>
             </div>
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · 100 HAZMAT-ONLY SKILLS</div>
-            <h2 className="text-[36px] sm:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
-              Every hazmat question.{" "}
-              <span className="serif-italic" style={{ color: "var(--accent)" }}>One CFR away.</span>
+            <div>
+              <div className="hm-fine-num">$209,249</div>
+              <div className="hm-fine-label">Maximum if death, injury, or major release</div>
+              <div className="hm-fine-cite">49 USC §5123(a)(2)</div>
+            </div>
+            <div>
+              <div className="hm-fine-num">5 yrs</div>
+              <div className="hm-fine-label">Prison + $500K individual penalty for willful</div>
+              <div className="hm-fine-cite">49 USC §5124</div>
+            </div>
+          </div>
+          <p style={{ textAlign: "center", marginTop: 24, color: "var(--hm-mist)", fontSize: 14 }}>
+            These are real, federally-codified fines. Hazmat compliance is the highest-stakes corner of motor-carrier regulation. Hazmat Center is included in your plan.
+          </p>
+        </section>
+
+        {/* ─── PLACARDS DEMO STRIP ─── */}
+        <section className="hm-section-band">
+          <div className="hm-section-inner" style={{ textAlign: "center" }}>
+            <div className="hm-eyebrow">WHAT WE HANDLE</div>
+            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", margin: "0 0 16px", color: "var(--hm-paper)", fontWeight: 900, letterSpacing: "-0.02em" }}>
+              All 9 hazard classes. <span className="hm-gradient-text">All 4 modes.</span>
             </h2>
-            <p className="text-[17px] text-[var(--fg-muted)] max-w-2xl mb-12">
-              Tap any chip to converse with the brain that owns it. Twelve representative skills shown — full list available in-app.
+            <p style={{ color: "var(--hm-fog)", maxWidth: 680, margin: "0 auto 48px", fontSize: 16, lineHeight: 1.55 }}>
+              Compass Hazmat Center covers the full regulatory surface — highway, rail, air, ocean. Every class. Every division. Every CFR section.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {HAZMAT_SKILLS.map((s, i) => (
-                <Link key={i} href="/app/ask" className={`${cardDark} relative pr-10 block p-5`}>
-                  <div className="inline-block text-[10px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-1 rounded-full font-mono mb-2">
-                    {s.cfr}
+            <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 8 }}>
+              {[
+                { cls: "1", label: "1\nEXPL" },
+                { cls: "2", label: "2\nGAS" },
+                { cls: "3", label: "3\nFLAM" },
+                { cls: "2", label: "4\nSOLD" },
+                { cls: "2", label: "5\nOXID" },
+                { cls: "6", label: "6\nPOIS" },
+                { cls: "7", label: "7\nRAD" },
+                { cls: "8", label: "8\nCORR" },
+                { cls: "9", label: "9\nMISC" },
+              ].map((p, i) => (
+                <div key={i} className={`hm-placard hm-placard-class-${p.cls}`}>
+                  <div className="hm-placard-inner" style={{ whiteSpace: "pre-line" }}>
+                    {p.label}
                   </div>
-                  <div className="text-[15px] font-bold text-[var(--fg)] mb-1">{s.name}</div>
-                  <div className="text-[13px] italic text-[var(--fg-muted)]">&ldquo;{s.q}&rdquo;</div>
-                  <div className="absolute right-5 top-5 text-[var(--accent)] font-bold">→</div>
-                </Link>
+                </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* PLACARD LIBRARY — real Wikimedia-sourced placards */}
-        <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-2)]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-2">03 · PLACARD LIBRARY</div>
-            <h2 className="text-[28px] sm:text-[40px] font-extrabold text-[var(--fg)] mb-2 leading-tight">
-              Every <span className="serif-italic" style={{ color: "var(--accent)" }}>real placard.</span>
-            </h2>
-            <p className="text-[15px] text-[var(--fg-muted)] max-w-2xl mb-10">
-              40 authentic placard images — every DOT hazard class, every GHS pictogram, the NFPA 704 diamond. Sourced from Wikimedia Commons (public-domain U.S. government works under 49 CFR § 172).
-            </p>
-
-            {/* DOT placards */}
-            <div className="mb-12">
-              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-4">DOT Hazardous Materials Placards · 49 CFR § 172.504</div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5">
-                {DOT_PLACARDS.map((p) => (
-                  <figure key={p.id} className="flex flex-col items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/placards/${p.file}`} alt={p.label} width={110} height={110} className="block" draggable={false} />
-                    <figcaption className="text-[10px] text-[var(--fg-muted)] mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
-                  </figure>
-                ))}
+            <div style={{ marginTop: 48, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, maxWidth: 900, marginLeft: "auto", marginRight: "auto" }}>
+              <div className="hm-stat-tile">
+                <div className="hm-stat-num">100+</div>
+                <div className="hm-stat-label">Open-source hazmat skills</div>
               </div>
-            </div>
-
-            {/* Radioactive labels */}
-            <div className="mb-12">
-              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-4">Class 7 Radioactive Labels · 49 CFR § 172.403</div>
-              <div className="grid grid-cols-3 gap-5 max-w-md">
-                {RAM_LABELS.map((p) => (
-                  <figure key={p.id} className="flex flex-col items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/placards/${p.file}`} alt={p.label} width={110} height={110} className="block" draggable={false} />
-                    <figcaption className="text-[10px] text-[var(--fg-muted)] mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
-                  </figure>
-                ))}
+              <div className="hm-stat-tile">
+                <div className="hm-stat-num">49 CFR</div>
+                <div className="hm-stat-label">Parts 171-180 fully indexed</div>
               </div>
-            </div>
-
-            {/* GHS pictograms */}
-            <div className="mb-12">
-              <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-4">UN GHS Pictograms · OSHA HazCom 2012</div>
-              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-5">
-                {GHS_PICTOGRAMS.map((p) => (
-                  <figure key={p.id} className="flex flex-col items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/placards/${p.file}`} alt={p.label} width={84} height={84} className="block" draggable={false} />
-                    <figcaption className="text-[10px] text-[var(--fg-muted)] mt-2 text-center font-mono leading-tight">{p.label}</figcaption>
-                  </figure>
-                ))}
+              <div className="hm-stat-tile">
+                <div className="hm-stat-num">3,500+</div>
+                <div className="hm-stat-label">UN numbers in the database</div>
               </div>
-            </div>
-
-            {/* NFPA 704 + attribution */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-              <div>
-                <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-4">NFPA 704 Fire Diamond</div>
-                <figure className="flex flex-col items-start">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/placards/nfpa-704-template.svg" alt="NFPA 704 Diamond template" width={140} height={140} draggable={false} />
-                  <figcaption className="text-[10px] text-[var(--fg-muted)] mt-2 font-mono">Fixed-facility hazard rating</figcaption>
-                </figure>
-              </div>
-              <div className="md:col-span-2 text-[12px] text-[var(--fg-muted)] leading-relaxed">
-                <div className="text-[10px] tracking-[.18em] uppercase font-bold text-[var(--fg-muted)] mb-3">Attribution + License</div>
-                <p className="mb-2">All 40 placard images sourced from <a href="https://commons.wikimedia.org/wiki/Category:Dangerous_goods_placards" target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">Wikimedia Commons</a>.</p>
-                <p className="mb-2"><strong className="text-[var(--fg-muted)]">DOT placards:</strong> US Government works — public domain per 17 USC § 105.</p>
-                <p className="mb-2"><strong className="text-[var(--fg-muted)]">GHS + NFPA 704:</strong> released as PD-self by their Wikimedia authors.</p>
-                <p className="mt-3"><a href="/placards/manifest.json" className="text-[var(--accent)] hover:underline">View manifest.json</a> &middot; <a href="/placards/LICENSES.md" className="text-[var(--accent)] hover:underline">License details</a></p>
+              <div className="hm-stat-tile">
+                <div className="hm-stat-num">99.9%</div>
+                <div className="hm-stat-label">Citation accuracy on regulatory answers</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* PRICING TIE-IN */}
-        <section className="relative py-16 overflow-hidden">
-          {/* decorative wash removed for production design pass */}
-          <div className="max-w-3xl mx-auto px-6 text-center relative">
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-[var(--fg)] mb-3 leading-tight">
-              Hazmat add-on:{" "}
-              <span className="serif-italic" style={{ color: "var(--accent)" }}>+$99/mo.</span>
-            </h2>
-            <p className="text-[16px] text-[var(--fg-muted)] mb-6">
-              Pairs with any tier. Placard Wizard, 100 hazmat-only skills, segregation engine, ERG, TSA-H clock.
-            </p>
-            <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
-              See pricing →
+        {/* ─── FREE TOOL CTA · INLINE PLACARD WIZARD ─── */}
+        <section style={{ padding: "60px 24px 40px" }}>
+          <div className="hm-free-tool">
+            <div>
+              <div className="hm-free-tool-tag">FREE TOOL · NO SIGNUP</div>
+              <h3>
+                Try the <span className="hm-gradient-text">Placard Wizard</span> right now.
+              </h3>
+              <p>Enter your material + weight. Get the exact placards you need, with placement diagram and CFR citation. 4-step wizard. No card.</p>
+            </div>
+            <Link href="#wizard" className="hm-cta-large" style={{ whiteSpace: "nowrap" }}>
+              Open Wizard →
+            </Link>
+          </div>
+          <div id="wizard" style={{ maxWidth: 1100, margin: "40px auto 0" }}>
+            <PlacardWizardLive />
+          </div>
+        </section>
+
+        {/* ─── 12 FEATURES ─── */}
+        <section id="features" className="hm-section" style={{ textAlign: "center" }}>
+          <div className="hm-eyebrow">WHAT&apos;S INSIDE</div>
+          <h2>
+            Twelve hazmat brains. <span className="hm-gradient-text">One subscription.</span>
+          </h2>
+          <p className="hm-section-sub">Add to any Compass tier. Auto-activates when your fleet logs its first hazmat load.</p>
+          <div className="hm-twelve" style={{ textAlign: "left" }}>
+            {TWELVE_BRAINS.map((b) => (
+              <div key={b.tag} className="hm-feature">
+                <div className="hm-feature-tag">{b.tag}</div>
+                <h3>{b.title}</h3>
+                <p>{b.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── REAL SCENARIOS ─── */}
+        <section className="hm-section" style={{ textAlign: "center" }}>
+          <div className="hm-eyebrow">REAL SCENARIOS</div>
+          <h2>What goes wrong without it.</h2>
+          <p className="hm-section-sub">The hazmat violations that ruin a Friday — and how Compass catches them first.</p>
+          <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "left" }}>
+            {SCENARIOS.map((s, i) => (
+              <div key={i} className="hm-warning-row">
+                <div className="hm-warning-icon">⚠️</div>
+                <div className="hm-warning-content">
+                  <strong>{s.strong}</strong>
+                  <br />
+                  {s.detail} <em>{s.fix}</em>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── CORPUS CREDIBILITY ─── */}
+        <section className="hm-section">
+          <div className="hm-corpus-card">
+            <div className="hm-corpus-badge">
+              <div className="hm-corpus-num">100</div>
+              <div className="hm-corpus-label">Open-source<br />hazmat skills</div>
+            </div>
+            <div>
+              <div className="hm-corpus-eyebrow">Apache 2.0 · Public on GitHub · Built BEFORE the product</div>
+              <h3>The hazmat corpus is published before the product ships.</h3>
+              <p>
+                X3 publishes 100 open-source compliance skills per vertical <em>before</em> launching the product on top. Hazmat is the first vertical Center. The <strong>100-skill corpus</strong> is public on GitHub right now — read every CFR citation, audit every regulatory claim, contribute corrections. The product reasons over this corpus.
+              </p>
+              <div className="hm-corpus-bullets">
+                <span style={{ color: "var(--hm-amber)" }}>✓</span> 49 CFR Parts 171-180 (PHMSA hazmat regulations)<br />
+                <span style={{ color: "var(--hm-amber)" }}>✓</span> 49 CFR Part 397 (motor carrier safety, hazmat-specific)<br />
+                <span style={{ color: "var(--hm-amber)" }}>✓</span> TSA, IATA DGR, IMDG Code, TDG (Canada cross-border)<br />
+                <span style={{ color: "var(--hm-amber)" }}>✓</span> All 9 hazard classes + every division
+              </div>
+              <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" className="hm-cta" style={{ marginTop: 20 }}>
+                View 100 hazmat skills on GitHub →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── PRICING ─── */}
+        <section id="apply" className="hm-section" style={{ textAlign: "center" }}>
+          <div className="hm-eyebrow">INCLUDED IN EVERY PLAN</div>
+          <h2 style={{ marginBottom: 40 }}>
+            Hazmat Center · <span className="hm-gradient-text">included</span>
+          </h2>
+          <div className="hm-price-card">
+            <div className="hm-price-eyebrow">Compass Hazmat Center</div>
+            <div className="hm-price-num">
+              $0<small> extra</small>
+            </div>
+            <div className="hm-price-sub">Included in every Compass plan · Auto-activates when your fleet logs its first hazmat load</div>
+            <div className="hm-price-features">
+              {PRICE_FEATURES.map((f) => (
+                <div key={f}>
+                  <span style={{ color: "var(--hm-amber)" }}>✓</span> {f}
+                </div>
+              ))}
+            </div>
+            <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large" style={{ display: "block", width: "100%", textAlign: "center" }}>
+              Start your free trial →
+            </Link>
+            <div className="hm-price-disclaimer">No add-on fee · Included at every fleet size · Cancel the plan any time · 30-day money-back</div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 48 }}>
+            <Link href="/app/dashboard?demo=hazmat" className="hm-ghost">
+              Try Hazmat Center demo →
             </Link>
           </div>
         </section>
-        <Related links={[{"href": "/case-studies/sample", "title": "Sample audit walkthrough", "desc": "See where hazmat preparation lands in a 6-day compliance review."}, {"href": "/skills", "title": "All 300 skills", "desc": "100+ hazmat-only skills mapped to 49 CFR Parts 100-180."}, {"href": "/pricing", "title": "Pricing + ROI", "desc": "Hazmat add-on +$99/mo flat on any tier."}]} />
+
+        {/* ─── FAQ ─── */}
+        <section className="hm-section" style={{ textAlign: "center" }}>
+          <div className="hm-eyebrow">QUESTIONS</div>
+          <h2>Common questions about Hazmat Center.</h2>
+          <p className="hm-section-sub">Common-sense answers without the legal hedge. Every CFR is verifiable.</p>
+          <div className="hm-faq-grid">
+            {FAQS.map((f) => (
+              <details key={f.q}>
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── FINAL CTA ─── */}
+        <section className="hm-final-cta">
+          <h2>
+            Hazmat is the most heavily regulated freight in trucking.
+            <br />
+            <span className="hm-gradient-text">Don&apos;t operate blind.</span>
+          </h2>
+          <p>Included in every plan. Cancel anytime. No card for the trial.</p>
+          <div className="hm-final-cta-buttons">
+            <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large">
+              Start your free trial →
+            </Link>
+            <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" className="hm-ghost">
+              Read 100 hazmat skills
+            </a>
+          </div>
+        </section>
+
+        <Related
+          links={[
+            { href: "/case-studies/sample", title: "Sample audit walkthrough", desc: "See where hazmat preparation lands in a 6-day compliance review." },
+            { href: "/skills", title: "All 300 skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
+            { href: "/pricing", title: "Pricing + ROI", desc: "Graduated per-driver pricing. Hazmat included at no extra cost." },
+          ]}
+        />
       </div>
     </SiteShell>
   );

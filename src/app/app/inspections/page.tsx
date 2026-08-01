@@ -1,17 +1,47 @@
 "use client";
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
+import { SkeletonRow } from "@/components/Skeleton";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
 import { InspectionImportModal } from "@/components/app/InspectionImportModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
+import { DEMO_INSPECTIONS, withDemoFallback } from "@/lib/demoFallback";
 
 type I = { id:string; driver_id:string|null; vehicle_id:string|null; inspection_date:string; level:number|null; state:string|null; inspector:string|null; report_number:string|null; oos_driver:boolean; oos_vehicle:boolean; violation_count:number; violations:unknown[]|null; report_url:string|null };
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
 
+/** Reshape DemoInspection → I so the existing renderer just works.
+ *  We keep driver_id/vehicle_id null on demo rows (the table falls back to "—")
+ *  but we attach driver_name + vehicle_unit via the unused `violations` slot
+ *  so the page can still surface them in a render helper if it cares. */
+function adaptDemoInspection(d: typeof DEMO_INSPECTIONS[number]): I & { _demoDriver: string; _demoVehicle: string } {
+  const LEVEL_MAP: Record<string, number> = {
+    "Level I": 1, "Level II": 2, "Level III": 3, "Level IV": 4, "Level V": 5, "Level VI": 6,
+  };
+  const oos = d.result === "oos";
+  return {
+    id: d.id,
+    driver_id: null,
+    vehicle_id: null,
+    inspection_date: d.inspection_date,
+    level: LEVEL_MAP[d.level] ?? null,
+    state: d.state,
+    inspector: d.location,
+    report_number: null,
+    oos_driver: oos && d.oos_violations > 0,
+    oos_vehicle: oos && d.oos_violations > 0,
+    violation_count: d.violations,
+    violations: null,
+    report_url: null,
+    _demoDriver: d.driver_name,
+    _demoVehicle: d.vehicle_unit,
+  };
+}
+
 // ============================================================
-// COLOR PALETTE — same theme-aware tokens as Accidents
+// COLOR PALETTE · same theme-aware tokens as Accidents
 // ============================================================
 const LEVEL_COLORS = {
   1: "bg-red-700 text-white border-red-800 dark:bg-rose-500/45 dark:text-rose-50 dark:border-rose-300/80",
@@ -43,7 +73,7 @@ function outcomeFor(r: I): { key: keyof typeof OUTCOME_COLORS; label: string } {
 }
 
 // ============================================================
-// DEFINITIONS CARD — FMCSA inspection levels + outcome classifications
+// DEFINITIONS CARD · FMCSA inspection levels + outcome classifications
 // (Mirrors the X3 Fleet Safety app's definitions content + Accidents card style)
 // ============================================================
 function DefinitionsCard() {
@@ -60,27 +90,27 @@ function DefinitionsCard() {
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">CVSA INSPECTION LEVELS</div>
           <div className="space-y-3.5">
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[1]} size="sm">LEVEL I</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>North American Standard</strong> — most thorough roadside. Driver credentials (CDL, med card, RODS/HOS, Clearinghouse) + 37 vehicle components (brakes, tires, lighting, steering, suspension, coupling, exhaust, fuel, frame, cargo securement). ~30 min.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[2]} size="sm">LEVEL II</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Walk-around vehicle inspection</strong> — same vehicle items as Level I but inspector does not go under the vehicle. Driver credentials still verified.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[3]} size="sm">LEVEL III</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Driver-only</strong> — credentials, RODS/HOS, drug & alcohol status, seat belt, Clearinghouse check. No vehicle inspection.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[4]} size="sm">LEVEL IV</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Special study</strong> — one-time examination of a specific item, typically as part of a research project (e.g. a tire study). Rare.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[5]} size="sm">LEVEL V</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Vehicle-only</strong> — same as Level I vehicle components, but no driver is present (e.g. terminal yard, scale).</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[6]} size="sm">LEVEL VI</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Enhanced for radioactive shipments</strong> — Level I plus additional requirements specific to highway-route-controlled-quantity radioactive material.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[1]} size="sm">LEVEL I</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>North American Standard</strong> · most thorough roadside. Driver credentials (CDL, med card, RODS/HOS, Clearinghouse) + 37 vehicle components (brakes, tires, lighting, steering, suspension, coupling, exhaust, fuel, frame, cargo securement). ~30 min.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[2]} size="sm">LEVEL II</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Walk-around vehicle inspection</strong> · same vehicle items as Level I but inspector does not go under the vehicle. Driver credentials still verified.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[3]} size="sm">LEVEL III</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Driver-only</strong> · credentials, RODS/HOS, drug & alcohol status, seat belt, Clearinghouse check. No vehicle inspection.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[4]} size="sm">LEVEL IV</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Special study</strong> · one-time examination of a specific item, typically as part of a research project (e.g. a tire study). Rare.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[5]} size="sm">LEVEL V</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Vehicle-only</strong> · same as Level I vehicle components, but no driver is present (e.g. terminal yard, scale).</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={LEVEL_COLORS[6]} size="sm">LEVEL VI</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Enhanced for radioactive shipments</strong> · Level I plus additional requirements specific to highway-route-controlled-quantity radioactive material.</div></div>
           </div>
         </div>
         <div>
           <div className="text-[10px] tracking-[.16em] uppercase font-extrabold text-blue-700 dark:text-blue-200 mb-3 border-b-2 border-amber-500 dark:border-amber-400 pb-1">OUTCOME CLASSIFICATIONS</div>
           <div className="space-y-3.5">
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.clean} size="sm">CLEAN</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">No violations cited. Counts as a <strong>clean inspection</strong> for CSA scoring — these actually <em>lower</em> your BASIC scores when reported to SAFER.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.clean} size="sm">CLEAN</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">No violations cited. Counts as a <strong>clean inspection</strong> for CSA scoring · these actually <em>lower</em> your BASIC scores when reported to SAFER.</div></div>
             <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.violations} size="sm">VIOLATIONS</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">One or more violations cited but driver / vehicle remained in service. Each violation has a severity weight in the BASIC scoring math. Review for DataQ challenge eligibility.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_v} size="sm">OOS - VEHICLE</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service vehicle</strong> — the truck or trailer is held at the inspection point until the defect is fixed (49 CFR Appendix G). Tow or roadside repair required.</div></div>
-            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_d} size="sm">OOS - DRIVER</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service driver</strong> — driver may not operate for the remainder of a duty period (49 CFR § 395.13 / § 392.5). Common triggers: HOS overage, no CDL, no med card, suspended license.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_v} size="sm">OOS - VEHICLE</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service vehicle</strong> · the truck or trailer is held at the inspection point until the defect is fixed (49 CFR Appendix G). Tow or roadside repair required.</div></div>
+            <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_d} size="sm">OOS - DRIVER</Pill><div className="text-[12px] text-black dark:text-white pt-0.5"><strong>Out-of-service driver</strong> · driver may not operate for the remainder of a duty period (49 CFR § 395.13 / § 392.5). Common triggers: HOS overage, no CDL, no med card, suspended license.</div></div>
             <div className="grid grid-cols-[140px_1fr] items-start gap-3"><Pill cls={OUTCOME_COLORS.oos_both} size="sm">OOS - BOTH</Pill><div className="text-[12px] text-black dark:text-white pt-0.5">Both vehicle and driver placed out-of-service. Highest-impact outcome; vehicle and driver each require remediation before returning to service.</div></div>
           </div>
         </div>
       </div>
       <div className="text-[11px] text-black dark:text-white mt-4 pt-4 border-t border-blue-200 dark:border-blue-400/60">
-        <strong>Retention:</strong> 49 CFR § 396.9 — keep inspection reports for at least 12 months from date. <strong className="ml-3">DataQs window:</strong> challenge incorrect violations within 30 days via the FMCSA DataQs portal — disputes after this window often time out without review. <strong className="ml-3">SAFER reporting:</strong> roadside inspections appear on your SMS profile within 7–10 business days.
+        <strong>Retention:</strong> 49 CFR § 396.9 · keep inspection reports for at least 12 months from date. <strong className="ml-3">DataQs window:</strong> challenge incorrect violations within 30 days via the FMCSA DataQs portal · disputes after this window often time out without review. <strong className="ml-3">SAFER reporting:</strong> roadside inspections appear on your SMS profile within 7–10 business days.
       </div>
     </div>
   );
@@ -110,17 +140,27 @@ export default function InspectionsPage() {
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
-  const filtered = useMemo(() => rows.filter(r => {
+  // Fall back to demo Apex-Logistics inspection log (7 records, 21d window)
+  // when the real Supabase query returns no rows for this carrier yet.
+  const effectiveRows = useMemo(
+    () => withDemoFallback(rows, DEMO_INSPECTIONS.map(adaptDemoInspection) as I[]),
+    [rows]
+  );
+  const isDemo = rows.length === 0;
+
+  const filtered = useMemo(() => effectiveRows.filter(r => {
     if (filterLevel && String(r.level) !== filterLevel) return false;
     if (filterOutcome && outcomeFor(r).key !== filterOutcome) return false;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       const drv = drivers.find(d => d.id === r.driver_id);
       const drvName = drv ? `${drv.first_name||""} ${drv.last_name||""}`.toLowerCase() : "";
-      if (!`${r.state||""} ${r.inspector||""} ${r.report_number||""} ${drvName}`.toLowerCase().includes(q)) return false;
+      // Demo rows carry _demoDriver as a fallback search target.
+      const demoName = (r as I & { _demoDriver?: string })._demoDriver || "";
+      if (!`${r.state||""} ${r.inspector||""} ${r.report_number||""} ${drvName} ${demoName}`.toLowerCase().includes(q)) return false;
     }
     return true;
-  }), [rows, drivers, filterLevel, filterOutcome, search]);
+  }), [effectiveRows, drivers, filterLevel, filterOutcome, search]);
 
   function vehLabel(id: string | null) {
     if (!id) return null;
@@ -142,8 +182,8 @@ export default function InspectionsPage() {
           </div>
           <select value={filterLevel} onChange={(e)=>setFilterLevel(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All levels</option>
-            <option value="1">Level I — Full</option><option value="2">Level II — Walk-around</option><option value="3">Level III — Driver-only</option>
-            <option value="4">Level IV — Special</option><option value="5">Level V — Vehicle-only</option><option value="6">Level VI — Radioactive</option>
+            <option value="1">Level I · Full</option><option value="2">Level II · Walk-around</option><option value="3">Level III · Driver-only</option>
+            <option value="4">Level IV · Special</option><option value="5">Level V · Vehicle-only</option><option value="6">Level VI · Radioactive</option>
           </select>
           <select value={filterOutcome} onChange={(e)=>setFilterOutcome(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All outcomes</option>
@@ -153,7 +193,7 @@ export default function InspectionsPage() {
           <div className="flex gap-2 flex-wrap">
             <button onClick={() => setShowImport(true)} className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">📥 Import CSV</button>
             <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-black" style={{ background: "linear-gradient(135deg, #FBBF24, #F59E0B)" }}>+ Log Inspection</button>
-            <div className="ml-auto self-center text-[12px] text-[var(--fg-muted)]">{filtered.length} of {rows.length} inspection{rows.length===1?"":"s"}</div>
+            <div className="ml-auto self-center text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveRows.length} inspection{effectiveRows.length===1?"":"s"}{isDemo && <span className="ml-2 text-[var(--accent)]/80 font-bold">· DEMO</span>}</div>
           </div>
         </div>
 
@@ -175,24 +215,30 @@ export default function InspectionsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} className="text-center p-10 text-[var(--fg-muted)] text-sm">Loading…</td></tr>
+                <>{Array.from({length:5}).map((_,i)=><SkeletonRow key={i} cols={9} />)}</>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={9} className="text-center p-10">
                   <div className="text-2xl mb-2">📋</div>
-                  <div className="text-[var(--fg)] font-bold mb-1">{rows.length === 0 ? "No inspections logged" : "No matches"}</div>
-                  <div className="text-[var(--fg-muted)] text-sm">{rows.length === 0 ? "Roadside inspections appear here. Clean ones lower your CSA BASIC scores." : "Try clearing your filters."}</div>
+                  <div className="text-[var(--fg)] font-bold mb-1">{effectiveRows.length === 0 ? "No inspections logged" : "No matches"}</div>
+                  <div className="text-[var(--fg-muted)] text-sm">{effectiveRows.length === 0 ? "Roadside inspections appear here. Clean ones lower your CSA BASIC scores." : "Try clearing your filters."}</div>
                 </td></tr>
               ) : filtered.map(r => {
                 const drv = drivers.find(d => d.id === r.driver_id);
                 const lev = (r.level || 1) as keyof typeof LEVEL_COLORS;
                 const out = outcomeFor(r);
+                // Demo rows carry driver/vehicle as strings (no real FK)
+                const demoExt = r as I & { _demoDriver?: string; _demoVehicle?: string };
                 return (
-                  <tr key={r.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] cursor-pointer" onClick={() => setEdit(r)}>
+                  <tr key={r.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] cursor-pointer" onClick={() => { if (!isDemo) setEdit(r); }}>
                     <td className="px-3 py-3"><div className="text-[var(--fg)] font-semibold">{new Date(r.inspection_date).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" })}</div></td>
                     <td className="px-3 py-3"><div className="text-[var(--fg)] font-mono">{r.state || <span className="text-[var(--fg-faint)]">—</span>}</div></td>
                     <td className="px-3 py-3 hidden md:table-cell">
-                      {drv ? <div className="text-[var(--fg)] font-semibold">{drv.first_name} {drv.last_name}</div> : <span className="text-[var(--fg-faint)]">—</span>}
-                      {vehLabel(r.vehicle_id) && <div className="text-[11px] text-[var(--fg-muted)]">{vehLabel(r.vehicle_id)}</div>}
+                      {drv ? <div className="text-[var(--fg)] font-semibold">{drv.first_name} {drv.last_name}</div>
+                           : demoExt._demoDriver ? <div className="text-[var(--fg)] font-semibold">{demoExt._demoDriver}</div>
+                           : <span className="text-[var(--fg-faint)]">—</span>}
+                      {vehLabel(r.vehicle_id) ? <div className="text-[11px] text-[var(--fg-muted)]">{vehLabel(r.vehicle_id)}</div>
+                       : demoExt._demoVehicle ? <div className="text-[11px] text-[var(--fg-muted)]">{demoExt._demoVehicle}</div>
+                       : null}
                     </td>
                     <td className="px-3 py-3"><Pill cls={LEVEL_COLORS[lev]}>LEVEL {["", "I", "II", "III", "IV", "V", "VI"][lev]}</Pill></td>
                     <td className="px-3 py-3"><Pill cls={OUTCOME_COLORS[out.key]}>{out.label}</Pill></td>
@@ -200,7 +246,7 @@ export default function InspectionsPage() {
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="font-mono text-[12px] text-[var(--fg-muted)]">{r.report_number || "—"}</span></td>
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="text-[12px] text-[var(--fg-muted)]">{r.inspector || "—"}</span></td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
-                      <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>
+                      {!isDemo && <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>}
                     </td>
                   </tr>
                 );
@@ -251,8 +297,8 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
           <Field label="Date *"><input required type="date" className="x3i" value={form.inspection_date||""} onChange={(e)=>setForm({...form,inspection_date:e.target.value})} /></Field>
           <Field label="Level *">
             <select required className="x3i" value={form.level||1} onChange={(e)=>setForm({...form,level:parseInt(e.target.value)})}>
-              <option value={1}>I — Full</option><option value={2}>II — Walk-around</option><option value={3}>III — Driver-only</option>
-              <option value={4}>IV — Special</option><option value={5}>V — Vehicle-only</option><option value={6}>VI — Radioactive</option>
+              <option value={1}>I · Full</option><option value={2}>II · Walk-around</option><option value={3}>III · Driver-only</option>
+              <option value={4}>IV · Special</option><option value={5}>V · Vehicle-only</option><option value={6}>VI · Radioactive</option>
             </select>
           </Field>
           <Field label="State"><input className="x3i" maxLength={2} value={form.state||""} onChange={(e)=>setForm({...form,state:e.target.value.toUpperCase()})} placeholder="TX" /></Field>
@@ -279,7 +325,7 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
         <Field label="Report URL"><input className="x3i" type="url" value={form.report_url||""} onChange={(e)=>setForm({...form,report_url:e.target.value})} placeholder="https://…" /></Field>
         {error && <Err msg={error} />}
         <div className="flex justify-between items-center pt-2">
-          <div>{inspection && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete record</button>}</div>
+          <div>{inspection && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-700 dark:text-red-400 hover:text-red-700 dark:text-red-300">Delete record</button>}</div>
           <ModalActions onClose={onClose} busy={busy} submitLabel={inspection ? "Save changes" : "Log inspection"} />
         </div>
       </form>

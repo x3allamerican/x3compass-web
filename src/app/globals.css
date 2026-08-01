@@ -1,32 +1,42 @@
 @import "tailwindcss";
 
 /* ============================================================
-   X3 COMPASS · DUAL-MODE THEME SYSTEM (v2 — readable light)
+   X3 COMPASS · DUAL-MODE THEME SYSTEM (v2 · readable light)
    Both dark + light themes share the cyan brand accent.
    Theme is toggled by adding `light` class to <html>.
    ============================================================ */
 
 /* ---- DARK (default) ---- */
 :root {
-  --bg:           #0A1929;
-  --bg-2:         #0B1B2E;
-  --bg-3:         #091525;
-  --surface:      #15233D;
-  --surface-2:    #1A2B47;
-  --surface-3:    #0F1C32;
+  /* Restored after Joshua said pure #000 was "too dark" — putting the navy
+     tint back so the eye has something to land on. Body stays near-black,
+     surfaces lift a couple percent for card depth. */
+  --bg:           #070D18;
+  --bg-2:         #0A1424;
+  --bg-3:         #060A14;
+  --surface:      #0A1628;
+  --surface-2:    #15233D;
+  --surface-3:    #0E1A2E;
 
   --fg:           #FFFFFF;
-  --fg-muted:     rgba(255, 255, 255, 0.72);
-  --fg-faint:     rgba(255, 255, 255, 0.50);
-  --fg-on-accent: #0A1929;
+  /* Joshua hates gray text on black · these were 0.72 / 0.50 which read as
+     muddy slate. Bumped to 0.94 / 0.78 — secondary text is now near-white,
+     "faint" text is still a step down but legible at small sizes. */
+  --fg-muted:     rgba(255, 255, 255, 0.94);
+  --fg-faint:     rgba(255, 255, 255, 0.78);
+  --fg-on-accent: #000000;
 
   --border:       #1E3556;
   --border-strong:#2A446B;
   --hairline:     rgba(255, 255, 255, 0.08);
 
-  --accent:       #22D3EE;
-  --accent-2:     #06B6D4;
-  --accent-fg:    #0A1929;
+  /* Brand cyan — matches app.x3compass.com/assets/styles.css line 19-21.
+     Was #16C7FF (Tailwind cyan-400) which is duller; x3-compass-design-system
+     skill explicitly bans #16C7FF in favor of brand cyan. */
+  --accent:       #16C7FF;
+  --accent-2:     #16C7FF;
+  --accent-dim:   rgba(22, 199, 255, 0.18);
+  --accent-fg:    #000000;
 
   --success:      #34D399;
   --warning:      #FBBF24;
@@ -45,17 +55,17 @@
   --surface-2:    #F8FAFC;
   --surface-3:    #FFFFFF;
 
-  --fg:           #0F172A;        /* slate-900 — body text */
-  --fg-muted:     #334155;        /* slate-700 — readable secondary, NOT washed out */
-  --fg-faint:     #64748B;        /* slate-500 — captions only, still legible */
+  --fg:           #000000;        /* slate-900 · body text */
+  --fg-muted:     #334155;        /* slate-700 · readable secondary, NOT washed out */
+  --fg-faint:     #475569;        /* slate-600 · 7.05:1 contrast on #F4F7FA, comfortably passes WCAG AA (was #64748B = 4.43:1, just under the 4.5 floor) */
   --fg-on-accent: #FFFFFF;
 
-  --border:       #CBD5E1;        /* slate-300 — visible card edges */
-  --border-strong:#94A3B8;        /* slate-400 — emphasized */
+  --border:       #CBD5E1;        /* slate-300 · visible card edges */
+  --border-strong:#94A3B8;        /* slate-400 · emphasized */
   --hairline:     rgba(15, 23, 42, 0.08);
 
-  --accent:       #0E7490;        /* cyan-700 — AA contrast on white */
-  --accent-2:     #155E75;        /* cyan-800 */
+  --accent:       #16C7FF;        /* cyan-700 · AA contrast on white */
+  --accent-2:     #16C7FF;        /* cyan-800 */
   --accent-fg:    #FFFFFF;
 
   --success:      #047857;        /* emerald-700 */
@@ -72,6 +82,91 @@
    light mode they read as muddy washes. Drop their opacity in light mode. */
 :root.light [style*="radial-gradient"] {
   opacity: var(--decoration-opacity);
+}
+
+/* ============================================================
+   MANUS APP SHELL · true-black canvas + electric cyan
+   ------------------------------------------------------------
+   These tokens override the marketing-site palette ONLY within
+   the AppShell (any element under [data-x3-shell="app"]).
+   The marketing site palette stays exactly as it was.
+
+   Source of truth: app.x3compass.com computed CSS, captured
+   2026-05-26. DO NOT change these without first confirming
+   the static app still matches.
+
+   TENANT WHITE-LABEL: TenantThemeProvider injects per-tenant
+   overrides inline via the style attribute, taking precedence
+   over these defaults via CSS specificity.
+   ============================================================ */
+[data-x3-shell="app"] {
+  /* ANTI_SLOP.md rule #1: never #000. Tint near-black toward the
+     cyan brand hue so the accent doesn't read as glowing on a
+     dead-black void. Target: oklch(13% 0.012 215) ~ #04070D.
+     Surfaces step up in 4-5% lightness increments for depth via
+     contrast, NOT via outer glow shadows (rule #2). */
+  --bg:            #04070D;
+  --bg-2:          #0B121E;
+  --bg-3:          #060A12;
+  --surface:       #0F1620;
+  --surface-2:     #131C2A;
+  --surface-3:     #0B121C;
+
+  --fg:            #FFFFFF;
+  --fg-muted:      rgba(255, 255, 255, 0.94);   /* was 0.88 · Joshua: even brighter, gray text on black is unreadable */
+  --fg-faint:      rgba(255, 255, 255, 0.78);   /* was 0.68 · Joshua: lift faint too */
+  --fg-on-accent:  #000000;
+
+  --border:        #243349;
+  --border-strong: #38507A;
+  --hairline:      rgba(255, 255, 255, 0.10);
+
+  /* Brand cyan · matches app.x3compass.com/assets/styles.css line 19-21 verbatim.
+     Was #16C7FF (Tailwind cyan-400) — the design system skill explicitly bans it. */
+  --accent:        #16C7FF;
+  --accent-2:      #16C7FF;
+  --accent-dim:    rgba(22, 199, 255, 0.18);
+  --accent-fg:     #000000;
+
+  --success:       #4ADE80;
+  --warning:       #FBBF24;
+  --danger:        #F87171;
+
+  /* ANTI_SLOP rule #2: shadow tinted on the bg hue (not pure black,
+     not the accent). Reads as elevation, never as glow. */
+  --card-shadow:   0 1px 0 rgba(255,255,255,0.04), 0 18px 40px rgba(2, 6, 12, 0.55);
+  --shell-sidebar-width: 264px;
+  --shell-header-height: 134px; /* matches AppShell + AppTopbar locked height */
+  --shell-radius: 14px;
+
+  /* Base font size bump · Joshua: font is too small */
+  font-size: 15px;
+}
+
+/* Light-mode app shell · same shape, light palette. Tenant overrides
+   still take precedence. */
+:root.light [data-x3-shell="app"] {
+  --bg:            #F4F7FA;
+  --bg-2:          #FFFFFF;
+  --bg-3:          #E8EFF5;
+  --surface:       #FFFFFF;
+  --surface-2:     #F8FAFC;
+  --surface-3:     #FFFFFF;
+
+  --fg:            #000000;
+  --fg-muted:      #334155;
+  --fg-faint:      #475569;
+  --fg-on-accent:  #FFFFFF;
+
+  --border:        #CBD5E1;
+  --border-strong: #94A3B8;
+  --hairline:      rgba(15, 23, 42, 0.08);
+
+  --accent:        #16C7FF;
+  --accent-2:      #16C7FF;
+  --accent-fg:     #FFFFFF;
+
+  --card-shadow:   0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 /* ---- Theme-aware utility classes ---- */
@@ -98,21 +193,42 @@ html, body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
+  /* Joshua: medium font bump for readability — 14 → 16px body. */
+  font-size: 16px;
   /* Belt-and-suspenders against any rogue mobile overflow (Sprint #8 probe). */
   overflow-x: hidden;
-  /* Safari mobile zoom-from-input guard — locks viewport horizontally only. */
+  /* Safari mobile zoom-from-input guard · locks viewport horizontally only. */
   max-width: 100vw;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 
-/* Italic emphasis serif — for "every card you collect" style words */
+/* App tables: bump 13 → 15px per Joshua. */
+body:has([data-x3-shell="app"]) table,
+body:has([data-x3-shell="app"]) thead,
+body:has([data-x3-shell="app"]) tbody,
+body:has([data-x3-shell="app"]) th,
+body:has([data-x3-shell="app"]) td {
+  font-size: 15px;
+}
+
+/* When the app shell mounts, paint the document background black to match.
+   Cannot use [data-x3-shell="app"] as a parent selector on body because body
+   is its ancestor. Instead use :has() to find the shell wrapper and apply. */
+body:has([data-x3-shell="app"]) {
+  background: var(--bg);
+}
+:root.light body:has([data-x3-shell="app"]) {
+  background: #F4F7FA;
+}
+
+/* Italic emphasis serif · for "every card you collect" style words */
 .serif-italic {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 500;
 }
 
-/* Card utility — works beautifully in both modes.
+/* Card utility · works beautifully in both modes.
    Dark: subtle 1px border + shadow.
    Light: visible border + soft shadow (gives card affordance without weight). */
 .x3-card {
@@ -140,7 +256,7 @@ html, body {
   border-radius: 4px;
 }
 
-/* Respect prefers-reduced-motion — kill all CSS transitions/animations for users who opted out */
+/* Respect prefers-reduced-motion · kill all CSS transitions/animations for users who opted out */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -150,7 +266,7 @@ html, body {
   }
 }
 
-/* sr-only / focus:not-sr-only — Tailwind has these built in but we add the focus-visible flavor for safety */
+/* sr-only / focus:not-sr-only · Tailwind has these built in but we add the focus-visible flavor for safety */
 .sr-only-focus {
   position: absolute;
   width: 1px; height: 1px;
@@ -159,4 +275,29 @@ html, body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ─── Skeleton pulse (used by src/components/Skeleton.tsx) ─────────────── */
+@keyframes x3-skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1.0; }
+}
+.animate-x3-pulse { animation: x3-skeleton-pulse 1.4s ease-in-out infinite; }
+
+/* ─── Scrolling compliance ticker (homepage "what we cover" marquee) ────
+   Track is duplicated in DOM so translating by -50% creates a seamless loop. */
+@keyframes x3-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.x3-marquee-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+  animation: x3-marquee 50s linear infinite;
+  will-change: transform;
+}
+.x3-marquee-track:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .x3-marquee-track { animation: none; }
 }

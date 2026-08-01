@@ -148,7 +148,7 @@ export default function DriverInvitesPage() {
         {/* Invitees table */}
         <div className="x3-card overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-[var(--fg-muted)]">Loading…</div>
+            <div className="p-4 space-y-2">{Array.from({length:4}).map((_,i)=><div key={i} className="flex gap-2"><div className="h-10 flex-1 bg-slate-200 dark:bg-[var(--surface-2)] rounded animate-x3-pulse"/></div>)}</div>
           ) : pending.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-[16px] font-extrabold text-[var(--fg)] mb-1">No pending invites</div>

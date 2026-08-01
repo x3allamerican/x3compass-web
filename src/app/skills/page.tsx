@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import SiteShell from "@/components/SiteShell";
-import catalog from "@/data/skills.json";
+import SkillConciergeModal from "@/components/SkillConciergeModal";
+// Lazy-loaded via useEffect → ~74KB removed from initial bundle
 
 type Skill = {
   id: string;
@@ -15,7 +16,7 @@ type Skill = {
   preview?: boolean;
 };
 
-const SKILLS = catalog as Skill[];
+// catalog populated by useEffect below
 
 // Category sort weights (higher = first)
 const CAT_ORDER: Record<string, number> = {
@@ -30,11 +31,11 @@ const CAT_ORDER: Record<string, number> = {
 };
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  "DQ Files": "Driver qualification files — § 391.51 the twelve documents",
+  "DQ Files": "Driver qualification files · § 391.51 the twelve documents",
   "Medical": "Medical examiner certificates, sleep apnea, vision standards",
   "MVR": "Motor vehicle records, annual reviews, continuous monitoring",
   "Background": "FCRA-compliant background checks, prior-employer inquiries",
-  "D&A Testing": "Drug & alcohol — pre-employment, random, post-accident, RTD",
+  "D&A Testing": "Drug & alcohol · pre-employment, random, post-accident, RTD",
   "Clearinghouse": "FMCSA Clearinghouse queries and reporting",
   "HOS / ELD": "Hours of service, ELD compliance, RODS, exceptions",
   "Vehicles & PM": "Preventive maintenance, annual DOT inspection, DVIRs",
@@ -66,6 +67,21 @@ function tally(skills: Skill[]) {
 }
 
 export default function SkillsCatalogPage() {
+  const [SKILLS, setSKILLS] = useState<Skill[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  // Active skill drives the in-place ConciergeModal. null = closed.
+  const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    import("@/data/skills.json").then((mod) => {
+      if (cancelled) return;
+      const data = (mod.default || mod) as unknown as Skill[];
+      setSKILLS(data);
+      setCatalogLoading(false);
+    }).catch(() => { if (!cancelled) setCatalogLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const [filter, setFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "coming-soon">("all");
   const [search, setSearch] = useState<string>("");
@@ -122,12 +138,12 @@ export default function SkillsCatalogPage() {
             {/* Stat strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
-                { l: "Published skills", v: totalPublished, c: "#22D3EE" },
+                { l: "Published skills", v: totalPublished, c: "#16C7FF" },
                 { l: "Categories", v: catBuckets.length, c: "#A78BFA" },
                 { l: "Apache 2.0 licensed", v: "Open source", c: "#10B981", small: true },
                 { l: "CFR coverage", v: "Parts 380–399 + Part 172–180", c: "#FBBF24", small: true },
               ].map((s, i) => (
-                <div key={i} className="rounded-2xl p-4 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+                <div key={i} className="rounded-2xl p-4 border border-[#1E3556] bg-black">
                   <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-faint)] mb-1">{s.l}</div>
                   <div className={`${s.small ? "text-[15px]" : "text-[28px]"} font-black leading-none`} style={{ color: s.c }}>
                     {s.v}
@@ -139,7 +155,7 @@ export default function SkillsCatalogPage() {
         </section>
 
         {/* Filter bar */}
-        <section className="bg-[var(--bg-3)] border-b border-[var(--border)] sticky top-16 z-30 backdrop-blur-md">
+        <section className="bg-[var(--bg-3)] border-b border-[var(--border)] sticky top-24 z-30 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center gap-3">
             {/* Search */}
             <div className="relative flex-1 min-w-[200px]">
@@ -153,7 +169,7 @@ export default function SkillsCatalogPage() {
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--fg-faint)]">🔍</span>
             </div>
 
-            {/* Status pill — only shown when there are coming-soon entries */}
+            {/* Status pill · only shown when there are coming-soon entries */}
             {totalComing > 0 && (
               <div className="flex items-center gap-1 rounded-full border border-[var(--border)] p-1 bg-[var(--surface-3)]">
                 {(["all", "published", "coming-soon"] as const).map((opt) => (
@@ -180,7 +196,7 @@ export default function SkillsCatalogPage() {
             <button
               onClick={() => setFilter("ALL")}
               className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
-                filter === "ALL" ? "bg-[var(--accent)]/15 border-[var(--accent)] text-[var(--fg)]" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                filter === "ALL" ? "bg-[#16C7FF]/15 border-[#16C7FF] text-white" : "bg-black border-[#1E3556] text-[var(--fg-muted)] hover:text-white hover:border-[#16C7FF]/60"
               }`}
             >
               All · {SKILLS.length}
@@ -190,7 +206,7 @@ export default function SkillsCatalogPage() {
                 key={cat}
                 onClick={() => setFilter(cat)}
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
-                  filter === cat ? "bg-[var(--accent)]/15 border-[var(--accent)] text-[var(--fg)]" : "border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                  filter === cat ? "bg-[#16C7FF]/15 border-[#16C7FF] text-white" : "bg-black border-[#1E3556] text-[var(--fg-muted)] hover:text-white hover:border-[#16C7FF]/60"
                 }`}
               >
                 {cat} · {n}
@@ -217,8 +233,8 @@ export default function SkillsCatalogPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filtered.map((s) => (
-                <SkillTile key={s.id} skill={s} />
+              {filtered.map((s, i) => (
+                <SkillTile key={s.id} skill={s} i={i} onOpen={setActiveSkill} />
               ))}
             </div>
           )}
@@ -234,55 +250,102 @@ export default function SkillsCatalogPage() {
               All 300 unlock with one signup.
             </h2>
             <p className="text-[15px] text-[var(--fg-muted)] mb-6">
-              DIY $25/driver · DFY $50/driver · 7-day free trial, no card required.
+              From $50/driver · graduated down to $25/driver as you grow · 7-day free trial, no card required.
             </p>
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" }}
             >
               ★ Start free trial →
             </Link>
           </div>
         </section>
       </div>
+      <SkillConciergeModal
+        question={activeSkill?.q ?? null}
+        cfr={activeSkill?.cfr}
+        name={activeSkill?.name}
+        onClose={() => setActiveSkill(null)}
+      />
     </SiteShell>
   );
 }
 
-function SkillTile({ skill }: { skill: Skill }) {
+// 100waystosay-style gradient stripes for skill tiles · matches BrainGrid + SkillsExplorer.
+const SKILL_STRIPES = [
+  "linear-gradient(90deg, #16C7FF 0%, #16C7FF 50%, #16C7FF 100%)",
+  "linear-gradient(90deg, #16C7FF 0%, #16C7FF 50%, #5EE5FF 100%)",
+  "linear-gradient(90deg, #5EE5FF 0%, #16C7FF 50%, #16C7FF 100%)",
+  "linear-gradient(90deg, #16C7FF 0%, #5EE5FF 50%, #16C7FF 100%)",
+  "linear-gradient(90deg, #16C7FF 0%, #5EE5FF 50%, #16C7FF 100%)",
+  "linear-gradient(90deg, #5EE5FF 0%, #16C7FF 50%, #16C7FF 100%)",
+];
+
+function SkillTile({
+  skill,
+  i = 0,
+  onOpen,
+}: {
+  skill: Skill;
+  i?: number;
+  onOpen: (s: Skill) => void;
+}) {
   const isComing = skill.status === "coming-soon";
-  return (
-    <div
-      className={`rounded-xl p-4 border transition-all relative ${
-        isComing ? "border-[var(--border)] bg-[var(--surface-3)]/50" : "border-[var(--border)] hover:border-[var(--accent)]/40"
-      }`}
-      style={!isComing ? { background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" } : undefined}
-    >
+  const stripe = SKILL_STRIPES[i % SKILL_STRIPES.length];
+
+  // Inner tile content (shared between Link wrapper for live skills and div for coming-soon)
+  const content = (
+    <>
+      {/* Top gradient stripe · matches BrainGrid + SkillsExplorer */}
+      <span
+        aria-hidden="true"
+        className="absolute left-0 right-0 top-0 h-[3px]"
+        style={{ background: isComing ? "#1E3556" : stripe }}
+      />
       <div className="flex items-center gap-2 flex-wrap mb-2">
-        <span className="text-[9.5px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/25 px-2 py-0.5 rounded-full font-mono">
+        <span className="text-[9.5px] font-bold tracking-wider text-[#16C7FF] bg-[#16C7FF]/10 border border-[#16C7FF]/25 px-2 py-0.5 rounded-full font-mono">
           {skill.cfr}
         </span>
-        <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--fg-faint)]">
+        <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/55">
           {skill.cat}
         </span>
-        {skill.preview && (
-          <span className="text-[9px] font-extrabold tracking-wider text-[var(--bg)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
-            ★ PREVIEW
-          </span>
-        )}
         {isComing && (
           <span className="text-[9px] font-extrabold tracking-wider text-amber-300 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full">
             COMING Q3
           </span>
         )}
       </div>
-      <div className={`text-[14px] font-bold mb-1 ${isComing ? "text-[var(--fg-muted)]" : "text-[var(--fg)]"}`}>
+      <div className={`text-[14px] font-bold mb-1 ${isComing ? "text-white/60" : "text-white"}`}>
         {skill.name}
       </div>
       {skill.q && (
-        <div className="text-[12px] italic text-[var(--fg-muted)] line-clamp-2">&ldquo;{skill.q}&rdquo;</div>
+        <div className="text-[12px] italic text-white/65 line-clamp-2">&ldquo;{skill.q}&rdquo;</div>
       )}
-    </div>
+      {!isComing && skill.q && (
+        <div className="text-[10px] text-[#16C7FF]/70 mt-3 font-semibold">
+          Ask the AI Concierge ↗
+        </div>
+      )}
+    </>
+  );
+
+  // Coming-soon tiles are not clickable. Live tiles open the in-place
+  // SkillConciergeModal — no page jump, answer streams right there.
+  if (isComing || !skill.q) {
+    return (
+      <div className="rounded-2xl p-5 pt-6 border border-[#1E3556] bg-black/60 opacity-80 relative overflow-hidden">
+        {content}
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(skill)}
+      className="text-left w-full block rounded-2xl p-5 pt-6 border border-[#1E3556] bg-black hover:border-[#16C7FF]/50 hover:shadow-[0_0_28px_rgba(22,199,255,0.25)] hover:-translate-y-0.5 transition-all relative overflow-hidden"
+    >
+      {content}
+    </button>
   );
 }

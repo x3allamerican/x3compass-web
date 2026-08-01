@@ -1,45 +1,32 @@
 "use client";
-import AppShell from "@/components/AppShell";
 
-const FORMS = [
-  { name: "Driver Application (long form)",        cfr: "49 CFR § 391.21",   uses: 142, last: "2026-05-14", category: "Hire" },
-  { name: "Investigation of Previous Employers",   cfr: "49 CFR § 391.23",   uses:  98, last: "2026-05-14", category: "Hire" },
-  { name: "Annual Driver Review",                  cfr: "49 CFR § 391.25",   uses:  72, last: "2026-05-12", category: "Annual" },
-  { name: "MVR Request Authorization",             cfr: "49 CFR § 391.23(a)(1)", uses: 72, last: "2026-05-10", category: "Annual" },
-  { name: "Medical Examiner Cert (template)",      cfr: "49 CFR § 391.43",   uses:  60, last: "2026-05-07", category: "Medical" },
-  { name: "FCRA Disclosure & Consent",             cfr: "FCRA 15 USC 1681", uses:  72, last: "2026-05-01", category: "Background" },
-  { name: "Drug & Alcohol Pre-Employment",         cfr: "49 CFR § 382.301", uses:  72, last: "2026-04-29", category: "D&A" },
-  { name: "Post-Accident D&A Form",                cfr: "49 CFR § 382.303", uses:  12, last: "2026-04-18", category: "D&A" },
-  { name: "Driver Vehicle Inspection Report",      cfr: "49 CFR § 396.11",  uses: 216, last: "2026-05-17", category: "Daily Ops" },
-  { name: "Accident Register Entry",               cfr: "49 CFR § 390.15",  uses:   5, last: "2026-04-22", category: "Incidents" },
-];
+/* ============================================================
+   X3 COMPASS · FORMS
+   ------------------------------------------------------------
+   Forms management — DocuSign templates, custom carrier forms,
+   driver-facing intake forms, and bulk-send. Designed stub for
+   now. Wires into the DocuSign OAuth integration + the existing
+   x3-compass-forms Supabase table when native port ships.
+   ============================================================ */
+
+import StubPage from "@/components/StubPage";
 
 export default function FormsPage() {
   return (
-    <AppShell title="Forms" crumbs="Client Admin · Templates · Auto-fillable">
-      <div className="px-6 py-6 space-y-4 bg-[var(--bg)] min-h-screen">
-        <div className="x3-card p-5">
-          <div className="text-[13px] text-[var(--fg-muted)]">
-            Every form X3 Compass generates for you, every CFR-required signature. Auto-fills from driver / vehicle / incident records. PDF + DocuSign-routable. Versioned — when a regulation changes, we update the template and re-issue.
-          </div>
-        </div>
-        <div className="x3-card overflow-hidden">
-          <table className="w-full text-[13px]">
-            <thead className="bg-[var(--surface-2)] text-[10px] tracking-[.14em] uppercase text-[var(--fg-muted)]">
-              <tr><th className="text-left px-4 py-2 font-bold">Form</th><th className="text-left px-4 py-2 font-bold">CFR Anchor</th><th className="text-left px-4 py-2 font-bold">Category</th><th className="text-right px-4 py-2 font-bold">Uses (YTD)</th><th className="text-left px-4 py-2 font-bold">Last used</th><th className="text-right px-4 py-2 font-bold">Action</th></tr>
-            </thead>
-            <tbody>{FORMS.map((f, i) => (
-              <tr key={i} className="border-t border-[var(--border)]">
-                <td className="px-4 py-2.5 text-[var(--fg)] font-semibold">{f.name}</td>
-                <td className="px-4 py-2.5 text-[var(--accent)] font-mono text-[12px]">{f.cfr}</td>
-                <td className="px-4 py-2.5"><span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-[var(--accent)]/15 text-[var(--accent)]">{f.category}</span></td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-[var(--fg-muted)]">{f.uses}</td>
-                <td className="px-4 py-2.5 text-[var(--fg-muted)]">{f.last}</td>
-                <td className="px-4 py-2.5 text-right"><button className="text-[12px] text-[var(--accent)] font-bold hover:underline">Generate →</button></td>
-              </tr>))}</tbody>
-          </table>
-        </div>
-      </div>
-    </AppShell>
+    <StubPage
+      title="Forms"
+      crumbs="X3 COMPASS · DOCUSIGN + INTERNAL FORMS"
+      cfr="Carrier-issued forms · DocuSign-routed signatures"
+      icon="📋"
+      desc="The forms layer between you and your drivers. Build DocuSign-routed driver applications (§ 391.21), road test certificates (§ 391.31), drug & alcohol policy acknowledgements (§ 382), and any carrier-internal form. Send to a driver, track signature status, auto-attach the signed PDF to the right slot in their DQ File."
+      features={[
+        { name: "DocuSign templates",     detail: "8 pre-built templates: driver application, road test, prior-employer inquiry, drug consent, MVR consent, hazmat security training acknowledgement, employee handbook acknowledgement, vehicle assignment." },
+        { name: "Custom form builder",    detail: "Drag-and-drop form designer for company-specific forms. Drop signature blocks, dates, and field bindings (driver name, hire date, CDL number) that auto-populate from compass_drivers." },
+        { name: "Bulk send",              detail: "Pick a template + a driver list, send all envelopes in one click. Tracks signature status per envelope, sends auto-reminders at day 3 / 7 / 14." },
+        { name: "Auto-attach to DQF",     detail: "Signed envelopes route to the right slot in the driver's DQ File via DocuSign Connect webhook — no manual upload step." },
+        { name: "Audit trail",            detail: "Every envelope shows who signed, when, from what IP, with the DocuSign certificate of completion. Click any envelope to open the signed PDF + audit log." },
+        { name: "Bulk export",            detail: "Export every signed envelope for a driver as a single ZIP — useful for prior-employer requests and FMCSA Compliance Reviews." },
+      ]}
+    />
   );
 }
