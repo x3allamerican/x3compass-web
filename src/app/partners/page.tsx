@@ -5,10 +5,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Partners · 30% rev-share white-label reseller program",
-  description: "DOT compliance consultants: white-label X3 Compass under your brand. Keep 60-70% of carrier subscriptions. Done-for-you consultant website + Legal-OS-drafted client contracts.",
+  description: "DOT compliance consultants: white-label X3 Compass under your brand. Keep 70% of every carrier subscription. Done-for-you consultant website + Legal-OS-drafted client contracts.",
   openGraph: {
     title: "X3 Compass Partners · 30% white-label reseller",
-    description: "Your brand, your domain, your colors. We power the compliance brain. Keep 60-70% of every carrier you sign.",
+    description: "Your brand, your domain, your colors. We power the compliance brain. Keep 70% of every carrier you sign.",
     type: "website",
   },
 };
@@ -122,7 +122,7 @@ export default function PartnersPage() {
                 </Link>
               </div>
               <div className="text-[12px] tracking-[.18em] uppercase font-bold text-[var(--fg-faint)]">
-                30% OF RETAIL · $10/DRIVER FLOOR · NO BASE FEE · NO CAPS · 90-DAY MONTH-TO-MONTH START
+                YOU KEEP 70% · $10/DRIVER FLOOR · NO BASE FEE · NO CAPS · 90-DAY MONTH-TO-MONTH START
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function PartnersPage() {
         <section className="border-y border-[var(--border)] bg-[var(--bg-3)]">
           <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: "30%", desc: "Of whatever you charge your carriers · you keep 60-70% on every driver" },
+              { n: "70%", desc: "Of X3 list pricing on every driver · X3 keeps 30%, no base fee" },
               { n: "$10", desc: "Per-driver floor · protects X3 economics on low-retail-tier carriers" },
               { n: "60 days", desc: "From sign-up to your first paying carrier (median across beta Partners)" },
             ].map((s, i) => (
@@ -186,7 +186,7 @@ export default function PartnersPage() {
               <span className="serif-italic" style={{ color: "var(--accent)" }}>One subscription.</span>
             </h2>
             <p className="text-[17px] text-[var(--fg-muted)] max-w-3xl mb-12">
-              Each component, valued at retail what an independent consultant would pay to acquire it separately · combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for a single 30% revenue share (no base fee, no minimum, no caps).
+              Each component, valued at retail what an independent consultant would pay to acquire it separately · combined retail value ~$15K initial + $1-2K/mo recurring. Compass Partner delivers all 12 for a single 30% revenue share to X3 — you keep 70% (no base fee, no minimum, no caps).
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {COMPONENTS.map((c) => (
