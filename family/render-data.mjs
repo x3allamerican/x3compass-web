@@ -91,21 +91,23 @@ const FAQ = [
   ["Can I export everything and leave?", "Any time. Every CSV, every PDF, every audit bundle. We charge for the product, not for holding your files hostage."],
 ];
 
-/* Footer columns mirror x3fleetsafety.com exactly. */
+/* Footer: X3 Fleet Safety first, then every product alphabetized, split 11/11.
+    Matches x3fleetsafety.com and all sibling products exactly. */
 const FAMILY = [
+  ["X3 Fleet Safety", "https://x3fleetsafety.com"],
+  ["X3 API", "https://x3api.com"], ["X3 Background", "https://x3background.com"],
+  ["X3 CarrierCheck", "https://x3carriercheck.com"], ["X3 Clean Truck", "https://x3cleantruck.com"],
   ["X3 Compass", "https://x3compass.com"], ["X3 CSA", "https://x3csa.com"],
   ["X3 DataQ", "https://x3dataq.com"], ["X3 DOT Audit", "https://x3dotaudit.com"],
-  ["X3 CarrierCheck", "https://x3carriercheck.com"], ["X3 New Entrant", "https://x3newentrant.com"],
-  ["X3 Insurability", "https://x3insurability.com"], ["X3 MVR", "https://x3mvr.com"],
-  ["X3 Background", "https://x3background.com"], ["X3 Clean Truck", "https://x3cleantruck.com"],
-  ["X3 Permits", "https://x3permits.com"],
+  ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com"], ["X3 Environmental", "https://x3enviro.com"],
 ];
 const MORE = [
-  ["X3 HazMat", "https://x3hazmat.com"], ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com"],
-  ["X3 Preventability", "https://x3preventability.com"], ["X3 HOS", "https://x3hos.com"],
-  ["X3 Legal", "https://x3legal.com"], ["X3 SOP", "https://x3sop.com"],
-  ["X3 Verify", "https://x3verify.com"], ["X3 Workforce", "https://x3workforce.com"],
-  ["X3 API", "https://x3api.com"], ["X3 Environmental", "https://x3enviro.com"],
+  ["X3 HazMat", "https://x3hazmat.com"], ["X3 HOS", "https://x3hos.com"],
+  ["X3 Insurability", "https://x3insurability.com"], ["X3 Legal", "https://x3legal.com"],
+  ["X3 MVR", "https://x3mvr.com"], ["X3 New Entrant", "https://x3newentrant.com"],
+  ["X3 Permits", "https://x3permits.com"], ["X3 Preventability", "https://x3preventability.com"],
+  ["X3 SOP", "https://x3sop.com"], ["X3 Verify", "https://x3verify.com"],
+  ["X3 Workforce", "https://x3workforce.com"],
 ];
 
 export function render() {
