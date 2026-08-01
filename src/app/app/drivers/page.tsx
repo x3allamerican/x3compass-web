@@ -1,11 +1,13 @@
 "use client";
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import AppShell from "@/components/AppShell";
+import EducationHubCard from "@/components/EducationHubCard";
 import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
 import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
+import { DEMO_DRIVERS, withDemoFallback } from "@/lib/demoFallback";
 
 type Driver = {
   id: string; carrier_id: string;
@@ -30,33 +32,77 @@ const STATUSES = ["active", "pending_hire", "on_leave", "inactive", "terminated"
 
 export default function DriversPage() {
   const { carrier } = useUser();
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Initialize with DEMO_DRIVERS so the table is never empty on first paint.
+  // refresh() overwrites this once Supabase returns the carrier's real rows.
+  const [drivers, setDrivers] = useState<Driver[]>(DEMO_DRIVERS as Driver[]);
+  // IMPORTANT: start `loading=false` so TenantTable renders the demo rows
+  // immediately. If we start true and no carrier is wired yet, the table
+  // sits on a "Loading…" spinner forever and the user sees an empty page.
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [classFilter, setClassFilter] = useState<string>("");
+  const [hireFilter, setHireFilter] = useState<string>("");
   const [showAdd, setShowAdd] = useState(false);
   const [editDriver, setEditDriver] = useState<Driver | null>(null);
   const [showImport, setShowImport] = useState(false);
   const [showVendor, setShowVendor] = useState(false);
+  function resetFilters() {
+    setSearch(""); setStatusFilter(""); setClassFilter(""); setHireFilter("");
+  }
 
   async function refresh() {
     if (!carrier) return;
-    setLoading(true);
-    const { data, error } = await getSupabase().from("compass_drivers")
-      .select("*").eq("carrier_id", carrier.id).order("last_name", { ascending: true });
-    if (!error) setDrivers((data as Driver[]) || []);
-    setLoading(false);
+    // IMPORTANT: do NOT call setLoading(true) here. The demo rows are already
+    // rendered and a flash to "Loading…" wipes them off-screen — which is the
+    // exact bug Joshua keeps hitting. Refresh quietly in the background and
+    // only swap rows in when we actually have real data.
+    try {
+      const { data, error } = await getSupabase().from("compass_drivers")
+        .select("*").eq("carrier_id", carrier.id).order("last_name", { ascending: true });
+      if (error) return; // keep existing rows; never fall back to a spinner
+      const real = (data as Driver[]) || [];
+      // Only overwrite the table if Supabase actually returned real rows.
+      // Empty result → keep the DEMO_DRIVERS already on screen.
+      if (real.length > 0) setDrivers(real);
+    } catch {
+      // network blip — keep whatever's on screen
+    } finally {
+      setLoading(false);
+    }
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
+  // When no real driver rows exist yet (new carrier / empty Supabase table),
+  // fall back to demo data so the page never looks broken on first load.
+  // Once even one real row exists, demo data is dropped automatically.
+  const effectiveDrivers = useMemo(
+    () => withDemoFallback(drivers, DEMO_DRIVERS as Driver[]),
+    [drivers]
+  );
+  const isDemo = drivers.length === 0;
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return drivers.filter(d => {
+    const now = Date.now();
+    const hireCutoff: Record<string, number> = {
+      "30":  now - 30  * 86400000,
+      "90":  now - 90  * 86400000,
+      "365": now - 365 * 86400000,
+    };
+    return effectiveDrivers.filter(d => {
       if (statusFilter && d.status !== statusFilter) return false;
+      if (classFilter && d.cdl_class !== classFilter) return false;
+      if (hireFilter && d.hire_date) {
+        const cutoff = hireCutoff[hireFilter];
+        if (cutoff && new Date(d.hire_date).getTime() < cutoff) return false;
+      } else if (hireFilter && !d.hire_date) {
+        return false;
+      }
       if (!q) return true;
-      return `${d.first_name} ${d.last_name} ${d.cdl_number} ${d.email}`.toLowerCase().includes(q);
+      return `${d.first_name} ${d.last_name} ${d.cdl_number || ""} ${d.email || ""} ${d.phone || ""}`.toLowerCase().includes(q);
     });
-  }, [drivers, search, statusFilter]);
+  }, [effectiveDrivers, search, statusFilter, classFilter, hireFilter]);
 
 
   // KPI counters for the top stat-card row
@@ -64,76 +110,209 @@ export default function DriversPage() {
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const kpis = useMemo(() => {
     let active = 0, pending = 0, cdlExp30 = 0, medExp30 = 0;
-    for (const d of drivers) {
+    for (const d of effectiveDrivers) {
       if (d.status === "active") active++;
       if (d.status === "pending_hire") pending++;
       if (d.cdl_expires_on && d.cdl_expires_on <= in30) cdlExp30++;
       if (d.medical_card_expires_on && d.medical_card_expires_on <= in30) medExp30++;
     }
     return { active, pending, cdlExp30, medExp30 };
-  }, [drivers, in30]);
+  }, [effectiveDrivers, in30]);
   const in60 = new Date(Date.now() + 60*86400000).toISOString().slice(0, 10);
   const isExpiring = (d?: string | null) => !!(d && d >= today && d <= in60);
   const isExpired = (d?: string | null) => !!(d && d < today);
 
   return (
-    <AppShell crumbs="DRIVERS" title="Drivers"
+    <AppShell title="Drivers"
       actions={<>
         <button onClick={() => setShowVendor(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">🔌 Vendor sync</button>
         <button onClick={() => setShowImport(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">📥 Import CSV</button>
         <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add driver</button>
       </>}>
       <div className="p-6">
-        {/* KPI stat cards — top row, classic-app style */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active drivers"           value={kpis.active}    sub={`${drivers.length} on roster`} />
-          <KpiCard label="Pending hires"            value={kpis.pending}   sub="In onboarding pipeline" tone={kpis.pending > 0 ? "info" : "muted"} />
-          <KpiCard label="CDL expiring ≤30d"        value={kpis.cdlExp30}  sub="Renew before driver-down" tone={kpis.cdlExp30 > 0 ? "warn" : "ok"} />
-          <KpiCard label="Med card expiring ≤30d"   value={kpis.medExp30}  sub="49 CFR § 391.45" tone={kpis.medExp30 > 0 ? "warn" : "ok"} />
+        {/* ============================================================
+            EDUCATION HUB + AI CONCIERGE — two pills on the right.
+            Click Education Hub → audience cards modal.
+            Click Ask AI Concierge → chat modal.
+            ============================================================ */}
+        <div className="mb-5 flex justify-end">
+          <EducationHubCard
+            surface="Drivers"
+            subtitle="49 CFR Part 391 · the rules for hiring + keeping drivers"
+            conciergeHref="/app/ask?context=drivers"
+            audiences={[
+              {
+                label: "For Drivers",
+                subtitle: "CDL HOLDERS YOU EMPLOY",
+                body: "Every driver in your fleet must have a current CDL, a valid DOT medical card, and a road test on file. Recurrent MVR pulls, drug & alcohol tests, and supervisor training notes all live in the driver's DQ file.",
+                bullets: [
+                  "Initial CDL + state license + endorsements (§ 391.11)",
+                  "DOT medical examiner's certificate, current (§ 391.41)",
+                  "Road test certificate or equivalency (§ 391.31)",
+                  "Annual MVR review + annual list of moving violations (§ 391.25)",
+                ],
+                cta: "Open driver guide (PDF) →",
+                href: "/pdfs/education/drivers-driver-guide.pdf",
+                tone: "cyan",
+                icon: "🚛",
+                pdfs: [
+                  { label: "Driver onboarding packet index",  href: "/pdfs/education/drivers-onboarding-packet.pdf" },
+                  { label: "Medical card driver guide (§ 391.41)", href: "/pdfs/education/drivers-medical-card-guide.pdf" },
+                  { label: "Annual violation self-cert (§ 391.27)", href: "/pdfs/education/drivers-annual-violation-cert.pdf" },
+                  { label: "Road test certificate (§ 391.31)", href: "/pdfs/education/drivers-road-test-cert.pdf" },
+                  { label: "MVR explainer for drivers",       href: "/pdfs/education/drivers-mvr-explainer.pdf" },
+                ],
+              },
+              {
+                label: "For Employers",
+                subtitle: "MOTOR CARRIERS · HIRING + RETAINING",
+                body: "Hiring is a 3-year window: PSP report, 3-year employment history check, 3-year drug & alcohol history check, road test, DOT physical, MVR, and the application that started it all — all retained for the duration of employment + 3 years.",
+                bullets: [
+                  "Application for employment (§ 391.21) — full 3-year work history",
+                  "Pre-employment drug test before performing safety-sensitive functions (§ 382.301)",
+                  "PSP + 3-year previous-employer query within 30 days of hire (§ 391.23)",
+                  "Annual MVR pull + annual driver review (§ 391.25)",
+                ],
+                cta: "Open employer playbook (PDF) →",
+                href: "/pdfs/education/drivers-employer-playbook.pdf",
+                tone: "amber",
+                pdfs: [
+                  { label: "Driver application form (§ 391.21)",          href: "/pdfs/education/drivers-application-form.pdf" },
+                  { label: "Previous-employer inquiry (§ 391.23)",        href: "/pdfs/education/drivers-previous-employer-inquiry.pdf" },
+                  { label: "Annual driver review form (§ 391.25)",        href: "/pdfs/education/drivers-annual-driver-review.pdf" },
+                  { label: "Medical card tracker (§ 391.41)",             href: "/pdfs/education/drivers-medical-card-tracker.pdf" },
+                  { label: "MVR employer playbook (§ 391.25)",            href: "/pdfs/education/drivers-mvr-employer-playbook.pdf" },
+                ],
+              },
+              {
+                label: "For Compliance Officers",
+                subtitle: "SAFETY DIRECTORS · DESIGNATED EMPLOYER REPS",
+                body: "Driver qualification is one of the seven BASICs scored on CSA. A missing medical card, expired CDL, or undocumented annual review is a § 391 finding — the most common write-up in a Compliance Review.",
+                bullets: [
+                  "Sample 10 DQ files per quarter — confirm all 12 § 391.51 documents are present",
+                  "Track CDL + medical card expirations 60 days out — block dispatch when expired",
+                  "Document annual review of driving record (§ 391.25) with signature + date",
+                  "Retain DQ files for duration of employment + 3 years (§ 391.51(d))",
+                ],
+                cta: "Open C/TPA audit checklist (PDF) →",
+                href: "/pdfs/education/drivers-ctpa-audit-checklist.pdf",
+                tone: "violet",
+                pdfs: [
+                  { label: "DQ-file auditor export guide",          href: "/pdfs/education/drivers-dqf-auditor-export.pdf" },
+                  { label: "Medical card auditor export guide",     href: "/pdfs/education/drivers-medical-card-auditor.pdf" },
+                  { label: "MVR auditor export guide",              href: "/pdfs/education/drivers-mvr-auditor.pdf" },
+                  { label: "New-entrant audit prep (§ 385)",        href: "/pdfs/education/drivers-new-entrant-audit-prep.pdf" },
+                  { label: "Safety Fitness Determination explainer", href: "/pdfs/education/drivers-safety-fitness-explainer.pdf" },
+                ],
+              },
+            ]}
+          />
         </div>
 
-        {/* Filter bar */}
+        {/* ============================================================
+            KPI STRIP — matches static reference at app.x3compass.com/drivers.html
+            ============================================================ */}
+        {/* Demo data banner removed per Joshua's request. */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <KpiCard label="Active drivers"        value={kpis.active}    sub={`↑ +${kpis.pending} vs last 30 days`} tone="ok" />
+          <KpiCard label="New this month"        value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
+          <KpiCard label="DQ expiring ≤ 30d"     value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
+          <KpiCard label="Inactive / Terminated" value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
+        </div>
+
+        {/* ============================================================
+            FILTER BAR — reference has search + 3 dropdowns + Reset
+            (search, status, CDL class, hire date window).
+            ============================================================ */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input
             value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, CDL #, email…"
-            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
+            placeholder="Search by name, CDL number, or phone…"
+            className="flex-1 min-w-[220px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]"
           />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
             <option value="">All statuses</option>
             {STATUSES.map(s => <option key={s} value={s}>{s.replace("_"," ")}</option>)}
           </select>
-          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {drivers.length}</div>
+          <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
+            <option value="">All CDL classes</option>
+            <option value="A">Class A</option>
+            <option value="B">Class B</option>
+            <option value="C">Class C</option>
+          </select>
+          <select value={hireFilter} onChange={(e) => setHireFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm">
+            <option value="">All hire dates</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="365">Last year</option>
+          </select>
+          <button onClick={resetFilters}
+            className="px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] border border-[var(--border)] hover:bg-[var(--surface-3)] hover:text-[var(--fg)]">
+            Reset
+          </button>
         </div>
 
-        <TenantTable<Driver>
-          rows={filtered} loading={loading}
-          emptyTitle={drivers.length ? "No matches" : "No drivers yet"}
-          emptyDesc={drivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
-          emptyAction={drivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
-          onRowClick={(d) => setEditDriver(d)}
-          columns={[
-            { key: "name", label: "Driver", render: (d) =>
-              <div>
-                <div className="text-[var(--fg)] font-semibold">{d.last_name}, {d.first_name}</div>
-                <div className="text-[11px] text-[var(--fg-muted)]">{d.email || d.phone || "—"}</div>
-              </div> },
-            { key: "cdl", label: "CDL", hideOnMobile: true, render: (d) =>
-              d.cdl_number ? <div><div className="text-[var(--fg)]">{d.cdl_state} · {d.cdl_class}</div><div className="text-[11px] text-[var(--fg-muted)]">{d.cdl_number}</div></div> : <span className="text-[var(--fg-faint)]">—</span> },
-            { key: "cdl_expires_on", label: "CDL expires", hideOnMobile: true, render: (d) =>
-              !d.cdl_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
-              isExpired(d.cdl_expires_on) ? <Badge color="red">{fmtDate(d.cdl_expires_on)}</Badge> :
-              isExpiring(d.cdl_expires_on) ? <Badge color="amber">{fmtDate(d.cdl_expires_on)}</Badge> :
-              <span className="text-[var(--fg-muted)]">{fmtDate(d.cdl_expires_on)}</span> },
-            { key: "medical_card_expires_on", label: "Medical", hideOnMobile: true, render: (d) =>
-              !d.medical_card_expires_on ? <span className="text-[var(--fg-faint)]">—</span> :
-              isExpired(d.medical_card_expires_on) ? <Badge color="red">{fmtDate(d.medical_card_expires_on)}</Badge> :
-              isExpiring(d.medical_card_expires_on) ? <Badge color="amber">{fmtDate(d.medical_card_expires_on)}</Badge> :
-              <span className="text-[var(--fg-muted)]">{fmtDate(d.medical_card_expires_on)}</span> },
-            { key: "status", label: "Status", render: (d) => <Badge color={STATUS_COLORS[d.status] || "gray"}>{d.status.replace("_"," ")}</Badge> },
-          ]}
-        />
+        {/* ============================================================
+            DRIVER LAYOUT — 2 columns: table left, side panel right
+            (reference: .driver-layout grid). Single column on mobile.
+            ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5">
+
+          {/* TABLE CARD */}
+          <div>
+            <TenantTable<Driver>
+              rows={filtered} loading={loading}
+              emptyTitle={effectiveDrivers.length ? "No matches" : "No drivers yet"}
+              emptyDesc={effectiveDrivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
+              emptyAction={effectiveDrivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
+              onRowClick={(d) => { if (!isDemo) setEditDriver(d); }}
+              columns={[
+                /* Joshua's column set: Driver / Class / Hire date / Status / CDL state / Domicile state.
+                   License expiry + DQ file completeness moved to /app/dq-files where they belong. */
+                { key: "name", label: "Driver", render: (d) =>
+                  <div>
+                    <div className="text-[var(--fg)] font-semibold">{d.last_name}, {d.first_name}</div>
+                    <div className="text-[11px] text-[var(--fg-muted)]">{d.email || d.phone || "—"}</div>
+                  </div> },
+                { key: "cdl_class", label: "Class", hideOnMobile: true, render: (d) =>
+                  d.cdl_class ? <span className="text-[var(--fg)] font-semibold">Class {d.cdl_class}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+                { key: "hire_date", label: "Hire date", hideOnMobile: true, render: (d) =>
+                  d.hire_date ? <span className="text-[var(--fg-muted)] tabular-nums">{fmtDate(d.hire_date)}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+                { key: "status", label: "Status", render: (d) => <Badge color={STATUS_COLORS[d.status] || "gray"}>{d.status.replace("_"," ")}</Badge> },
+                { key: "cdl_state", label: "CDL state", hideOnMobile: true, render: (d) =>
+                  d.cdl_state ? <span className="text-[var(--fg)] font-semibold tabular-nums">{d.cdl_state.toUpperCase()}</span> : <span className="text-[var(--fg-faint)]">—</span> },
+                { key: "domicile_state", label: "Domicile state", hideOnMobile: true, render: (d) => {
+                    // domicile_state column not yet in compass_drivers schema · falls back to "—".
+                    // TODO: add domicile_state column via Supabase migration, then update the Driver type + edit form.
+                    const dom = (d as unknown as { domicile_state?: string | null }).domicile_state;
+                    return dom ? <span className="text-[var(--fg)] tabular-nums">{dom.toUpperCase()}</span> : <span className="text-[var(--fg-faint)]" title="Add domicile state in driver profile">—</span>;
+                  } },
+              ]}
+            />
+            {/* Footer — matches reference "Showing X of Y drivers" + pager. */}
+            <div className="flex items-center justify-between mt-3 text-[12px] text-[var(--fg-muted)]">
+              <span>Showing {filtered.length} of {effectiveDrivers.length} drivers</span>
+            </div>
+          </div>
+
+          {/* SIDE PANEL — Joshua removed the "Needs Attention" card per his polish pass.
+              The action-item view duplicates info already surfaced by KPIs at the top
+              and by the MVR/D&A trackers in their own tabs. Status Breakdown stays. */}
+          <aside className="flex flex-col gap-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
+              <div className="text-[13px] font-extrabold text-[var(--fg)] mb-3">Status Breakdown</div>
+              <div className="flex flex-col gap-2.5">
+                <StatusRow color="var(--success)"  label="Active"             value={kpis.active} />
+                <StatusRow color="var(--warning)"  label="Pending onboarding" value={kpis.pending} />
+                <StatusRow color="var(--fg-faint)" label="Inactive"           value={Math.max(0, effectiveDrivers.filter(d => d.status === "inactive").length)} />
+                <StatusRow color="var(--danger)"   label="Suspended"          value={effectiveDrivers.filter(d => d.status === "on_leave" || d.status === "terminated").length} />
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
 
       {(showAdd || editDriver) && <DriverFormModal carrier_id={carrier!.id} driver={editDriver} onClose={() => { setShowAdd(false); setEditDriver(null); }} onSaved={() => { refresh(); setShowAdd(false); setEditDriver(null); }} />}
@@ -226,9 +405,9 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
             </Row>
           </Section>
 
-          {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+          {error && <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
           <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[var(--surface-3)] py-2">
-            <div>{driver && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete driver</button>}</div>
+            <div>{driver && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-700 dark:text-red-400 hover:text-red-700 dark:text-red-300">Delete driver</button>}</div>
             <div className="flex gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>
               <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>{busy ? "Saving…" : driver ? "Save changes" : "Add driver"}</button>
@@ -262,6 +441,43 @@ function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: num
       <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{label}</div>
       <div className="text-[28px] font-black leading-none text-[var(--fg)]" style={{ color: tone === "warn" && typeof value === "number" && value > 0 ? accent : undefined }}>{value}</div>
       {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   Side-panel helpers · match the .side-card pattern from the
+   static reference at app.x3compass.com/drivers.html
+   ============================================================ */
+
+function AttnItem({ icon, tone, title, sub }: { icon: string; tone: "urgent" | "warning" | "info"; title: string; sub: string }) {
+  const ringTint = tone === "urgent" ? "rgba(248,113,113,0.20)" : tone === "warning" ? "rgba(251,191,36,0.20)" : "rgba(22, 199, 255,0.18)";
+  const bgTint   = tone === "urgent" ? "rgba(248,113,113,0.10)" : tone === "warning" ? "rgba(251,191,36,0.10)" : "rgba(22, 199, 255,0.08)";
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        aria-hidden="true"
+        className="grid place-items-center text-[16px] flex-shrink-0"
+        style={{ width: 36, height: 36, borderRadius: 8, background: bgTint, border: `1px solid ${ringTint}` }}
+      >
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div className="text-[13px] font-semibold text-[var(--fg)] leading-snug">{title}</div>
+        <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function StatusRow({ color, label, value }: { color: string; label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between text-[13px]">
+      <span className="inline-flex items-center gap-2 text-[var(--fg-muted)]">
+        <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+        {label}
+      </span>
+      <strong className="text-[var(--fg)] tabular-nums">{value}</strong>
     </div>
   );
 }

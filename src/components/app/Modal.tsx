@@ -13,7 +13,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
       </div>
       <style jsx global>{`
         .x3i { width: 100%; padding: 8px 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
-        .x3i:focus { outline: none; border-color: #22D3EE; }
+        .x3i:focus { outline: none; border-color: #16C7FF; }
       `}</style>
     </div>
   );
@@ -24,7 +24,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export function Err({ msg }: { msg: string }) {
-  return <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
+  return <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
 }
 
 export function ModalActions({ onClose, busy, submitLabel = "Save" }: { onClose: () => void; busy: boolean; submitLabel?: string }) {

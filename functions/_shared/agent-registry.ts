@@ -1025,6 +1025,470 @@ async function agentFinanceWorkflow(env: FtEnv): Promise<AgentResult> {
 }
 
 
+// ============================================================================
+// Sprint #21: 4 new Finance Team agents
+// 31. agent-partner-settlement — monthly 30% rev-share payouts to partners
+// 32. agent-ap-manager         — vendor invoice ingest + paid/unpaid reconciliation
+// 33. agent-tax-manager        — quarterly est tax + 1099-NEC deadline tracking
+// 34. agent-pricing-margin     — per-carrier unit-economics watchdog
+// ============================================================================
+
+async function agentPartnerSettlement(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  log.info("partner-settlement: starting");
+  const supa = supaFetch(env);
+
+  // Only run if today is the 5th of the month (or any day if explicitly invoked)
+  const now = new Date();
+  const period = `${now.getUTCFullYear()}-${String(now.getUTCMonth()).padStart(2, "0")}`; // PRIOR month
+  log.info(`Computing partner payouts for ${period}`);
+
+  // Pull approved partners and their attributed carriers from the prior month's revenue
+  let partners: Array<{ id: string; legal_name: string; payout_email?: string; rev_share_pct: number }> = [];
+  try {
+    partners = (await supa.select("compass_partner_applications", "select=id,legal_name,payout_email,rev_share_pct&status=eq.approved&limit=200")) as typeof partners;
+  } catch {
+    return { status: "skipped", summary: "compass_partner_applications not present yet — no partners to settle", log: log.text() };
+  }
+  if (partners.length === 0) {
+    return { status: "skipped", summary: "no approved partners", log: log.text() };
+  }
+
+  // For each partner, sum money_in entries from compass_finance_entries where carriers were attributed
+  let queued = 0; let totalCents = 0;
+  for (const p of partners) {
+    try {
+      const entries = (await supa.select("compass_finance_entries", `select=amount_cents,carrier_id&type=eq.money_in&entry_date=gte.${period}-01&entry_date=lt.${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2, "0")}-01`)) as Array<{ amount_cents: number; carrier_id: string | null }>;
+      const carrierAttribution = (await supa.select("compass_partner_attributions", `select=carrier_id&partner_id=eq.${p.id}`).catch(() => [])) as Array<{ carrier_id: string }>;
+      const ourCarriers = new Set(carrierAttribution.map(a => a.carrier_id));
+      const partnerRevenue = entries.filter(e => e.carrier_id && ourCarriers.has(e.carrier_id)).reduce((s, e) => s + (e.amount_cents || 0), 0);
+      if (partnerRevenue <= 0) { log.info(`${p.legal_name}: no attributable revenue this period`); continue; }
+      const payoutCents = Math.round(partnerRevenue * (p.rev_share_pct || 30) / 100);
+      // Queue a payout row — actual Stripe transfer happens via a separate hook with manual approval
+      await supa.insert("compass_partner_payouts", {
+        partner_id: p.id, period, gross_revenue_cents: partnerRevenue, rev_share_pct: p.rev_share_pct, payout_cents: payoutCents, status: "queued", queued_at: new Date().toISOString(),
+      }, "minimal").catch(() => { log.warn(`Failed to queue payout for ${p.legal_name} (table may not exist)`); });
+      queued++; totalCents += payoutCents;
+      log.info(`${p.legal_name}: $${(partnerRevenue/100).toFixed(2)} revenue × ${p.rev_share_pct}% = $${(payoutCents/100).toFixed(2)} queued`);
+    } catch (e) {
+      log.error(`${p.legal_name}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  return { status: queued > 0 ? "ok" : "skipped", summary: `Queued ${queued} partner payout(s) totaling $${(totalCents/100).toFixed(2)} for ${period}`, log: log.text() };
+}
+
+async function agentApManager(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  log.info("ap-manager: starting");
+  const supa = supaFetch(env);
+
+  // Pull invoices from compass_vendor_invoices (created by webhook ingest or manual entry)
+  let invoices: Array<{ id: string; vendor: string; amount_cents: number; due_at: string | null; paid: boolean; carrier_id: string | null }> = [];
+  try {
+    invoices = (await supa.select("compass_vendor_invoices", "select=id,vendor,amount_cents,due_at,paid,carrier_id&order=due_at.asc&limit=500")) as typeof invoices;
+  } catch {
+    return { status: "skipped", summary: "compass_vendor_invoices not present yet", log: log.text() };
+  }
+
+  const now = new Date();
+  let overdue = 0; let dueSoon = 0; let totalUnpaidCents = 0;
+  const overdueList: string[] = [];
+  for (const inv of invoices) {
+    if (inv.paid) continue;
+    totalUnpaidCents += inv.amount_cents || 0;
+    if (!inv.due_at) continue;
+    const days = Math.floor((new Date(inv.due_at).getTime() - now.getTime()) / 86_400_000);
+    if (days < 0) { overdue++; overdueList.push(`${inv.vendor}: $${(inv.amount_cents/100).toFixed(2)} (${-days}d overdue)`); }
+    else if (days <= 7) dueSoon++;
+  }
+  log.info(`Found ${overdue} overdue + ${dueSoon} due-soon · $${(totalUnpaidCents/100).toFixed(2)} unpaid total`);
+
+  // Escalate overdue via email
+  if (overdue > 0 && env.RESEND_API_KEY) {
+    await sendEmail(env, {
+      to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+      subject: `⚠️ ${overdue} vendor invoice(s) overdue — $${(totalUnpaidCents/100).toFixed(2)} total unpaid`,
+      html: `<h2>${overdue} overdue vendor invoice(s)</h2><ul>${overdueList.slice(0, 20).map(l => `<li>${l}</li>`).join("")}</ul><p>See <a href="https://x3compass.com/app/finance">/app/finance</a> for full ledger.</p>`,
+    }).catch(e => log.warn(`email send failed: ${e}`));
+  }
+
+  return { status: overdue > 0 ? "partial" : "ok", summary: `${overdue} overdue · ${dueSoon} due in 7d · $${(totalUnpaidCents/100).toFixed(2)} unpaid`, log: log.text() };
+}
+
+async function agentTaxManager(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  log.info("tax-manager: starting");
+  const supa = supaFetch(env);
+
+  const now = new Date();
+  const year = now.getUTCFullYear();
+
+  // Quarterly estimated tax deadlines (federal)
+  const Q_DEADLINES = [
+    { quarter: 1, due: new Date(Date.UTC(year, 3, 15)) }, // Apr 15
+    { quarter: 2, due: new Date(Date.UTC(year, 5, 15)) }, // Jun 15
+    { quarter: 3, due: new Date(Date.UTC(year, 8, 15)) }, // Sep 15
+    { quarter: 4, due: new Date(Date.UTC(year + 1, 0, 15)) }, // Jan 15 next year
+  ];
+  const nextDeadline = Q_DEADLINES.find(d => d.due.getTime() > now.getTime());
+
+  // Estimate quarterly liability from YTD net
+  let netCents = 0;
+  try {
+    const entries = (await supa.select("compass_finance_entries", `select=amount_cents,type&entry_date=gte.${year}-01-01`)) as Array<{ amount_cents: number; type: string }>;
+    for (const e of entries) {
+      if (e.type === "money_in") netCents += e.amount_cents;
+      else if (e.type === "vendor" || e.type === "overhead") netCents -= e.amount_cents;
+      else if (e.type === "refund") netCents -= e.amount_cents;
+    }
+  } catch { log.warn("compass_finance_entries unreadable"); }
+
+  // 25% effective rate (rough — single member LLC, no state)
+  const estTaxCents = Math.max(0, Math.round(netCents * 0.25));
+  const quarterlyCents = Math.round(estTaxCents / 4);
+  log.info(`YTD net: $${(netCents/100).toFixed(2)} · est tax 25%: $${(estTaxCents/100).toFixed(2)} · per-quarter: $${(quarterlyCents/100).toFixed(2)}`);
+
+  // 1099-NEC candidates: vendors paid >= $600 YTD (compass_finance_entries.type='vendor' + carrier_id IS NULL)
+  let candidates1099 = 0;
+  try {
+    const vendorPays = (await supa.select("compass_finance_entries", `select=vendor,amount_cents&type=eq.vendor&entry_date=gte.${year}-01-01`)) as Array<{ vendor: string; amount_cents: number }>;
+    const totals = new Map<string, number>();
+    for (const p of vendorPays) if (p.vendor) totals.set(p.vendor, (totals.get(p.vendor) || 0) + p.amount_cents);
+    for (const [, c] of totals) if (c >= 60_000) candidates1099++;
+    log.info(`${candidates1099} vendors paid >= $600 YTD (1099-NEC candidates)`);
+  } catch { log.warn("vendor pay summary unreadable"); }
+
+  // Alert if a Q deadline is within 14 days
+  if (nextDeadline && env.RESEND_API_KEY) {
+    const daysUntil = Math.floor((nextDeadline.due.getTime() - now.getTime()) / 86_400_000);
+    if (daysUntil <= 14) {
+      await sendEmail(env, {
+        to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+        subject: `🧾 Q${nextDeadline.quarter} estimated tax due in ${daysUntil}d — ~$${(quarterlyCents/100).toFixed(0)}`,
+        html: `<h2>Q${nextDeadline.quarter} federal estimated tax deadline</h2><p>Due: <strong>${nextDeadline.due.toISOString().slice(0,10)}</strong> (${daysUntil} days)</p><p>YTD net: <strong>$${(netCents/100).toFixed(2)}</strong></p><p>Estimated quarterly payment: <strong>$${(quarterlyCents/100).toFixed(2)}</strong></p><p>Pay via <a href="https://www.irs.gov/payments">IRS Direct Pay</a> or hand off to CPA.</p>`,
+      }).catch(e => log.warn(`email send failed: ${e}`));
+    }
+  }
+
+  return { status: "ok", summary: `YTD net $${(netCents/100).toFixed(0)} · ${candidates1099} 1099-NEC candidates · next deadline ${nextDeadline?.due.toISOString().slice(0,10) || "—"}`, log: log.text() };
+}
+
+async function agentPricingMargin(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  log.info("pricing-margin: starting");
+  const supa = supaFetch(env);
+
+  // Pull last 30 days of usage events grouped by carrier, sum cost
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  let usage: Array<{ carrier_id: string | null; vendor: string; cost_cents: number }> = [];
+  try {
+    usage = (await supa.select("compass_usage_events", `select=carrier_id,vendor,cost_cents&ts=gte.${cutoff}&limit=10000`)) as typeof usage;
+  } catch {
+    return { status: "skipped", summary: "compass_usage_events not present yet — telemetry needed first", log: log.text() };
+  }
+
+  const TIER_REV_CENTS: Record<string, number> = { diy: 2500, dfy: 5000 }; // per-driver-per-month
+  const HAZMAT_ADDON = 9900;
+
+  // Per-carrier COGS in last 30d
+  const cogsByCarrier = new Map<string, number>();
+  for (const u of usage) {
+    if (!u.carrier_id) continue;
+    cogsByCarrier.set(u.carrier_id, (cogsByCarrier.get(u.carrier_id) || 0) + (u.cost_cents || 0));
+  }
+
+  // Pull carriers + their tier + driver count
+  const carriers = (await supa.select("compass_carriers", "select=id,name,service_tier,hazmat_addon,drivers_count").catch(() => [])) as Array<{ id: string; name: string; service_tier: string | null; hazmat_addon: boolean | null; drivers_count: number | null }>;
+
+  const bleeders: Array<{ name: string; cogs: number; revenue: number; margin: number }> = [];
+  for (const c of carriers) {
+    const cogs = cogsByCarrier.get(c.id) || 0;
+    const tier = (c.service_tier || "diy").toLowerCase();
+    const rate = TIER_REV_CENTS[tier] || 0;
+    const revenue = rate * (c.drivers_count || 0) + (c.hazmat_addon ? HAZMAT_ADDON : 0);
+    if (revenue === 0) continue;
+    const margin = revenue - cogs;
+    if (margin < 0) {
+      bleeders.push({ name: c.name, cogs, revenue, margin });
+      log.warn(`BLEEDING: ${c.name} cogs=$${(cogs/100).toFixed(2)} > rev=$${(revenue/100).toFixed(2)} (margin -$${(-margin/100).toFixed(2)})`);
+    }
+  }
+
+  // Alert if any carrier is bleeding
+  if (bleeders.length > 0 && env.RESEND_API_KEY) {
+    await sendEmail(env, {
+      to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com",
+      subject: `📉 ${bleeders.length} carrier(s) bleeding — tier doesn't cover COGS`,
+      html: `<h2>${bleeders.length} carrier(s) costing more than they pay</h2><table border="1" cellpadding="6" style="border-collapse:collapse"><tr><th>Carrier</th><th>30d revenue</th><th>30d COGS</th><th>Margin</th></tr>${bleeders.map(b => `<tr><td>${b.name}</td><td>$${(b.revenue/100).toFixed(2)}</td><td>$${(b.cogs/100).toFixed(2)}</td><td style="color:#b91c1c"><strong>-$${(-b.margin/100).toFixed(2)}</strong></td></tr>`).join("")}</table><p>Consider tier change or capacity throttle. See <a href="https://x3compass.com/app/finance">/app/finance</a>.</p>`,
+    }).catch(e => log.warn(`email send failed: ${e}`));
+  }
+
+  return { status: bleeders.length > 0 ? "partial" : "ok", summary: `${bleeders.length} carrier(s) bleeding margin · ${carriers.length} total reviewed`, log: log.text() };
+}
+
+
+// ============================================================================
+// Sprint #450 — Marketing channel rollers (5 daily agents)
+// Each agent pulls yesterday's data from its channel API and upserts into
+// compass_marketing_channel_spend_daily (paid channels) or
+// compass_marketing_content_perf_daily (content/organic).
+// All upsert keys: (day, channel) or (day, content_id). Re-runnable.
+// ============================================================================
+
+interface MarketingEnv extends Env {
+  LINKEDIN_ADS_TOKEN?: string;
+  LINKEDIN_ADS_ACCOUNT_ID?: string;
+  CUSTOMERIO_API_KEY?: string;
+  CUSTOMERIO_SITE_ID?: string;
+  POSTIZ_API_KEY?: string;
+  POSTIZ_BASE_URL?: string;
+  GA4_PROPERTY_ID?: string;
+  GA4_SERVICE_ACCOUNT_KEY?: string; // JSON-stringified service account
+  GITHUB_TOKEN?: string;
+  GITHUB_SKILLS_REPO?: string; // default x3fleetsafety/skills
+}
+
+function ymd(d: Date): string { return d.toISOString().slice(0, 10); }
+function yesterdayUtc(): { day: string; startMs: number; endMs: number } {
+  const now = new Date();
+  const dayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+  const startMs = dayUtc.getTime();
+  return { day: ymd(dayUtc), startMs, endMs: startMs + 86400_000 };
+}
+
+// 27. agent-marketing-linkedin-roller -----------------------------------------
+async function agentMarketingLinkedinRoller(env: MarketingEnv): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.LINKEDIN_ADS_TOKEN || !env.LINKEDIN_ADS_ACCOUNT_ID) {
+    return { status: "error", summary: "LINKEDIN_ADS_TOKEN or LINKEDIN_ADS_ACCOUNT_ID not set", log: log.text() };
+  }
+  const { day } = yesterdayUtc();
+  log.info(`[linkedin-roller] pulling ${day} for account ${env.LINKEDIN_ADS_ACCOUNT_ID}`);
+  // LinkedIn Marketing Reporting API v202504 — daily analytics by account.
+  // Endpoint: GET /rest/adAnalytics?q=analytics&pivot=ACCOUNT&dateRange=...
+  const dayStart = day.replaceAll("-", ",").replace(/^(\d+),(\d+),(\d+)$/, "(year:$1,month:$2,day:$3)");
+  const url = `https://api.linkedin.com/rest/adAnalytics?q=analytics&pivot=ACCOUNT&dateRange=(start:${dayStart},end:${dayStart})&accounts=List(urn%3Ali%3AsponsoredAccount%3A${env.LINKEDIN_ADS_ACCOUNT_ID})&fields=costInUsd,impressions,clicks,externalWebsiteConversions`;
+  let r: Response;
+  try {
+    r = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${env.LINKEDIN_ADS_TOKEN}`,
+        "LinkedIn-Version": "202504",
+        "X-Restli-Protocol-Version": "2.0.0",
+      },
+    });
+  } catch (e) {
+    return { status: "error", summary: `LinkedIn fetch failed: ${e}`, log: log.text() };
+  }
+  if (!r.ok) {
+    return { status: "error", summary: `LinkedIn HTTP ${r.status}: ${await r.text()}`, log: log.text() };
+  }
+  const data = await r.json() as { elements?: Array<{ costInUsd?: string; impressions?: number; clicks?: number; externalWebsiteConversions?: number }> };
+  const row = data.elements?.[0];
+  const spendCents = row?.costInUsd ? Math.round(parseFloat(row.costInUsd) * 100) : 0;
+  const impressions = row?.impressions || 0;
+  const clicks = row?.clicks || 0;
+  const conversions = row?.externalWebsiteConversions || 0;
+  await supaFetch(env).upsert("compass_marketing_channel_spend_daily", {
+    day, channel: "linkedin",
+    spend_cents: spendCents, impressions, clicks, leads: conversions,
+    source_meta: { ...row, fetched_url: "linkedin.adAnalytics" },
+    fetched_at: new Date().toISOString(),
+  });
+  log.info(`[linkedin-roller] ${day}: $${(spendCents / 100).toFixed(2)} spend · ${impressions} impr · ${clicks} clicks · ${conversions} leads`);
+  return { status: "ok", summary: `LinkedIn ${day}: $${(spendCents / 100).toFixed(2)} · ${clicks} clicks · ${conversions} leads`, log: log.text() };
+}
+
+// 28. agent-marketing-customerio-roller ---------------------------------------
+async function agentMarketingCustomerioRoller(env: MarketingEnv): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.CUSTOMERIO_API_KEY) {
+    return { status: "error", summary: "CUSTOMERIO_API_KEY not set", log: log.text() };
+  }
+  const { day, startMs, endMs } = yesterdayUtc();
+  // Customer.io Beta API: GET /v1/metrics?type=email&start=&end=&steps=day
+  const url = `https://api.customer.io/v1/api/metrics?type=email&start=${Math.floor(startMs / 1000)}&end=${Math.floor(endMs / 1000)}&steps=day`;
+  let r: Response;
+  try {
+    r = await fetch(url, { headers: { Authorization: `Bearer ${env.CUSTOMERIO_API_KEY}` } });
+  } catch (e) {
+    return { status: "error", summary: `Customer.io fetch failed: ${e}`, log: log.text() };
+  }
+  if (!r.ok) {
+    return { status: "error", summary: `Customer.io HTTP ${r.status}: ${await r.text()}`, log: log.text() };
+  }
+  const j = await r.json() as { metric?: { series?: { sent?: number[]; opened?: number[]; clicked?: number[]; converted?: number[] } } };
+  const sent = j.metric?.series?.sent?.[0] || 0;
+  const clicks = j.metric?.series?.clicked?.[0] || 0;
+  const leads = j.metric?.series?.converted?.[0] || 0;
+  await supaFetch(env).upsert("compass_marketing_channel_spend_daily", {
+    day, channel: "email",
+    spend_cents: 0,  // email is free at our volume
+    impressions: sent,
+    clicks,
+    leads,
+    source_meta: { sent, opened: j.metric?.series?.opened?.[0] || 0, clicked: clicks, converted: leads, vendor: "customerio" },
+    fetched_at: new Date().toISOString(),
+  });
+  log.info(`[customerio-roller] ${day}: ${sent} sent · ${clicks} clicks · ${leads} converted`);
+  return { status: "ok", summary: `Customer.io ${day}: ${sent} sent · ${clicks} clicks · ${leads} converted`, log: log.text() };
+}
+
+// 29. agent-marketing-postiz-roller -------------------------------------------
+async function agentMarketingPostizRoller(env: MarketingEnv): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.POSTIZ_API_KEY) {
+    return { status: "error", summary: "POSTIZ_API_KEY not set", log: log.text() };
+  }
+  const { day } = yesterdayUtc();
+  const base = (env.POSTIZ_BASE_URL || "https://app.postiz.com").replace(/\/$/, "");
+  // Postiz exposes posts; reach/clicks per platform aggregate by querying recent posts and summing analytics.
+  const url = `${base}/api/v1/posts?from=${day}T00:00:00Z&to=${day}T23:59:59Z`;
+  let r: Response;
+  try {
+    r = await fetch(url, { headers: { Authorization: `Bearer ${env.POSTIZ_API_KEY}` } });
+  } catch (e) {
+    return { status: "error", summary: `Postiz fetch failed: ${e}`, log: log.text() };
+  }
+  if (!r.ok) {
+    return { status: "error", summary: `Postiz HTTP ${r.status}: ${await r.text()}`, log: log.text() };
+  }
+  const j = await r.json() as { posts?: Array<{ analytics?: { impressions?: number; clicks?: number; engagements?: number } }> };
+  const posts = j.posts || [];
+  const impressions = posts.reduce((a, p) => a + (p.analytics?.impressions || 0), 0);
+  const clicks = posts.reduce((a, p) => a + (p.analytics?.clicks || 0), 0);
+  const engagements = posts.reduce((a, p) => a + (p.analytics?.engagements || 0), 0);
+  await supaFetch(env).upsert("compass_marketing_channel_spend_daily", {
+    day, channel: "postiz",
+    spend_cents: 0,
+    impressions, clicks,
+    leads: 0, // attribution via UTM, joined at report time
+    source_meta: { posts: posts.length, engagements, vendor: "postiz" },
+    fetched_at: new Date().toISOString(),
+  });
+  log.info(`[postiz-roller] ${day}: ${posts.length} posts · ${impressions} reach · ${clicks} clicks`);
+  return { status: "ok", summary: `Postiz ${day}: ${posts.length} posts · ${impressions} reach · ${clicks} clicks`, log: log.text() };
+}
+
+// 30. agent-marketing-ga4-roller ---------------------------------------------
+async function agentMarketingGa4Roller(env: MarketingEnv): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.GA4_PROPERTY_ID || !env.GA4_SERVICE_ACCOUNT_KEY) {
+    return { status: "error", summary: "GA4_PROPERTY_ID or GA4_SERVICE_ACCOUNT_KEY not set", log: log.text() };
+  }
+  const { day } = yesterdayUtc();
+  // Exchange service account JWT for an access token, then call Analytics Data API v1beta.
+  let accessToken: string;
+  try {
+    const sa = JSON.parse(env.GA4_SERVICE_ACCOUNT_KEY) as { client_email: string; private_key: string };
+    const now = Math.floor(Date.now() / 1000);
+    const claim = {
+      iss: sa.client_email,
+      scope: "https://www.googleapis.com/auth/analytics.readonly",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600,
+      iat: now,
+    };
+    const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/=+$/, "").replaceAll("+", "-").replaceAll("/", "_");
+    const payload = btoa(JSON.stringify(claim)).replace(/=+$/, "").replaceAll("+", "-").replaceAll("/", "_");
+    const toSign = `${header}.${payload}`;
+    const keyBuf = await crypto.subtle.importKey("pkcs8",
+      pemToDer(sa.private_key),
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+    const sigBuf = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", keyBuf, new TextEncoder().encode(toSign));
+    const sig = btoa(String.fromCharCode(...new Uint8Array(sigBuf))).replace(/=+$/, "").replaceAll("+", "-").replaceAll("/", "_");
+    const tr = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${toSign}.${sig}`,
+    });
+    if (!tr.ok) return { status: "error", summary: `GA4 token HTTP ${tr.status}: ${await tr.text()}`, log: log.text() };
+    accessToken = ((await tr.json()) as { access_token: string }).access_token;
+  } catch (e) {
+    return { status: "error", summary: `GA4 JWT signing failed: ${e}`, log: log.text() };
+  }
+  const r = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${env.GA4_PROPERTY_ID}:runReport`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      dateRanges: [{ startDate: day, endDate: day }],
+      metrics: [{ name: "sessions" }, { name: "conversions" }, { name: "totalUsers" }],
+      dimensions: [{ name: "sessionDefaultChannelGroup" }],
+    }),
+  });
+  if (!r.ok) return { status: "error", summary: `GA4 runReport HTTP ${r.status}: ${await r.text()}`, log: log.text() };
+  const j = await r.json() as { rows?: Array<{ dimensionValues: Array<{ value: string }>; metricValues: Array<{ value: string }> }> };
+  let totalSessions = 0, totalConversions = 0;
+  for (const row of j.rows || []) {
+    const ch = row.dimensionValues[0].value;
+    const sessions = parseInt(row.metricValues[0].value, 10) || 0;
+    const conversions = parseInt(row.metricValues[1].value, 10) || 0;
+    totalSessions += sessions;
+    totalConversions += conversions;
+    await supaFetch(env).upsert("compass_marketing_channel_spend_daily", {
+      day, channel: `ga4:${ch.toLowerCase().replace(/\s+/g, "-")}`,
+      spend_cents: 0,
+      impressions: 0, clicks: sessions, leads: conversions,
+      source_meta: { ga4_channel: ch, vendor: "ga4" },
+      fetched_at: new Date().toISOString(),
+    });
+  }
+  log.info(`[ga4-roller] ${day}: ${totalSessions} sessions · ${totalConversions} conversions across ${(j.rows || []).length} channels`);
+  return { status: "ok", summary: `GA4 ${day}: ${totalSessions} sessions · ${totalConversions} conversions`, log: log.text() };
+}
+
+function pemToDer(pem: string): ArrayBuffer {
+  const cleaned = pem.replace(/-----BEGIN [^-]+-----/g, "").replace(/-----END [^-]+-----/g, "").replace(/\s+/g, "");
+  const binary = atob(cleaned);
+  const buf = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
+  return buf.buffer;
+}
+
+// 31. agent-marketing-github-roller -------------------------------------------
+async function agentMarketingGithubRoller(env: MarketingEnv): Promise<AgentResult> {
+  const log = newLogger();
+  const repo = env.GITHUB_SKILLS_REPO || "x3fleetsafety/skills";
+  const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+  if (env.GITHUB_TOKEN) headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
+  const { day } = yesterdayUtc();
+
+  // Stars total + clones/views over last 14d (which API caps)
+  const [repoRes, trafficRes, clonesRes] = await Promise.all([
+    fetch(`https://api.github.com/repos/${repo}`, { headers }),
+    fetch(`https://api.github.com/repos/${repo}/traffic/views`, { headers }),
+    fetch(`https://api.github.com/repos/${repo}/traffic/clones`, { headers }),
+  ]);
+  if (!repoRes.ok) return { status: "error", summary: `GitHub /repos/${repo} HTTP ${repoRes.status}`, log: log.text() };
+  const repoData = await repoRes.json() as { stargazers_count: number; subscribers_count: number; forks_count: number };
+  const traffic = trafficRes.ok ? await trafficRes.json() as { views?: Array<{ timestamp: string; count: number; uniques: number }> } : { views: [] };
+  const clones = clonesRes.ok ? await clonesRes.json() as { clones?: Array<{ timestamp: string; count: number; uniques: number }> } : { clones: [] };
+  const yesterdayView = (traffic.views || []).find(v => v.timestamp.startsWith(day));
+  const yesterdayClone = (clones.clones || []).find(v => v.timestamp.startsWith(day));
+  const views = yesterdayView?.count || 0;
+  const uniques = yesterdayView?.uniques || 0;
+  const cloneCount = yesterdayClone?.count || 0;
+
+  await supaFetch(env).upsert("compass_marketing_content_perf_daily", {
+    day, content_id: `github:${repo}`,
+    content_type: "repo",
+    content_title: `GitHub · ${repo}`,
+    reach: views, views: uniques, downloads: cloneCount,
+    leads_attributed: 0, // UTM-joined at query time
+    source_meta: {
+      stars: repoData.stargazers_count,
+      forks: repoData.forks_count,
+      watchers: repoData.subscribers_count,
+      vendor: "github",
+    },
+    fetched_at: new Date().toISOString(),
+  });
+  log.info(`[github-roller] ${day}: ${views} views · ${uniques} uniques · ${cloneCount} clones · ${repoData.stargazers_count} ★`);
+  return { status: "ok", summary: `GitHub ${day}: ${views} views · ${uniques} uniques · ${repoData.stargazers_count} ★ total`, log: log.text() };
+}
+
+
 export async function runAgent(name: string, env: Env, inputs?: Record<string, unknown>): Promise<AgentResult> {
   try {
     switch (name) {
@@ -1059,6 +1523,16 @@ export async function runAgent(name: string, env: Env, inputs?: Record<string, u
       case "agent-reporting-manager":        return await agentReportingManager(env);
       case "agent-fpa-manager":              return await agentFpaManager(env);
       case "agent-finance-workflow":         return await agentFinanceWorkflow(env);
+      case "agent-partner-settlement":       return await agentPartnerSettlement(env);
+      case "agent-ap-manager":                return await agentApManager(env);
+      case "agent-tax-manager":               return await agentTaxManager(env);
+      case "agent-pricing-margin":            return await agentPricingMargin(env);
+      // Sprint #450 — Marketing channel rollers
+      case "agent-marketing-linkedin-roller":   return await agentMarketingLinkedinRoller(env);
+      case "agent-marketing-customerio-roller": return await agentMarketingCustomerioRoller(env);
+      case "agent-marketing-postiz-roller":     return await agentMarketingPostizRoller(env);
+      case "agent-marketing-ga4-roller":        return await agentMarketingGa4Roller(env);
+      case "agent-marketing-github-roller":     return await agentMarketingGithubRoller(env);
     }
     return { status: "error", summary: `Unknown agent '${name}' — not in registry.` };
   } catch (e) {

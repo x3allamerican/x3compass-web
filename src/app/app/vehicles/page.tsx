@@ -6,6 +6,7 @@ import { VehicleImportModal } from "@/components/app/VehicleImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
+import { DEMO_VEHICLES, withDemoFallback } from "@/lib/demoFallback";
 
 type Vehicle = {
   id: string; carrier_id: string;
@@ -18,6 +19,28 @@ type Vehicle = {
   last_dot_inspection_on: string | null; next_dot_inspection_due: string | null;
   created_at: string;
 };
+
+/** Adapt DemoVehicle (which has a slightly different field shape) into the
+ *  Vehicle type the page already renders. Lets us reuse one demo dataset
+ *  across pages that share the underlying concept. */
+function adaptDemoVehicle(d: typeof DEMO_VEHICLES[number]): Vehicle {
+  // map demo "tractor/trailer" to vehicle_type, "active/oos/maintenance/retired" → status
+  const STATUS_MAP: Record<string, string> = {
+    active: "active", oos: "out_of_service", maintenance: "out_of_service", retired: "sold",
+  };
+  return {
+    id: d.id, carrier_id: d.carrier_id,
+    vin: d.vin, license_plate: d.plate_number, license_plate_state: d.plate_state,
+    year: d.year, make: d.make, model: d.model,
+    gvwr_lbs: null, vehicle_type: d.type, fuel_type: "diesel",
+    current_odometer: null,
+    in_service_date: null, out_of_service_date: null,
+    status: STATUS_MAP[d.status] || "active",
+    last_dot_inspection_on: d.annual_inspection_on,
+    next_dot_inspection_due: d.next_pm_due_on,
+    created_at: d.created_at,
+  };
+}
 
 const VEHICLE_TYPES = ["tractor","straight_truck","trailer","tank","dump","bus","other"];
 const STATUSES = ["active","out_of_service","sold","totaled"];
@@ -44,18 +67,26 @@ export default function VehiclesPage() {
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
+  // Fall back to demo Apex-Logistics roster (10 power units) when the
+  // real query came back empty. Adapter normalizes the demo shape to Vehicle.
+  const effectiveRows = useMemo(
+    () => withDemoFallback(rows, DEMO_VEHICLES.map(adaptDemoVehicle)),
+    [rows]
+  );
+  const isDemo = rows.length === 0;
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(v => `${v.vin} ${v.license_plate} ${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q));
-  }, [rows, search]);
+    if (!q) return effectiveRows;
+    return effectiveRows.filter(v => `${v.vin} ${v.license_plate} ${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q));
+  }, [effectiveRows, search]);
 
   const today = new Date().toISOString().slice(0,10);
   const in60  = new Date(Date.now() + 60*86400000).toISOString().slice(0,10);
   const in30 = new Date(Date.now() + 30*86400000).toISOString().slice(0,10);
   const kpis = useMemo(() => {
     let active = 0, oos = 0, dotDue30 = 0, dotOverdue = 0;
-    for (const v of rows) {
+    for (const v of effectiveRows) {
       if (v.status === "active") active++;
       if (v.status === "out_of_service") oos++;
       if (v.next_dot_inspection_due) {
@@ -64,7 +95,7 @@ export default function VehiclesPage() {
       }
     }
     return { active, oos, dotDue30, dotOverdue };
-  }, [rows, today, in30]);
+  }, [effectiveRows, today, in30]);
 
 
   return (
@@ -75,9 +106,14 @@ export default function VehiclesPage() {
         <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add vehicle</button>
       </>}>
       <div className="p-6">
-        {/* KPI stat cards — top row, classic-app style */}
+        {isDemo && (
+          <div className="mb-3 text-[11px] uppercase tracking-[.14em] font-bold text-[var(--accent)]/80">
+            ★ Demo data · showing Apex Logistics sample fleet until your first vehicle is added
+          </div>
+        )}
+        {/* KPI stat cards · top row, classic-app style */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active power units"           value={kpis.active}     sub={`${rows.length} on roster`} />
+          <KpiCard label="Active power units"           value={kpis.active}     sub={`${effectiveRows.length} on roster`} />
           <KpiCard label="Out of service"               value={kpis.oos}        sub="Down for maintenance / inspection" tone={kpis.oos > 0 ? "warn" : "ok"} />
           <KpiCard label="DOT inspection ≤30d"          value={kpis.dotDue30}   sub="49 CFR § 396.17" tone={kpis.dotDue30 > 0 ? "warn" : "ok"} />
           <KpiCard label="DOT inspection overdue"       value={kpis.dotOverdue} sub="Annual inspection past due" tone={kpis.dotOverdue > 0 ? "danger" : "ok"} />
@@ -86,15 +122,15 @@ export default function VehiclesPage() {
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search VIN, plate, make/model…"
             className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]" />
-          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {rows.length}</div>
+          <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveRows.length}</div>
         </div>
 
         <TenantTable<Vehicle>
           rows={filtered} loading={loading}
-          emptyTitle={rows.length ? "No matches" : "No vehicles yet"}
-          emptyDesc={rows.length ? "Try a different search." : "Add your first power unit to start tracking inspections and maintenance."}
-          emptyAction={rows.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first vehicle</button> : undefined}
-          onRowClick={(v) => setEdit(v)}
+          emptyTitle={effectiveRows.length ? "No matches" : "No vehicles yet"}
+          emptyDesc={effectiveRows.length ? "Try a different search." : "Add your first power unit to start tracking inspections and maintenance."}
+          emptyAction={effectiveRows.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first vehicle</button> : undefined}
+          onRowClick={(v) => { if (!isDemo) setEdit(v); }}
           columns={[
             { key: "vehicle", label: "Vehicle", render: (v) =>
               <div>
@@ -193,9 +229,9 @@ function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_i
             </Row>
           </Section>
 
-          {error && <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
+          {error && <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
           <div className="flex justify-between items-center pt-2 sticky bottom-0 bg-[var(--surface-3)] py-2">
-            <div>{vehicle && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-400 hover:text-red-300">Delete vehicle</button>}</div>
+            <div>{vehicle && <button type="button" onClick={handleDelete} disabled={busy} className="text-[12px] text-red-700 dark:text-red-400 hover:text-red-700 dark:text-red-300">Delete vehicle</button>}</div>
             <div className="flex gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] text-sm border border-[var(--border)]">Cancel</button>
               <button type="submit" disabled={busy} className="px-5 py-2 rounded-lg font-extrabold text-sm text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>{busy ? "Saving…" : vehicle ? "Save changes" : "Add vehicle"}</button>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
+import { SkeletonShell } from "@/components/Skeleton";
 
 type Step = 1 | 2 | 3;
 
@@ -31,12 +32,12 @@ export default function OnboardingPage() {
   useEffect(() => { if (!loading && !user) router.replace("/signin?return_to=/app/onboarding"); }, [user, loading, router]);
   useEffect(() => { if (carrier) { setCarrierName(carrier.name); setUsdot(carrier.usdot_number || ""); } }, [carrier]);
 
-  if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] grid place-items-center text-[var(--fg-muted)]">Loading…</div>;
+  if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] p-6"><SkeletonShell kpis={3} rows={4} /></div>;
 
   async function saveCarrier() {
     setBusy(true); setError(null);
     try {
-      if (!carrier) throw new Error("No carrier — refresh and try again");
+      if (!carrier) throw new Error("No carrier · refresh and try again");
       const sb = getSupabase();
       const { error } = await sb.from("compass_carriers").update({
         name: carrierName.trim(),
@@ -105,7 +106,7 @@ export default function OnboardingPage() {
           </>)}
           {step === 2 && (<>
             <h2 className="text-xl font-extrabold mb-1">2 · Add your first driver</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional — you can skip.</p>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional · you can skip.</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="First"><input className="x3-input" value={driverFirst} onChange={(e) => setDriverFirst(e.target.value)} /></Field>
@@ -127,7 +128,7 @@ export default function OnboardingPage() {
             <h2 className="text-xl font-extrabold mb-1">3 · Pick your plan</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mb-6">7-day free trial active. Card optional today.</p>
             <div className="space-y-3 mb-6">
-              <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills — you operate it." />
+              <PlanCard active={plan === "diy"} onClick={() => setPlan("diy")} title="DIY" price="$25" sub="/driver/mo" desc="AI Safety Director + skills · you operate it." />
               <PlanCard active={plan === "dfy"} onClick={() => setPlan("dfy")} title="DFY" price="$50" sub="/driver/mo" desc="We operate Compass for you. Concierge included." />
             </div>
             <div className="space-y-3 mb-6">
@@ -151,7 +152,7 @@ export default function OnboardingPage() {
       </div>
       <style jsx global>{`
         .x3-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
-        .x3-input:focus { outline: none; border-color: #22D3EE; }
+        .x3-input:focus { outline: none; border-color: #16C7FF; }
         .x3-btn-primary { width: 100%; padding: 12px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; color: var(--accent-fg); background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 0; cursor: pointer; }
         .x3-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .x3-btn-secondary { padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; color: white; background: transparent; border: 1px solid #1E3556; cursor: pointer; }
@@ -164,7 +165,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return (<div><label className="text-[11px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1.5 block">{label}</label>{children}</div>);
 }
 function Err({ msg }: { msg: string }) {
-  return <div className="text-[12px] text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
+  return <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
 }
 function PlanCard({ active, onClick, title, price, sub, desc }: { active: boolean; onClick: () => void; title: string; price: string; sub: string; desc: string }) {
   return (

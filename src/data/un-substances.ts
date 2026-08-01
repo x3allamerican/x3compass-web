@@ -3,14 +3,14 @@
  * Source: 49 CFR § 172.101 Hazardous Materials Table.
  *
  * Fields:
- *   un        — UN/NA number (without "UN" prefix)
- *   name      — proper shipping name (per § 172.101)
- *   class     — hazard class or division
- *   pg        — packing group (I, II, III, or undefined)
- *   erg       — ERG (Emergency Response Guidebook) guide number
- *   placardThresholdLb — aggregate weight threshold for placarding (per § 172.504 Table 2)
+ *   un        · UN/NA number (without "UN" prefix)
+ *   name      · proper shipping name (per § 172.101)
+ *   class     · hazard class or division
+ *   pg        · packing group (I, II, III, or undefined)
+ *   erg       · ERG (Emergency Response Guidebook) guide number
+ *   placardThresholdLb · aggregate weight threshold for placarding (per § 172.504 Table 2)
  *                       null = Table 1 substance (ANY quantity requires placarding)
- *   commonName — colloquial name shown in the UI
+ *   commonName · colloquial name shown in the UI
  */
 
 export type Substance = {
@@ -25,7 +25,7 @@ export type Substance = {
 };
 
 export const UN_SUBSTANCES: Substance[] = [
-  // Class 3 — Flammable liquids (most common cargo)
+  // Class 3 · Flammable liquids (most common cargo)
   { un: "1203", name: "Gasoline", class: "3", pg: "II", erg: "128", placardThresholdLb: 1001, commonName: "Gasoline / Petrol" },
   { un: "1202", name: "Diesel fuel", class: "3", pg: "III", erg: "128", placardThresholdLb: 1001, commonName: "Diesel / #2 fuel oil" },
   { un: "1170", name: "Ethanol or Ethyl alcohol", class: "3", pg: "II", erg: "127", placardThresholdLb: 1001, commonName: "Ethanol" },
@@ -44,7 +44,7 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "1300", name: "Turpentine substitute", class: "3", pg: "II", erg: "128", placardThresholdLb: 1001 },
   { un: "1866", name: "Resin solution", class: "3", pg: "II", erg: "127", placardThresholdLb: 1001 },
 
-  // Class 2 — Gases
+  // Class 2 · Gases
   { un: "1075", name: "Petroleum gases, liquefied", class: "2", subclass: "2.1", erg: "115", placardThresholdLb: null, commonName: "LPG / Propane" },
   { un: "1978", name: "Propane", class: "2", subclass: "2.1", erg: "115", placardThresholdLb: null, commonName: "Propane" },
   { un: "1971", name: "Methane / Natural gas, compressed", class: "2", subclass: "2.1", erg: "115", placardThresholdLb: null, commonName: "Natural gas / Methane" },
@@ -59,7 +59,7 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "1005", name: "Ammonia, anhydrous", class: "2", subclass: "2.3", erg: "125", placardThresholdLb: null, commonName: "Anhydrous ammonia" },
   { un: "1017", name: "Chlorine", class: "2", subclass: "2.3", erg: "124", placardThresholdLb: null, commonName: "Chlorine gas" },
 
-  // Class 1 — Explosives (Table 1; any quantity)
+  // Class 1 · Explosives (Table 1; any quantity)
   { un: "0027", name: "Black powder", class: "1", subclass: "1.1", erg: "112", placardThresholdLb: null },
   { un: "0048", name: "Charges, demolition", class: "1", subclass: "1.1", erg: "112", placardThresholdLb: null },
   { un: "0084", name: "Detonator assemblies, non-electric", class: "1", subclass: "1.4", erg: "114", placardThresholdLb: null },
@@ -67,14 +67,14 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "0331", name: "Explosive, blasting, type B", class: "1", subclass: "1.5", erg: "112", placardThresholdLb: null },
   { un: "0124", name: "Jet perforating guns, charged (oil well)", class: "1", subclass: "1.1", erg: "112", placardThresholdLb: null, commonName: "Oil-well jet perforators" },
 
-  // Class 4 — Flammable solids / spontaneously combustible / dangerous when wet
+  // Class 4 · Flammable solids / spontaneously combustible / dangerous when wet
   { un: "1325", name: "Flammable solid, organic, n.o.s.", class: "4", subclass: "4.1", pg: "II", erg: "133", placardThresholdLb: 1001 },
   { un: "1350", name: "Sulfur (solid)", class: "4", subclass: "4.1", pg: "III", erg: "133", placardThresholdLb: 1001 },
   { un: "1369", name: "p-Nitrosodimethylaniline", class: "4", subclass: "4.2", pg: "II", erg: "135", placardThresholdLb: 1001 },
   { un: "1428", name: "Sodium metal", class: "4", subclass: "4.3", pg: "I", erg: "138", placardThresholdLb: null, commonName: "Sodium" },
   { un: "1438", name: "Aluminum nitrate", class: "5", subclass: "5.1", pg: "III", erg: "140", placardThresholdLb: 1001 },
 
-  // Class 5 — Oxidizers / organic peroxides
+  // Class 5 · Oxidizers / organic peroxides
   { un: "1942", name: "Ammonium nitrate", class: "5", subclass: "5.1", pg: "III", erg: "140", placardThresholdLb: 1001, commonName: "Ammonium nitrate" },
   { un: "2014", name: "Hydrogen peroxide, aqueous, 20-60%", class: "5", subclass: "5.1", pg: "II", erg: "140", placardThresholdLb: 1001, commonName: "Hydrogen peroxide" },
   { un: "1791", name: "Hypochlorite solution", class: "8", pg: "III", erg: "154", placardThresholdLb: 1001, commonName: "Bleach (industrial)" },
@@ -82,7 +82,7 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "2067", name: "Ammonium nitrate fertilizers", class: "5", subclass: "5.1", pg: "III", erg: "140", placardThresholdLb: 1001 },
   { un: "3105", name: "Organic peroxide type D, liquid", class: "5", subclass: "5.2", erg: "146", placardThresholdLb: 1001, commonName: "Organic peroxide" },
 
-  // Class 6 — Toxic / infectious
+  // Class 6 · Toxic / infectious
   { un: "1654", name: "Nicotine", class: "6", subclass: "6.1", pg: "II", erg: "151", placardThresholdLb: 1001 },
   { un: "1664", name: "Nitrotoluenes, liquid", class: "6", subclass: "6.1", pg: "II", erg: "152", placardThresholdLb: 1001 },
   { un: "1593", name: "Dichloromethane (Methylene chloride)", class: "6", subclass: "6.1", pg: "III", erg: "160", placardThresholdLb: 1001 },
@@ -91,13 +91,13 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "3082", name: "Environmentally hazardous substance, liquid, n.o.s.", class: "9", pg: "III", erg: "171", placardThresholdLb: 1001 },
   { un: "2814", name: "Infectious substance, affecting humans", class: "6", subclass: "6.2", erg: "158", placardThresholdLb: null, commonName: "Category A infectious" },
 
-  // Class 7 — Radioactive (Table 1 — any quantity placarded)
+  // Class 7 · Radioactive (Table 1 · any quantity placarded)
   { un: "2912", name: "Radioactive material, low specific activity (LSA-I)", class: "7", erg: "162", placardThresholdLb: null },
   { un: "2915", name: "Radioactive material, Type A package", class: "7", erg: "163", placardThresholdLb: null },
   { un: "2916", name: "Radioactive material, Type B(U) package", class: "7", erg: "163", placardThresholdLb: null },
   { un: "3332", name: "Radioactive material, Type A package, special form", class: "7", erg: "164", placardThresholdLb: null },
 
-  // Class 8 — Corrosives (very common)
+  // Class 8 · Corrosives (very common)
   { un: "1789", name: "Hydrochloric acid", class: "8", pg: "II", erg: "157", placardThresholdLb: 1001, commonName: "Hydrochloric acid (HCl)" },
   { un: "1830", name: "Sulfuric acid (>51% acid)", class: "8", pg: "II", erg: "137", placardThresholdLb: 1001, commonName: "Sulfuric acid" },
   { un: "1832", name: "Sulfuric acid, spent", class: "8", pg: "II", erg: "137", placardThresholdLb: 1001, commonName: "Spent sulfuric acid" },
@@ -110,7 +110,7 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "1764", name: "Dichloroacetic acid", class: "8", pg: "II", erg: "153", placardThresholdLb: 1001 },
   { un: "1791", name: "Hypochlorite solution (>5% available chlorine)", class: "8", pg: "III", erg: "154", placardThresholdLb: 1001 },
 
-  // Class 9 — Misc dangerous
+  // Class 9 · Misc dangerous
   { un: "3077", name: "Environmentally hazardous substance, solid, n.o.s.", class: "9", pg: "III", erg: "171", placardThresholdLb: 1001 },
   { un: "3091", name: "Lithium metal batteries in equipment", class: "9", erg: "138", placardThresholdLb: 1001, commonName: "Lithium metal batteries" },
   { un: "3480", name: "Lithium ion batteries", class: "9", erg: "147", placardThresholdLb: 1001, commonName: "Lithium-ion batteries" },
@@ -122,7 +122,7 @@ export const UN_SUBSTANCES: Substance[] = [
   { un: "3334", name: "Aviation regulated solid, n.o.s.", class: "9", erg: "171", placardThresholdLb: 1001 },
 ];
 
-// Segregation rules per § 177.848 — common conflict pairs
+// Segregation rules per § 177.848 · common conflict pairs
 // X = prohibited; O = allowed with separation; A = away from
 export type SegregationCode = "X" | "O" | "A" | "-";
 type SegMap = Record<string, Record<string, SegregationCode>>;
@@ -177,7 +177,7 @@ export function getSegregationCode(classA: string, classB: string): SegregationC
 
 export function placardingThresholdSummary(s: Substance): string {
   if (s.placardThresholdLb === null) {
-    return "Any quantity — Table 1 substance (placard from first lb)";
+    return "Any quantity · Table 1 substance (placard from first lb)";
   }
   return `Aggregate gross weight ≥ ${s.placardThresholdLb.toLocaleString()} lbs in transport`;
 }

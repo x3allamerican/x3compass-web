@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * DriverDQGrid — the visual driver qualification file view.
+ * DriverDQGrid · the visual driver qualification file view.
  *
  * Shows the 12-document grid from 49 CFR § 391.51 (plus D&A from Part 382)
  * as colored status tiles. Each tile shows the requirement, CFR citation,
@@ -54,9 +54,9 @@ type Requirement = {
 const REQUIREMENTS: Requirement[] = [
   { id: "application",        label: "Driver's application", cfr: "§ 391.21",      hint: "Signed employment application on file.",
     doc_types: ["application"] },
-  { id: "mvr_initial",        label: "MVR — initial",        cfr: "§ 391.23(a)",   hint: "Initial MVR within 30 days of hire from every state held in last 3 years.",
+  { id: "mvr_initial",        label: "MVR · initial",        cfr: "§ 391.23(a)",   hint: "Initial MVR within 30 days of hire from every state held in last 3 years.",
     doc_types: ["mvr", "mvr_initial"] },
-  { id: "mvr_annual",         label: "MVR — annual",         cfr: "§ 391.25",      hint: "Annual MVR + written review note. The note is part of the requirement.",
+  { id: "mvr_annual",         label: "MVR · annual",         cfr: "§ 391.25",      hint: "Annual MVR + written review note. The note is part of the requirement.",
     doc_types: ["mvr_annual", "mvr_review"], driver_date_field: "last_mvr_pulled_on", expires: true, warn_window_days: 60 },
   { id: "road_test",          label: "Road test or CDL copy", cfr: "§ 391.31–33",  hint: "Signed road test cert, or a copy of the CDL (which substitutes).",
     doc_types: ["road_test_certificate", "cdl_copy"] },
@@ -64,11 +64,11 @@ const REQUIREMENTS: Requirement[] = [
     doc_types: ["medical_card"], driver_date_field: "medical_card_expires_on", expires: true, warn_window_days: 30 },
   { id: "natl_registry",      label: "Nat'l Registry verification", cfr: "§ 391.43", hint: "Screenshot/printout from nationalregistry.fmcsa.dot.gov.",
     doc_types: ["national_registry_verification", "registry_verification"] },
-  { id: "clearinghouse_full", label: "Clearinghouse — full query", cfr: "§ 382.701(a)", hint: "Pre-employment full query, driver consent on file.",
+  { id: "clearinghouse_full", label: "Clearinghouse · full query", cfr: "§ 382.701(a)", hint: "Pre-employment full query, driver consent on file.",
     doc_types: ["clearinghouse_query", "clearinghouse_full"], driver_date_field: "clearinghouse_full_query_on" },
   { id: "prior_employer",     label: "Prior-employer inquiry", cfr: "§ 391.23(d)", hint: "Safety performance history covering past 3 years.",
     doc_types: ["prior_employer_inquiry", "psp"] },
-  { id: "psp",                label: "PSP report (recommended)", cfr: "§ 385.105", hint: "Pre-Employment Screening Program record — not required but standard.",
+  { id: "psp",                label: "PSP report (recommended)", cfr: "§ 385.105", hint: "Pre-Employment Screening Program record · not required but standard.",
     doc_types: ["psp", "psp_report"] },
   { id: "drug_test_pre",      label: "Pre-employment drug test", cfr: "§ 382.301", hint: "Negative result before driver performs safety-sensitive duties.",
     doc_types: ["drug_test_result", "pre_employment_drug_test"], driver_date_field: "last_drug_test_on" },
@@ -173,7 +173,7 @@ export function DriverDQGrid({
 
   return (
     <div className="space-y-5">
-      {/* Header card — driver identity + DQ completion bar */}
+      {/* Header card · driver identity + DQ completion bar */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-3)] p-5">
         <div className="flex items-end justify-between gap-4 mb-3 flex-wrap">
           <div>
@@ -187,10 +187,10 @@ export function DriverDQGrid({
             <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">DQ Completion</div>
             <div className="text-[40px] font-black leading-none text-[var(--fg)]">{summary.pct}%</div>
             <div className="text-[13px] text-[var(--fg-muted)] mt-2 font-semibold">
-              <span className="text-emerald-400 font-bold">{summary.valid} valid</span>
-              {summary.expiring > 0 && <> · <span className="text-amber-400 font-bold">{summary.expiring} expiring</span></>}
-              {summary.expired > 0 && <> · <span className="text-rose-400 font-bold">{summary.expired} expired</span></>}
-              {summary.missing > 0 && <> · <span className="text-rose-400 font-bold">{summary.missing} missing</span></>}
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">{summary.valid} valid</span>
+              {summary.expiring > 0 && <> · <span className="text-amber-700 dark:text-amber-400 font-bold">{summary.expiring} expiring</span></>}
+              {summary.expired > 0 && <> · <span className="text-rose-700 dark:text-rose-400 font-bold">{summary.expired} expired</span></>}
+              {summary.missing > 0 && <> · <span className="text-rose-700 dark:text-rose-400 font-bold">{summary.missing} missing</span></>}
             </div>
           </div>
         </div>
@@ -199,13 +199,13 @@ export function DriverDQGrid({
             className="h-full rounded-full transition-all"
             style={{
               width: `${summary.pct}%`,
-              background: summary.pct >= 95 ? "linear-gradient(90deg, #10B981, #22D3EE)" : summary.pct >= 75 ? "linear-gradient(90deg, #FBBF24, #F59E0B)" : "linear-gradient(90deg, #F87171, #EF4444)",
+              background: summary.pct >= 95 ? "linear-gradient(90deg, #10B981, #16C7FF)" : summary.pct >= 75 ? "linear-gradient(90deg, #FBBF24, #F59E0B)" : "linear-gradient(90deg, #F87171, #EF4444)",
             }}
           />
         </div>
       </div>
 
-      {/* The 12 status tiles — the "boxes in different colors" Joshua loved */}
+      {/* The 12 status tiles · the "boxes in different colors" Joshua loved */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {evaluated.map(({ req, status, detail, expiresOn }) => {
           const c = STATUS_COLOR[status];

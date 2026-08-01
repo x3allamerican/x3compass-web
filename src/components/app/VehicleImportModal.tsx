@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const VEHICLE_TEMPLATE = `vin,license_plate,license_plate_state,year,make,model,vehicle_type,gvwr_lbs,annual_inspection_date,pm_due_date,status
 1FUJGEDR5BLAS1234,7XYZ123,TX,2022,Freightliner,Cascadia,tractor,80000,2026-01-15,2026-07-15,active
@@ -65,14 +65,14 @@ export function VehicleImportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="bg-[var(--surface-2)] rounded-2xl border border-[var(--border)] max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <h2 className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import vehicles</h2>
+            <h2 id="modal-title" className="text-[20px] font-extrabold text-[var(--fg)]">Bulk import vehicles</h2>
             <p className="text-[12px] text-[var(--fg-muted)] mt-1">CSV upload · existing vehicles (by VIN) are updated, not duplicated.</p>
           </div>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-xl leading-none">×</button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -109,10 +109,10 @@ export function VehicleImportModal({
             </div>
           )}
 
-          {error && <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-300">{error}</div>}
+          {error && <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-[13px] text-rose-700 dark:text-rose-300">{error}</div>}
 
           {result && (
-            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-300"}`}>
+            <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               <div className="font-bold mb-1">{result.ok ? "✓ Import complete" : "⚠ Import finished with errors"}</div>
               <div className="text-[12px]">
                 Submitted: <strong>{result.submitted}</strong> · Saved: <strong>{result.inserted + result.updated}</strong>
@@ -120,7 +120,7 @@ export function VehicleImportModal({
                 {result.errors.length ? <> · Errors: <strong>{result.errors.length}</strong></> : null}
               </div>
               {result.errors.length > 0 && (
-                <ul className="mt-2 text-[11px] text-amber-200 space-y-0.5 max-h-32 overflow-y-auto">
+                <ul className="mt-2 text-[11px] text-amber-800 dark:text-amber-200 space-y-0.5 max-h-32 overflow-y-auto">
                   {result.errors.slice(0, 10).map((e, i) => <li key={i}>Row {e.row + 1}: {e.reason}</li>)}
                   {result.errors.length > 10 && <li>…and {result.errors.length - 10} more</li>}
                 </ul>

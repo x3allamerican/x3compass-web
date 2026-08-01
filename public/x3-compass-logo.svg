@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="X3 Compass">
+  <defs>
+    <style>
+      .x3-letter { font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif; font-weight: 900; fill: #16C7FF; }
+      .x3-word   { font-family: "Arial", "Helvetica Neue", Arial, sans-serif; font-weight: 800; fill: #16C7FF; letter-spacing: 16px; }
+    </style>
+  </defs>
+
+  <!-- X3 mark — angular, oversized -->
+  <text x="240" y="170" class="x3-letter" font-size="220" text-anchor="middle" dominant-baseline="auto">X3</text>
+
+  <!-- COMPASS wordmark, letter-spaced -->
+  <text x="240" y="240" class="x3-word" font-size="40" text-anchor="middle" dominant-baseline="auto">COMPASS</text>
+</svg>

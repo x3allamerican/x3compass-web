@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 
-const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(34, 211, 238, 0.32)" };
+const ctaCyan = { background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 6px 18px rgba(2, 6, 12, 0.45)" };
 
 export default function PartnerApplyPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -48,7 +48,7 @@ export default function PartnerApplyPage() {
           <div className="max-w-xl text-center">
             <div
               className="w-20 h-20 rounded-full grid place-items-center text-[var(--bg)] font-black text-[36px] mx-auto mb-6"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 6px rgba(34, 211, 238, 0.12)" }}
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 6px rgba(2, 6, 12, 0.45)" }}
             >
               ✓
             </div>
@@ -87,7 +87,7 @@ export default function PartnerApplyPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-7">
-            {/* Section 1 — About you */}
+            {/* Section 1 · About you */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 1 · ABOUT YOU</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,7 +98,7 @@ export default function PartnerApplyPage() {
               </div>
             </div>
 
-            {/* Section 2 — Business */}
+            {/* Section 2 · Business */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 2 · YOUR CONSULTING BUSINESS</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -141,7 +141,7 @@ export default function PartnerApplyPage() {
               </div>
             </div>
 
-            {/* Section 3 — Fit */}
+            {/* Section 3 · Fit */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 3 · WHY COMPASS PARTNER</div>
               <TextAreaField
@@ -167,13 +167,13 @@ export default function PartnerApplyPage() {
                     "Within 30 days of approval",
                     "30-60 days",
                     "60-90 days",
-                    "Exploring — no firm timeline",
+                    "Exploring · no firm timeline",
                   ]}
                 />
               </div>
             </div>
 
-            {/* Section 4 — References */}
+            {/* Section 4 · References */}
             <div className="rounded-2xl border border-[var(--border)] p-6" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
               <div className="text-[10px] tracking-[.14em] uppercase font-extrabold text-[var(--accent)] mb-3">SECTION 4 · CREDIBILITY (OPTIONAL BUT HELPS)</div>
               <TextAreaField
@@ -194,11 +194,11 @@ export default function PartnerApplyPage() {
 
             {/* Acknowledge */}
             <div className="rounded-xl p-4 border border-[var(--accent)]/30 bg-[var(--accent)]/5 text-[12.5px] text-[var(--fg)] leading-relaxed">
-              <strong className="text-[var(--fg)]">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor — no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
+              <strong className="text-[var(--fg)]">Before submitting:</strong> Compass Partner is a paid B2B program (X3 takes 30% of whatever you charge your carriers, with a $10/driver/month floor · no base subscription). The application + interview is free. By submitting, you agree to be contacted at the email/phone provided about partnership opportunities.
             </div>
 
             {error && (
-              <div className="rounded-xl p-4 border border-rose-500/40 bg-rose-500/10 text-[13px] text-rose-200">
+              <div className="rounded-xl p-4 border border-rose-500/40 bg-rose-500/10 text-[13px] text-rose-700 dark:text-rose-200">
                 <strong className="text-[var(--fg)]">Submission failed:</strong> {error}<br />
                 Try again, or email <a href="mailto:partners@x3compass.com" className="underline">partners@x3compass.com</a> directly.
               </div>
@@ -228,7 +228,7 @@ function Field({ label, name, type = "text", required, placeholder }: { label: s
   return (
     <div>
       <label className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] block mb-1.5">
-        {label} {required && <span className="text-rose-300">*</span>}
+        {label} {required && <span className="text-rose-700 dark:text-rose-300">*</span>}
       </label>
       <input
         type={type}
@@ -245,7 +245,7 @@ function TextAreaField({ label, name, required, placeholder, rows = 3 }: { label
   return (
     <div>
       <label className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] block mb-1.5">
-        {label} {required && <span className="text-rose-300">*</span>}
+        {label} {required && <span className="text-rose-700 dark:text-rose-300">*</span>}
       </label>
       <textarea
         name={name}
@@ -262,7 +262,7 @@ function SelectField({ label, name, required, options }: { label: string; name: 
   return (
     <div>
       <label className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] block mb-1.5">
-        {label} {required && <span className="text-rose-300">*</span>}
+        {label} {required && <span className="text-rose-700 dark:text-rose-300">*</span>}
       </label>
       <select
         name={name}

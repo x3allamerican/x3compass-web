@@ -2,7 +2,7 @@ import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 
 export const metadata = {
-  title: "Changelog — X3 Compass",
+  title: "Changelog · X3 Compass",
   description: "We build in the open. Every shipped feature, every fix, every milestone. Updated continuously.",
 };
 
@@ -17,50 +17,50 @@ const TAG_STYLES: Record<Entry["tag"], { label: string; cls: string }> = {
   feature: { label: "FEATURE",     cls: "text-[var(--accent)]  bg-[var(--accent)]/10  border-[var(--accent)]/30" },
   fix:     { label: "FIX",         cls: "text-[var(--success)] bg-[var(--success)]/10 border-[var(--success)]/30" },
   infra:   { label: "INFRA",       cls: "text-[var(--warning)] bg-[var(--warning)]/10 border-[var(--warning)]/30" },
-  design:  { label: "DESIGN",      cls: "text-purple-400        bg-purple-400/10       border-purple-400/30" },
+  design:  { label: "DESIGN",      cls: "text-purple-700 dark:text-purple-400        bg-purple-400/10       border-purple-400/30" },
 };
 
-// Curated changelog — written for carriers, not engineers
+// Curated changelog · written for carriers, not engineers
 const ENTRIES: Entry[] = [
   {
     date: "May 17, 2026",
     tag: "design",
-    title: "Site redesign — sprints 1-4: from generic AI-template to trucking-native",
+    title: "Site redesign · sprints 1-4: from generic AI-template to trucking-native",
     body:
-      "Replaced every emoji icon with a real photo. Added 16 authentic trucking/compliance photos sourced from Pexels + Unsplash. Real brand SVGs for every integration (Stripe, Anthropic, Supabase, Cloudflare, Resend, Twilio, Checkr). Built /trust transparency page. Live Ask Compass demo widget — no signup, 5 free questions per IP per 6h, every CFR citation round-tripped against eCFR. Page heroes on /pricing, /partners, /faq. Number counters on the stat band. Per-brain hover-expand with example questions. Light + dark mode with persistent toggle.",
+      "Replaced every emoji icon with a real photo. Added 16 authentic trucking/compliance photos sourced from Pexels + Unsplash. Real brand SVGs for every integration (Stripe, Anthropic, Supabase, Cloudflare, Resend, Twilio, Checkr). Built /trust transparency page. Live Ask Compass demo widget · no signup, 5 free questions per IP per 6h, every CFR citation round-tripped against eCFR. Page heroes on /pricing, /partners, /faq. Number counters on the stat band. Per-brain hover-expand with example questions. Light + dark mode with persistent toggle.",
   },
   {
     date: "May 17, 2026",
     tag: "feature",
-    title: "Prompt Intelligence v1 — every customer query measured, improved weekly",
+    title: "Prompt Intelligence v1 · every customer query measured, improved weekly",
     body:
       "Every /api/ask response now logs to compass_prompt_eval with the cited CFR sections, eCFR verification status, and citation quality score. Weekly auto-report flags categories with quality < 0.9 so the system prompt can be tuned. Foundation for the open-source skills library to keep improving with every customer query.",
   },
   {
     date: "May 17, 2026",
     tag: "infra",
-    title: "Fort Knox v4 — 8 production monitors, autonomous incident response",
+    title: "Fort Knox v4 · 8 production monitors, autonomous incident response",
     body:
       "Synthetic journey probes every 15 min. Cloudflare deploy-failure watcher every 10 min. Stripe webhook health every 30 min. Supabase security + performance advisor poll. Client-error spike aggregator. Doctor agent with 14 known incident patterns auto-resolves Cloudflare swaps, transient 403s, and upstream incidents without paging a human.",
   },
   {
     date: "May 17, 2026",
     tag: "feature",
-    title: "Hazmat Center — 40 real DOT placards sourced from Wikimedia Commons",
+    title: "Hazmat Center · 40 real DOT placards sourced from Wikimedia Commons",
     body:
       "Every Class 1-9 placard, every RAM label, every GHS pictogram, the NFPA 704 diamond. All from authoritative public-domain sources. Replaces the in-code SVG generator. Real placards, real regulations, instantly recognizable to anyone who's handled hazmat freight.",
   },
   {
     date: "May 17, 2026",
     tag: "feature",
-    title: "CFR Eval Baseline — 85.0% on 60 questions across 15 categories",
+    title: "CFR Eval Baseline · 85.0% on 60 questions across 15 categories",
     body:
-      "Benchmark of vanilla Claude on 60 hand-crafted FMCSA questions. Each question round-trips against the live eCFR registry. Drives every skill-builder we ship. Public number: 51 of 60 questions correctly cited (claude-sonnet-4-6, vanilla — improvements come from skill grounding).",
+      "Benchmark of vanilla Claude on 60 hand-crafted FMCSA questions. Each question round-trips against the live eCFR registry. Drives every skill-builder we ship. Public number: 51 of 60 questions correctly cited (claude-sonnet-4-6, vanilla · improvements come from skill grounding).",
   },
   {
     date: "May 16, 2026",
     tag: "feature",
-    title: "Background Checks — Checkr embedded NewInvitation + ReportsOverview",
+    title: "Background Checks · Checkr embedded NewInvitation + ReportsOverview",
     body:
       "Driver-side: FCRA-compliant disclosure + consent flow embedded in /app/background-checks. Carrier-side: live status tracking from Checkr's webhook. Fully wired to compass_background_checks. Order, deliver, archive without leaving Compass.",
   },
@@ -69,12 +69,12 @@ const ENTRIES: Entry[] = [
     tag: "feature",
     title: "Full /app shell wired to real per-tenant Supabase data",
     body:
-      "16 application pages — Drivers, Vehicles, DQ Files, D&A, Training, MVR, HOS, Inspections, Accidents, IFTA, Audit Export, Settings, etc. All reading from the customer's own Supabase rows, all RLS-isolated by carrier_id, all with CRUD wired against compass_* tables.",
+      "16 application pages · Drivers, Vehicles, DQ Files, D&A, Training, MVR, HOS, Inspections, Accidents, IFTA, Audit Export, Settings, etc. All reading from the customer's own Supabase rows, all RLS-isolated by carrier_id, all with CRUD wired against compass_* tables.",
   },
   {
     date: "May 16, 2026",
     tag: "feature",
-    title: "Partner Program v2 — 30% commission floor, application + admin pipe",
+    title: "Partner Program v2 · 30% commission floor, application + admin pipe",
     body:
       "DOT compliance consultants can resell Compass at their own price; we pay 30% of net revenue or a $10/driver floor (whichever is higher). Application form at /partners. Admin review dashboard at /admin/partners. Full reseller agreement reviewed through the Legal OS three-pass.",
   },
@@ -88,7 +88,7 @@ const ENTRIES: Entry[] = [
   {
     date: "May 14, 2026",
     tag: "feature",
-    title: "v1.0 of the open-source skills library — 100 published FMCSA skills on GitHub",
+    title: "v1.0 of the open-source skills library · 100 published FMCSA skills on GitHub",
     body:
       "Every skill is a versioned prompt + a CFR-cited sample answer. MIT licensed. Anyone can inspect what Compass actually knows. github.com/x3fleetsafety/skills.",
   },
@@ -110,7 +110,7 @@ export default function ChangelogPage() {
             </h1>
             <p className="text-[18px] text-[var(--fg-muted)] max-w-3xl">
               We ship continuously and we list it all. No marketing-speak. If we fixed it, broke it,
-              shipped it, or learned from it — it&apos;s on this page.
+              shipped it, or learned from it · it&apos;s on this page.
             </p>
           </div>
         </section>

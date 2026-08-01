@@ -7,19 +7,20 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:smoke": "playwright test tests/smoke.spec.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.4",
+    "@supabase/supabase-js": "^2.45.0",
+    "lightningcss-darwin-arm64": "^1.32.0",
     "next": "16.2.6",
+    "pdf-lib": "^1.17.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "stripe": "^22.1.1"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.0",
-    "@playwright/test": "^1.49.0",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

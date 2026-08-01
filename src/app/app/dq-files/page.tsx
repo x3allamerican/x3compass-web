@@ -1,227 +1,301 @@
-"use client";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { TenantTable, Badge, fmtDate } from "@/components/app/TenantTable";
-import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
-import { DriverDQGrid } from "@/components/app/DriverDQGrid";
-import { useUser } from "@/lib/useUser";
-import { getSupabase } from "@/lib/supabase";
-import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
+import PageGuide from "@/components/PageGuide";
+import DataSourceCard from "@/components/DataSourceCard";
 
-type Doc = { id:string; carrier_id:string; driver_id:string; doc_type:string; label:string|null; url:string|null; expires_on:string|null; created_at:string };
+type DocStatus = "complete" | "missing" | "expiring" | "expired";
 
-const DOC_TYPES = [
-  "application","cdl_copy","medical_card","road_test_certificate",
-  "mvr","mvr_initial","mvr_annual","mvr_review",
-  "drug_test_result","pre_employment_drug_test",
-  "clearinghouse_query","clearinghouse_full",
-  "prior_employer_inquiry","psp","psp_report",
-  "national_registry_verification","registry_verification",
-  "disclosure_consent","background_check",
-  "eldt_certificate","eldt","other",
+type Doc = {
+  slot: string;
+  cfr: string;
+  status: DocStatus;
+  detail: string;
+};
+
+const ROSTER = [
+  { id: "rtorres",   name: "Ricardo Torres", initials: "RT", coverage: "8 / 12", risk: "amber" },
+  { id: "jmartinez", name: "Jared Martinez", initials: "JM", coverage: "12 / 12", risk: "green" },
+  { id: "sjohnson",  name: "Sarah Johnson",  initials: "SJ", coverage: "9 / 12",  risk: "red" },
+  { id: "mkowalski", name: "Mike Kowalski",  initials: "MK", coverage: "12 / 12", risk: "green" },
+  { id: "epark",     name: "Emma Park",      initials: "EP", coverage: "10 / 12", risk: "amber" },
+  { id: "dramirez",  name: "Diego Ramirez",  initials: "DR", coverage: "11 / 12", risk: "green" },
 ];
 
+const DOCS: Doc[] = [
+  { slot: "Driver application",              cfr: "§ 391.21",      status: "complete", detail: "Signed 2024-08-12 · on file" },
+  { slot: "Inquiry to previous employers",   cfr: "§ 391.23(a)(1)",status: "complete", detail: "3 employers contacted · on file" },
+  { slot: "Motor vehicle record (MVR)",      cfr: "§ 391.23(a)(2)",status: "complete", detail: "TX · pulled 2026-03-10" },
+  { slot: "Annual MVR review",               cfr: "§ 391.25",       status: "expiring", detail: "Next review due in 12 days" },
+  { slot: "Road test certificate",           cfr: "§ 391.31",       status: "complete", detail: "Examiner: Mike Perry · 2024-08-15" },
+  { slot: "Medical examiner certificate",    cfr: "§ 391.43",       status: "expiring", detail: "Expires in 14 days · UPLOAD NEW" },
+  { slot: "Medical examiner cert verification (NRCME)", cfr: "§ 391.23(m)", status: "complete", detail: "Verified · 2024-08-12" },
+  { slot: "Clearinghouse pre-employment query",         cfr: "§ 382.701(a)", status: "complete", detail: "Limited query · negative · 2024-08-14" },
+  { slot: "Clearinghouse annual query",      cfr: "§ 382.701(b)",  status: "missing",  detail: "Not yet conducted · DUE THIS WEEK" },
+  { slot: "Drug & alcohol pre-employment test", cfr: "§ 382.301",  status: "complete", detail: "DOT 5-panel · negative · 2024-08-13" },
+  { slot: "Entry-Level Driver Training (ELDT) · theory", cfr: "Part 380.609", status: "missing", detail: "Driver had CDL pre-2022 · CHECK GRANDFATHER" },
+  { slot: "Hazmat endorsement (TSA-H)",      cfr: "49 CFR 1572",    status: "complete", detail: "Valid · expires 2027-02-19" },
+];
+
+const STATUS_STYLE: Record<DocStatus, { bg: string; text: string; border: string; label: string; ring: string }> = {
+  complete: { bg: "bg-emerald-500/10",  text: "text-emerald-300",  border: "border-emerald-500/30",  label: "Complete",  ring: "ring-emerald-500/30" },
+  expiring: { bg: "bg-amber-500/10",    text: "text-amber-300",    border: "border-amber-500/40",    label: "Expiring",  ring: "ring-amber-500/40" },
+  expired:  { bg: "bg-rose-500/10",     text: "text-rose-300",     border: "border-rose-500/40",     label: "Expired",   ring: "ring-rose-500/40" },
+  missing:  { bg: "bg-rose-500/10",     text: "text-rose-300",     border: "border-rose-500/40",     label: "Missing",   ring: "ring-rose-500/40" },
+};
+
+const RISK_COLOR: Record<string, string> = {
+  green: "#10B981",
+  amber: "#FBBF24",
+  red:   "#F87171",
+};
+
 export default function DQFilesPage() {
-  const { carrier } = useUser();
-  const drivers = useDrivers(carrier?.id);
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterDriver, setFilterDriver] = useState("");
-  const [search, setSearch] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [prefillDocType, setPrefillDocType] = useState<string | undefined>();
-  const [view, setView] = useState<"grid" | "table">("grid");
-
-  async function refresh() {
-    if (!carrier) return;
-    setLoading(true);
-    const { data } = await getSupabase().from("compass_dq_documents").select("*").eq("carrier_id", carrier.id).order("created_at",{ascending:false});
-    setDocs((data as Doc[]) || []); setLoading(false);
-  }
-  useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
-  useEffect(() => {
-    // Auto-select the first driver so the visual 12-box DQ grid shows by default.
-    if (!filterDriver && drivers.length > 0) setFilterDriver(drivers[0].id);
-  }, [drivers, filterDriver]);
-
-  const filtered = useMemo(() => {
-    let rows = filterDriver ? docs.filter(d => d.driver_id === filterDriver) : docs;
-    const q = search.trim().toLowerCase();
-    if (q) {
-      rows = rows.filter(d => {
-        const drv = drivers.find(x => x.id === d.driver_id);
-        const drvName = drv ? `${drv.first_name || ""} ${drv.last_name || ""}`.toLowerCase() : "";
-        return (
-          (d.doc_type || "").toLowerCase().includes(q) ||
-          (d.label || "").toLowerCase().includes(q) ||
-          drvName.includes(q)
-        );
-      });
-    }
-    return rows;
-  }, [docs, filterDriver, search, drivers]);
-  const selectedDriver = useMemo(() => drivers.find(d => d.id === filterDriver), [drivers, filterDriver]);
-
-  const today = new Date().toISOString().slice(0,10);
-  const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0,10);
-
-  // ── KPI rollups across the whole fleet
-  const kpis = useMemo(() => {
-    const driversWithDocs = new Set(docs.map(d => d.driver_id)).size;
-    const expiringSoon = docs.filter(d => d.expires_on && d.expires_on >= today && d.expires_on <= in30).length;
-    const expired = docs.filter(d => d.expires_on && d.expires_on < today).length;
-    // Coverage = fraction of drivers that have *any* documents on file (rough proxy)
-    const coveragePct = drivers.length > 0 ? Math.round((driversWithDocs / drivers.length) * 100) : 0;
-    return { totalDocs: docs.length, coveragePct, expiringSoon, expired, driversWithFiles: driversWithDocs };
-  }, [docs, drivers, today, in30]);
-
-  function startUpload(docType?: string) {
-    setPrefillDocType(docType);
-    setShowAdd(true);
-  }
+  const active = ROSTER[0];
 
   return (
-    <AppShell crumbs="DQ FILES · 49 CFR § 391" title="Driver Qualification Files"
+    <AppShell
+      title="DQ Files · Ricardo Torres"
+      crumbs="DQ FILES BRAIN · 49 CFR § 391.51 · 12-DOCUMENT FILE"
       actions={
         <>
-          {selectedDriver && (
-            <button
-              onClick={() => setView(v => v === "grid" ? "table" : "grid")}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]"
-            >
-              {view === "grid" ? "📋 Table view" : "🟦 Grid view"}
-            </button>
-          )}
-          <button onClick={() => startUpload()} disabled={!drivers.length} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Upload document</button>
+          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
+            ⬆ Upload
+          </button>
+          <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#000000]"
+            style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
+          >
+            📄 Audit-ready bundle →
+          </Link>
         </>
       }
     >
-      <div className="p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
+        {/* DRIVER PICKER SIDEBAR (within main) */}
+        <aside className="border-r border-[#1E3556] bg-[#0C1A30] min-h-[calc(100vh-64px)] py-5 px-3">
+          <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[#16C7FF]/60 px-2 mb-3">
+            Drivers · 72
+          </div>
+          <div className="relative mb-3">
+            <input
+              type="search"
+              placeholder="Search drivers…"
+              className="w-full bg-[#000000] border border-[#1E3556] rounded-lg pl-9 pr-3 py-2 text-[12px] text-white placeholder:text-white/40 focus:border-[#16C7FF] focus:outline-none"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-[12px]">🔍</span>
+          </div>
+          <div className="space-y-1">
+            {ROSTER.map((d) => (
+              <Link
+                key={d.id}
+                href={`/app/dq-files?d=${d.id}`}
+                className={`flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
+                  d.id === active.id
+                    ? "bg-[#16C7FF]/12 border border-[#16C7FF]/30"
+                    : "hover:bg-white/5 border border-transparent"
+                }`}
+              >
+                <div
+                  className="w-8 h-8 rounded-full grid place-items-center font-extrabold text-[11px] text-[#000000] flex-shrink-0"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, " + RISK_COLOR[d.risk] + ", #16C7FF)",
+                  }}
+                >
+                  {d.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-semibold text-white truncate">{d.name}</div>
+                  <div className="text-[10px] text-white/45 font-mono">{d.coverage}</div>
+                </div>
+                <div className="w-2 h-2 rounded-full" style={{ background: RISK_COLOR[d.risk], boxShadow: `0 0 6px ${RISK_COLOR[d.risk]}80` }} />
+              </Link>
+            ))}
+            <div className="text-[11px] text-white/40 px-2 py-2">+ 66 more drivers</div>
+          </div>
+        </aside>
 
-        {/* KPI stat cards — top row, classic-app style */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Total documents"        value={kpis.totalDocs} sub={`${kpis.driversWithFiles} of ${drivers.length} drivers have files`} />
-          <KpiCard label="Roster coverage"         value={`${kpis.coveragePct}%`} sub="Drivers with ≥1 DQ doc" tone={kpis.coveragePct < 80 ? "warn" : "ok"} />
-          <KpiCard label="Expiring ≤30d"           value={kpis.expiringSoon} sub="Across all drivers" tone={kpis.expiringSoon > 0 ? "warn" : "ok"} />
-          <KpiCard label="Expired"                 value={kpis.expired} sub="Action required" tone={kpis.expired > 0 ? "danger" : "ok"} />
-        </div>
+        {/* DOC GRID */}
+        <div className="px-6 py-6 space-y-6">
+        {/* Joshua's polish pass: action content (driver detail + 12-doc grid)
+            renders FIRST. The Education Hub explainer ("How this page works")
+            and DataSource picker live at the bottom now — matches Drivers tab
+            structure where the title + KPIs + table lead, and any explainers
+            sit below. Original PageGuide + DataSourceCard moved to render
+            AFTER the 12-doc grid (see further down in this file). */}
 
-        <div className="flex flex-wrap gap-3 mb-5 items-center">
-          <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search docs by type, label, or driver name…" className="flex-1 min-w-[260px] px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm focus:outline-none focus:border-[var(--accent)]" />
-          <select value={filterDriver} onChange={(e)=>setFilterDriver(e.target.value)} className="px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--fg)] text-sm min-w-[220px]">
-            <option value="">All drivers (table view)</option>
-            {drivers.map(d => <option key={d.id} value={d.id}>{driverLabel(d)}</option>)}
-          </select>
-          {!filterDriver && <div className="text-[12px] text-[var(--fg-muted)]">{filtered.length} document{filtered.length===1?"":"s"} across all drivers · pick a driver to see the 12-box DQ grid</div>}
-        </div>
-
-        {/* Grid view: per-driver colored requirement tiles */}
-        {selectedDriver && view === "grid" && (
-          <DriverDQGrid
-            driver={selectedDriver as Parameters<typeof DriverDQGrid>[0]["driver"]}
-            docs={docs.filter(d => d.driver_id === selectedDriver.id) as Parameters<typeof DriverDQGrid>[0]["docs"]}
-            onUpload={(docType) => startUpload(docType)}
-          />
+        {/* DATA SOURCE — hidden in this top slot; rendered at the bottom. */}
+        {null && (
+        <DataSourceCard
+          trackerLabel="Driver Qualification Files"
+          cfr="49 CFR § 391.51 (the 12 documents)"
+          initialStatus="manual"
+          recordCount={864}
+          vendors={[
+            { name: "Tenstreet", blurb: "Pulls full DQ file from candidate intake", badge: "Recommended", status: "live", cost: "Included" },
+            { name: "Foley Carrier Services", blurb: "DQ file management · annual reviews", badge: "API key", status: "live", cost: "$8/driver/mo" },
+            { name: "JJ Keller Encompass", blurb: "DQ files + medical card tracking", status: "manual-pull", cost: "$12/driver/mo" },
+            { name: "DocuSign", blurb: "eSign-completed forms route to DQ file", badge: "OAuth", status: "live", cost: "Included" },
+            { name: "Drive My Way", blurb: "ATS-to-DQ doc transfer", badge: "API key", status: "live", cost: "Included" },
+            { name: "Upload PDFs to X3", blurb: "Drag-and-drop · OCR + auto-classify", badge: "Recommended", status: "live", cost: "Included" },
+          ]}
+          csvTemplate={{
+            name: "x3-compass-dq-files-template.csv",
+            columns: ["driver_id", "document_type", "document_url", "issued_date", "expires_date", "verified_by"],
+          }}
+          manualLabel="Upload document"
+        />
         )}
 
-        {/* Table view: flat doc list (filter applies if a driver is selected) */}
-        {(!selectedDriver || view === "table") && (
-          <TenantTable<Doc> rows={filtered} loading={loading}
-            emptyTitle={drivers.length === 0 ? "Add a driver first" : "No documents yet"}
-            emptyDesc={drivers.length === 0 ? "DQ documents attach to drivers. Add a driver from the Drivers page first." : "Upload your first DQ document, or pick a driver above to see what's required."}
-            columns={[
-              { key: "driver", label: "Driver", render: (d) => <span className="text-[var(--fg)]">{driverLabel(drivers.find(x => x.id === d.driver_id))}</span> },
-              { key: "doc_type", label: "Type", render: (d) => <Badge color="cyan">{d.doc_type.replace(/_/g," ")}</Badge> },
-              { key: "label", label: "Label", hideOnMobile: true, render: (d) => d.label || <span className="text-[var(--fg-faint)]">—</span> },
-              { key: "expires_on", label: "Expires", render: (d) => !d.expires_on ? <span className="text-[var(--fg-faint)]">—</span> : d.expires_on < today ? <Badge color="red">{fmtDate(d.expires_on)}</Badge> : d.expires_on <= in30 ? <Badge color="amber">{fmtDate(d.expires_on)}</Badge> : <span className="text-[var(--fg-muted)]">{fmtDate(d.expires_on)}</span> },
-              { key: "url", label: "File", render: (d) => d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline">Open</a> : <span className="text-[var(--fg-faint)]">—</span> },
-            ]}
-          />
-        )}
+          {/* Driver header */}
+          <div
+            className="rounded-2xl p-5 border border-[#1E3556] flex items-center gap-4 flex-wrap"
+            style={{ background: "linear-gradient(180deg, #000000 0%, #0F1C32 100%)" }}
+          >
+            <div
+              className="w-14 h-14 rounded-full grid place-items-center font-black text-[18px] text-[#000000]"
+              style={{ background: "linear-gradient(135deg, #8B5CF6, #16C7FF)" }}
+            >
+              RT
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-[20px] font-extrabold text-white">Ricardo Torres</h2>
+              <div className="text-[12px] text-white/55 mt-0.5">CDL-A · H · Dallas, TX · TX-DL-8901442 · Hire date 2024-08-12</div>
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div>
+                <div className="text-[10px] tracking-wider uppercase text-white/45">Coverage</div>
+                <div className="text-[20px] font-black text-amber-300">8 / 12</div>
+              </div>
+              <div>
+                <div className="text-[10px] tracking-wider uppercase text-white/45">Risk</div>
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                  ⚠ 2 missing · 2 expiring
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Compass nudge */}
+          <div
+            className="rounded-2xl p-4 border flex gap-3 items-start"
+            style={{
+              background: "linear-gradient(135deg, rgba(2, 6, 12, 0.45), rgba(15, 28, 50, 0.5))",
+              borderColor: "rgba(2, 6, 12, 0.45)",
+            }}
+          >
+            <div
+              className="w-9 h-9 rounded-full grid place-items-center font-black text-[16px] text-[#000000] flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}
+            >
+              ∞
+            </div>
+            <div className="flex-1">
+              {/* Joshua: Compass answer text needs to be bright + readable.
+                  Bumped 13px → 16px and forced #FFFFFF (no opacity) so it's
+                  full white on the dark card surface, not the 70%-opacity
+                  off-white that was making it dim. */}
+              <div className="text-[16px] leading-relaxed" style={{ color: "#FFFFFF" }}>
+                <strong style={{ color: "#16C7FF" }}>Compass:</strong>{" "}
+                Ricardo&apos;s med cert expires in <strong style={{ color: "#FFFFFF" }}>14 days</strong> per § 391.43. He also needs his <strong style={{ color: "#FFFFFF" }}>annual Clearinghouse query</strong> (§ 382.701(b)) before next Tuesday, and we should check his <strong style={{ color: "#FFFFFF" }}>ELDT grandfather status</strong> (Part 380.609) since he had his CDL before Feb 7, 2022.
+              </div>
+              <div className="mt-2 flex gap-2 flex-wrap">
+                <button className="px-3 py-1.5 rounded-full text-[12px] font-bold text-[#000000]" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>
+                  Email Ricardo a med-cert reminder
+                </button>
+                <button className="px-3 py-1.5 rounded-full text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">
+                  Run Clearinghouse query
+                </button>
+                <button className="px-3 py-1.5 rounded-full text-[12px] font-bold text-white border border-white/20 hover:bg-white/5">
+                  Check ELDT grandfather
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 12-DOC GRID */}
+          <div>
+            <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+              <h3 className="text-[15px] font-extrabold text-white">The 12 documents · § 391.51</h3>
+              <span className="text-[11px] text-white/50">Click any slot to upload, replace, or view history</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {DOCS.map((d, i) => {
+                const s = STATUS_STYLE[d.status];
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-xl p-4 border ${s.bg} ${s.border} flex flex-col gap-2 hover:scale-[1.01] transition-transform cursor-pointer`}
+                    style={{
+                      boxShadow: d.status === "missing" || d.status === "expired" ? `0 0 0 1px ${s.ring.split("/")[0].replace("ring-", "")} inset` : undefined,
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-[14px] font-bold text-white leading-snug">{d.slot}</div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${s.bg} ${s.text} border ${s.border} whitespace-nowrap`}>
+                        {s.label}
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-mono text-[#16C7FF]/80">{d.cfr}</div>
+                    <div className="text-[12px] text-white/70 leading-relaxed flex-1">{d.detail}</div>
+                    <div className="flex gap-2 mt-1">
+                      {d.status === "complete" && (
+                        <>
+                          <button className="text-[11px] font-bold text-[#16C7FF] hover:text-[#16C7FF]">View →</button>
+                          <button className="text-[11px] font-bold text-white/55 hover:text-white">Replace</button>
+                        </>
+                      )}
+                      {(d.status === "expiring" || d.status === "expired") && (
+                        <button className="text-[11px] font-bold text-amber-300 hover:text-amber-200">⬆ Upload new</button>
+                      )}
+                      {d.status === "missing" && (
+                        <button className="text-[11px] font-bold text-rose-300 hover:text-rose-200">⬆ Upload now</button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Color legend — Joshua wants this under the 4 (12) status boxes so
+              the green / amber / rose / red meaning is unambiguous. */}
+          <div className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4">
+            <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[#16C7FF]/80 mb-3">
+              Status legend
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[14px]">
+              <div className="flex items-start gap-2.5">
+                <span className="mt-1 w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#10B981", boxShadow: "0 0 6px #10B98180" }} />
+                <div>
+                  <div className="font-bold text-white">Complete <span className="text-white/60 font-normal">(green)</span></div>
+                  <div className="text-white/65 text-[12px]">On file, signed, verified, and current.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-1 w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#FBBF24", boxShadow: "0 0 6px #FBBF2480" }} />
+                <div>
+                  <div className="font-bold text-white">Expiring soon <span className="text-white/60 font-normal">(yellow / amber)</span></div>
+                  <div className="text-white/65 text-[12px]">Expires within 30 days. Schedule renewal now.</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-1 w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#F97316", boxShadow: "0 0 6px #F9731680" }} />
+                <div>
+                  <div className="font-bold text-white">Action required <span className="text-white/60 font-normal">(orange)</span></div>
+                  <div className="text-white/65 text-[12px]">Driver action pending (e.g. signature, prior-employer reply).</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-1 w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#F87171", boxShadow: "0 0 6px #F8717180" }} />
+                <div>
+                  <div className="font-bold text-white">Expired / Missing <span className="text-white/60 font-normal">(red)</span></div>
+                  <div className="text-white/65 text-[12px]">Past expiration or never on file. Audit-fail risk.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {showAdd && <DocFormModal carrier_id={carrier!.id} drivers={drivers} preDriverId={filterDriver} preDocType={prefillDocType} onClose={()=>{setShowAdd(false); setPrefillDocType(undefined);}} onSaved={()=>{refresh(); setShowAdd(false); setPrefillDocType(undefined);}} />}
     </AppShell>
-  );
-}
-
-function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: number | string; sub?: string; tone?: "ok" | "warn" | "info" | "muted" | "danger" }) {
-  const accent = tone === "warn" ? "var(--warning, #FBBF24)" : tone === "danger" ? "var(--danger, #F87171)" : tone === "info" ? "var(--accent)" : tone === "muted" ? "var(--fg-muted)" : "var(--accent)";
-  const showAccent = (tone === "warn" || tone === "danger") && typeof value === "number" && value > 0;
-  return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-4">
-      <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[var(--fg-muted)] mb-1">{label}</div>
-      <div className="text-[28px] font-black leading-none text-[var(--fg)]" style={{ color: showAccent ? accent : undefined }}>{value}</div>
-      {sub && <div className="text-[11px] text-[var(--fg-muted)] mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function DocFormModal({ carrier_id, drivers, preDriverId, preDocType, onClose, onSaved }:{ carrier_id:string; drivers: DriverOpt[]; preDriverId?: string; preDocType?: string; onClose:()=>void; onSaved:()=>void }) {
-  const [form, setForm] = useState<Partial<Doc>>({ doc_type: preDocType || "medical_card", driver_id: preDriverId || drivers[0]?.id });
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string|null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  async function uploadFileToStorage(): Promise<string | null> {
-    if (!file) return null;
-    setUploading(true);
-    try {
-      const sb = getSupabase();
-      const driverId = form.driver_id;
-      if (!driverId) throw new Error("Select a driver before uploading");
-      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-      const path = `${carrier_id}/${driverId}/${Date.now()}_${safeName}`;
-      const { error: upErr } = await sb.storage.from("dq-docs").upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-      // Signed URL good for 1 year (3600*24*365 = 31536000)
-      const { data: signed } = await sb.storage.from("dq-docs").createSignedUrl(path, 31536000);
-      return signed?.signedUrl || null;
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault(); setBusy(true); setError(null);
-    try {
-      if (!form.driver_id) throw new Error("Select a driver");
-      // Upload file first (if attached) and use the returned signed URL
-      const uploadedUrl = await uploadFileToStorage();
-      const payload = { ...form, carrier_id, url: uploadedUrl || form.url || null };
-      const { error } = await getSupabase().from("compass_dq_documents").insert([payload]);
-      if (error) throw error;
-      onSaved();
-    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
-    finally { setBusy(false); }
-  }
-
-  return (
-    <Modal title="Upload DQ document" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <Field label="Driver *">
-          <select required value={form.driver_id||""} onChange={(e)=>setForm({...form,driver_id:e.target.value})} className="x3i">
-            <option value="">Select…</option>
-            {drivers.map(d => <option key={d.id} value={d.id}>{driverLabel(d)}</option>)}
-          </select>
-        </Field>
-        <Field label="Document type">
-          <select value={form.doc_type||""} onChange={(e)=>setForm({...form,doc_type:e.target.value})} className="x3i">
-            {DOC_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g," ")}</option>)}
-          </select>
-        </Field>
-        <Field label="Label (optional)"><input className="x3i" value={form.label||""} onChange={(e)=>setForm({...form,label:e.target.value})} placeholder="e.g. 2026 renewal" /></Field>
-        <Field label="Upload file (PDF, JPG, PNG, DOCX — 50MB max)">
-          <input type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-[var(--fg-muted)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[var(--accent)] file:text-[var(--accent-fg)]" />
-          {file && <div className="text-[11px] text-[var(--fg-muted)] mt-1">📎 {file.name} · {(file.size/1024/1024).toFixed(2)} MB{uploading ? " · uploading…" : ""}</div>}
-          {!file && <div className="text-[11px] text-[var(--fg-muted)] mt-1">Or paste a link instead:</div>}
-        </Field>
-        {!file && <Field label="Link (optional)"><input className="x3i" type="url" value={form.url||""} onChange={(e)=>setForm({...form,url:e.target.value})} placeholder="https://drive.google.com/… or s3 link" /></Field>}
-        <Field label="Expires on"><input className="x3i" type="date" value={form.expires_on||""} onChange={(e)=>setForm({...form,expires_on:e.target.value})} /></Field>
-        {error && <Err msg={error} />}
-        <ModalActions onClose={onClose} busy={busy} submitLabel="Upload" />
-      </form>
-    </Modal>
   );
 }

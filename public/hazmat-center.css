@@ -1,0 +1,2178 @@
+/* =================================================================
+   HAZMAT CENTER — matches the main app theme
+   Cyan #16C7FF + white/light surfaces · navy text · Inter type
+   ================================================================= */
+
+/* Hazmat page chrome ride on top of the standard styles.css system */
+
+.hz-page-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px; margin-bottom: 22px;
+  background: #000000;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.hz-page-bar-l { display: flex; align-items: center; gap: 14px; }
+.hz-page-bar-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #16C7FF, #16C7FF);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #FFFFFF;
+}
+.hz-page-bar-title {
+  font-size: 14pt; font-weight: 800; color: #F8FAFC;
+  margin: 0; letter-spacing: -0.2pt;
+}
+.hz-page-bar-sub {
+  font-size: 10pt; color: var(--fg-muted, #475569); margin-top: 2px;
+}
+.hz-page-bar-r { display: flex; align-items: center; gap: 10px; }
+
+/* Premium $99 add-on pill (inline, just a chip — NOT a theme) */
+.hz-pro-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  color: #000000; font-weight: 800; font-size: 9px;
+  padding: 3px 8px; border-radius: 4px;
+  letter-spacing: 0.5pt; text-transform: uppercase;
+}
+
+/* ============== HERO (matches the in-app feel) ============== */
+background: linear-gradient(135deg, rgba(22, 199, 255,0.10) 0%, rgba(22, 199, 255,0.06) 100%), #000000;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.hz-hero::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #16C7FF 0%, #16C7FF 100%);
+}
+.hz-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 10pt; font-weight: 700; letter-spacing: 2pt; text-transform: uppercase;
+  color: #16C7FF; margin-bottom: 14px;
+}
+.hz-hero h1 {
+  font-size: 32pt; font-weight: 800; color: var(--fg, #000000);
+  letter-spacing: -0.8pt; line-height: 1.1; margin: 0 0 14px 0;
+  max-width: 820px;
+}
+.hz-hero h1 em {
+  font-style: normal; color: #16C7FF;
+}
+.hz-hero-sub {
+  font-size: 12pt; color: var(--fg-muted, #475569); line-height: 1.55;
+  max-width: 720px; margin: 0;
+}
+.hz-hero-meta {
+  display: flex; gap: 28px; flex-wrap: wrap; margin-top: 22px;
+  padding-top: 22px; border-top: 1px solid var(--border, #E2E8F0);
+}
+.hz-hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+.hz-hero-meta-num {
+  font-size: 20pt; font-weight: 900; color: #16C7FF; line-height: 1;
+}
+.hz-hero-meta-label {
+  font-size: 9pt; font-weight: 700; color: var(--fg-muted, #475569);
+  letter-spacing: 1.5pt; text-transform: uppercase;
+}
+
+/* ============== UPSELL GATE ============== */
+background: linear-gradient(90deg, rgba(22, 199, 255,0.10), rgba(22, 199, 255,0.12)), #000000;
+  border: 1px solid #BAE6FD;
+  border-radius: 12px;
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 22px;
+}
+.hz-upsell-bar-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  background: linear-gradient(135deg, #16C7FF, #16C7FF);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #FFFFFF;
+}
+.hz-upsell-bar-content { flex: 1; }
+.hz-upsell-bar-title {
+  font-size: 12pt; font-weight: 800; color: var(--fg, #000000); margin-bottom: 2px;
+}
+.hz-upsell-bar-sub { font-size: 10pt; color: var(--fg-muted, #475569); }
+.hz-upsell-bar-price { text-align: right; flex-shrink: 0; }
+.hz-upsell-bar-price-num {
+  font-size: 22pt; font-weight: 900; color: #16C7FF; line-height: 1;
+}
+.hz-upsell-bar-price-unit {
+  font-size: 9pt; font-weight: 600; color: var(--fg-muted, #475569);
+  letter-spacing: 1pt; text-transform: uppercase; margin-top: 2px;
+}
+.hz-upsell-cta {
+  background: linear-gradient(135deg, #16C7FF 0%, #16C7FF 100%);
+  color: #FFFFFF; font-weight: 800; font-size: 11pt;
+  padding: 11px 22px; border: 0; border-radius: 8px;
+  cursor: pointer; flex-shrink: 0; letter-spacing: 0.2pt;
+}
+.hz-upsell-cta:hover { box-shadow: 0 6px 18px rgba(22, 199, 255, 0.3); transform: translateY(-1px); }
+
+/* ============== SERVICE TILE GRID ============== */
+.hz-tile-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.hz-tile {
+  position: relative;
+  background: #000000;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 12px;
+  padding: 22px;
+  text-decoration: none; color: inherit;
+  transition: all 0.2s;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.hz-tile::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #16C7FF, #16C7FF);
+  opacity: 0; transition: opacity 0.2s;
+}
+.hz-tile:hover {
+  border-color: #BAE6FD;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(22, 199, 255, 0.12);
+}
+.hz-tile:hover::before { opacity: 1; }
+.hz-tile-icon {
+  width: 48px; height: 48px;
+  background: rgba(22, 199, 255, 0.12);
+  border: 1px solid #BAE6FD;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #16C7FF;
+  margin-bottom: 14px;
+}
+.hz-tile-h {
+  font-size: 13pt; font-weight: 800; color: #F8FAFC;
+  margin: 0 0 6px 0; letter-spacing: -0.1pt;
+}
+.hz-tile-tag {
+  font-size: 8.5pt; font-weight: 700; color: #16C7FF;
+  letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 10px;
+}
+.hz-tile-desc {
+  font-size: 10.5pt; color: #CBD5E1; line-height: 1.55;
+  margin: 0 0 14px 0; flex: 1;
+}
+.hz-tile-cfr {
+  display: inline-block; background: rgba(22, 199, 255, 0.10);
+  color: #16C7FF; border: 1px solid #BAE6FD;
+  padding: 2px 8px; border-radius: 10px;
+  font-size: 8.5pt; font-weight: 700; font-style: italic;
+  margin-bottom: 12px; align-self: flex-start;
+}
+.hz-tile-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10pt; font-weight: 700; color: #16C7FF;
+  margin-top: auto;
+}
+.hz-tile-cta::after { content: "→"; transition: transform 0.2s; }
+.hz-tile:hover .hz-tile-cta::after { transform: translateX(3px); }
+
+/* ============== HAZMAT PANELS ============== */
+.hz-panel {
+  background: #000000;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.hz-panel-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border, #E2E8F0);
+  gap: 12px;
+}
+.hz-panel-h {
+  font-size: 13pt; font-weight: 800; color: #F8FAFC;
+  letter-spacing: -0.1pt; margin: 0;
+}
+.hz-panel-h-eyebrow {
+  font-size: 9pt; font-weight: 700; color: #16C7FF;
+  letter-spacing: 1.2pt; text-transform: uppercase; margin-bottom: 4px;
+}
+
+/* Tables */
+.hz-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.hz-table th {
+  background: var(--fg, #000000); color: #16C7FF;
+  text-align: left; padding: 10px 12px; font-weight: 700;
+  font-size: 9pt; letter-spacing: 0.5pt; text-transform: uppercase;
+  border-bottom: 2px solid #16C7FF;
+}
+.hz-table td {
+  padding: 11px 12px; color: #E2E8F0;
+  border-bottom: 1px solid var(--border, #E2E8F0);
+}
+.hz-table tr:nth-child(even) td { background: #F8FAFC; }
+
+.hz-pill {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 8.5pt; font-weight: 700; letter-spacing: 0.3pt;
+}
+.hz-pill.ok { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.hz-pill.warn { background: #FEF3C7; color: #92400E; border: 1px solid #FBBF24; }
+.hz-pill.danger { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+
+/* Buttons (match app system) */
+.hz-btn {
+  background: linear-gradient(135deg, #16C7FF 0%, #16C7FF 100%);
+  color: #FFFFFF; font-weight: 700; font-size: 10pt;
+  padding: 9px 16px; border: 0; border-radius: 8px;
+  cursor: pointer; letter-spacing: 0.2pt;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.2s; font-family: inherit;
+}
+.hz-btn:hover { box-shadow: 0 4px 12px rgba(22, 199, 255, 0.3); transform: translateY(-1px); }
+.hz-btn-ghost {
+  background: #FFFFFF; color: var(--fg, #000000);
+  border: 1px solid var(--border, #E2E8F0);
+  font-weight: 600; font-size: 10pt;
+  padding: 9px 16px; border-radius: 8px;
+  cursor: pointer; font-family: inherit;
+}
+.hz-btn-ghost:hover { border-color: #16C7FF; color: #16C7FF; }
+
+/* Form inputs */
+.hz-input, .hz-select, .hz-textarea {
+  width: 100%; padding: 10px 12px;
+  background: #000000; border: 1px solid var(--border, #E2E8F0);
+  border-radius: 8px; color: #F8FAFC;
+  font-size: 11pt; font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hz-input:focus, .hz-select:focus, .hz-textarea:focus {
+  outline: 0; border-color: #16C7FF;
+  box-shadow: 0 0 0 3px rgba(22, 199, 255, 0.15);
+}
+.hz-label {
+  display: block; font-size: 9pt; font-weight: 700;
+  color: var(--fg-muted, #475569);
+  text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 5px;
+}
+
+/* ============== HAZMAT SHIPPING PAPER LIVE PREVIEW (Bugatti) ============== */
+.hz-bol {
+  background: #FFFFFF; border: 1px solid #94A3B8;
+  border-radius: 6px; overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+.hz-bol-head {
+  background: var(--fg, #000000); color: #FFFFFF;
+  padding: 16px 22px; display: flex; justify-content: space-between; align-items: center;
+}
+.hz-bol-head-l { display: flex; align-items: center; gap: 14px; }
+.hz-bol-head-x3 {
+  width: 38px; height: 38px;
+  background: #16C7FF; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #FFFFFF; font-weight: 900; font-size: 14pt;
+}
+.hz-bol-head-title {
+  font-size: 11pt; font-weight: 800; letter-spacing: 1.5pt; text-transform: uppercase; line-height: 1;
+}
+.hz-bol-head-sub {
+  font-size: 8.5pt; font-weight: 500; color: #94A3B8; letter-spacing: 0.5pt; margin-top: 3px;
+}
+.hz-bol-head-r {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+.hz-bol-head-num {
+  font-size: 9pt; font-weight: 700; color: #16C7FF; letter-spacing: 0.5pt;
+}
+.hz-bol-head-date { font-size: 9pt; color: #CBD5E1; }
+
+.hz-bol-body { padding: 24px 24px 20px; color: #000000; font-size: 10.5pt; line-height: 1.55; }
+
+.hz-bol-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.hz-bol-field { border: 1px solid #CBD5E1; padding: 10px 12px; border-radius: 4px; }
+.hz-bol-field-label {
+  font-size: 8pt; font-weight: 800; color: #475569;
+  letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 4px;
+}
+.hz-bol-field-val { font-weight: 700; color: #000000; font-size: 10.5pt; }
+
+.hz-bol-haz {
+  margin: 16px 0; padding: 14px 16px;
+  background: #FEF3C7; border: 2px solid #F59E0B; border-radius: 4px;
+}
+.hz-bol-haz-tag {
+  font-size: 8pt; font-weight: 900; color: #92400E;
+  letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 6px;
+}
+.hz-bol-haz-desc {
+  font-family: 'Courier New', monospace; font-weight: 700;
+  font-size: 12pt; color: #000000; line-height: 1.4;
+}
+
+.hz-bol-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0; margin: 16px 0; border: 1px solid #CBD5E1;
+}
+.hz-bol-cell {
+  padding: 10px 12px; border-right: 1px solid #CBD5E1;
+}
+.hz-bol-cell:last-child { border-right: 0; }
+.hz-bol-cell-label {
+  font-size: 7.5pt; font-weight: 800; color: #475569;
+  letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 3px;
+}
+.hz-bol-cell-val { font-weight: 700; color: #000000; font-size: 11pt; }
+
+.hz-bol-erp {
+  margin: 16px 0; padding: 14px 16px;
+  background: #FEE2E2; border: 2px solid #DC2626; border-radius: 4px;
+  display: flex; align-items: center; gap: 14px;
+}
+.hz-bol-erp-icon { font-size: 24px; }
+.hz-bol-erp-content { flex: 1; }
+.hz-bol-erp-tag {
+  font-size: 8pt; font-weight: 900; color: #991B1B;
+  letter-spacing: 1.5pt; text-transform: uppercase; margin-bottom: 3px;
+}
+.hz-bol-erp-num {
+  font-family: 'Courier New', monospace;
+  font-weight: 900; color: #000000; font-size: 16pt; letter-spacing: 0.5pt;
+}
+
+.hz-bol-cert {
+  margin-top: 18px; padding: 12px 14px;
+  background: #F8FAFC; border-left: 3px solid #000000;
+  font-size: 9pt; color: #475569; line-height: 1.45; border-radius: 0 4px 4px 0;
+}
+
+.hz-bol-sig {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin-top: 22px; padding-top: 14px; border-top: 1px dashed #94A3B8;
+}
+.hz-bol-sig-row { display: flex; flex-direction: column; gap: 4px; }
+.hz-bol-sig-line {
+  border-bottom: 1.5px solid #000000; height: 28px;
+}
+.hz-bol-sig-label {
+  font-size: 8pt; font-weight: 700; color: #475569;
+  letter-spacing: 1pt; text-transform: uppercase;
+}
+
+.hz-bol-foot {
+  background: #F8FAFC; padding: 12px 22px;
+  border-top: 1px solid #E2E8F0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 8.5pt; color: #64748B;
+}
+.hz-bol-foot strong { color: #000000; }
+
+
+   Pages whose body data-page begins with "hazmat-" sit on a deep
+   navy/cyan gradient so the $99 add-on tier reads as distinct from
+   the rest of the cyan/white app shell. Tiles + panels stay white so
+   content remains legible. */
+body[data-page^="hazmat-"] .main {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(22, 199, 255, 0.18), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(22, 199, 255, 0.22), transparent 50%),
+    linear-gradient(135deg, #000000 0%, #0F1F35 60%, #0A2540 100%);
+  color: #F8FAFC;
+  min-height: 100vh;
+}
+body[data-page^="hazmat-"] .page-title-row .page-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .topbar { background: #000000; border-bottom-color: rgba(22, 199, 255, 0.2); }
+body[data-page^="hazmat-"] .topbar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .topbar-user-name { color: #F8FAFC; }
+body[data-page^="hazmat-"] .sidebar { background: #060B14; border-right-color: rgba(22, 199, 255, 0.12); }
+body[data-page^="hazmat-"] .app-footer { color: #94A3B8; }
+body[data-page^="hazmat-"] .app-footer a { color: #16C7FF; }
+
+/* Hero — darker gradient that pops on the navy canvas */
+body[data-page^="hazmat-"] .hz-hero {
+  background: linear-gradient(135deg, rgba(22, 199, 255, 0.18) 0%, rgba(22, 199, 255, 0.10) 100%),
+              rgba(15, 31, 53, 0.7);
+  border-color: rgba(22, 199, 255, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+body[data-page^="hazmat-"] .hz-hero h1 { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-hero h1 em {
+  background: linear-gradient(90deg, #16C7FF 0%, #16C7FF 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+body[data-page^="hazmat-"] .hz-hero-sub { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-hero-meta { border-top-color: rgba(22, 199, 255, 0.2); }
+body[data-page^="hazmat-"] .hz-hero-meta-num { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-hero-meta-label { color: #94A3B8; }
+body[data-page^="hazmat-"] .hz-hero-eyebrow { color: #16C7FF; }
+
+/* Upsell bar — dark variant */
+body[data-page^="hazmat-"] .hz-upsell-bar {
+  background: linear-gradient(90deg, rgba(22, 199, 255, 0.12), rgba(22, 199, 255, 0.18));
+  border-color: rgba(22, 199, 255, 0.4);
+}
+body[data-page^="hazmat-"] .hz-upsell-bar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-upsell-bar-sub { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-upsell-bar-price-num { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-upsell-bar-price-unit { color: #94A3B8; }
+
+/* Page bar on hazmat sub-pages */
+body[data-page^="hazmat-"] .hz-page-bar {
+  background: rgba(15, 31, 53, 0.85);
+  border-color: rgba(22, 199, 255, 0.25);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+body[data-page^="hazmat-"] .hz-page-bar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-page-bar-sub { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-btn-ghost {
+  background: rgba(15, 23, 42, 0.6); color: #F8FAFC;
+  border-color: rgba(22, 199, 255, 0.3);
+}
+body[data-page^="hazmat-"] .hz-btn-ghost:hover {
+  background: rgba(22, 199, 255, 0.15); border-color: #16C7FF; color: #16C7FF;
+}
+
+/* Tiles — float on the dark canvas with stronger shadow */
+body[data-page^="hazmat-"] .hz-tile {
+  background: #000000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(22, 199, 255, 0.18);
+}
+body[data-page^="hazmat-"] .hz-tile:hover {
+  border-color: #16C7FF;
+  box-shadow: 0 14px 28px rgba(22, 199, 255, 0.25), 0 0 0 1px rgba(22, 199, 255, 0.5);
+  transform: translateY(-3px);
+}
+
+/* Panels stay light for legibility, but get a stronger shadow on the dark canvas */
+body[data-page^="hazmat-"] .hz-panel {
+  background: #000000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-color: rgba(22, 199, 255, 0.18);
+}
+
+/* ============== HAZMAT BACKDROP — black canvas, no white anywhere ============== */
+body[data-page^="hazmat-"] {
+  background: #000000;
+}
+body[data-page^="hazmat-"] .main {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(22, 199, 255, 0.10), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(22, 199, 255, 0.10), transparent 50%),
+    #000000;
+  color: #F8FAFC;
+  /* Preserve scroll: base styles set height: calc(100vh - 88px); overflow-y: auto */
+  height: calc(100vh - 88px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+/* Ensure content can extend below viewport and the .main scroll catches it */
+body[data-page^="hazmat-"] .main > footer.app-footer { margin-top: 32px; }
+body[data-page^="hazmat-"] .page-title-row .page-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .topbar { background: #000000; border-bottom-color: rgba(22, 199, 255, 0.25); }
+body[data-page^="hazmat-"] .topbar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .topbar-user-name { color: #F8FAFC; }
+body[data-page^="hazmat-"] .sidebar { background: #000000; border-right-color: rgba(22, 199, 255, 0.15); }
+body[data-page^="hazmat-"] .app-footer { color: #94A3B8; border-color: rgba(22, 199, 255, 0.1); }
+body[data-page^="hazmat-"] .app-footer a { color: #16C7FF; }
+
+/* ===== HERO ===== */
+body[data-page^="hazmat-"] .hz-hero {
+  background: linear-gradient(135deg, rgba(22, 199, 255, 0.10) 0%, rgba(22, 199, 255, 0.06) 100%), #000000;
+  border-color: rgba(22, 199, 255, 0.3);
+}
+body[data-page^="hazmat-"] .hz-hero h1 { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-hero h1 em { background: linear-gradient(90deg, #16C7FF 0%, #16C7FF 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+body[data-page^="hazmat-"] .hz-hero-sub { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-hero-meta { border-top-color: rgba(22, 199, 255, 0.2); }
+body[data-page^="hazmat-"] .hz-hero-meta-num { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-hero-meta-label { color: #94A3B8; }
+body[data-page^="hazmat-"] .hz-hero-eyebrow { color: #16C7FF; }
+
+/* ===== UPSELL BAR ===== */
+body[data-page^="hazmat-"] .hz-upsell-bar {
+  background: linear-gradient(90deg, rgba(22, 199, 255, 0.10), rgba(22, 199, 255, 0.12)), #000000;
+  border-color: rgba(22, 199, 255, 0.4);
+}
+body[data-page^="hazmat-"] .hz-upsell-bar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-upsell-bar-sub { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-upsell-bar-price-num { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-upsell-bar-price-unit { color: #94A3B8; }
+
+/* ===== PAGE BAR ===== */
+body[data-page^="hazmat-"] .hz-page-bar {
+  background: #000000;
+  border-color: rgba(22, 199, 255, 0.25);
+  box-shadow: 0 1px 0 rgba(22, 199, 255, 0.1);
+}
+body[data-page^="hazmat-"] .hz-page-bar-title { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-page-bar-sub { color: #94A3B8; }
+body[data-page^="hazmat-"] .hz-btn-ghost {
+  background: transparent; color: #F8FAFC;
+  border-color: rgba(22, 199, 255, 0.3);
+}
+body[data-page^="hazmat-"] .hz-btn-ghost:hover {
+  background: rgba(22, 199, 255, 0.10); border-color: #16C7FF; color: #16C7FF;
+}
+
+/* ===== TILES — dark with cyan accents ===== */
+body[data-page^="hazmat-"] .hz-tile {
+  background: #000000;
+  border-color: rgba(22, 199, 255, 0.2);
+  color: #F8FAFC;
+}
+body[data-page^="hazmat-"] .hz-tile:hover {
+  background: #0F1F35;
+  border-color: #16C7FF;
+  box-shadow: 0 12px 28px rgba(22, 199, 255, 0.15), 0 0 0 1px rgba(22, 199, 255, 0.4);
+  transform: translateY(-3px);
+}
+body[data-page^="hazmat-"] .hz-tile-icon {
+  background: rgba(22, 199, 255, 0.12);
+  border-color: rgba(22, 199, 255, 0.3);
+  color: #16C7FF;
+}
+body[data-page^="hazmat-"] .hz-tile-h { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-tile-tag { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-tile-desc { color: #CBD5E1; }
+body[data-page^="hazmat-"] .hz-tile-cta { color: #16C7FF; }
+body[data-page^="hazmat-"] .hz-tile-cfr {
+  background: rgba(22, 199, 255, 0.10); color: #16C7FF; border-color: rgba(22, 199, 255, 0.35);
+}
+
+/* Special "bundled" tile that had a light gradient — kill it */
+body[data-page^="hazmat-"] .hz-tile[style*="linear-gradient"] {
+  background: #000000 !important;
+}
+
+/* ===== PANELS — dark with cyan accents ===== */
+body[data-page^="hazmat-"] .hz-panel {
+  background: #000000;
+  border-color: rgba(22, 199, 255, 0.2);
+  color: #F8FAFC;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+body[data-page^="hazmat-"] .hz-panel-head { border-bottom-color: rgba(22, 199, 255, 0.15); }
+body[data-page^="hazmat-"] .hz-panel-h { color: #F8FAFC; }
+body[data-page^="hazmat-"] .hz-panel-h-eyebrow { color: #16C7FF; }
+
+/* Override the .hz-panel inline-style bg variants */
+body[data-page^="hazmat-"] .hz-panel[style*="linear-gradient"][style*="ECFEFF"],
+body[data-page^="hazmat-"] .hz-panel[style*="FFFBEB"],
+body[data-page^="hazmat-"] .hz-panel[style*="#F8FAFC"] {
+  background: #0F1F35 !important;
+}
+
+/* ===== TABLES ===== */
+body[data-page^="hazmat-"] .hz-table {
+  border-color: rgba(22, 199, 255, 0.15);
+  color: #F8FAFC;
+}
+body[data-page^="hazmat-"] .hz-table th {
+  background: #000000;
+  color: #16C7FF;
+  border-bottom-color: #16C7FF;
+}
+body[data-page^="hazmat-"] .hz-table td {
+  color: #E2E8F0;
+  border-bottom-color: rgba(22, 199, 255, 0.12);
+}
+body[data-page^="hazmat-"] .hz-table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+body[data-page^="hazmat-"] .hz-table tr:hover td { background: rgba(22, 199, 255, 0.06); }
+
+/* ===== FORM INPUTS ===== */
+body[data-page^="hazmat-"] .hz-input,
+body[data-page^="hazmat-"] .hz-select,
+body[data-page^="hazmat-"] .hz-textarea,
+body[data-page^="hazmat-"] textarea,
+body[data-page^="hazmat-"] select,
+body[data-page^="hazmat-"] input[type="text"],
+body[data-page^="hazmat-"] input[type="number"],
+body[data-page^="hazmat-"] input[type="date"] {
+  background: #000000 !important;
+  color: #F8FAFC !important;
+  border-color: rgba(22, 199, 255, 0.25) !important;
+}
+body[data-page^="hazmat-"] .hz-input:focus,
+body[data-page^="hazmat-"] .hz-select:focus,
+body[data-page^="hazmat-"] .hz-textarea:focus {
+  border-color: #16C7FF !important;
+  box-shadow: 0 0 0 3px rgba(22, 199, 255, 0.18) !important;
+}
+body[data-page^="hazmat-"] .hz-label { color: #94A3B8; }
+body[data-page^="hazmat-"] ::placeholder { color: #64748B; }
+
+/* ===== PILLS / CFR CHIPS ===== */
+body[data-page^="hazmat-"] .hz-tile-cfr,
+body[data-page^="hazmat-"] .hz-pro-chip { /* leave pro chip alone — amber */ }
+
+/* ===== STRIP WHITE FROM INLINE-STYLED ELEMENTS ===== */
+/* Pages set lots of inline backgrounds — override them */
+body[data-page^="hazmat-"] [style*="background:#FFFFFF"],
+body[data-page^="hazmat-"] [style*="background: #FFFFFF"],
+body[data-page^="hazmat-"] [style*="background:#FFF"],
+body[data-page^="hazmat-"] [style*="background: #FFF;"],
+body[data-page^="hazmat-"] [style*="background:#F8FAFC"],
+body[data-page^="hazmat-"] [style*="background: #F8FAFC"] {
+  background: #0F1F35 !important;
+  color: #F8FAFC !important;
+}
+body[data-page^="hazmat-"] [style*="background:#FEF3C7"] { background: #1C1611 !important; color: #FCD34D !important; }
+body[data-page^="hazmat-"] [style*="background:#FEE2E2"] { background: #1F0B0B !important; color: #FCA5A5 !important; }
+body[data-page^="hazmat-"] [style*="background:#D1FAE5"] { background: #0A1F18 !important; color: #6EE7B7 !important; }
+body[data-page^="hazmat-"] [style*="background:#FFFBEB"] { background: #1F1A0D !important; color: #FCD34D !important; }
+body[data-page^="hazmat-"] [style*="background:#ECFEFF"],
+body[data-page^="hazmat-"] [style*="background: #ECFEFF"] { background: rgba(22, 199, 255, 0.08) !important; color: #16C7FF !important; }
+body[data-page^="hazmat-"] [style*="color:#000000"]:not(.hz-bol *) { color: #F8FAFC !important; }
+body[data-page^="hazmat-"] [style*="color:var(--fg)"]:not(.hz-bol *) { color: #F8FAFC !important; }
+body[data-page^="hazmat-"] [style*="color:var(--fg-muted)"]:not(.hz-bol *) { color: #94A3B8 !important; }
+body[data-page^="hazmat-"] [style*="color:#475569"]:not(.hz-bol *) { color: #94A3B8 !important; }
+
+/* Audit checklist labels: ensure rows are dark */
+body[data-page^="hazmat-"] .audit-row { background: #0F1F35 !important; border-color: rgba(22, 199, 255, 0.18) !important; }
+body[data-page^="hazmat-"] .audit-row > div { color: #F8FAFC !important; }
+
+/* ===== BOL PREVIEW (Shipping Papers) STAYS WHITE
+   The BOL is a print-replica document — must stay white-on-paper. ===== */
+body[data-page^="hazmat-"] .hz-bol { background: #FFFFFF !important; color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol * { color: inherit; }
+body[data-page^="hazmat-"] .hz-bol-body { color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol-field-val { color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol-haz-desc { color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol-cell-val { color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol-erp-num { color: #000000 !important; }
+
+/* Specialty markings + placard images need light frames on dark */
+body[data-page^="hazmat-"] [style*="background:#F8FAFC"] img,
+body[data-page^="hazmat-"] [style*="background:#FFFFFF"] img { display: block; }
+
+
+/* ============== AGGRESSIVE WHITE → DARK OVERRIDE for all Hazmat sub-pages ============== */
+/* Catch every variation of inline white/light backgrounds and force dark */
+body[data-page^="hazmat-"] [style*="background:#FFFFFF"],
+body[data-page^="hazmat-"] [style*="background: #FFFFFF"],
+body[data-page^="hazmat-"] [style*="background:#FFF;"],
+body[data-page^="hazmat-"] [style*="background: #FFF;"],
+body[data-page^="hazmat-"] [style*="background:#FFFFFF;"],
+body[data-page^="hazmat-"] [style*="background: #FFFFFF;"],
+body[data-page^="hazmat-"] [style*="background:#fff"],
+body[data-page^="hazmat-"] [style*="background: #fff"],
+body[data-page^="hazmat-"] [style*="background-color:#FFFFFF"],
+body[data-page^="hazmat-"] [style*="background-color: #FFFFFF"],
+body[data-page^="hazmat-"] [style*="background-color:#FFF"],
+body[data-page^="hazmat-"] [style*="background:#F8FAFC"],
+body[data-page^="hazmat-"] [style*="background: #F8FAFC"],
+body[data-page^="hazmat-"] [style*="background:#F1F5F9"],
+body[data-page^="hazmat-"] [style*="background: #F1F5F9"],
+body[data-page^="hazmat-"] [style*="background:#F0FBFF"],
+body[data-page^="hazmat-"] [style*="background: #F0FBFF"],
+body[data-page^="hazmat-"] [style*="background:#ECFEFF"],
+body[data-page^="hazmat-"] [style*="background: #ECFEFF"],
+body[data-page^="hazmat-"] [style*="background:#BAE6FD"],
+body[data-page^="hazmat-"] [style*="background:white"],
+body[data-page^="hazmat-"] [style*="background: white"] {
+  background: #0F1F35 !important;
+  color: #F8FAFC !important;
+  border-color: rgba(22, 199, 255, 0.2) !important;
+}
+
+/* Linear-gradient light backgrounds (e.g. #ECFEFF→#F0FBFF) */
+body[data-page^="hazmat-"] [style*="linear-gradient"][style*="ECFEFF"],
+body[data-page^="hazmat-"] [style*="linear-gradient"][style*="F0FBFF"],
+body[data-page^="hazmat-"] [style*="linear-gradient"][style*="#FFFFFF"],
+body[data-page^="hazmat-"] [style*="linear-gradient"][style*="#F8FAFC"] {
+  background: linear-gradient(135deg, rgba(22, 199, 255, 0.10) 0%, rgba(22, 199, 255, 0.06) 100%), #000000 !important;
+  color: #F8FAFC !important;
+  border-color: rgba(22, 199, 255, 0.25) !important;
+}
+
+/* Make all generic divs that look like cards dark on hazmat pages */
+body[data-page^="hazmat-"] .hz-panel > div[style*="background"],
+body[data-page^="hazmat-"] .hz-tile-grid > div[style*="background"] {
+  background: #0F1F35 !important;
+  color: #F8FAFC !important;
+}
+
+/* Make sure status pill backgrounds remain semantic but on dark surface */
+body[data-page^="hazmat-"] .hz-pill.ok    { background: rgba(16, 185, 129, 0.18) !important; color: #6EE7B7 !important; border-color: rgba(16, 185, 129, 0.4) !important; }
+body[data-page^="hazmat-"] .hz-pill.warn  { background: rgba(245, 158, 11, 0.18) !important; color: #FCD34D !important; border-color: rgba(245, 158, 11, 0.4) !important; }
+body[data-page^="hazmat-"] .hz-pill.danger{ background: rgba(239, 68, 68, 0.18)  !important; color: #FCA5A5 !important; border-color: rgba(239, 68, 68, 0.4)  !important; }
+
+/* Specialty placards + class placards on dark backdrops — give them a subtle dark frame */
+body[data-page^="hazmat-"] .hz-tile-grid img,
+body[data-page^="hazmat-"] #placard-output img,
+body[data-page^="hazmat-"] #plate-output img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+/* Force text colors on inline styles to be readable on dark */
+body[data-page^="hazmat-"] [style*="color:#000000"]:not(.hz-bol):not(.hz-bol *):not(svg *) { color: #F8FAFC !important; }
+body[data-page^="hazmat-"] [style*="color: #000000"]:not(.hz-bol):not(.hz-bol *):not(svg *) { color: #F8FAFC !important; }
+body[data-page^="hazmat-"] [style*="color:#475569"]:not(.hz-bol):not(.hz-bol *):not(svg *) { color: #94A3B8 !important; }
+body[data-page^="hazmat-"] [style*="color: #475569"]:not(.hz-bol):not(.hz-bol *):not(svg *) { color: #94A3B8 !important; }
+body[data-page^="hazmat-"] [style*="color:#64748B"]:not(.hz-bol):not(.hz-bol *):not(svg *) { color: #94A3B8 !important; }
+
+/* BOL preview kept white (paper replica) */
+body[data-page^="hazmat-"] .hz-bol,
+body[data-page^="hazmat-"] .hz-bol * { background: revert !important; color: revert !important; }
+body[data-page^="hazmat-"] .hz-bol { background: #FFFFFF !important; color: #000000 !important; }
+body[data-page^="hazmat-"] .hz-bol-body { color: #000000 !important; }
+
+/* Placard preview wrappers - the inner placard SVG stays as-is, but the outer container becomes dark */
+body[data-page^="hazmat-"] #placard-output,
+body[data-page^="hazmat-"] #plate-output,
+body[data-page^="hazmat-"] #placard-thumb {
+  background: rgba(22, 199, 255, 0.04) !important;
+  border-color: rgba(22, 199, 255, 0.2) !important;
+}
+
+
+/* ============== READABILITY PASS — larger type on hazmat pages ============== */
+/* Increase base font on hazmat pages so wide-screen room actually gets used */
+body[data-page^="hazmat-"] {
+  font-size: 16px;            /* up from default ~13.5-14px */
+  line-height: 1.6;
+}
+body[data-page^="hazmat-"] .hz-tile-h { font-size: 16pt !important; }
+body[data-page^="hazmat-"] .hz-tile-desc { font-size: 12pt !important; line-height: 1.6 !important; }
+body[data-page^="hazmat-"] .hz-tile-tag { font-size: 10pt !important; }
+body[data-page^="hazmat-"] .hz-tile-cta { font-size: 12pt !important; }
+body[data-page^="hazmat-"] .hz-panel-h { font-size: 15pt !important; }
+body[data-page^="hazmat-"] .hz-panel-h-eyebrow { font-size: 10pt !important; }
+body[data-page^="hazmat-"] .hz-page-bar-title { font-size: 16pt !important; }
+body[data-page^="hazmat-"] .hz-page-bar-sub { font-size: 11pt !important; }
+body[data-page^="hazmat-"] .hz-hero h1 { font-size: 36pt !important; }
+body[data-page^="hazmat-"] .hz-hero-sub { font-size: 14pt !important; line-height: 1.6 !important; }
+body[data-page^="hazmat-"] .hz-hero-meta-num { font-size: 24pt !important; }
+body[data-page^="hazmat-"] .hz-hero-meta-label { font-size: 10pt !important; }
+body[data-page^="hazmat-"] .hz-table { font-size: 12pt !important; }
+body[data-page^="hazmat-"] .hz-table th { font-size: 11pt !important; padding: 12pt 14pt !important; }
+body[data-page^="hazmat-"] .hz-table td { padding: 12pt 14pt !important; }
+body[data-page^="hazmat-"] .hz-input,
+body[data-page^="hazmat-"] .hz-select,
+body[data-page^="hazmat-"] .hz-textarea { font-size: 12pt !important; padding: 12pt 14pt !important; }
+body[data-page^="hazmat-"] .hz-label { font-size: 10pt !important; letter-spacing: 1pt !important; }
+body[data-page^="hazmat-"] .hz-btn,
+body[data-page^="hazmat-"] .hz-btn-ghost { font-size: 11pt !important; padding: 11pt 18pt !important; }
+body[data-page^="hazmat-"] .hz-upsell-bar-title { font-size: 14pt !important; }
+body[data-page^="hazmat-"] .hz-upsell-bar-sub { font-size: 11pt !important; }
+body[data-page^="hazmat-"] .hz-upsell-bar-price-num { font-size: 26pt !important; }
+body[data-page^="hazmat-"] .hz-pill { font-size: 10pt !important; padding: 4pt 12pt !important; }
+body[data-page^="hazmat-"] .hz-tab { font-size: 12pt !important; padding: 12pt 18pt !important; }
+body[data-page^="hazmat-"] h2 { font-size: 16pt !important; }
+body[data-page^="hazmat-"] h3 { font-size: 13pt !important; }
+body[data-page^="hazmat-"] label > div > strong,
+body[data-page^="hazmat-"] .audit-row > div { font-size: 12pt !important; }
+
+/* ============== CFR pill / regulation chip — readable cyan on dark ============== */
+/* Single canonical CFR-chip style for all hazmat pages */
+body[data-page^="hazmat-"] .hz-tile-cfr,
+body[data-page^="hazmat-"] [class*="cfr"],
+body[data-page^="hazmat-"] [style*="background:rgba(22, 199, 255, 0.10)"],
+body[data-page^="hazmat-"] [style*="background:rgba(22, 199, 255, 0.08)"],
+body[data-page^="hazmat-"] [style*="background:#ECFEFF"] {
+  background: rgba(22, 199, 255, 0.18) !important;
+  color: #16C7FF !important;
+  border: 1px solid rgba(22, 199, 255, 0.55) !important;
+  font-weight: 700 !important;
+  font-size: 10.5pt !important;
+  padding: 3pt 10pt !important;
+  letter-spacing: 0.2pt !important;
+}
+
+/* Audit-specific: score color matches CFR pill cyan, regulation chips clearly readable */
+body[data-page="hazmat-audit"] #audit-score { color: #16C7FF !important; }
+body[data-page="hazmat-audit"] #audit-bar { background: linear-gradient(90deg, #16C7FF, #16C7FF) !important; }
+body[data-page="hazmat-audit"] [style*="color:#16C7FF"]:not(svg *) { color: #16C7FF !important; }
+body[data-page="hazmat-audit"] .audit-row span[class*="cfr"],
+body[data-page="hazmat-audit"] .audit-row span[style*="background:#ECFEFF"],
+body[data-page="hazmat-audit"] .audit-row span:last-child {
+  background: rgba(22, 199, 255, 0.20) !important;
+  color: #16C7FF !important;
+  border-color: rgba(22, 199, 255, 0.6) !important;
+  font-weight: 700 !important;
+  font-size: 11pt !important;
+  padding: 4pt 12pt !important;
+}
+
+/* Audit row hover */
+body[data-page="hazmat-audit"] .audit-row:hover {
+  border-color: #16C7FF !important;
+  background: rgba(22, 199, 255, 0.06) !important;
+}
+
+/* ============== PRINT STYLES — Hazmat Shipping Papers ============== */
+/* When user hits Print on the Shipping Papers Builder page, output only a
+   clean paper-replica BOL with no app chrome (no sidebar, no topbar, no
+   form panels, no dark navy backgrounds). */
+
+@media print {
+  /* Force white paper, full bleed page setup */
+  @page {
+    size: letter;
+    margin: 0.4in 0.4in 0.4in 0.4in;
+  }
+
+  body[data-page="hazmat-shipping-papers"] {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide all app chrome on shipping-papers print */
+  body[data-page="hazmat-shipping-papers"] .sidebar,
+  body[data-page="hazmat-shipping-papers"] .topbar,
+  body[data-page="hazmat-shipping-papers"] .hz-page-bar,
+  body[data-page="hazmat-shipping-papers"] .hz-upsell-bar,
+  body[data-page="hazmat-shipping-papers"] .hz-tabs,
+  body[data-page="hazmat-shipping-papers"] .hz-no-print,
+  body[data-page="hazmat-shipping-papers"] button,
+  body[data-page="hazmat-shipping-papers"] .hz-btn,
+  body[data-page="hazmat-shipping-papers"] .hz-btn-ghost {
+    display: none !important;
+  }
+
+  /* Hide the left-hand form panel — only the BOL preview should print.
+     Find every .hz-panel that does NOT contain .hz-bol. */
+  body[data-page="hazmat-shipping-papers"] .hz-panel:not(:has(.hz-bol)) {
+    display: none !important;
+  }
+
+  /* Strip the app-shell layout so .main flows as a normal document */
+  body[data-page="hazmat-shipping-papers"] .app,
+  body[data-page="hazmat-shipping-papers"] .main,
+  body[data-page="hazmat-shipping-papers"] .main > *,
+  body[data-page="hazmat-shipping-papers"] .hz-grid,
+  body[data-page="hazmat-shipping-papers"] .hz-shell {
+    display: block !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-page="hazmat-shipping-papers"] html,
+  body[data-page="hazmat-shipping-papers"] body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* The BOL itself: shed any wrapping panel styling, render as the page */
+  body[data-page="hazmat-shipping-papers"] .hz-panel:has(.hz-bol) {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body[data-page="hazmat-shipping-papers"] .hz-bol {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border: 1px solid #94A3B8 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* Preserve the hazmat orange + emergency red banners on paper */
+  body[data-page="hazmat-shipping-papers"] .hz-bol-head,
+  body[data-page="hazmat-shipping-papers"] .hz-bol-haz,
+  body[data-page="hazmat-shipping-papers"] .hz-bol-erp,
+  body[data-page="hazmat-shipping-papers"] .hz-bol-head-x3 {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Any heading or panel header on the form side stays hidden */
+  body[data-page="hazmat-shipping-papers"] h1,
+  body[data-page="hazmat-shipping-papers"] h2:not(.hz-bol h2),
+  body[data-page="hazmat-shipping-papers"] h3:not(.hz-bol h3) {
+    display: none !important;
+  }
+}
+
+/* ============== P0 ACCESSIBILITY + CONTRAST FIXES (May 2026) ============== */
+
+/* Placeholder text — bump from 4.41:1 to 7:1 */
+body[data-page^="hazmat-"] input::placeholder,
+body[data-page^="hazmat-"] textarea::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+}
+
+/* Focus-visible — explicit cyan outline for keyboard users (every interactive element) */
+body[data-page^="hazmat-"] input:focus-visible,
+body[data-page^="hazmat-"] textarea:focus-visible,
+body[data-page^="hazmat-"] select:focus-visible,
+body[data-page^="hazmat-"] button:focus-visible,
+body[data-page^="hazmat-"] a:focus-visible,
+body[data-page^="hazmat-"] [role="tab"]:focus-visible,
+body[data-page^="hazmat-"] [role="option"]:focus-visible,
+body[data-page^="hazmat-"] [role="checkbox"]:focus-visible {
+  outline: 2px solid #16C7FF !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* Skip-to-main link — invisible until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #16C7FF;
+  color: #000000;
+  padding: 12px 18px;
+  font-weight: 800;
+  z-index: 100;
+  text-decoration: none;
+  border-radius: 0 0 6px 0;
+}
+.skip-link:focus-visible {
+  left: 0;
+  outline: 3px solid #16C7FF;
+  outline-offset: -3px;
+}
+
+/* hz-step-num — Security Plan numbered circles (1, 2, 3, 4, 5)
+   Was deep cyan circle with navy text — invisible. Now navy circle with cyan number. */
+body[data-page="hazmat-security-plan"] .hz-step-num,
+body[data-page^="hazmat-"] .hz-step-num {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px; height: 36px;
+  background: rgba(22, 199, 255, 0.15) !important;
+  border: 2px solid #16C7FF !important;
+  color: #16C7FF !important;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: 14pt;
+  flex-shrink: 0;
+}
+
+/* hazmat-emergency-response: CHEMTREC phone and ERG result panels */
+body[data-page="hazmat-emergency-response"] [style*="color:#16C7FF"]:not(svg *) {
+  color: #16C7FF !important;
+}
+
+/* Make sure the ERP phone CTA button reads as cyan-on-navy, not deep-cyan-on-red */
+body[data-page="hazmat-emergency-response"] .hz-btn[href^="tel:"] {
+  background: #16C7FF !important;
+  color: #FFFFFF !important;
+}
+
+/* hazmat-training: any KPI value rendered with inline navy text gets flipped */
+body[data-page="hazmat-training"] [style*="color:#000000"]:not(svg *) {
+  color: #F8FAFC !important;
+}
+body[data-page="hazmat-training"] [style*="color:#0F1F35"]:not(svg *) {
+  color: #F8FAFC !important;
+}
+
+/* Audit progress-bar background — was light slate, drop in cyan-tint */
+body[data-page="hazmat-audit"] [style*="background:#E2E8F0"]:not(svg *) {
+  background: rgba(22, 199, 255, 0.18) !important;
+}
+body[data-page="hazmat-audit"] [style*="background: #E2E8F0"]:not(svg *) {
+  background: rgba(22, 199, 255, 0.18) !important;
+}
+
+/* Shipping Papers: amber warning panel (low contrast nested span)
+   Force the span to use full hazmat ink color #92400E on #FEF3C7 — passes 6.37:1 */
+body[data-page="hazmat-shipping-papers"] .hz-bol-haz [style*="color"] {
+  color: #92400E !important;
+}
+
+/* In-app toast (replacement for alert() — appears bottom-right, slides up, dismisses after 4s) */
+.hz-toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 1000;
+  background: #0F1F35;
+  border: 1px solid #16C7FF;
+  border-left: 4px solid #16C7FF;
+  color: #F8FAFC;
+  padding: 16px 22px 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(22, 199, 255, 0.18);
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 380px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: hz-toast-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.hz-toast-icon {
+  width: 24px; height: 24px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(22, 199, 255, 0.2);
+  color: #16C7FF;
+  border-radius: 50%;
+  font-weight: 900;
+}
+.hz-toast-body { flex: 1; line-height: 1.45; }
+.hz-toast-close {
+  background: transparent; border: 0; color: #94A3B8;
+  cursor: pointer; padding: 0; font-size: 18px; line-height: 1;
+  margin-top: -2px;
+}
+.hz-toast-close:hover { color: #FFFFFF; }
+@keyframes hz-toast-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hz-toast.hz-toast-out {
+  animation: hz-toast-out 200ms ease-out forwards;
+}
+@keyframes hz-toast-out {
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+/* ============================================================
+   HAZMAT CENTER OVERVIEW REDESIGN (May 2026)
+   Skeleton: Hero · Credibility strip · Stakes · Demo · Flagships
+            · "Everything else" grid · Proof · FAQ · Final CTA
+   ============================================================ */
+
+/* ====== HERO v2 ====== */
+[data-page="hazmat-center"] .hz-hero-v2 {
+  position: relative;
+  padding: 56px 48px 48px;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(22, 199, 255, 0.18), transparent 50%),
+    radial-gradient(circle at 15% 80%, rgba(22, 199, 255, 0.12), transparent 45%),
+    linear-gradient(180deg, #000000 0%, #000000 100%);
+  border: 1px solid rgba(22, 199, 255, 0.22);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 0 0 24px;
+}
+[data-page="hazmat-center"] .hz-hero-v2::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% -20%, rgba(22, 199, 255,0.10), transparent 60%);
+  pointer-events: none;
+}
+[data-page="hazmat-center"] .hz-hero-v2-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(22, 199, 255, 0.16);
+  border: 1px solid rgba(22, 199, 255, 0.5);
+  color: #16C7FF;
+  font-size: 11pt; font-weight: 700; letter-spacing: 0.5pt;
+  padding: 6px 14px; border-radius: 999px;
+  margin-bottom: 22px;
+}
+[data-page="hazmat-center"] .hz-hero-v2 h1 {
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  color: #F8FAFC;
+  margin: 0 0 18px;
+  max-width: 900px;
+}
+[data-page="hazmat-center"] .hz-hero-v2 h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, #16C7FF 30%, #16C7FF 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-page="hazmat-center"] .hz-hero-v2-sub {
+  font-size: 17px;
+  line-height: 1.55;
+  color: #B8C5D6;
+  max-width: 780px;
+  margin: 0 0 32px;
+}
+[data-page="hazmat-center"] .hz-hero-v2-ctas {
+  display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  margin-top: 8px;
+}
+[data-page="hazmat-center"] .hz-cta-primary {
+  background: linear-gradient(135deg, #16C7FF, #0098D9);
+  color: #FFFFFF !important;
+  font-weight: 800;
+  font-size: 14pt;
+  padding: 14px 26px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(22, 199, 255, 0.4), 0 0 0 1px rgba(22, 199, 255, 0.6);
+  font-family: inherit;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  text-decoration: none !important;
+}
+[data-page="hazmat-center"] .hz-cta-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(22, 199, 255, 0.55), 0 0 0 1px rgba(22, 199, 255, 0.8);
+}
+[data-page="hazmat-center"] .hz-cta-secondary {
+  background: transparent;
+  color: #16C7FF !important;
+  font-weight: 700;
+  font-size: 13pt;
+  padding: 13px 22px;
+  border: 1px solid #16C7FF;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none !important;
+  font-family: inherit;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+[data-page="hazmat-center"] .hz-cta-secondary:hover {
+  background: rgba(22, 199, 255, 0.12);
+}
+[data-page="hazmat-center"] .hz-hero-v2-trust {
+  margin-top: 26px;
+  font-size: 11pt;
+  color: #94A3B8;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+[data-page="hazmat-center"] .hz-hero-v2-trust strong { color: #CBD5E1; font-weight: 700; }
+
+/* ====== CREDIBILITY STRIP ====== */
+[data-page="hazmat-center"] .hz-cred-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: #0F1F35;
+  border: 1px solid rgba(22, 199, 255, 0.2);
+  border-radius: 10px;
+  margin: 0 0 36px;
+  overflow: hidden;
+}
+[data-page="hazmat-center"] .hz-cred-item {
+  padding: 18px 22px;
+  border-right: 1px solid rgba(22, 199, 255, 0.18);
+  display: flex; flex-direction: column; gap: 4px;
+}
+[data-page="hazmat-center"] .hz-cred-item:last-child { border-right: 0; }
+[data-page="hazmat-center"] .hz-cred-label {
+  font-size: 9pt; font-weight: 700; color: #16C7FF;
+  letter-spacing: 1.2pt; text-transform: uppercase;
+}
+[data-page="hazmat-center"] .hz-cred-val {
+  font-size: 14pt; font-weight: 700; color: #F8FAFC;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ====== STAKES SECTION ====== */
+[data-page="hazmat-center"] .hz-section-head {
+  margin: 56px 0 24px;
+}
+[data-page="hazmat-center"] .hz-section-head h2 {
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  color: #F8FAFC;
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+[data-page="hazmat-center"] .hz-section-head p {
+  font-size: 16px; color: #B8C5D6; margin: 0;
+  max-width: 700px; line-height: 1.55;
+}
+[data-page="hazmat-center"] .hz-stakes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 36px;
+}
+[data-page="hazmat-center"] .hz-stakes-card {
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.02));
+  border: 1px solid rgba(220, 38, 38, 0.32);
+  border-left: 4px solid #DC2626;
+  border-radius: 10px;
+  padding: 24px 22px 22px;
+}
+[data-page="hazmat-center"] .hz-stakes-icon {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+[data-page="hazmat-center"] .hz-stakes-title {
+  font-size: 10.5pt; font-weight: 700;
+  color: #F87171; letter-spacing: 0.8pt; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+[data-page="hazmat-center"] .hz-stakes-stat {
+  font-size: 36pt; font-weight: 900;
+  color: #F8FAFC;
+  line-height: 1; letter-spacing: -1.5px;
+  margin-bottom: 14px;
+  font-variant-numeric: tabular-nums;
+}
+[data-page="hazmat-center"] .hz-stakes-body {
+  font-size: 14px; color: #CBD5E1; line-height: 1.55;
+}
+
+/* ====== FLAGSHIP TRIO ====== */
+[data-page="hazmat-center"] .hz-flagship-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 36px;
+}
+[data-page="hazmat-center"] .hz-flagship {
+  background: linear-gradient(180deg, rgba(22, 199, 255,0.08), rgba(22, 199, 255,0.03)), #0F1F35;
+  border: 1px solid rgba(22, 199, 255, 0.32);
+  border-radius: 12px;
+  padding: 26px 24px;
+  text-decoration: none;
+  display: flex; flex-direction: column;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  color: inherit;
+}
+[data-page="hazmat-center"] .hz-flagship:hover {
+  transform: translateY(-2px);
+  border-color: #16C7FF;
+  box-shadow: 0 14px 30px rgba(22, 199, 255, 0.22);
+}
+[data-page="hazmat-center"] .hz-flagship-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #16C7FF, #16C7FF);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #FFFFFF;
+  margin-bottom: 18px;
+}
+[data-page="hazmat-center"] .hz-flagship h3 {
+  font-size: 22px; font-weight: 800;
+  color: #F8FAFC;
+  margin: 0 0 12px;
+  letter-spacing: -0.3px;
+}
+[data-page="hazmat-center"] .hz-flagship-val {
+  font-size: 14.5px; line-height: 1.55;
+  color: #CBD5E1;
+  margin-bottom: 18px;
+  flex: 1;
+}
+[data-page="hazmat-center"] .hz-flagship-cite {
+  font-size: 10pt; font-weight: 600;
+  color: #16C7FF;
+  letter-spacing: 0.2pt;
+  background: rgba(22, 199, 255, 0.12);
+  border: 1px solid rgba(22, 199, 255, 0.4);
+  padding: 4px 10px;
+  border-radius: 4px;
+  align-self: flex-start;
+  margin-bottom: 16px;
+}
+[data-page="hazmat-center"] .hz-flagship-cta {
+  font-size: 13px; font-weight: 700;
+  color: #16C7FF;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta { color: #16C7FF; }
+[data-page="hazmat-center"] .hz-flagship-cta::after {
+  content: " →"; transition: transform 160ms ease;
+}
+[data-page="hazmat-center"] .hz-flagship:hover .hz-flagship-cta::after { transform: translateX(3px); }
+
+/* ====== DEMO PANEL (live placard wizard preview) ====== */
+[data-page="hazmat-center"] .hz-demo {
+  background: #0F1F35;
+  border: 1px solid rgba(22, 199, 255, 0.32);
+  border-radius: 14px;
+  padding: 32px;
+  margin: 0 0 36px;
+}
+[data-page="hazmat-center"] .hz-demo-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px; gap: 18px; flex-wrap: wrap;
+}
+[data-page="hazmat-center"] .hz-demo-head h2 {
+  font-size: 26px; font-weight: 800; color: #F8FAFC;
+  margin: 0; letter-spacing: -0.3px;
+}
+[data-page="hazmat-center"] .hz-demo-head p {
+  font-size: 14px; color: #B8C5D6; margin: 6px 0 0; line-height: 1.5;
+  max-width: 560px;
+}
+[data-page="hazmat-center"] .hz-demo-live-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ADE80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-size: 11pt; font-weight: 700;
+  padding: 5px 12px; border-radius: 999px;
+  letter-spacing: 0.3pt;
+}
+[data-page="hazmat-center"] .hz-demo-live-tag::before {
+  content: ""; width: 8px; height: 8px; background: #22C55E; border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+  /* animation: hz-pulse 2s ease-in-out infinite; */
+  /* Disabled · paint-storm pair to hz-placard-float. Solid dot still reads
+     as a "live" indicator without forcing a paint every 2s. */
+}
+@keyframes hz-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.10); }
+}
+[data-page="hazmat-center"] .hz-demo-stage {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 1fr;
+  gap: 24px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(22, 199, 255, 0.18);
+  border-radius: 10px;
+  padding: 30px;
+}
+[data-page="hazmat-center"] .hz-demo-input-block label {
+  display: block; font-size: 10pt; font-weight: 700;
+  color: #16C7FF; letter-spacing: 1pt; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+[data-page="hazmat-center"] .hz-demo-input {
+  width: 100%;
+  background: #000000;
+  border: 2px solid rgba(22, 199, 255, 0.4);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: #F8FAFC;
+  font-size: 17px; font-weight: 600;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+[data-page="hazmat-center"] .hz-demo-input:focus {
+  outline: none;
+  border-color: #16C7FF;
+  box-shadow: 0 0 0 3px rgba(22, 199, 255, 0.2);
+}
+[data-page="hazmat-center"] .hz-demo-suggestions {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+[data-page="hazmat-center"] .hz-demo-chip {
+  background: rgba(22, 199, 255, 0.1);
+  border: 1px solid rgba(22, 199, 255, 0.35);
+  color: #16C7FF;
+  font-size: 11pt; font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+}
+[data-page="hazmat-center"] .hz-demo-chip:hover {
+  background: rgba(22, 199, 255, 0.22);
+  border-color: #16C7FF;
+}
+[data-page="hazmat-center"] .hz-demo-meta {
+  margin-top: 16px; font-size: 12px; color: #94A3B8; line-height: 1.5;
+}
+[data-page="hazmat-center"] .hz-demo-result {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+}
+[data-page="hazmat-center"] .hz-demo-result-name {
+  font-size: 14pt; font-weight: 800; color: #F8FAFC;
+  margin-bottom: 4px;
+}
+[data-page="hazmat-center"] .hz-demo-result-class {
+  font-size: 11pt; color: #16C7FF; margin-bottom: 16px;
+  font-weight: 700; letter-spacing: 0.5pt;
+}
+[data-page="hazmat-center"] .hz-demo-placard-wrap {
+  display: inline-block;
+}
+[data-page="hazmat-center"] .hz-demo-cite {
+  margin-top: 16px; font-size: 11pt; color: #94A3B8;
+}
+[data-page="hazmat-center"] .hz-demo-cite strong {
+  color: #16C7FF; font-weight: 700;
+}
+[data-page="hazmat-center"] .hz-demo-footer {
+  margin-top: 22px;
+  text-align: center;
+}
+
+/* ====== INCLUDED GRID (denser secondary tiles) ====== */
+[data-page="hazmat-center"] .hz-included-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+[data-page="hazmat-center"] .hz-included-item {
+  background: #0F1F35;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: inherit;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+[data-page="hazmat-center"] .hz-included-item:hover {
+  border-color: rgba(22, 199, 255, 0.55);
+  transform: translateY(-1px);
+}
+[data-page="hazmat-center"] .hz-included-head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+[data-page="hazmat-center"] .hz-included-name {
+  font-size: 15px; font-weight: 800; color: #F8FAFC;
+}
+[data-page="hazmat-center"] .hz-included-icon {
+  font-size: 18px; opacity: 0.9;
+}
+[data-page="hazmat-center"] .hz-included-desc {
+  font-size: 12.5px; line-height: 1.5; color: #B8C5D6;
+}
+[data-page="hazmat-center"] .hz-included-cite {
+  font-size: 9pt; font-weight: 700;
+  color: #16C7FF;
+  background: rgba(22, 199, 255, 0.10);
+  border: 1px solid rgba(22, 199, 255, 0.32);
+  padding: 2px 8px; border-radius: 4px;
+  align-self: flex-start;
+  margin-top: 4px;
+  letter-spacing: 0.2pt;
+}
+
+/* ====== PROOF / TESTIMONIAL ====== */
+[data-page="hazmat-center"] .hz-proof {
+  background: linear-gradient(180deg, #0F1F35, #000000);
+  border: 1px solid rgba(22, 199, 255, 0.22);
+  border-radius: 14px;
+  padding: 40px 42px;
+  margin-bottom: 36px;
+  position: relative;
+}
+[data-page="hazmat-center"] .hz-proof::before {
+  content: '"';
+  position: absolute; top: 14px; left: 26px;
+  font-size: 120px; font-weight: 900;
+  color: rgba(22, 199, 255, 0.14);
+  font-family: 'Inter', serif;
+  line-height: 1;
+}
+[data-page="hazmat-center"] .hz-proof-quote {
+  font-size: 19px; line-height: 1.55;
+  color: #F8FAFC;
+  margin: 0 0 18px;
+  font-weight: 500;
+  max-width: 800px;
+  position: relative;
+}
+[data-page="hazmat-center"] .hz-proof-cite {
+  font-size: 13px; color: #B8C5D6;
+}
+[data-page="hazmat-center"] .hz-proof-cite strong { color: #16C7FF; font-weight: 700; }
+
+/* ====== FAQ ====== */
+[data-page="hazmat-center"] .hz-faq {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 36px;
+}
+[data-page="hazmat-center"] .hz-faq-item {
+  background: #0F1F35;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+}
+[data-page="hazmat-center"] .hz-faq-q {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 18px 22px;
+  font-size: 15px; font-weight: 700;
+  color: #F8FAFC;
+  text-align: left;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: inherit;
+}
+[data-page="hazmat-center"] .hz-faq-q:hover { color: #16C7FF; }
+[data-page="hazmat-center"] .hz-faq-q::after {
+  content: "+";
+  font-size: 24px; font-weight: 400;
+  color: #16C7FF;
+  transition: transform 200ms ease;
+}
+[data-page="hazmat-center"] .hz-faq-item[open] .hz-faq-q::after { transform: rotate(45deg); }
+[data-page="hazmat-center"] .hz-faq-a {
+  padding: 0 22px 18px;
+  font-size: 14px; line-height: 1.6;
+  color: #CBD5E1;
+}
+
+/* ====== FINAL CTA BAR ====== */
+[data-page="hazmat-center"] .hz-final-cta {
+  background:
+    radial-gradient(circle at 80% 50%, rgba(22, 199, 255, 0.22), transparent 50%),
+    linear-gradient(135deg, #000000, #000000);
+  border: 1px solid rgba(22, 199, 255, 0.4);
+  border-radius: 14px;
+  padding: 44px 48px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+[data-page="hazmat-center"] .hz-final-cta h2 {
+  font-size: 38px; font-weight: 900;
+  color: #F8FAFC;
+  margin: 0 0 12px;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+[data-page="hazmat-center"] .hz-final-cta p {
+  font-size: 16px; color: #B8C5D6;
+  margin: 0 0 28px;
+  max-width: 560px;
+  margin-left: auto; margin-right: auto;
+  line-height: 1.5;
+}
+
+/* ====== MOBILE ====== */
+@media (max-width: 900px) {
+  [data-page="hazmat-center"] .hz-hero-v2 { padding: 36px 24px 32px; }
+  [data-page="hazmat-center"] .hz-hero-v2 h1 { font-size: 36px; letter-spacing: -1px; }
+  [data-page="hazmat-center"] .hz-cred-strip { grid-template-columns: repeat(2, 1fr); }
+  [data-page="hazmat-center"] .hz-cred-item:nth-child(2) { border-right: 0; }
+  [data-page="hazmat-center"] .hz-cred-item:nth-child(-n+2) { border-bottom: 1px solid rgba(22, 199, 255,0.18); }
+  [data-page="hazmat-center"] .hz-stakes-grid,
+  [data-page="hazmat-center"] .hz-flagship-grid { grid-template-columns: 1fr; }
+  [data-page="hazmat-center"] .hz-demo-stage { grid-template-columns: 1fr; }
+  [data-page="hazmat-center"] .hz-final-cta { padding: 32px 24px; }
+  [data-page="hazmat-center"] .hz-final-cta h2 { font-size: 28px; }
+  [data-page="hazmat-center"] .hz-section-head h2 { font-size: 28px; }
+}
+
+/* ============== HERO v3 — placard wall + tanker illustration (May 2026) ============== */
+
+[data-page="hazmat-center"] .hz-hero-v3 {
+  position: relative;
+  padding: 72px 56px 60px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 100%, rgba(22, 199, 255, 0.15), transparent 65%),
+    radial-gradient(ellipse 60% 40% at 90% 0%, rgba(22, 199, 255, 0.18), transparent 55%),
+    linear-gradient(180deg, #000000 0%, #000000 100%);
+  border: 1px solid rgba(22, 199, 255, 0.28);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 0 24px;
+  min-height: 480px;
+  isolation: isolate;
+}
+
+/* Placard wall — anchored top-right, tilted, dimmed */
+[data-page="hazmat-center"] .hz-placard-wall {
+  position: absolute;
+  top: -40px;
+  right: -80px;
+  display: flex;
+  gap: 18px;
+  transform: rotate(-12deg);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  mask-image: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%);
+  -webkit-mask-image: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%);
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
+}
+[data-page="hazmat-center"] .hz-placard-wall img {
+  width: 140px;
+  height: 140px;
+  display: block;
+  border-radius: 6px;
+  /* animation: hz-placard-float 8s ease-in-out infinite; */
+  /* Disabled · was causing GPU paint storm on Mac mini-class hardware when
+     combined with backdrop-filter + the inner-scroll .main container. The
+     static placards still look correct; the float was decorative only. */
+}
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(1) { animation-delay: 0s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(2) { animation-delay: -1.2s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(3) { animation-delay: -2.4s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(4) { animation-delay: -3.6s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(5) { animation-delay: -4.8s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(6) { animation-delay: -6.0s; }
+[data-page="hazmat-center"] .hz-placard-wall img:nth-child(7) { animation-delay: -7.2s; }
+@keyframes hz-placard-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page="hazmat-center"] .hz-placard-wall img { animation: none; }
+}
+
+/* Subtle X3 mark tile pattern on top of placard wall */
+[data-page="hazmat-center"] .hz-hero-v3::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 30% 50%, rgba(22, 199, 255, 0.08), transparent 18%),
+    radial-gradient(circle at 70% 30%, rgba(22, 199, 255, 0.05), transparent 15%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Scan-line texture overlay (CRT instrument-panel feel) */
+[data-page="hazmat-center"] .hz-hero-v3::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(22, 199, 255, 0.03) 3px,
+    rgba(22, 199, 255, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+}
+
+/* Hero content sits above the placard wall + overlays */
+[data-page="hazmat-center"] .hz-hero-v3 > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* Tiered hero typography — bigger, more confident */
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-eyebrow {
+  background: rgba(22, 199, 255, 0.18);
+  border: 1px solid rgba(22, 199, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10.5pt;
+  letter-spacing: 1pt;
+  text-transform: uppercase;
+}
+[data-page="hazmat-center"] .hz-hero-v3 h1 {
+  font-size: 64px;
+  letter-spacing: -2px;
+  max-width: 760px;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  margin-bottom: 22px;
+}
+[data-page="hazmat-center"] .hz-hero-v3 h1 em {
+  position: relative;
+  display: inline-block;
+}
+[data-page="hazmat-center"] .hz-hero-v3 h1 em::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 2px;
+  height: 6px;
+  background: linear-gradient(90deg, #16C7FF, #16C7FF);
+  opacity: 0.4;
+  border-radius: 3px;
+  filter: blur(2px);
+}
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
+  max-width: 620px;
+  font-size: 18px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Tactical badge row above the CTAs — "instrument cluster" feel */
+[data-page="hazmat-center"] .hz-hero-cluster {
+  display: flex;
+  gap: 24px;
+  margin: 0 0 26px;
+  flex-wrap: wrap;
+}
+[data-page="hazmat-center"] .hz-hero-cluster-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 14px;
+  border-left: 2px solid #16C7FF;
+}
+[data-page="hazmat-center"] .hz-hero-cluster-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  color: #16C7FF;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+[data-page="hazmat-center"] .hz-hero-cluster-label {
+  font-size: 10pt;
+  font-weight: 600;
+  color: #94A3B8;
+  letter-spacing: 0.5pt;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  [data-page="hazmat-center"] .hz-hero-v3 { padding: 40px 24px 36px; }
+  [data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; letter-spacing: -1px; }
+  [data-page="hazmat-center"] .hz-placard-wall { display: none; }
+  [data-page="hazmat-center"] .hz-hero-cluster { gap: 14px; }
+}
+
+/* ============== HERO v8 — Large ambient placard photo (May 2026) ============== */
+
+/* Hero: single column, ample padding-right so headlines don't crash into the photo area */
+[data-page="hazmat-center"] .hz-hero-v3 {
+  position: relative;
+  min-height: 580px;
+  padding: 64px 56px 64px 56px;
+  overflow: hidden;
+}
+
+/* The big atmospheric placard photo — fills the right half, dimmed, masked */
+[data-page="hazmat-center"] .hz-placard-photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  margin: 0;
+  z-index: 1;            /* behind text, behind placard wall accent */
+  opacity: 0.32;          /* grayed-out like the placards */
+  pointer-events: none;
+  /* Mask: fade to transparent on the LEFT edge so it blends into the text area */
+  mask-image: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(0,0,0,0.4) 22%,
+    rgba(0,0,0,0.95) 50%,
+    rgba(0,0,0,0.95) 75%,
+    rgba(0,0,0,0.5) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(0,0,0,0.4) 22%,
+    rgba(0,0,0,0.95) 50%,
+    rgba(0,0,0,0.95) 75%,
+    rgba(0,0,0,0.5) 100%
+  );
+  /* Filter: partial grayscale + cyan duotone shift, slight blur */
+  filter:
+    grayscale(0.55)
+    brightness(0.85)
+    contrast(1.05)
+    saturate(0.7)
+    sepia(0.18) hue-rotate(160deg);
+}
+[data-page="hazmat-center"] .hz-placard-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 50%;
+  display: block;
+}
+
+/* Tiny CC0 credit chip — discreet, bottom-right of the photo zone */
+[data-page="hazmat-center"] .hz-hero-v3::after {
+  content: "";  /* removed sub-content; credit lives in HTML via a small note below */
+}
+
+/* Re-show a small CC0 credit (we removed the markup, but add it back as a CSS-only floating tip)
+   Better: re-inject in HTML — but for now a tiny absolute label */
+
+/* Placard wall — restore prominence, but pull it forward in z so it sits above the big photo */
+[data-page="hazmat-center"] .hz-placard-wall {
+  top: -32px;
+  right: -60px;
+  opacity: 0.55;
+  z-index: 2;
+}
+[data-page="hazmat-center"] .hz-placard-wall img {
+  width: 130px;
+  height: 130px;
+}
+
+/* All hero text + cluster + CTAs sit above the photo */
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-eyebrow,
+[data-page="hazmat-center"] .hz-hero-v3 > h1,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-sub,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-cluster,
+[data-page="hazmat-center"] .hz-hero-v3 > .hz-hero-v2-ctas {
+  position: relative;
+  z-index: 3;
+}
+
+[data-page="hazmat-center"] .hz-hero-v3 h1 {
+  font-size: 60px;
+  letter-spacing: -1.5px;
+  max-width: 700px;
+}
+[data-page="hazmat-center"] .hz-hero-v3 .hz-hero-v2-sub {
+  max-width: 620px;
+}
+
+/* Mobile: hide the giant ambient photo, fall back to the placard wall alone */
+@media (max-width: 1100px) {
+  [data-page="hazmat-center"] .hz-hero-v3 {
+    padding: 40px 24px 32px;
+    min-height: auto;
+  }
+  [data-page="hazmat-center"] .hz-placard-photo {
+    display: none;
+  }
+  [data-page="hazmat-center"] .hz-hero-v3 h1 { font-size: 36px; }
+  [data-page="hazmat-center"] .hz-placard-wall { display: none; }
+}
+
+/* Tiny floating CC0 credit — sits in the bottom-right of the hero */
+[data-page="hazmat-center"] .hz-placard-photo-tag {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  z-index: 4;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3pt;
+  color: rgba(255, 255, 255, 0.42);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px 8px;
+  border-radius: 3px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+[data-page="hazmat-center"] .hz-placard-photo-tag a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+[data-page="hazmat-center"] .hz-placard-photo-tag a:hover {
+  color: #16C7FF;
+}
+
+/* Placard wall — hidden for now per UX feedback. Flip display back to flex to restore. */
+[data-page="hazmat-center"] .hz-placard-wall { display: none !important; }
+
+/* ============== Substance Lookup — Big Preview Layout (May 2026) ============== */
+body[data-page="hazmat-substances"] .hz-sub-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 20px;
+  align-items: start;
+}
+body[data-page="hazmat-substances"] .hz-sub-left { min-width: 0; }
+
+body[data-page="hazmat-substances"] .hz-sub-preview {
+  position: sticky;
+  top: 24px;
+  background:
+    linear-gradient(180deg, rgba(22, 199, 255, 0.05), rgba(22, 199, 255, 0.02)),
+    rgba(10, 22, 40, 0.85);
+  border: 1px solid rgba(22, 199, 255, 0.32);
+  border-radius: 14px;
+  padding: 22px 22px 20px;
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(22, 199, 255, 0.10);
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10pt;
+  font-weight: 700;
+  color: #16C7FF;
+  letter-spacing: 1pt;
+  text-transform: uppercase;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-print {
+  background: rgba(22, 199, 255, 0.12);
+  color: #16C7FF;
+  border: 1px solid rgba(22, 199, 255, 0.4);
+  font-size: 14pt;
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-print:hover { background: rgba(22, 199, 255,0.25); }
+body[data-page="hazmat-substances"] .hz-sub-preview-stage {
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 18px;
+  min-height: 380px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 6px rgba(0,0,0,0.3);
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-empty {
+  font-size: 13pt;
+  color: #475569;
+  text-align: center;
+  font-style: italic;
+  font-weight: 500;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-noimage {
+  font-size: 12.5pt;
+  color: #475569;
+  text-align: center;
+  font-weight: 600;
+  padding: 24px;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-meta {
+  display: flex; flex-direction: column; gap: 4px;
+  text-align: center;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-un {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22pt;
+  font-weight: 800;
+  color: #16C7FF;
+  letter-spacing: 1pt;
+  line-height: 1;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-name {
+  font-size: 14pt;
+  font-weight: 700;
+  color: #F8FAFC;
+  line-height: 1.3;
+  margin: 4px 0 0;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-class {
+  font-size: 11pt;
+  color: #94A3B8;
+  font-weight: 600;
+  margin: 2px 0 0;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-cite {
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  color: #16C7FF;
+  background: rgba(22, 199, 255, 0.12);
+  border: 1px solid rgba(22, 199, 255, 0.35);
+  padding: 4px 10px;
+  border-radius: 4px;
+  align-self: center;
+  display: inline-block;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-cta {
+  margin-top: 12px;
+  background: linear-gradient(135deg, #16C7FF, #0098D9);
+  color: #FFFFFF !important;
+  font-weight: 700;
+  font-size: 11pt;
+  padding: 10px 18px;
+  border-radius: 6px;
+  text-decoration: none !important;
+  text-align: center;
+  display: inline-block;
+}
+body[data-page="hazmat-substances"] .hz-sub-preview-cta:hover {
+  filter: brightness(1.1);
+}
+
+/* Table row interactivity */
+body[data-page="hazmat-substances"] #sub-body tr {
+  transition: background 120ms ease;
+}
+body[data-page="hazmat-substances"] #sub-body tr:hover {
+  background: rgba(22, 199, 255, 0.08);
+}
+body[data-page="hazmat-substances"] #sub-body tr.selected {
+  background: rgba(22, 199, 255, 0.18);
+  box-shadow: inset 3px 0 0 #16C7FF;
+}
+
+/* Bump font sizes site-wide on substance + placard wizard pages */
+body[data-page="hazmat-substances"],
+body[data-page="hazmat-placard-wizard"] {
+  font-size: 17px;
+}
+body[data-page="hazmat-substances"] .hz-table,
+body[data-page="hazmat-substances"] .hz-table td,
+body[data-page="hazmat-substances"] .hz-table th {
+  font-size: 13.5pt !important;
+}
+body[data-page="hazmat-substances"] .hz-input,
+body[data-page="hazmat-substances"] .hz-select {
+  font-size: 13.5pt !important;
+  padding: 13pt 15pt !important;
+}
+body[data-page="hazmat-substances"] #sub-stats {
+  font-size: 11pt !important;
+  color: #B8C5D6 !important;
+}
+body[data-page="hazmat-placard-wizard"] .hz-input,
+body[data-page="hazmat-placard-wizard"] .hz-textarea {
+  font-size: 13.5pt !important;
+  padding: 13pt 15pt !important;
+}
+body[data-page="hazmat-placard-wizard"] .hz-table td,
+body[data-page="hazmat-placard-wizard"] .hz-table th {
+  font-size: 12.5pt !important;
+}
+body[data-page="hazmat-placard-wizard"] .hz-tab {
+  font-size: 12.5pt !important;
+  padding: 12pt 18pt !important;
+}
+
+/* Result panel placard well — bigger on placard wizard */
+body[data-page="hazmat-placard-wizard"] #placard-output {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 360px;
+}
+
+/* Mobile: stack the substance preview below the table */
+@media (max-width: 1100px) {
+  body[data-page="hazmat-substances"] .hz-sub-layout {
+    grid-template-columns: 1fr;
+  }
+  body[data-page="hazmat-substances"] .hz-sub-preview {
+    position: static;
+    order: -1;
+  }
+}
+
+/* Print: only the placard preview prints on substances */
+@media print {
+  body[data-page="hazmat-substances"] .topbar,
+  body[data-page="hazmat-substances"] .sidebar,
+  body[data-page="hazmat-substances"] .hz-page-bar,
+  body[data-page="hazmat-substances"] .hz-sub-left,
+  body[data-page="hazmat-substances"] .hz-sub-preview-print,
+  body[data-page="hazmat-substances"] .hz-sub-preview-cta,
+  body[data-page="hazmat-substances"] .hz-sub-preview-tag {
+    display: none !important;
+  }
+  body[data-page="hazmat-substances"] .hz-sub-layout {
+    grid-template-columns: 1fr !important;
+  }
+  body[data-page="hazmat-substances"] .hz-sub-preview {
+    background: #FFFFFF !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    position: static !important;
+  }
+  body[data-page="hazmat-substances"] .hz-sub-preview-stage {
+    min-height: 600px;
+    box-shadow: none !important;
+  }
+  body[data-page="hazmat-substances"] .hz-sub-preview-name,
+  body[data-page="hazmat-substances"] .hz-sub-preview-class,
+  body[data-page="hazmat-substances"] .hz-sub-preview-un {
+    color: #000000 !important;
+  }
+}
+
+/* =================================================================
+   HAZMAT PARITY OVERRIDES — Next.js wrapper grid
+   -----------------------------------------------------------------
+   In the static reference (app.x3compass.com/hazmat-center.html),
+   <body> itself is the CSS grid that carries .brand-box, .topbar,
+   .sidebar, and .main as direct children, and .app-shell uses
+   `display: contents` so its sidebar+main promote into the body
+   grid via grid-area names.
+
+   Next.js owns <body> in RootLayout, so we make the wrapper element
+   `.hz-app-frame[data-page="hazmat-center"]` take on body's grid
+   role here. Same template areas, same column/row sizes — just on
+   the wrapper instead of body. The static `.app-shell { display:
+   contents !important }` rule (in x3-static-styles.css) still
+   dissolves it, so sidebar/main promote into THIS grid instead.
+
+   AppShell contract from the design system is preserved:
+   `.main { height: calc(100vh - 88px); overflow-y: auto }` keeps
+   sticky scroll working. We do NOT add min-height:100vh or
+   overflow:visible to .main — those break the contract.
+   ================================================================= */
+
+/* Wrapper takes body's grid role — same as styles.css line 808 body{} */
+.hz-app-frame[data-page="hazmat-center"] {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 88px 1fr;
+  grid-template-areas:
+    "brand topbar"
+    "sidebar main";
+  min-height: 100vh;
+  background: var(--bg, #000000);
+  color: var(--fg, #FFFFFF);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* If x3-static-styles.css ever applies body{display:grid} on this surface,
+   neutralize it so it doesn't conflict with our wrapper grid. */
+body:has(.hz-app-frame[data-page="hazmat-center"]) {
+  display: block;
+  background: var(--bg, #000000);
+}
+
+/* Bridge the body[data-page^="hazmat-"] rules the verbatim CSS still uses —
+   our data-page lives on the wrapper, not body. */
+[data-page="hazmat-center"] .hz-hero h1,
+[data-page="hazmat-center"] .hz-hero-v2 h1,
+[data-page="hazmat-center"] .hz-hero-v3 h1 { color: #F8FAFC; }
+[data-page="hazmat-center"] .hz-hero h1 em,
+[data-page="hazmat-center"] .hz-hero-v2 h1 em,
+[data-page="hazmat-center"] .hz-hero-v3 h1 em {
+  background: linear-gradient(90deg, #16C7FF 0%, #16C7FF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-page="hazmat-center"] .hz-hero-sub,
+[data-page="hazmat-center"] .hz-hero-v2-sub { color: #CBD5E1; }
+[data-page="hazmat-center"] .hz-hero-eyebrow,
+[data-page="hazmat-center"] .hz-hero-v2-eyebrow { color: #16C7FF; }
+[data-page="hazmat-center"] .hz-hero-meta { border-top-color: rgba(22, 199, 255, 0.2); }
+[data-page="hazmat-center"] .hz-hero-meta-num { color: #16C7FF; }
+[data-page="hazmat-center"] .hz-hero-meta-label { color: #94A3B8; }
+
+/* ===================================================================
+   EMERGENCY OVERRIDES · Sprint #469 follow-up
+   -------------------------------------------------------------------
+   /app/hazmat Overview was freezing on scroll for Mac mini-class GPUs.
+   Stripping the heaviest paint costs SPECIFIC to this page:
+     · 3-layer radial+linear gradient on the hero (3 composited layers
+       per frame on a 480px-tall element + isolation: isolate)
+     · The 1000x800 hero JPG (one-shot decode but adds to layer budget)
+     · The remaining backdrop-filter rules anywhere on this page
+     · Hero photo's filter drop-shadow + mask-image residue
+   Sub-pages don't trip this because they don't use .hz-hero-v3.
+   =================================================================== */
+
+[data-page="hazmat-center"] .hz-hero-v3 {
+  background: #000 !important;
+  border: 1px solid #1E3556 !important;
+  min-height: auto !important;
+  isolation: auto !important;
+  padding: 40px 32px !important;
+}
+[data-page="hazmat-center"] .hz-placard-wall,
+[data-page="hazmat-center"] .hz-placard-photo,
+[data-page="hazmat-center"] .hz-placard-photo-tag {
+  display: none !important;
+}
+[data-page="hazmat-center"] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* Kill the inner-scroll container — let the document scroll naturally
+   instead. .main becomes a normal block element. Topbar may need to be
+   position: sticky if it isn't already, but every other hazmat page
+   uses the same shell so this should be safe. */
+body[data-page="hazmat-center"] .main {
+  height: auto !important;
+  overflow: visible !important;
+}
