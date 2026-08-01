@@ -12,7 +12,11 @@ let injected = 0;
 for (const [id, body] of Object.entries(frags)) {
   const re = new RegExp(`(<(?:div|ul|tbody)[^>]*id="${id}"[^>]*>)(\\s*)(</(?:div|ul|tbody)>)`, "s");
   if (!re.test(html)) { console.error(`  build-index: no empty placeholder for #${id}`); process.exit(1); }
-  html = html.replace(re, `$1${body}$3`);
+  // NB: replacer MUST be a function. A string replacement treats $1/$2/$3 as
+  // capture-group refs, and our content is full of "$14,000", "$2,500",
+  // "$3,500" — which silently injected captured tags mid-content and nested
+  // the cards inside each other.
+  html = html.replace(re, (_m, open, _ws, close) => open + body + close);
   injected++;
 }
 html = html.replace(/<span class="yr">\d{4}<\/span>/, `<span class="yr">${new Date().getFullYear()}</span>`);

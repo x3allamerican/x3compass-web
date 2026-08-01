@@ -44,7 +44,9 @@ const CREW = [
   ["CMP-11", "Training", "Assigns ELDT, supervisor D&amp;A and remedial coaching, then measures whether it worked.", CYAN],
   ["CMP-12", "Audit Readiness", "Asks continuously: if FMCSA knocked tomorrow, are you ready? Score, gaps, priorities.", TEAL],
   ["CMP-13", "Citation Verifier", "Checks every CFR citation against the live eCFR registry. Anything unverified never ships.", VIOLET],
-  ["CMP-14", "Concierge", "The front door. Answers any compliance question from the corpus, cited to the section.", PINK],
+  ["CMP-14", "IFTA &amp; Permits", "Watches IFTA quarters, UCR windows and state permit renewals so none of them lapse.", AMBER],
+  ["CMP-15", "Audit Export", "Assembles the indexed three-year packet on demand — every file an auditor asks for.", CYAN],
+  ["CMP-16", "Concierge", "The front door. Answers any compliance question from the corpus, cited to the section.", PINK],
 ];
 
 /* ---------- 04 · THE REAL COST — 4 boxes, 2 x 2 ---------- */
@@ -116,13 +118,17 @@ export function render() {
       <p class="mt-3 text-[14px] leading-relaxed text-[#AEB9C7]">${c[2]}</p>
     </div>`).join("");
 
-  O.costgrid = COST.map((c) =>
+  const costCard = (c) =>
     `<div class="card p-8" style="border:1px solid rgba(255,255,255,.10);border-top:3px solid ${c[4]}">
       <div class="text-[36px] font-black leading-none" style="color:${c[4]}">${c[0]}</div>
       <h3 class="mt-3 text-[19px] font-extrabold tracking-tight text-white">${c[1]}</h3>
       <p class="mt-3 text-[14px] leading-relaxed text-[#AEB9C7]">${c[2]}</p>
       <div class="mt-5 font-mono text-[11px] tracking-widest text-[#5B6B7E]">${c[3]}</div>
-    </div>`).join("");
+    </div>`;
+  /* two columns, two boxes stacked in each */
+  O.costgrid =
+    `<div class="flex flex-col gap-6">${costCard(COST[0])}${costCard(COST[1])}</div>` +
+    `<div class="flex flex-col gap-6">${costCard(COST[2])}${costCard(COST[3])}</div>`;
 
   O.ticker = PRODUCTS.concat(PRODUCTS).map((p, i) =>
     `<span class="inline-flex items-center gap-3 rounded-full border border-[#1C2533] bg-[#0B0F16] px-5 py-3">
