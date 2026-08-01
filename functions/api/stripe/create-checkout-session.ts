@@ -3,7 +3,8 @@ import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/s
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
   STRIPE_SECRET_KEY?: string;
-  STRIPE_PRICE_DIY_DRIVER?: string; STRIPE_PRICE_DFY_DRIVER?: string; STRIPE_PRICE_HAZMAT_ADDON?: string;
+  // One graduated per-driver price (configure Stripe tiers to match src/lib/pricing.ts BANDS).
+  STRIPE_PRICE_COMPASS_DRIVER?: string;
   NEXT_PUBLIC_SITE_URL?: string;
 }
 
@@ -16,16 +17,13 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const user = await verifySupabaseJwt(ctx.env, token);
     if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
 
-    let body: { plan?: string; drivers?: number; hazmat?: boolean; success_path?: string; cancel_path?: string };
+    let body: { drivers?: number; success_path?: string; cancel_path?: string };
     try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
-    const plan = (body.plan || "diy").toLowerCase();
     const drivers = Math.max(1, Math.floor(Number(body.drivers || 1)));
-    const hazmat = !!body.hazmat;
 
     if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
-    if (plan === "diy" && !ctx.env.STRIPE_PRICE_DIY_DRIVER) return json({ ok: false, error: "DIY price not configured" }, 500);
-    if (plan === "dfy" && !ctx.env.STRIPE_PRICE_DFY_DRIVER) return json({ ok: false, error: "DFY price not configured" }, 500);
+    if (!ctx.env.STRIPE_PRICE_COMPASS_DRIVER) return json({ ok: false, error: "Compass price not configured" }, 500);
 
     const supa = supaFetch(ctx.env);
     const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id,trial_ends_at)`)) as Array<{ carrier_id: string; compass_carriers: { id: string; name: string; stripe_customer_id: string | null; trial_ends_at: string | null } }>;
@@ -44,22 +42,18 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     if (carrier.stripe_customer_id) params.set("customer", carrier.stripe_customer_id);
     else if (user.email) params.set("customer_email", user.email);
 
-    const priceDriver = plan === "dfy" ? ctx.env.STRIPE_PRICE_DFY_DRIVER : ctx.env.STRIPE_PRICE_DIY_DRIVER;
-    params.append("line_items[0][price]", priceDriver!);
+    // Single line item, quantity = drivers. The Stripe Price itself must be a graduated
+    // tiered price mirroring src/lib/pricing.ts (50/40/30/25 bands). Every X3 product incl.
+    params.append("line_items[0][price]", ctx.env.STRIPE_PRICE_COMPASS_DRIVER!);
     params.append("line_items[0][quantity]", String(drivers));
     params.append("line_items[0][adjustable_quantity][enabled]", "true");
     params.append("line_items[0][adjustable_quantity][minimum]", "1");
-    if (hazmat && ctx.env.STRIPE_PRICE_HAZMAT_ADDON) {
-      params.append("line_items[1][price]", ctx.env.STRIPE_PRICE_HAZMAT_ADDON);
-      params.append("line_items[1][quantity]", "1");
-    }
     if (carrier.trial_ends_at && new Date(carrier.trial_ends_at) > new Date()) {
       const trialDays = Math.ceil((new Date(carrier.trial_ends_at).getTime() - Date.now()) / 86400000);
       if (trialDays > 0) params.set("subscription_data[trial_period_days]", String(Math.min(trialDays, 7)));
     }
     params.set("metadata[carrier_id]", carrier.id);
-    params.set("metadata[plan]", plan);
-    params.set("metadata[hazmat]", hazmat ? "true" : "false");
+    params.set("metadata[plan]", "compass");
     params.set("allow_promotion_codes", "true");
 
     const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {

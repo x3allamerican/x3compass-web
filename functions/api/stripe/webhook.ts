@@ -65,11 +65,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         const subId = sub.id as string;
         const status = sub.status as string;
         const currentPeriodEnd = sub.current_period_end ? new Date(((sub.current_period_end as number) || 0) * 1000).toISOString() : null;
-        const planMeta = (sub.metadata as Record<string, string>)?.plan;
+        // Single plan — service_tier is always "compass" now.
         const carrierMeta = (sub.metadata as Record<string, string>)?.carrier_id;
         const query = carrierMeta ? `id=eq.${carrierMeta}` : `stripe_subscription_id=eq.${subId}`;
         const updates: Record<string, unknown> = { subscription_status: status, current_period_end: currentPeriodEnd, stripe_subscription_id: subId };
-        if (planMeta) updates.service_tier = planMeta;
+        updates.service_tier = "compass";
         await supa.update("compass_carriers", query, updates);
         break;
       }

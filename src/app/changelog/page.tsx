@@ -83,7 +83,7 @@ const ENTRIES: Entry[] = [
     tag: "feature",
     title: "Stripe Checkout live + 7-day free trial with no card",
     body:
-      "DIY at $25/driver/mo, DFY at $50/driver/mo, Hazmat add-on at $99/mo flat. Trial requires no credit card. Stripe webhook signature verified, idempotent event handling, subscription state synced to compass_carriers.",
+      "Original launch pricing: DIY at $25/driver/mo, DFY at $50/driver/mo, Hazmat add-on at $99/mo flat. (Superseded 2026-07-31 by one plan — graduated per-driver, every X3 product included.) Stripe webhook signature verified, idempotent event handling, subscription state synced to compass_carriers.",
   },
   {
     date: "May 14, 2026",

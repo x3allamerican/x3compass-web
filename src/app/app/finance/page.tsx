@@ -10,7 +10,7 @@ import { useFinance, type FinanceEntry } from "@/lib/useFinance";
 import { getSupabase } from "@/lib/supabase";
 
 // ---------------- Helpers ----------------
-const TIER_LABEL: Record<string, string> = { diy: "DIY $25/driver", dfy: "DFY $50/driver", enterprise: "Enterprise" };
+const TIER_LABEL: Record<string, string> = { compass: "X3 Compass", diy: "X3 Compass", dfy: "X3 Compass", enterprise: "X3 Compass" };
 
 function fmt(cents: number) {
   return (cents / 100).toLocaleString(undefined, { style: "currency", currency: "USD" });
@@ -166,7 +166,7 @@ export default function FinancePage() {
           dataSource={{
             items: [
               <span key="f1"><strong className="text-[var(--fg)]">Stripe charges</strong> auto-pulled per month via <code className="font-mono text-[var(--accent)]">/api/admin/finance?sync=auto</code>. New rows inserted to <code className="font-mono text-[var(--accent)]">compass_finance_entries</code> with <code className="font-mono">type=&apos;money_in&apos;</code>.</span>,
-              <span key="f2"><strong className="text-[var(--fg)]">Expected MRR</strong> = drivers × tier rate (DIY $25, DFY $50, +$99 Hazmat). Per-client view compares actual revenue vs expected · flags <em>OWED</em> when behind, <em>OVERPAID</em> when ahead.</span>,
+              <span key="f2"><strong className="text-[var(--fg)]">Expected MRR</strong> = graduated per-driver ($50→$25 bands, $100/mo min, every product included). Per-client view compares actual revenue vs expected · flags <em>OWED</em> when behind, <em>OVERPAID</em> when ahead.</span>,
               <span key="f3"><strong className="text-[var(--fg)]">Vendor pass-throughs</strong> = costs we incur (MVR, PSP, drug tests, background checks) on behalf of carriers. Tab 3 shows which carriers still owe us reimbursement.</span>,
               <span key="f4"><strong className="text-[var(--fg)]">12-Month Trend</strong> pulls from <code className="font-mono text-[var(--accent)]">finance_monthly_summary</code> view · revenue, costs, net per month for the last 12.</span>,
             ],
@@ -202,7 +202,7 @@ export default function FinancePage() {
           <X3KPITile label="Software + overhead" value={fmt(kpis.overhead_cents)}                  sub="hosting, AI, email, infra"                                                            tone="navy" />
           <X3KPITile label="What's left"        value={fmt(kpis.whats_left_cents)}                 sub="money in − costs − refunds"                                                           tone={kpis.whats_left_cents >= 0 ? "green" : "red"} />
           <X3KPITile label="Customers owe us"   value={fmt(clientTotals.owed_cents)}               sub="below expected MRR"                                                                   tone={clientTotals.owed_cents > 0 ? "red" : "navy"} />
-          <X3KPITile label="Expected MRR"       value={fmt(clientTotals.expected_mrr_cents)}       sub={`${clientTotals.drivers} drivers × tier rate`}                                        tone="navy" />
+          <X3KPITile label="Expected MRR"       value={fmt(clientTotals.expected_mrr_cents)}       sub={`${clientTotals.drivers} drivers · graduated`}                                        tone="navy" />
         </div>
 
         {/* 5 Tabs via X3AdminTabs */}
@@ -249,7 +249,7 @@ export default function FinancePage() {
                       </td>
                       <td className="px-3 py-2.5">
                         <div className="text-[var(--fg)]">{TIER_LABEL[r.tier] || r.tier}</div>
-                        {r.hazmat_addon && <div className="text-[10px] text-[var(--accent)] font-bold">+ Hazmat $99</div>}
+                        
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums text-[var(--fg)]">{r.drivers}</td>
                       <td className="px-3 py-2.5 text-right tabular-nums text-[var(--fg-muted)]">{fmt(r.expected_mrr_cents)}</td>

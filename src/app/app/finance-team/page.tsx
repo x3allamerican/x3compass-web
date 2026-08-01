@@ -83,7 +83,7 @@ const AGENTS: AgentDef[] = [
     desc: "Watches per-tier unit economics. Flags carriers whose tier doesn't cover their COGS. Recommends pricing changes.",
     outputs: ["Per-tier margin report", "Money-losing carrier list", "Quarterly pricing recommendation"],
     status: "proposed",
-    rationale: "A $25/mo DIY customer burning $40 of Claude API is bleeding you. Anthropic + Twilio + Resend prices drift over time. Without an agent watching per-carrier COGS vs tier price, unit economics quietly invert.",
+    rationale: "A low-driver-count carrier burning $40 of Claude API is bleeding you. Anthropic + Twilio + Resend prices drift over time. Without an agent watching per-carrier COGS vs plan price, unit economics quietly invert.",
   },
 ];
 

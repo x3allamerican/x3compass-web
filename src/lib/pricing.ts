@@ -81,6 +81,8 @@ export function breakdown(driverCount: number): Array<{
   return rows;
 }
 
+export const SERVICE_TIER = "compass";
+
 export const PLAN = {
   name: "X3 Compass",
   tagline: "Every X3 product included",

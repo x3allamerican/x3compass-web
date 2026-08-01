@@ -13,8 +13,7 @@ import { supaFetch } from "../../../_shared/supabase-admin";
 
 interface Env extends AdminEnv { STRIPE_SECRET_KEY?: string; }
 
-const TIER_RATE_CENTS: Record<string, number> = { diy: 2500, dfy: 5000, enterprise: 0 };
-const HAZMAT_ADDON_CENTS = 9900;
+import { monthlyCents } from "../../../_shared/pricing";
 
 function monthRange(month: string): { start: string; end: string; startSec: number; endSec: number } {
   const [y, m] = month.split("-").map((n) => parseInt(n, 10));
@@ -105,10 +104,9 @@ async function buildByClientView(env: Env, month: string) {
 
   const rows = carriers.map((c) => {
     const driverCount = driversByCarrier.get(c.id) || 0;
-    const tier = (c.service_tier || "diy").toLowerCase();
-    const tierRate = TIER_RATE_CENTS[tier] || 0;
-    const hazmatAddon = c.hazmat_addon ? HAZMAT_ADDON_CENTS : 0;
-    const expectedMrr = driverCount * tierRate + hazmatAddon;
+    const tier = "compass";
+    const expectedMrr = monthlyCents(driverCount); // graduated per-driver, every product included
+    const tierRate = driverCount > 0 ? Math.round(expectedMrr / driverCount) : 0;
     let actual = revById.get(c.id) || 0;
     if (!actual) actual = revByName.get(c.name.trim().toLowerCase()) || 0;
     const charges = chargesById.get(c.id) || 0;
