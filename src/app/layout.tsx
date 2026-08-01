@@ -14,17 +14,17 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { default: "X3 Compass · AI Safety Director for fleets", template: "%s · X3 Compass" },
-  description: "An AI Safety Director · or a real one. Both work. 12 specialized brains, 300+ FMCSA skills, CFR-cited answers. Graduated per-driver pricing from $50/driver down to $25. 7-day free trial, no card.",
+  description: "An AI Safety Director · or a real one. Both work. 300+ FMCSA skills across the full CFR corpus, every answer cited. Graduated per-driver pricing from $50/driver down to $25. 7-day free trial, no card.",
   keywords: ["FMCSA compliance","DOT compliance software","fleet safety","AI safety director","DataQ disputes","hazmat compliance","DQ files","CDL compliance","hours of service","driver qualification file","X3 Compass"],
   authors: [{ name: "X3 Fleet Safety LLC" }],
   alternates: { canonical: SITE },
   openGraph: {
     type: "website", locale: "en_US", url: SITE, siteName: "X3 Compass",
     title: "X3 Compass · AI Safety Director for fleets",
-    description: "12 specialized brains. 300+ CFR-cited skills. The AI Safety Director for FMCSA-regulated fleets 1-100. Free 7-day trial.",
+    description: "300+ CFR-cited skills across the full corpus. The AI Safety Director for FMCSA-regulated fleets 1-100. Free 7-day trial.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "X3 Compass · AI Safety Director" }],
   },
-  twitter: { card: "summary_large_image", title: "X3 Compass · AI Safety Director", description: "12 brains. 300+ FMCSA skills. CFR-cited. From $50/driver, graduated. Free trial.", images: ["/og-image.png"] },
+  twitter: { card: "summary_large_image", title: "X3 Compass · AI Safety Director", description: "300+ FMCSA skills. CFR-cited. From $50/driver, graduated. Free trial.", images: ["/og-image.png"] },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
