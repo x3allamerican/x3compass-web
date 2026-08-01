@@ -1,4 +1,3 @@
-import { rateLimit } from "../../_shared/rate-limit";
 /**
  * POST /api/inspections/import — bulk import roadside / DOT inspections.
  * Body: { carrier_id, csv }
@@ -23,9 +22,6 @@ function bool(v: string): boolean { return /^(true|t|yes|y|1)$/i.test(v.trim());
 function intOr(v: string, d = 0): number { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; }
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "inspection-import", max: 5, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { carrier_id?: string; csv?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);

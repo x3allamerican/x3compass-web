@@ -1,5 +1,4 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
-import { rateLimit } from "../../_shared/rate-limit";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -118,9 +117,6 @@ const TABLES: Array<[string,string,string]> = [
 ];
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "audit-build", max: 10, windowSec: 300 });
-  if (_rl) return _rl;
-
   try {
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);

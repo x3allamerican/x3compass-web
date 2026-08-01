@@ -1,5 +1,4 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
-import { rateLimit } from "../../_shared/rate-limit";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -12,9 +11,6 @@ const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "stripe-checkout", max: 30, windowSec: 60 });
-  if (_rl) return _rl;
-
   try {
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);

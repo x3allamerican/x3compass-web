@@ -11,23 +11,13 @@
  *
  * Required: X-X3-Internal-Secret header matching env.X3_INTERNAL_SECRET.
  */
-import { unauthorized, ok, serverError, type AdminEnv } from "../../_shared/admin-auth";
+import { requireSuperAdmin, unauthorized, ok, serverError, type AdminEnv } from "../../_shared/admin-auth";
 import { supaFetch } from "../../_shared/supabase-admin";
 import { computeNextRun } from "../../_shared/cron";
 
-interface DispatchEnv extends AdminEnv {
-  X3_INTERNAL_SECRET?: string;
-}
-
-export const onRequestPost: PagesFunction<DispatchEnv> = async (ctx) => {
-  // Auth: only the Compass cron Worker can call dispatch.
-  // rate-limit intentionally removed — caller is trusted, rate-shape is
-  // bounded by cron schedule (1/min), and the prior rateLimit() call was
-  // using a stale signature that threw at runtime.
-  const presented = ctx.request.headers.get("X-X3-Internal-Secret");
-  if (!presented || !ctx.env.X3_INTERNAL_SECRET || presented !== ctx.env.X3_INTERNAL_SECRET) {
-    return unauthorized("dispatch requires X-X3-Internal-Secret");
-  }
+export const onRequestPost: PagesFunction<AdminEnv> = async (ctx) => {
+  const who = await requireSuperAdmin(ctx);
+  if (!who || who.type !== "internal") return unauthorized();
 
   try {
     const supa = supaFetch(ctx.env);

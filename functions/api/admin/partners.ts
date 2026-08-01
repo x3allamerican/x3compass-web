@@ -1,5 +1,3 @@
-import { requireSuperAdmin, unauthorized } from "../../_shared/admin-auth";
-import { rateLimit } from "../../_shared/rate-limit";
 /**
  * GET /api/admin/partners?key=<ADMIN_KEY>
  *
@@ -29,14 +27,14 @@ const SUPABASE_HEADERS = (sr: string) => ({
 });
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "admin-partners", max: 30, windowSec: 60 });
-  if (_rl) return _rl;
-
-  // SECURITY: was previously gated by query-string ADMIN_KEY which leaks in HTTP
-  // logs + Referer. Migrated to JWT super-admin check. Caught by code-quality agent.
-  const gate = await requireSuperAdmin(ctx);
-  if (!gate.ok) return unauthorized(gate.reason);
-
+  const url = new URL(ctx.request.url);
+  const key = url.searchParams.get("key");
+  if (!ctx.env.ADMIN_KEY || key !== ctx.env.ADMIN_KEY) {
+    return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
     return new Response(JSON.stringify({ ok: false, error: "Server not configured" }), {
       status: 500,
@@ -61,15 +59,15 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 };
 
 export const onRequestPatch: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "admin-partners", max: 30, windowSec: 60 });
-  if (_rl) return _rl;
-
-  // SECURITY: same JWT super-admin gate as the GET handler.
-  const gate = await requireSuperAdmin(ctx);
-  if (!gate.ok) return unauthorized(gate.reason);
-
   const url = new URL(ctx.request.url);
+  const key = url.searchParams.get("key");
   const id = url.searchParams.get("id");
+  if (!ctx.env.ADMIN_KEY || key !== ctx.env.ADMIN_KEY) {
+    return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   if (!id) {
     return new Response(JSON.stringify({ ok: false, error: "Missing id" }), {
       status: 400,

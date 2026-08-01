@@ -1,4 +1,3 @@
-import { rateLimit } from "../../../_shared/rate-limit";
 /**
  * PATCH /api/admin/social/update
  * Body: { id, status?, body?, scheduled_at?, rejection_reason? }
@@ -7,9 +6,6 @@ import { rateLimit } from "../../../_shared/rate-limit";
 interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
 export const onRequestPatch: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "social-update", max: 30, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { id?: string; status?: string; body?: string; scheduled_at?: string; rejection_reason?: string; image_url?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.id) return json({ ok: false, error: "Missing id" }, 400);

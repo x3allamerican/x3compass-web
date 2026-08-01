@@ -7,14 +7,10 @@
  */
 import { requireSuperAdmin, unauthorized, ok, serverError, type AdminEnv } from "../../../_shared/admin-auth";
 import { supaFetch } from "../../../_shared/supabase-admin";
-import { rateLimit } from "../../../_shared/rate-limit";
 
 interface Env extends AdminEnv { STRIPE_SECRET_KEY?: string; }
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "finance-sync", max: 10, windowSec: 60 });
-  if (_rl) return _rl;
-
   const who = await requireSuperAdmin(ctx); if (!who) return unauthorized();
   if (!ctx.env.STRIPE_SECRET_KEY) return serverError("STRIPE_SECRET_KEY not set", 500);
   const url = new URL(ctx.request.url);

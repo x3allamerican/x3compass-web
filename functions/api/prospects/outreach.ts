@@ -1,4 +1,3 @@
-import { rateLimit } from "../../_shared/rate-limit";
 /**
  * POST /api/prospects/outreach
  * Body: { dot_numbers: string[], template_id: string }
@@ -19,9 +18,6 @@ const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: 
 type CarrierLite = { id: string; dot_number: string; legal_name: string; email: string | null; safety_rating: string | null };
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "bulk-outreach", max: 5, windowSec: 60 });
-  if (_rl) return _rl;
-
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
     return json({ ok: false, error: "Server missing Supabase env" }, 500);
   }

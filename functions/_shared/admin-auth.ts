@@ -1,70 +1,75 @@
 /**
- * Admin auth helpers — gate Pages Functions to super-admin users only.
- * Re-uses Supabase JWT verification + checks email against allow-list.
+ * Super-admin auth helper for Pages Functions.
+ *
+ * Two valid auth paths:
+ *  1. A logged-in user whose email is on the SUPER_ADMIN_EMAILS list, OR
+ *     whose JWT contains user_metadata.role = 'super_admin'.
+ *  2. An internal-cron caller with the X3_INTERNAL_SECRET header (used by
+ *     the GitHub Actions dispatcher workflow).
  */
-import { bearerFromRequest, verifySupabaseJwt, type SupaEnv, type SupaUser } from "./supabase-admin";
+import { verifySupabaseJwt, bearerFromRequest, type SupabaseAdminEnv } from "./supabase-admin";
 
-export interface AdminEnv extends SupaEnv {
-  ADMIN_KEY?: string;
-  SUPER_ADMIN_EMAILS?: string;  // comma-separated; falls back to hardcoded
+export interface AdminEnv extends SupabaseAdminEnv {
+  X3_INTERNAL_SECRET?: string;
 }
 
-const DEFAULT_SUPER_ADMINS = [
+const SUPER_ADMIN_EMAILS = new Set([
   "joshua@x3compass.com",
   "joshua@x3fleetsafety.com",
   "joshuakovarik@yahoo.com",
-];
+]);
 
-export type AdminCheckResult =
-  | { ok: true; user: SupaUser; via: "jwt" | "admin-key" }
-  | { ok: false; reason: string };
+export type AdminPrincipal =
+  | { type: "user"; id: string; email: string }
+  | { type: "internal"; reason: string };
 
-export async function requireSuperAdmin(ctx: { request: Request; env: AdminEnv }): Promise<AdminCheckResult> {
-  // Path 1: X-Admin-Key shared secret (for scripts/tests)
-  const adminKeyHeader = ctx.request.headers.get("X-Admin-Key");
-  if (ctx.env.ADMIN_KEY && adminKeyHeader && adminKeyHeader === ctx.env.ADMIN_KEY) {
-    return { ok: true, user: { sub: "admin-key", email: "admin@x3compass.com" }, via: "admin-key" };
+/**
+ * Returns the AdminPrincipal if the request is authorized, otherwise returns null.
+ * Pages Function callers should: `const who = await requireSuperAdmin(ctx); if (!who) return unauthorized()`.
+ */
+export async function requireSuperAdmin(ctx: { request: Request; env: AdminEnv }): Promise<AdminPrincipal | null> {
+  // Path 1: internal-secret header from the cron dispatcher
+  const internal = ctx.request.headers.get("X-X3-Internal-Secret") || ctx.request.headers.get("x-x3-internal-secret");
+  if (internal && ctx.env.X3_INTERNAL_SECRET && internal === ctx.env.X3_INTERNAL_SECRET) {
+    return { type: "internal", reason: "cron-dispatcher" };
   }
 
-  // Path 2: Supabase JWT — user must be in super-admin allow-list
+  // Path 2: signed-in super-admin
   const token = bearerFromRequest(ctx.request);
-  if (!token) return { ok: false, reason: "no bearer token" };
-  const user = await verifySupabaseJwt(ctx.env, token);
-  if (!user) return { ok: false, reason: "invalid jwt" };
-
-  const allow = (ctx.env.SUPER_ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-  const list = allow.length > 0 ? allow : DEFAULT_SUPER_ADMINS;
-  if (!user.email || !list.includes(user.email.toLowerCase())) {
-    return { ok: false, reason: "not in super-admin list" };
+  if (token) {
+    const user = await verifySupabaseJwt(ctx.env, token);
+    if (user && user.email) {
+      const email = user.email.toLowerCase().trim();
+      if (SUPER_ADMIN_EMAILS.has(email)) {
+        return { type: "user", id: user.id, email };
+      }
+      // also check role
+      const r = await fetch(`${ctx.env.SUPABASE_URL?.replace(/\/$/, "")}/auth/v1/user`, {
+        headers: { apikey: ctx.env.SUPABASE_SERVICE_ROLE || "", Authorization: `Bearer ${token}` },
+      });
+      if (r.ok) {
+        const u = (await r.json()) as { user_metadata?: { role?: string } };
+        if (u.user_metadata?.role === "super_admin") return { type: "user", id: user.id, email };
+      }
+    }
   }
-  return { ok: true, user, via: "jwt" };
+  return null;
 }
 
-export function unauthorized(reason = "Unauthorized"): Response {
-  return new Response(JSON.stringify({ ok: false, error: reason }), {
-    status: 401,
-    headers: { "Content-Type": "application/json" },
+export function unauthorized(): Response {
+  return new Response(JSON.stringify({ ok: false, error: "Unauthorized — super-admin only." }), {
+    status: 401, headers: { "Content-Type": "application/json" },
   });
 }
 
-export function ok(data: unknown = { ok: true }): Response {
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
+export function serverError(message: string, status = 500): Response {
+  return new Response(JSON.stringify({ ok: false, error: message }), {
+    status, headers: { "Content-Type": "application/json" },
   });
 }
 
-export function serverError(error: unknown): Response {
-  const msg = error instanceof Error ? error.message : String(error);
-  return new Response(JSON.stringify({ ok: false, error: msg }), {
-    status: 500,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-export function badRequest(reason: string): Response {
-  return new Response(JSON.stringify({ ok: false, error: reason }), {
-    status: 400,
-    headers: { "Content-Type": "application/json" },
+export function ok<T>(body: T, status = 200): Response {
+  return new Response(JSON.stringify({ ok: true, ...body }), {
+    status, headers: { "Content-Type": "application/json" },
   });
 }

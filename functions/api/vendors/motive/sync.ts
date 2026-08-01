@@ -4,7 +4,6 @@
  */
 
 import { mapMotive, upsertVehicles, markVendorSync } from "../../../_shared/vendor-mapper";
-import { rateLimit } from "../../../_shared/rate-limit";
 
 interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; MOTIVE_API_KEY?: string; }
 
@@ -12,9 +11,6 @@ const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "motive-sync", max: 10, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { carrier_id?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);

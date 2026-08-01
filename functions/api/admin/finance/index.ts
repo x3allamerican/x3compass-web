@@ -10,7 +10,6 @@
  */
 import { requireSuperAdmin, unauthorized, ok, serverError, type AdminEnv } from "../../../_shared/admin-auth";
 import { supaFetch } from "../../../_shared/supabase-admin";
-import { rateLimit } from "../../../_shared/rate-limit";
 
 interface Env extends AdminEnv { STRIPE_SECRET_KEY?: string; }
 
@@ -148,9 +147,6 @@ async function buildByClientView(env: Env, month: string) {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "finance-index", max: 60, windowSec: 60 });
-  if (_rl) return _rl;
-
   const who = await requireSuperAdmin(ctx); if (!who) return unauthorized();
   const url = new URL(ctx.request.url);
   const month = url.searchParams.get("month") || new Date().toISOString().slice(0, 7);
@@ -191,9 +187,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
 };
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "finance-index", max: 60, windowSec: 60 });
-  if (_rl) return _rl;
-
   const who = await requireSuperAdmin(ctx); if (!who) return unauthorized();
   let body: Record<string, unknown>;
   try { body = await ctx.request.json(); } catch { return serverError("Invalid JSON body", 400); }

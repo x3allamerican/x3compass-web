@@ -1,116 +1,125 @@
 /**
- * Finance Team helpers — usage tracking + cost calculation for AI agents.
- * Records token usage to compass_agent_usage table, computes Anthropic API costs.
+ * Shared helpers for the AI Finance Team agents.
+ *  - recordUsage(): writes a row to compass_usage_events for per-carrier COGS
+ *  - postJournal(): writes balanced double-entry to compass_journal_entries + lines
+ *  - ANTHROPIC_PRICING + STRIPE_FEE_RATE + RESEND_PRICING constants
  */
-import { supaFetch, type SupaEnv } from "./supabase-admin";
+import { supaFetch } from "./supabase-admin";
 
-export interface FinanceEnv extends SupaEnv {}
-
-export interface UsageRecord {
-  carrier_id: string | null;
-  vendor: string;
-  service: string;
-  units_in: number;
-  units_out: number;
-  cost_cents: number;
-  agent_name?: string;
-  [k: string]: unknown;
+export interface Env {
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE?: string;
 }
 
-/**
- * Anthropic pricing per 1M tokens (USD), as of 2026-05.
- * Update when pricing changes.
- */
-const ANTHROPIC_PRICING: Record<string, { in: number; out: number }> = {
-  "claude-opus-4-6":      { in: 15.00, out: 75.00 },
-  "claude-sonnet-4-6":    { in:  3.00, out: 15.00 },
-  "claude-haiku-4-5":     { in:  0.80, out:  4.00 },
-  "claude-sonnet-4-5":    { in:  3.00, out: 15.00 },
-  "claude-haiku-4-5-20251001": { in: 0.80, out: 4.00 },
+// Per-million-token prices for the models we use (US, prod tier)
+export const ANTHROPIC_PRICING: Record<string, { in_per_mtok: number; out_per_mtok: number }> = {
+  "claude-sonnet-4-6":   { in_per_mtok: 3.00,  out_per_mtok: 15.00 },
+  "claude-opus-4-6":     { in_per_mtok: 15.00, out_per_mtok: 75.00 },
+  "claude-haiku-4-5":    { in_per_mtok: 0.80,  out_per_mtok: 4.00  },
 };
+export const STRIPE_FEE_RATE = 0.029;
+export const STRIPE_FEE_FIXED_CENTS = 30;
+export const RESEND_COST_PER_EMAIL_CENTS = 0.04;   // ~$0.0004 per email at the volume tier
+export const TWILIO_COST_PER_SMS_CENTS   = 0.79;   // ~$0.0079 per SMS US
 
 export function anthropicCostCents(model: string, tokensIn: number, tokensOut: number): number {
-  const key = Object.keys(ANTHROPIC_PRICING).find(k => model.startsWith(k)) || "claude-sonnet-4-6";
-  const p = ANTHROPIC_PRICING[key];
-  const usd = (tokensIn / 1_000_000) * p.in + (tokensOut / 1_000_000) * p.out;
-  return Math.round(usd * 100);
+  const p = ANTHROPIC_PRICING[model] || ANTHROPIC_PRICING["claude-sonnet-4-6"];
+  const dollars = (tokensIn / 1_000_000) * p.in_per_mtok + (tokensOut / 1_000_000) * p.out_per_mtok;
+  return Math.round(dollars * 100);
 }
 
-export async function recordUsage(env: FinanceEnv, rec: UsageRecord): Promise<void> {
+export async function recordUsage(env: Env, row: {
+  carrier_id?: string | null;
+  vendor: string;
+  service: string;
+  units_in?: number;
+  units_out?: number;
+  cost_cents: number;
+  agent_name?: string;
+  agent_run_id?: string;
+  request_id?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  if (row.cost_cents <= 0) return;
   try {
     const supa = supaFetch(env);
-    await supa.insert("compass_agent_usage", {
-      carrier_id: rec.carrier_id,
-      vendor:     rec.vendor,
-      service:    rec.service,
-      units_in:   rec.units_in,
-      units_out:  rec.units_out,
-      cost_cents: rec.cost_cents,
-      agent_name: rec.agent_name || null,
-      recorded_at: new Date().toISOString(),
+    await supa.insert("compass_usage_events", {
+      ts:           new Date().toISOString(),
+      carrier_id:   row.carrier_id || null,
+      vendor:       row.vendor,
+      service:      row.service,
+      units_in:     row.units_in  || 0,
+      units_out:    row.units_out || 0,
+      cost_cents:   row.cost_cents,
+      agent_name:   row.agent_name || null,
+      agent_run_id: row.agent_run_id || null,
+      request_id:   row.request_id || null,
+      metadata:     row.metadata || null,
     });
-  } catch {
-    // Best-effort logging — never break the calling agent
+  } catch (e) {
+    // Never block business logic on telemetry failures
+    console.error("[recordUsage] failed:", e);
   }
 }
 
-export interface JournalLine {
-  account_code: string;
-  debit_cents?: number;
-  credit_cents?: number;
-  memo?: string;
-}
-
-export interface JournalEntry {
-  entry_date: string;       // YYYY-MM-DD
-  reference: string;        // unique idempotency key (e.g. stripe charge id)
-  source: string;           // "stripe-sync" | "manual" | "agent-x"
-  description: string;
-  carrier_id: string | null;
-  agent_name?: string;
-  lines: JournalLine[];
-}
-
 /**
- * Post a double-entry journal — header to compass_journal_entries, lines to
- * compass_journal_lines. Idempotent by reference: if a row with the same
- * reference already exists, this is a no-op.
+ * Post a balanced double-entry journal. Validates debits = credits before insert.
+ * Returns entry_id on success, throws on imbalance or DB error.
  */
-export async function postJournal(env: FinanceEnv, entry: JournalEntry): Promise<{ ok: boolean; id?: string; skipped?: boolean }> {
-  try {
-    const supa = supaFetch(env);
-    // Idempotency check
-    const existing = await supa.select(
-      "compass_journal_entries",
-      `select=id&reference=eq.${encodeURIComponent(entry.reference)}&limit=1`,
-    );
-    if (existing.length > 0) return { ok: true, skipped: true };
+export async function postJournal(env: Env, entry: {
+  entry_date?: string;
+  reference?: string;
+  source: string;
+  description?: string;
+  carrier_id?: string | null;
+  agent_name?: string;
+  agent_run_id?: string;
+  posted?: boolean;
+  lines: Array<{ account_code: string; debit_cents?: number; credit_cents?: number; memo?: string }>;
+}): Promise<string> {
+  const entryDate = entry.entry_date || new Date().toISOString().slice(0, 10);
+  const period    = entryDate.slice(0, 7);
 
-    const header = await supa.insert("compass_journal_entries", {
-      entry_date:  entry.entry_date,
-      reference:   entry.reference,
-      source:      entry.source,
-      description: entry.description,
-      carrier_id:  entry.carrier_id,
-      agent_name:  entry.agent_name || null,
-      posted_at:   new Date().toISOString(),
-    });
-    const headerRow = Array.isArray(header) && header.length > 0
-      ? header[0] as { id?: string }
-      : null;
-    const journalId = headerRow?.id;
-    if (!journalId) return { ok: false };
+  let totalDebit = 0, totalCredit = 0;
+  for (const l of entry.lines) {
+    totalDebit  += l.debit_cents  || 0;
+    totalCredit += l.credit_cents || 0;
+  }
+  if (totalDebit !== totalCredit) {
+    throw new Error(`Journal imbalance: debits=${totalDebit} credits=${totalCredit} ref=${entry.reference}`);
+  }
+  if (totalDebit === 0) throw new Error("Journal entry must have non-zero amount");
 
-    const lines = entry.lines.map((l) => ({
-      journal_id:   journalId,
+  const supa = supaFetch(env);
+  const [inserted] = await supa.insert("compass_journal_entries", {
+    entry_date:    entryDate,
+    period,
+    reference:     entry.reference || null,
+    source:        entry.source,
+    description:   entry.description || null,
+    carrier_id:    entry.carrier_id || null,
+    agent_name:    entry.agent_name || null,
+    agent_run_id:  entry.agent_run_id || null,
+    posted:        entry.posted !== false,
+    created_by:    entry.agent_name ? `agent:${entry.agent_name}` : "system",
+  }) as Array<{ id: string }>;
+  const entryId = inserted.id;
+
+  for (const l of entry.lines) {
+    await supa.insert("compass_journal_lines", {
+      entry_id:     entryId,
       account_code: l.account_code,
       debit_cents:  l.debit_cents  || 0,
       credit_cents: l.credit_cents || 0,
-      memo:         l.memo         || null,
-    }));
-    await supa.insert("compass_journal_lines", lines);
-    return { ok: true, id: journalId };
-  } catch {
-    return { ok: false };
+      memo:         l.memo || null,
+    });
   }
+  return entryId;
+}
+
+/**
+ * Pretty-format cents as USD for memos.
+ */
+export function fmtCents(c: number): string {
+  return (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

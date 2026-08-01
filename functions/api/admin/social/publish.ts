@@ -3,28 +3,13 @@
  * Body: { id }
  * Gated by POSTIZ_API_KEY + POSTIZ_BASE_URL env vars.
  */
-import { requireSuperAdmin, unauthorized, type AdminEnv } from "../../../_shared/admin-auth";
-import { rateLimit } from "../../../_shared/rate-limit";
-
-interface Env extends AdminEnv {
-  SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
-  POSTIZ_API_KEY?: string; POSTIZ_BASE_URL?: string;
-}
+interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; POSTIZ_API_KEY?: string; POSTIZ_BASE_URL?: string; }
 
 // Postiz Cloud is the hosted SaaS at app.postiz.com — use that as the default so
 // only POSTIZ_API_KEY needs to be set. Self-hosted users can override via env.
 const DEFAULT_POSTIZ_BASE_URL = "https://app.postiz.com";
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "social-publish", max: 20, windowSec: 60 });
-  if (_rl) return _rl;
-
-  // SECURITY: super-admin only. Previously this endpoint had NO auth — any visitor
-  // could POST and publish anything to your Postiz account. Caught by code-quality
-  // agent in the 5-specialist inspection follow-up.
-  const gate = await requireSuperAdmin(ctx);
-  if (!gate.ok) return unauthorized(gate.reason);
-
   let body: { id?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.id) return json({ ok: false, error: "Missing id" }, 400);

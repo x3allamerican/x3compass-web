@@ -139,19 +139,6 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // === Apply state transition to vendor_orders ===
   await applyCheckrEventToOrder(ctx.env, sbHeaders, eventType, obj, payload);
 
-  // === Apply state transition to continuous MVR enrollments ===
-  // Handles: continuous_check.created, continuous_check.canceled, continuous_check.completed,
-  //          mvr_report.created, report.created (when triggered from a continuous_check)
-  if (eventType.startsWith("continuous_check.") || eventType === "mvr_report.created") {
-    await applyCheckrContinuousEvent(ctx.env, sbHeaders, eventType, obj, payload);
-  } else if (eventType === "report.created" || eventType === "report.completed") {
-    // A report.created/completed *may* be triggered by a continuous enrollment.
-    // Checkr includes `continuous_check_id` on the report object when it is.
-    if (typeof obj.continuous_check_id === "string" && obj.continuous_check_id) {
-      await applyCheckrContinuousEvent(ctx.env, sbHeaders, eventType, obj, payload);
-    }
-  }
-
   // Mark event as processed
   await fetch(
     `${ctx.env.SUPABASE_URL}/rest/v1/vendor_webhook_events?event_id=eq.${encodeURIComponent(eventId)}`,
@@ -222,10 +209,6 @@ async function applyCheckrEventToOrder(
   const reportId =
     (obj.report_id as string) ||
     (eventType.startsWith("report.") ? (obj.id as string) : undefined);
-  // Bug fix 2026-05-19: report.created events arrive BEFORE we've cached the
-  // report_id on the order row, so report_id.eq doesn't match. Match by
-  // candidate_id instead (set on invitation creation, stable for all events).
-  const candidateId = (obj.candidate_id as string) || (obj.id as string && eventType === "candidate.created" ? (obj.id as string) : undefined);
 
   const update: Record<string, unknown> = {
     raw_last_event: fullPayload,
@@ -304,158 +287,18 @@ async function applyCheckrEventToOrder(
   }
 
   const filters: string[] = [];
-  if (reportId)     filters.push(`report_id.eq.${encodeURIComponent(reportId)}`);
+  if (reportId) filters.push(`report_id.eq.${encodeURIComponent(reportId)}`);
   if (invitationId) filters.push(`vendor_ref_id.eq.${encodeURIComponent(invitationId)}`);
-  if (candidateId)  filters.push(`checkr_candidate_id.eq.${encodeURIComponent(candidateId)}`);
   if (filters.length === 0) return;
   // Use OR for either match
   const orFilter = filters.join(",");
 
   const patchUrl = `${env.SUPABASE_URL}/rest/v1/vendor_orders?or=(${orFilter})&vendor=eq.checkr`;
-  const patchRes = await fetch(patchUrl, {
+  await fetch(patchUrl, {
     method: "PATCH",
-    headers: { ...sbHeaders, Prefer: "return=representation" },
+    headers: { ...sbHeaders, Prefer: "return=minimal" },
     body: JSON.stringify(update),
   });
-  // Bug fix 2026-05-19: link the just-processed event back to the order via
-  // vendor_order_id so we can build a per-order timeline view.
-  if (patchRes.ok) {
-    try {
-      const rows = (await patchRes.json()) as Array<{ id?: string }>;
-      const orderId = Array.isArray(rows) && rows.length > 0 ? rows[0].id : null;
-      if (orderId && fullPayload?.id) {
-        await fetch(
-          `${env.SUPABASE_URL}/rest/v1/vendor_webhook_events?event_id=eq.${encodeURIComponent(fullPayload.id)}`,
-          { method: "PATCH", headers: { ...sbHeaders, Prefer: "return=minimal" }, body: JSON.stringify({ vendor_order_id: orderId }) }
-        );
-      }
-    } catch { /* no-op */ }
-  }
-}
-
-/**
- * applyCheckrContinuousEvent — handles continuous_check.* and continuous-triggered
- * report.* events. Updates compass_continuous_checks and logs to
- * compass_continuous_check_events. Also creates a compass_notifications row
- * when a hit fires.
- */
-async function applyCheckrContinuousEvent(
-  env: Env,
-  sbHeaders: Record<string, string>,
-  eventType: string,
-  obj: Record<string, unknown>,
-  fullPayload: Record<string, unknown>
-): Promise<void> {
-  const continuousCheckId = (obj.continuous_check_id as string) || (eventType.startsWith("continuous_check.") ? (obj.id as string) : undefined);
-  const candidateId = obj.candidate_id as string | undefined;
-  const reportId = eventType.startsWith("report.") || eventType === "mvr_report.created" ? (obj.id as string) : undefined;
-  const assessment = (obj.assessment as string) || null;
-  const result = (obj.result as string) || null;
-
-  // 1. Log the event to compass_continuous_check_events (idempotent on event_id)
-  const eventInsert = {
-    checkr_continuous_check_id: continuousCheckId,
-    checkr_candidate_id: candidateId,
-    event_type: eventType,
-    event_id: fullPayload?.id || null,
-    report_id: reportId,
-    assessment,
-    result,
-    payload: obj,
-    raw_event: fullPayload,
-  };
-  await fetch(`${env.SUPABASE_URL}/rest/v1/compass_continuous_check_events`, {
-    method: "POST",
-    headers: { ...sbHeaders, Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: JSON.stringify(eventInsert),
-  }).catch(() => { /* idempotent dup — ok */ });
-
-  // 2. Update the corresponding enrollment row
-  if (!continuousCheckId && !candidateId) return;
-
-  const update: Record<string, unknown> = {};
-  switch (eventType) {
-    case "continuous_check.created":
-      update.status = "active";
-      update.enrolled_at = new Date().toISOString();
-      break;
-    case "continuous_check.canceled":
-      update.status = "canceled";
-      update.canceled_at = new Date().toISOString();
-      break;
-    case "continuous_check.completed":
-      // Some accounts get a "completed" event when a baseline/initial enrollment finishes
-      update.status = "active";
-      break;
-    case "mvr_report.created":
-    case "report.created":
-    case "report.completed":
-      // A HIT — Checkr generated a new MVR report because a state reported a change
-      update.last_hit_at = new Date().toISOString();
-      update.last_hit_report_id = reportId;
-      update.last_hit_assessment = assessment;
-      // Postgres-side increment via RPC would be cleaner; here we re-read + write.
-      // Cheap because we filter by id below.
-      break;
-  }
-
-  if (Object.keys(update).length === 0) return;
-
-  // Build filter — match on checkr_continuous_check_id first, fall back to candidate_id
-  const filters: string[] = [];
-  if (continuousCheckId) filters.push(`checkr_continuous_check_id.eq.${encodeURIComponent(continuousCheckId)}`);
-  if (candidateId) filters.push(`checkr_candidate_id.eq.${encodeURIComponent(candidateId)}`);
-  if (filters.length === 0) return;
-  const orFilter = filters.join(",");
-
-  const patchUrl = `${env.SUPABASE_URL}/rest/v1/compass_continuous_checks?or=(${orFilter})&status=in.(pending,active)`;
-  const patchRes = await fetch(patchUrl, {
-    method: "PATCH",
-    headers: { ...sbHeaders, Prefer: "return=representation" },
-    body: JSON.stringify(update),
-  });
-
-  // 3. If a hit fired, bump hit_count_total + hit_count_30d AND drop a compass_notifications row
-  if (update.last_hit_at && patchRes.ok) {
-    try {
-      const rows = (await patchRes.json()) as Array<{
-        id: string;
-        carrier_id: string;
-        driver_id: string | null;
-        hit_count_total: number | null;
-        hit_count_30d: number | null;
-      }>;
-      for (const r of rows) {
-        // Increment counters
-        await fetch(`${env.SUPABASE_URL}/rest/v1/compass_continuous_checks?id=eq.${r.id}`, {
-          method: "PATCH",
-          headers: { ...sbHeaders, Prefer: "return=minimal" },
-          body: JSON.stringify({
-            hit_count_total: (r.hit_count_total || 0) + 1,
-            hit_count_30d: (r.hit_count_30d || 0) + 1,
-          }),
-        });
-        // Create notification for the carrier
-        await fetch(`${env.SUPABASE_URL}/rest/v1/compass_notifications`, {
-          method: "POST",
-          headers: { ...sbHeaders, Prefer: "return=minimal" },
-          body: JSON.stringify({
-            carrier_id: r.carrier_id,
-            kind: "continuous_mvr_hit",
-            severity: assessment === "review" ? "warn" : assessment === "eligible" ? "info" : "warn",
-            title: "Continuous MVR alert",
-            body: `Checkr detected a new MVR change for one of your drivers.${assessment ? ` Assessment: ${assessment}.` : ""}`,
-            metadata: {
-              continuous_check_id: r.id,
-              driver_id: r.driver_id,
-              report_id: reportId,
-              assessment,
-            },
-          }),
-        }).catch(() => { /* notifications table may not exist on all envs — non-fatal */ });
-      }
-    } catch { /* no-op */ }
-  }
 }
 
 // OPTIONS for CORS preflight (Checkr does not send OPTIONS but harmless)

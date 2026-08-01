@@ -19,7 +19,6 @@
  */
 
 import { mapTenStreet, upsertDrivers, markVendorSync } from "../../../_shared/vendor-mapper";
-import { rateLimit } from "../../../_shared/rate-limit";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -35,9 +34,6 @@ const json = (body: unknown, status = 200) =>
   });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "tenstreet-sync", max: 10, windowSec: 60 });
-  if (_rl) return _rl;
-
   const { TENSTREET_API_KEY, TENSTREET_SUBDOMAIN, SUPABASE_URL, SUPABASE_SERVICE_ROLE } = ctx.env;
 
   let body: { carrier_id?: string };

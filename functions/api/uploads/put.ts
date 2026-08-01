@@ -1,4 +1,3 @@
-import { rateLimit } from "../../_shared/rate-limit";
 /**
  * PUT /api/uploads/put?t=<signed-token> — relay file body to R2 via S3 SigV4.
  */
@@ -21,9 +20,6 @@ function hex(b: ArrayBuffer): string {
 }
 
 export const onRequestPut: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "upload", max: 30, windowSec: 60 });
-  if (_rl) return _rl;
-
   try {
     if (!ctx.env.R2_ACCESS_KEY_ID || !ctx.env.R2_SECRET_ACCESS_KEY || !ctx.env.R2_BUCKET || !ctx.env.R2_ACCOUNT_ID) {
       return json({ ok: false, error: "R2 not configured (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ACCOUNT_ID)" }, 500);

@@ -1,43 +1,36 @@
 /**
- * Rate-limit helper using Cloudflare KV.
- * Falls back to allow-all if KV binding is missing.
+ * Lightweight per-IP rate limiter for Cloudflare Pages Functions.
+ *
+ * Not a globally consistent limit — Workers run per-colo, so a determined
+ * attacker hitting different POPs can multiply this. For real rate limiting
+ * use the Cloudflare WAF Rate Limiting rule we provision separately (zone
+ * level, applied at the edge before our function runs).
+ *
+ * This is the in-function "second layer" that:
+ *  - logs the IP + path on each request
+ *  - returns 429 if the same IP has hit the same path > N times in W seconds
+ *    *as observed by this single colo*
  */
-export interface RateLimitEnv {
-  RATE_LIMIT?: KVNamespace;
-}
 
-export interface RateLimitResult {
-  ok: boolean;
-  count: number;
-  remaining: number;
-  resetIn: number;
-}
+const BUCKETS = new Map<string, { count: number; reset: number }>();
 
-/**
- * @param env       Environment with optional RATE_LIMIT KV binding
- * @param key       Unique identifier for the bucket (e.g. `samsara-disconnect:${userId}`)
- * @param max       Max requests allowed in the window
- * @param windowSec Window size in seconds
- */
-export async function rateLimit(
-  env: RateLimitEnv,
-  key: string,
-  max: number,
-  windowSec: number,
-): Promise<RateLimitResult> {
-  if (!env.RATE_LIMIT) {
-    return { ok: true, count: 0, remaining: max, resetIn: windowSec };
+export function rateLimit(req: Request, opts: { key?: string; max: number; windowSec: number }): Response | null {
+  const ip = req.headers.get("CF-Connecting-IP") || req.headers.get("X-Forwarded-For") || "unknown";
+  const path = new URL(req.url).pathname;
+  const key = `${opts.key || path}|${ip}`;
+  const now = Date.now();
+  const b = BUCKETS.get(key);
+  if (!b || now > b.reset) {
+    BUCKETS.set(key, { count: 1, reset: now + opts.windowSec * 1000 });
+    return null;
   }
-  const bucketKey = `rl:${key}`;
-  const raw = await env.RATE_LIMIT.get(bucketKey);
-  let count = 0;
-  if (raw) { try { count = Number(JSON.parse(raw).count || 0); } catch {} }
-  count += 1;
-  await env.RATE_LIMIT.put(bucketKey, JSON.stringify({ count, ts: Date.now() }), { expirationTtl: windowSec });
-  return {
-    ok: count <= max,
-    count,
-    remaining: Math.max(0, max - count),
-    resetIn: windowSec,
-  };
+  b.count += 1;
+  if (b.count > opts.max) {
+    const retryAfter = Math.ceil((b.reset - now) / 1000);
+    return new Response(JSON.stringify({ ok: false, error: "Too many requests", retry_after: retryAfter }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": String(retryAfter) },
+    });
+  }
+  return null;
 }

@@ -13,7 +13,6 @@
  */
 
 import { mapCsvRow, upsertDrivers, type NormalizedDriver } from "../../_shared/vendor-mapper";
-import { rateLimit } from "../../_shared/rate-limit";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -66,9 +65,6 @@ export const onRequestOptions: PagesFunction<Env> = async () =>
   });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "driver-import", max: 5, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { carrier_id?: string; csv?: string; rows?: NormalizedDriver[] };
   try {
     body = await ctx.request.json();

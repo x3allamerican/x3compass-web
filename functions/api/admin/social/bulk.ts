@@ -1,11 +1,7 @@
-import { rateLimit } from "../../../_shared/rate-limit";
 /** POST /api/admin/social/bulk · Body: { ids: string[], status: string } */
 interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "social-bulk", max: 10, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { ids?: string[]; status?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) return json({ ok: false, error: "Missing ids" }, 400);

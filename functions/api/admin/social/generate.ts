@@ -1,4 +1,3 @@
-import { rateLimit } from "../../../_shared/rate-limit";
 /**
  * POST /api/admin/social/generate
  * Body: { carrier_id, topic, platforms: ['x','linkedin',...], count: number }
@@ -24,9 +23,6 @@ We sell trust and audit-readiness — not buzzwords. Tone is like a trusted comp
 Target reader: a dispatcher, safety manager, or owner-operator of a 5–50 truck fleet who's worried about a roadside inspection or new-entrant audit.`;
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  const _rl = rateLimit(ctx.request, { key: "social-generate", max: 5, windowSec: 60 });
-  if (_rl) return _rl;
-
   let body: { carrier_id?: string; topic?: string; platforms?: string[]; count?: number };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);
