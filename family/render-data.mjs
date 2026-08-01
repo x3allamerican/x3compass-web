@@ -7,26 +7,33 @@
 const CYAN = "#00B2FD", TEAL = "#2DD4BF", VIOLET = "#C084FC", PINK = "#F472B6", AMBER = "#FBBF24";
 const ROT = [CYAN, TEAL, VIOLET, PINK, AMBER];
 
-/* ---------- 01 · THE SUITE — the actual X3 products ---------- */
+/* ---------- 01 · THE SUITE ----------
+   Source of truth: the live footer + services grid on x3fleetsafety.com.
+   NOT X3_FOOTER_STANDARD.md, which is stale (it still lists DOT Skills, omits
+   Background / SOP / Environmental, and wrongly counts Fleet Safety as a
+   product — Fleet Safety is the umbrella, not a tool).
+   Card imagery is the same photography the parent site uses per product. */
 const PRODUCTS = [
-  ["X3 CSA", "https://x3csa.com", "Live SMS percentile by BASIC, root-cause decomposition and forecasting before enforcement finds you."],
-  ["X3 DataQ", "https://x3dataq.com", "Challenge contestable violations. Evidence checklist, drafted dispute, win-pattern templates."],
-  ["X3 Preventability", "https://x3preventability.com", "CPDP crash review across all 16+1 categories with RDR drafting and PAR evidence."],
-  ["X3 MVR", "https://x3mvr.com", "Annual review log per driver per state, with continuous monitoring and auto pull cadence."],
-  ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com", "Random pools, rate tracking, Clearinghouse queries, pre-employment and post-accident."],
-  ["X3 HOS", "https://x3hos.com", "ELD edits, exemptions, split-sleeper, 14- and 70-hour tracking with falsification flags."],
-  ["X3 HazMat", "https://x3hazmat.com", "Placarding, segregation tables, shipping papers, ERG lookups and TSA endorsements."],
-  ["X3 Legal", "https://x3legal.com", "Subpoena response, litigation hold, retention mapping, FCRA-timed adverse action."],
-  ["X3 Verify", "https://x3verify.com", "Background screening and identity verification wired straight into the driver file."],
-  ["X3 CarrierCheck", "https://x3carriercheck.com", "Vet carriers and brokers before you sign — authority, insurance, safety posture."],
-  ["X3 Insurability", "https://x3insurability.com", "See your fleet the way an underwriter does, before renewal season does it for you."],
-  ["X3 New Entrant", "https://x3newentrant.com", "Pass the New Entrant Safety Audit. Every required artifact, tracked to the deadline."],
-  ["X3 DOT Audit", "https://x3dotaudit.com", "Compliance-review readiness: gaps, priorities and an indexed export you hand over."],
-  ["X3 Permits", "https://x3permits.com", "UCR, IFTA, IRP and state permits with renewal windows watched for you."],
-  ["X3 Clean Truck", "https://x3cleantruck.com", "CARB and EPA Clean Truck Check compliance for the jurisdictions that require it."],
-  ["X3 Workforce", "https://x3workforce.com", "Hiring, onboarding and qualification workflow from application to first dispatch."],
-  ["X3 DOT Skills", "https://x3dotskills.com", "The published, version-controlled CFR skill library the whole platform answers from."],
-  ["X3 Fleet Safety", "https://x3fleetsafety.com", "The human side — a real safety advisor on your account when you want one."],
+  ["X3 CSA", "https://x3csa.com", "csa", "See your SMS percentiles and exactly what&rsquo;s pulling them up."],
+  ["X3 DataQ", "https://x3dataq.com", "dataq", "Challenge and remove unfair violations and crashes from your record."],
+  ["X3 Preventability", "https://x3preventability.com", "preventability", "CPDP crash review, PAR evidence and the RDR drafted for you."],
+  ["X3 MVR", "https://x3mvr.com", "mvr", "Annual review per driver per state, with continuous monitoring."],
+  ["X3 Background", "https://x3background.com", "background", "Pre-employment screening wired straight into the driver file."],
+  ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com", "drugalcohol", "Random pools, rate tracking and Clearinghouse queries under Part 382."],
+  ["X3 HOS", "https://x3hos.com", "hos", "ELD edits, exemptions, split-sleeper and the 14- and 70-hour clocks."],
+  ["X3 HazMat", "https://x3hazmat.com", "hazmat", "Placarding, segregation, shipping papers and TSA endorsements."],
+  ["X3 DOT Audit", "https://x3dotaudit.com", "dotaudit", "Compliance-review readiness: gaps, priorities and the export you hand over."],
+  ["X3 New Entrant", "https://x3newentrant.com", "newentrant", "Pass the New Entrant Safety Audit with every artifact tracked to deadline."],
+  ["X3 CarrierCheck", "https://x3carriercheck.com", "carriercheck", "Vet any carrier or broker before you sign — authority, insurance, safety."],
+  ["X3 Insurability", "https://x3insurability.com", "insurability", "See your fleet the way an underwriter does, before renewal does it for you."],
+  ["X3 Legal", "https://x3legal.com", "legal", "Subpoena response, litigation hold, retention and FCRA-timed adverse action."],
+  ["X3 Permits", "https://x3permits.com", "permits", "UCR, IFTA, IRP and state permits with every renewal window watched."],
+  ["X3 Clean Truck", "https://x3cleantruck.com", "cleantruck", "CARB and EPA Clean Truck Check for the jurisdictions that require it."],
+  ["X3 Environmental", "https://x3enviro.com", "enviro", "Environmental compliance across the EPA rules that touch your operation."],
+  ["X3 Verify", "https://x3verify.com", "verify", "Identity and credential verification at the point you need it."],
+  ["X3 Workforce", "https://x3workforce.com", "workforce", "Hiring, onboarding and qualification from application to first dispatch."],
+  ["X3 SOP", "https://x3sop.com", "sop", "Written procedures your people actually follow, mapped to the reg."],
+  ["X3 API", "https://x3api.com", "api", "The published CFR skill library and API the whole platform answers from."],
 ];
 
 /* ---------- THE COMPASS CREW ---------- */
@@ -84,19 +91,21 @@ const FAQ = [
   ["Can I export everything and leave?", "Any time. Every CSV, every PDF, every audit bundle. We charge for the product, not for holding your files hostage."],
 ];
 
+/* Footer columns mirror x3fleetsafety.com exactly. */
 const FAMILY = [
-  ["X3 Fleet Safety", "https://x3fleetsafety.com"], ["X3 Compass", "https://x3compass.com"],
-  ["X3 CSA", "https://x3csa.com"], ["X3 DataQ", "https://x3dataq.com"],
-  ["X3 MVR", "https://x3mvr.com"], ["X3 Preventability", "https://x3preventability.com"],
-  ["X3 HOS", "https://x3hos.com"], ["X3 Clean Truck", "https://x3cleantruck.com"],
-  ["X3 HazMat", "https://x3hazmat.com"], ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com"],
-  ["X3 Legal", "https://x3legal.com"],
+  ["X3 Compass", "https://x3compass.com"], ["X3 CSA", "https://x3csa.com"],
+  ["X3 DataQ", "https://x3dataq.com"], ["X3 DOT Audit", "https://x3dotaudit.com"],
+  ["X3 CarrierCheck", "https://x3carriercheck.com"], ["X3 New Entrant", "https://x3newentrant.com"],
+  ["X3 Insurability", "https://x3insurability.com"], ["X3 MVR", "https://x3mvr.com"],
+  ["X3 Background", "https://x3background.com"], ["X3 Clean Truck", "https://x3cleantruck.com"],
+  ["X3 Permits", "https://x3permits.com"],
 ];
 const MORE = [
-  ["X3 Verify", "https://x3verify.com"], ["X3 Insurability", "https://x3insurability.com"],
-  ["X3 CarrierCheck", "https://x3carriercheck.com"], ["X3 New Entrant", "https://x3newentrant.com"],
-  ["X3 DOT Audit", "https://x3dotaudit.com"], ["X3 Permits", "https://x3permits.com"],
-  ["X3 Workforce", "https://x3workforce.com"], ["X3 DOT Skills", "https://x3dotskills.com"],
+  ["X3 HazMat", "https://x3hazmat.com"], ["X3 Drug &amp; Alcohol", "https://x3drugalcohol.com"],
+  ["X3 Preventability", "https://x3preventability.com"], ["X3 HOS", "https://x3hos.com"],
+  ["X3 Legal", "https://x3legal.com"], ["X3 SOP", "https://x3sop.com"],
+  ["X3 Verify", "https://x3verify.com"], ["X3 Workforce", "https://x3workforce.com"],
+  ["X3 API", "https://x3api.com"], ["X3 Environmental", "https://x3enviro.com"],
 ];
 
 export function render() {
@@ -104,10 +113,16 @@ export function render() {
 
   O.prodgrid = PRODUCTS.map((p, i) => {
     const a = ROT[i % ROT.length];
-    return `<a href="${p[1]}" target="_blank" rel="noopener" class="card block p-6 transition-transform hover:-translate-y-1" style="border:1px solid rgba(255,255,255,.10);border-top:3px solid ${a}">
-      <div class="text-[16px] font-extrabold text-white">${p[0]}</div>
-      <p class="mt-2.5 text-[13.5px] leading-relaxed text-[#AEB9C7]">${p[2]}</p>
-      <div class="mt-4 font-mono text-[11px] font-bold uppercase tracking-widest" style="color:${a}">Included &rarr;</div>
+    return `<a href="${p[1]}" target="_blank" rel="noopener" class="card group block overflow-hidden transition-transform hover:-translate-y-1" style="border:1px solid rgba(255,255,255,.10);border-top:3px solid ${a}">
+      <div class="relative aspect-[16/10] overflow-hidden">
+        <img src="/img/products/${p[2]}.jpg" alt="${p[0].replace(/&[a-z]+;/g, "and")}" loading="lazy" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"/>
+        <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(11,15,22,.10) 40%,rgba(11,15,22,.92))"></div>
+      </div>
+      <div class="p-6">
+        <div class="text-[16px] font-extrabold text-white">${p[0]}</div>
+        <p class="mt-2 text-[13.5px] leading-relaxed text-[#AEB9C7]">${p[3]}</p>
+        <div class="mt-4 font-mono text-[11px] font-bold uppercase tracking-widest" style="color:${a}">Included &rarr;</div>
+      </div>
     </a>`;
   }).join("");
 
