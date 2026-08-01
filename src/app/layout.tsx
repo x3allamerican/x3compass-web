@@ -51,7 +51,6 @@ const SOFTWARE_JSONLD = {
       offerCount: 4,
       description: "Graduated per-driver pricing. $50/driver for drivers 1-50, $40 for 51-75, $30 for 76-100, $25 for 101+. $100/mo minimum.",
     },
-    { "@type": "Offer", name: "Hazmat add-on", price: "99", priceCurrency: "USD" },
   ],
   provider: { "@type": "Organization", name: "X3 Fleet Safety LLC", url: SITE, contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "support@x3compass.com" } },
 };
@@ -121,7 +120,7 @@ const FAQ_JSONLD = {
     {
       "@type": "Question",
       name: "Do you support hazmat carriers?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes. The Hazmat add-on is $99/mo and adds 100+ Parts 100-180 skills, an interactive placard wizard, shipping paper templates, emergency response info (ERG) lookups, hazardous waste manifests, and PHMSA registration cross-reference." },
+      acceptedAnswer: { "@type": "Answer", text: "Yes, and it is included in the plan at no extra cost. The Hazmat Center adds 100+ Parts 100-180 skills, an interactive placard wizard, shipping paper templates, emergency response info (ERG) lookups, hazardous waste manifests, and PHMSA registration cross-reference." },
     },
   ],
 };

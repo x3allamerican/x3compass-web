@@ -494,16 +494,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Hazmat add-on band — sits right under the pricing tiers so the
-                $99/mo price is visible at the moment of pricing comparison. */}
+            {/* Hazmat band — included in the plan, no upcharge. Sits under the
+                ladder so the "no add-on" point lands during price comparison. */}
             <div className={`${cardDark} p-5 flex items-center justify-between gap-6 flex-wrap`}>
               <div>
-                <div className="text-[11px] tracking-wider uppercase font-bold text-[var(--accent)] mb-1">★ OPTIONAL ADD-ON</div>
+                <div className="text-[11px] tracking-wider uppercase font-bold text-[var(--accent)] mb-1">★ INCLUDED</div>
                 <div className="text-[18px] font-extrabold text-[var(--fg)]">
-                  Hazmat Center · <span style={{ color: "var(--accent)" }}>+$99/mo</span>
+                  Hazmat Center · <span style={{ color: "var(--accent)" }}>no extra charge</span>
                 </div>
                 <p className="text-[14px] text-[var(--fg-muted)] mt-1">
-                  Placard Wizard, 100 hazmat-only skills, segregation engine, ERG lookup, Hazmat endorsement. Pairs with any tier. Skip it if you don&apos;t haul hazmat.
+                  Placard Wizard, 100 hazmat-only skills, segregation engine, ERG lookup, Hazmat endorsement. In every plan, at every fleet size — most competitors bill this separately.
                 </p>
               </div>
               <Link href="/signup" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-[13px] text-[var(--bg)] whitespace-nowrap" style={ctaCyan}>
@@ -588,25 +588,25 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 06 · HAZMAT ADD-ON · sits below pricing because it's an optional
-            offering for the ~15% of carriers hauling placarded loads, not part
-            of the main product story above. */}
+        {/* 06 · HAZMAT · included in the plan. Sits below pricing because it
+            is only relevant to the ~15% of carriers hauling placarded loads,
+            not because it costs extra — it does not. */}
         <section id="hazmat" className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--bg-3)] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-6 relative">
             <div className="text-center mb-10">
               <div className="inline-block text-[11px] tracking-[.18em] uppercase font-bold text-[var(--accent)] mb-3">
-                06 · OPTIONAL HAZMAT ADD-ON · +$99/MO
+                06 · HAZMAT CENTER · INCLUDED
               </div>
               <h2 className="text-[32px] sm:text-[40px] lg:text-[44px] font-extrabold tracking-tight text-[var(--fg)] mb-3 leading-tight">
                 Hauling placarded loads?{" "}
-                <span className="serif-italic" style={{ color: "var(--accent)" }}>Add the Hazmat Center.</span>
+                <span className="serif-italic" style={{ color: "var(--accent)" }}>It&apos;s already in your plan.</span>
               </h2>
               <p className="text-[16px] text-[var(--fg-muted)] max-w-2xl mx-auto mb-2">
                 For the ~15% of carriers running hazmat. 100 hazmat-only skills,
                 the Placard Wizard, segregation engine, ERG lookup, and the Hazmat endorsement.
               </p>
               <p className="text-[13px] text-[var(--fg-faint)] max-w-2xl mx-auto mb-8">
-                Pairs with any Compass tier above. Skip it if you don&apos;t haul hazmat.
+                Included at every fleet size — no add-on, no upcharge. Ignore it if you don&apos;t haul hazmat.
               </p>
             </div>
 
@@ -668,7 +668,7 @@ export default function Home() {
                   {
                     section: "PRICING & BILLING",
                     items: [
-                      { q: "How much does it cost?", a: "One graduated plan. $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so 100 drivers is $4,250/mo — not 100 × $30. $100/mo minimum. Hazmat add-on is +$99/month." },
+                      { q: "How much does it cost?", a: "One graduated plan. $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so 100 drivers is $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included — hazmat too, at no extra cost." },
                       { q: "Is there a free trial?", a: "Yes — 7 days, no credit card required. Every brain, the full knowledge base, and the Hazmat add-on are included in the trial. After 7 days you pick a plan or cancel." },
                       { q: "Do I lose features at the lower rates?", a: "No. Every X3 product is included at every fleet size. The rate per driver falls as you grow; the product never changes." },
                       { q: "What if I have more than 100 drivers?", a: "That's Enterprise. Call us. Volume pricing, dedicated advisor team, white-label dashboard for partners, SSO, custom CFR skills." },

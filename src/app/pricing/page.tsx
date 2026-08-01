@@ -2,12 +2,12 @@ import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
 import ROICalculator from "@/components/ROICalculator";
 import type { Metadata } from "next";
-import { BANDS, MONTHLY_MINIMUM, PLAN, HAZMAT_ADDON, monthlyFor, effectiveRate, breakdown, usd } from "@/lib/pricing";
+import { BANDS, MONTHLY_MINIMUM, PLAN, HAZMAT, monthlyFor, effectiveRate, breakdown, usd } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Graduated per-driver pricing: $50/driver for drivers 1–50, $40 for 51–75, $30 for 76–100, $25 for 101+. $100/mo minimum. Every X3 product included. 7-day free trial, no card.",
+    "Graduated per-driver pricing: $50/driver for drivers 1–50, $40 for 51–75, $30 for 76–100, $25 for 101+. $100/mo minimum. Every X3 product included — hazmat too, at no extra cost. 7-day free trial, no card.",
   openGraph: {
     title: "Pricing · X3 Compass",
     description: "Graduated per-driver pricing from $50/driver. Every X3 product included. 7-day free trial, no card.",
@@ -162,11 +162,11 @@ export default function PricingPage() {
         <div className="rounded-2xl p-8 border border-[#FACC15] mb-14" style={{ background: "linear-gradient(180deg, var(--surface-2) 0%, var(--surface-3) 100%)" }}>
           <div className="md:flex md:items-center md:justify-between gap-6">
             <div className="md:flex-1 mb-4 md:mb-0">
-              <div className="text-amber-700 dark:text-[#FACC15] tracking-[.18em] text-[11px] uppercase font-bold mb-2">Add-on</div>
-              <h3 className="text-2xl font-extrabold mb-2">{HAZMAT_ADDON.name} · +${HAZMAT_ADDON.price}/mo flat</h3>
-              <p className="text-[var(--fg-muted)] text-[14px] max-w-xl">Add it when you transport placardable hazmat. 100+ skills covering 49 CFR Parts 100-180.</p>
+              <div className="text-amber-700 dark:text-[#FACC15] tracking-[.18em] text-[11px] uppercase font-bold mb-2">Included</div>
+              <h3 className="text-2xl font-extrabold mb-2">{HAZMAT.name} · included</h3>
+              <p className="text-[var(--fg-muted)] text-[14px] max-w-xl">No add-on, no upcharge. If you haul placardable hazmat it is already in your plan — 100+ skills covering 49 CFR Parts 100-180.</p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mt-4">
-                {HAZMAT_ADDON.features.map((f, i) => (
+                {HAZMAT.features.map((f, i) => (
                   <li key={i} className="text-[12px] text-[var(--fg-muted)] flex items-start gap-2">
                     <span className="text-amber-700 dark:text-[#FACC15] mt-0.5">▲</span><span>{f}</span>
                   </li>

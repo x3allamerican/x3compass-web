@@ -10,11 +10,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "X3 Compass Hazmat Center · The hazmat compliance brain",
   description:
-    "Hazmat compliance, codified. One missed placard is a $25,000 fine. We make sure that's not you. $99/month add-on. Built on 100 open-source hazmat skills covering 49 CFR 171-180, PHMSA, TSA, IATA, IMDG.",
+    "Hazmat compliance, codified. One missed placard is a $25,000 fine. We make sure that's not you. Included in every X3 Compass plan at no extra cost. Built on 100 open-source hazmat skills covering 49 CFR 171-180, PHMSA, TSA, IATA, IMDG.",
   openGraph: {
     title: "X3 Compass Hazmat Center",
     description:
-      "Hazmat compliance brain — placards, shipping papers, ERG, segregation, training, cargo tank specs, route restrictions. $99/mo.",
+      "Hazmat compliance brain — placards, shipping papers, ERG, segregation, training, cargo tank specs, route restrictions. Included in every plan.",
     type: "website",
   },
 };
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
      5. 12 hazmat brains
      6. Real scenarios · what goes wrong
      7. Corpus credibility · 100 open-source skills
-     8. Pricing card · $99/mo
+     8. Pricing card · included in every plan
      9. FAQ
     10. Final CTA
    ============================================================ */
@@ -83,7 +83,7 @@ const FAQS = [
   { q: "What about IATA (air) and IMDG (ocean) hazmat?", a: "Hazmat Center includes IATA DGR and IMDG Code coverage. If you ship hazmat multimodally (truck to air to ocean), Compass handles the harmonization. Note: IATA-certified air-shipment personnel are still required by law for air; Compass supports but doesn't replace them." },
   { q: "Can I cancel anytime?", a: "Yes. Self-serve cancel. No friction. 30-day money-back guarantee on top." },
   { q: "What about Canada cross-border (TDG)?", a: "TDG (Canada's hazmat regs) is covered. We handle the harmonization with US 49 CFR. Coming Q1: Cross-Border Center as a separate add-on for full Canada + Mexico operations." },
-  { q: "Does this work for the smallest carriers (1-5 trucks)?", a: "Yes. Hazmat Center is the same price ($99/mo) regardless of fleet size. A 1-truck owner-op hauling hazmat gets the same coverage as a 50-truck fleet." },
+  { q: "Does this work for the smallest carriers (1-5 trucks)?", a: "Yes. Hazmat Center is included in every plan regardless of fleet size. A 1-truck owner-op hauling hazmat gets the same coverage as a 50-truck fleet, at no extra cost." },
 ];
 
 const HERO_BULLETS = [
@@ -121,7 +121,7 @@ export default function Hazmat() {
             — Apache 2.0, fully public, auditable.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 32, flexWrap: "wrap" }}>
-            <Link href="#apply" className="hm-cta-large">Add Hazmat Center · $99/mo →</Link>
+            <Link href="#apply" className="hm-cta-large">See what&apos;s included →</Link>
             <Link href="#features" className="hm-ghost">See features</Link>
           </div>
           <div className="hm-hero-bullets">
@@ -153,7 +153,7 @@ export default function Hazmat() {
             </div>
           </div>
           <p style={{ textAlign: "center", marginTop: 24, color: "var(--hm-mist)", fontSize: 14 }}>
-            These are real, federally-codified fines. Hazmat compliance is the highest-stakes corner of motor-carrier regulation. Hazmat Center is $99/month.
+            These are real, federally-codified fines. Hazmat compliance is the highest-stakes corner of motor-carrier regulation. Hazmat Center is included in your plan.
           </p>
         </section>
 
@@ -291,16 +291,16 @@ export default function Hazmat() {
 
         {/* ─── PRICING ─── */}
         <section id="apply" className="hm-section" style={{ textAlign: "center" }}>
-          <div className="hm-eyebrow">ADD TO ANY TIER</div>
+          <div className="hm-eyebrow">INCLUDED IN EVERY PLAN</div>
           <h2 style={{ marginBottom: 40 }}>
-            Hazmat Center · <span className="hm-gradient-text">$99/month</span>
+            Hazmat Center · <span className="hm-gradient-text">included</span>
           </h2>
           <div className="hm-price-card">
-            <div className="hm-price-eyebrow">Compass Hazmat Center · Monthly</div>
+            <div className="hm-price-eyebrow">Compass Hazmat Center</div>
             <div className="hm-price-num">
-              $99<small>/mo</small>
+              $0<small> extra</small>
             </div>
-            <div className="hm-price-sub">Add-on to any Compass tier · Cancel anytime · Auto-activates when fleet logs first hazmat load</div>
+            <div className="hm-price-sub">Included in every Compass plan · Auto-activates when your fleet logs its first hazmat load</div>
             <div className="hm-price-features">
               {PRICE_FEATURES.map((f) => (
                 <div key={f}>
@@ -309,9 +309,9 @@ export default function Hazmat() {
               ))}
             </div>
             <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large" style={{ display: "block", width: "100%", textAlign: "center" }}>
-              Add Hazmat Center to my account →
+              Start your free trial →
             </Link>
-            <div className="hm-price-disclaimer">$99 charged month-to-month · Cancel any time · Auto-pause if no hazmat loads logged for 60 days · 30-day money-back</div>
+            <div className="hm-price-disclaimer">No add-on fee · Included at every fleet size · Cancel the plan any time · 30-day money-back</div>
           </div>
           <div style={{ textAlign: "center", marginTop: 48 }}>
             <Link href="/app/dashboard?demo=hazmat" className="hm-ghost">
@@ -342,10 +342,10 @@ export default function Hazmat() {
             <br />
             <span className="hm-gradient-text">Don&apos;t operate blind.</span>
           </h2>
-          <p>$99/month. Cancel anytime. No card for the 14-day trial.</p>
+          <p>Included in every plan. Cancel anytime. No card for the trial.</p>
           <div className="hm-final-cta-buttons">
             <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large">
-              Add Hazmat Center →
+              Start your free trial →
             </Link>
             <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" className="hm-ghost">
               Read 100 hazmat skills
@@ -357,7 +357,7 @@ export default function Hazmat() {
           links={[
             { href: "/case-studies/sample", title: "Sample audit walkthrough", desc: "See where hazmat preparation lands in a 6-day compliance review." },
             { href: "/skills", title: "All 300 skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
-            { href: "/pricing", title: "Pricing + ROI", desc: "Hazmat add-on +$99/mo flat on any tier." },
+            { href: "/pricing", title: "Pricing + ROI", desc: "Graduated per-driver pricing. Hazmat included at no extra cost." },
           ]}
         />
       </div>

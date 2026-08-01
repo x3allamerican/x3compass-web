@@ -14,8 +14,8 @@ const FAQS = [
   {
     section: "PRICING & BILLING",
     items: [
-      { q: "How much does it cost?", a: "One graduated plan: $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so a 100-driver fleet pays $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included. Hazmat add-on is +$99/month." },
-      { q: "Is there a free trial?", a: "Yes · 7 days, no credit card required. Every brain, the full knowledge base, and the Hazmat add-on are included in the trial. After 7 days you pick a plan or cancel." },
+      { q: "How much does it cost?", a: "One graduated plan: $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so a 100-driver fleet pays $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included — hazmat too, at no extra cost." },
+      { q: "Is there a free trial?", a: "Yes · 7 days, no credit card required. Every brain, the full knowledge base, and the Hazmat Center are included. After 7 days you pick a plan or cancel." },
       { q: "Do I lose features at the lower rates?", a: "No. Every X3 product is included at every fleet size. The rate per driver falls as you grow; the product never changes." },
       { q: "What if I have more than 100 drivers?", a: "That's Enterprise. Call us. Volume pricing, dedicated advisor team, white-label dashboard for partners, SSO, custom CFR skills." },
     ],

@@ -17,7 +17,7 @@ const COMPONENTS = [
     desc: "Your logo, your domain, your colors. Carrier clients log into your platform · never see X3 Compass branding. Powered by Compass behind the scenes.",
     retail: "~$3,500 custom build" },
   { n: "02", title: "Unlimited carrier client seats", badge: "NO CAPS",
-    desc: "30% of whatever you charge your carriers, $10/driver floor. Add 1 carrier or 200 · same simple split. You set retail; you keep 60-70%.",
+    desc: "Your carriers pay X3 list pricing — the same graduated per-driver ladder we charge Direct. You keep 70%, X3 takes 30%, $10/driver floor. Add 1 carrier or 200 · same simple split.",
     retail: "Competitors charge $99-200/seat" },
   { n: "03", title: "Done-for-you consultant website", badge: "DEPLOY IN 1 DAY",
     desc: "Polished one-page website with your photo, bio, services. Lead capture + Calendly built in. Most safety consultants have no site or a 2008-era one · yours is live tomorrow.",
@@ -47,14 +47,14 @@ const COMPONENTS = [
     desc: "Cold-email templates, LinkedIn sequences, carrier-discovery scripts, proposal frameworks. Pre-built for the safety-consultant-to-motor-carrier sale.",
     retail: "$500-1,500 from agencies" },
   { n: "12", title: "Plus everything Direct gets", badge: "FULL PRODUCT",
-    desc: "All 12 brains, 300 skills, vendor integrations, audit export, hazmat add-on at wholesale, continuous updates. Partners are first-in-line for new features.",
-    retail: "$25/driver Direct retail" },
+    desc: "All 12 brains, 300 skills, vendor integrations, audit export, the Hazmat Center included, continuous updates. Partners are first-in-line for new features.",
+    retail: "From $50/driver Direct retail" },
 ];
 
 const FAQ = [
   {
     q: "What does Compass Partner cost?",
-    a: "30% of whatever you charge your carriers, with a $10/driver/month floor. No base subscription, no carrier-count cap, no minimums. You set retail (typical: $25-50/driver) and keep 60-70% on every driver. Example: you charge a carrier $50/driver · X3 takes $15, you keep $35.",
+    a: "Your carriers pay X3 list pricing — the same graduated ladder as Direct: $50/driver for their first 50 drivers, $40 for 51-75, $30 for 76-100, $25 for 101+. X3 takes 30%, you keep 70%, with a $10/driver/month floor. No base subscription, no carrier-count cap, no minimums. Example: a 22-driver carrier pays $1,100/mo · X3 takes $330, you keep $770.",
   },
   {
     q: "Who is Compass Partner for?",
@@ -229,13 +229,13 @@ export default function PartnersPage() {
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers signed by Month 12</td><td className="py-2 text-right font-bold text-[var(--fg)]">4</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">22</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">88</td></tr>
-                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (you charge carriers @ $50)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$52,800</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (carriers pay X3 list)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$52,800</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-700 dark:text-rose-300">-$15,840</td></tr>
                   <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 1</td><td className="py-2 text-right font-black text-emerald-700 dark:text-emerald-300">~$36,960</td></tr>
                 </tbody>
               </table>
               <p className="text-[12px] text-[var(--fg-muted)] italic leading-relaxed">
-                Math: 88 drivers × $50/driver/mo × 12 = $52,800. X3 fee = 30% × $52,800 = $15,840 (floor of $10,560 doesn&apos;t apply at $50 retail).
+                Math: each carrier averages 22 drivers, so all four sit in the first band at $50/driver. 88 drivers × $50/mo × 12 = $52,800. X3 fee = 30% × $52,800 = $15,840 (the $10/driver floor would be $10,560, so it does not bind).
               </p>
             </div>
             <div className={`${cardDark} p-6 border-[var(--accent)]/60`}>
@@ -246,7 +246,7 @@ export default function PartnersPage() {
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Carriers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">15</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Average drivers per carrier</td><td className="py-2 text-right font-bold text-[var(--fg)]">25</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Total drivers under management</td><td className="py-2 text-right font-bold text-[var(--fg)]">375</td></tr>
-                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (@ $50/driver retail)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$225,000</td></tr>
+                  <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual revenue (carriers pay X3 list)</td><td className="py-2 text-right font-bold text-[var(--accent)]">$225,000</td></tr>
                   <tr className="border-b border-[var(--border)]"><td className="py-2 text-[var(--fg-muted)]">Annual X3 fee (30%)</td><td className="py-2 text-right text-rose-700 dark:text-rose-300">-$67,500</td></tr>
                   <tr><td className="py-2 text-[var(--fg)] font-bold">Your net Year 3</td><td className="py-2 text-right font-black text-emerald-700 dark:text-emerald-300">~$157,500</td></tr>
                 </tbody>

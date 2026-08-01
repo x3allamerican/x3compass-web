@@ -90,16 +90,16 @@ export const PLAN = {
 } as const;
 
 /**
- * Hazmat add-on.
- * ⚠️ UNCONFIRMED against the 2026-07-31 pricing reset. The plan tagline now
- * reads "every X3 product included", which suggests Hazmat is bundled — but
- * the founder did not say to remove it, and it is a live revenue line, so it
- * is preserved as-is pending an explicit call. Do not silently delete.
+ * Hazmat is INCLUDED in the plan as of 2026-07-31.
+ *
+ * There is no longer a $99/mo Hazmat add-on. "Every X3 product included"
+ * means every product — the Hazmat Center ships with the plan at every
+ * fleet size. Kept as a named export so any surface that still wants to
+ * merchandise the capability can do so without reintroducing a price.
  */
-export const HAZMAT_ADDON = {
+export const HAZMAT = {
   name: "Hazmat Center",
-  price: 99,
-  unit: "/ mo",
+  included: true,
   features: [
     "100+ hazmat-specific skills (Parts 100-180)",
     "Interactive placard wizard with live preview",
