@@ -9,6 +9,7 @@ test("public health responses do not expose dependency details", async () => {
   expect(body.ok).toBe(false);
   expect(body.status).toBe("degraded");
   expect(body).not.toHaveProperty("services");
+  expect(body).not.toHaveProperty("total_ms");
   expect(JSON.stringify(body)).not.toContain("SUPABASE");
   expect(JSON.stringify(body)).not.toContain("STRIPE");
   expect(response.headers.get("cache-control")).toBe("no-store");
