@@ -57,8 +57,11 @@ export function unauthorized(): Response {
 }
 
 export function serverError(message: string, status = 500): Response {
-  return new Response(JSON.stringify({ ok: false, error: message }), {
-    status, headers: { "Content-Type": "application/json" },
+  const body = status >= 500
+    ? { ok: false, error: "request failed", correlation_id: crypto.randomUUID() }
+    : { ok: false, error: message };
+  return new Response(JSON.stringify(body), {
+    status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
 

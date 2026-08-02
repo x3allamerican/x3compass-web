@@ -7,6 +7,7 @@ on:
       - "functions/_shared/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
+      - "tests/admin-error-security.spec.ts"
       - "tests/api-route-classification.spec.ts"
       - "tests/upload-token.spec.ts"
       - "tests/webhook-security.spec.ts"
@@ -20,6 +21,7 @@ on:
       - "functions/_shared/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
+      - "tests/admin-error-security.spec.ts"
       - "tests/api-route-classification.spec.ts"
       - "tests/upload-token.spec.ts"
       - "tests/webhook-security.spec.ts"
@@ -68,6 +70,7 @@ jobs:
           functions/_shared/upload-token.ts
           functions/api/_middleware.ts
           tests/api-middleware.spec.ts
+          tests/admin-error-security.spec.ts
           tests/api-route-classification.spec.ts
           tests/request-security.spec.ts
           tests/security-containment.spec.ts
