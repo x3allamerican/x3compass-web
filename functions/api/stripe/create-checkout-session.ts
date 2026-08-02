@@ -12,6 +12,16 @@ interface Env {
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
+export function parseDriverQuantity(value: unknown): number | null {
+  const quantity = typeof value === "string" && value.trim() ? Number(value) : value;
+  return typeof quantity === "number"
+    && Number.isSafeInteger(quantity)
+    && quantity >= 1
+    && quantity <= 100_000
+    ? quantity
+    : null;
+}
+
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try {
     const token = bearerFromRequest(ctx.request);
@@ -21,7 +31,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     let body: { drivers?: number; success_path?: string; cancel_path?: string };
     try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
-    const drivers = Math.max(1, Math.floor(Number(body.drivers || 1)));
+    const drivers = parseDriverQuantity(body.drivers);
+    if (drivers === null) return json({ ok: false, error: "drivers must be a whole number from 1 to 100000" }, 400);
 
     if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
     if (!ctx.env.STRIPE_PRICE_COMPASS_DRIVER) return json({ ok: false, error: "Compass price not configured" }, 500);

@@ -10,7 +10,7 @@
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:smoke": "playwright test tests/smoke.spec.ts",
-    "test:security": "playwright test tests/request-security.spec.ts tests/security-containment.spec.ts tests/api-route-classification.spec.ts tests/api-middleware.spec.ts tests/upload-token.spec.ts tests/webhook-security.spec.ts tests/admin-error-security.spec.ts tests/health-security.spec.ts tests/client-auth-security.spec.ts"
+    "test:security": "playwright test tests/request-security.spec.ts tests/security-containment.spec.ts tests/api-route-classification.spec.ts tests/api-middleware.spec.ts tests/upload-token.spec.ts tests/webhook-security.spec.ts tests/admin-error-security.spec.ts tests/health-security.spec.ts tests/client-auth-security.spec.ts tests/payment-security.spec.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

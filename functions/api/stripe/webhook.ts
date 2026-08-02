@@ -13,6 +13,27 @@ const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: 
 
 interface StripeEvent { id: string; type: string; data: { object: Record<string, unknown> }; }
 
+interface StripeEventStore {
+  insert(table: string, row: Record<string, unknown>, returning?: string): Promise<unknown[]>;
+  select(table: string, query: string): Promise<unknown[]>;
+}
+
+export async function reserveStripeEvent(store: StripeEventStore, event: StripeEvent): Promise<"new" | "retry" | "processed"> {
+  try {
+    await store.insert("compass_stripe_events", { id: event.id, type: event.type, payload: event }, "minimal");
+    return "new";
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes("409") && !message.toLowerCase().includes("duplicate")) throw error;
+    const rows = await store.select(
+      "compass_stripe_events",
+      `id=eq.${encodeURIComponent(event.id)}&select=processed_at`,
+    ) as Array<{ processed_at?: string | null }>;
+    if (rows.length === 0) throw error;
+    return rows[0].processed_at ? "processed" : "retry";
+  }
+}
+
 export async function verifyStripeSignature(payload: string, sigHeader: string, secret: string, now = Date.now() / 1000): Promise<boolean> {
   const parts = sigHeader.split(",");
   const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
@@ -42,10 +63,10 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try { event = JSON.parse(rawBody) as StripeEvent; } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
   const supa = supaFetch(ctx.env);
-  try { await supa.insert("compass_stripe_events", { id: event.id, type: event.type, payload: event }, "minimal"); }
-  catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("409") || msg.includes("duplicate")) return json({ ok: true, duplicate: true });
+  try {
+    const reservation = await reserveStripeEvent(supa, event);
+    if (reservation === "processed") return json({ ok: true, duplicate: true });
+  } catch {
     return securityError(500, "request_failed", requestId);
   }
 
