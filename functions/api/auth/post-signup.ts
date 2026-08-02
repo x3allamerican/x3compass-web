@@ -100,7 +100,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       }
     }
 
-    return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan });
+    return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan: "compass" });
   } catch (err) {
     console.error("[post-signup] unexpected error:", err);
     return securityError(500, "request_failed", correlationId(ctx.request));

@@ -123,29 +123,6 @@ export default function DQFilesPage() {
             sit below. Original PageGuide + DataSourceCard moved to render
             AFTER the 12-doc grid (see further down in this file). */}
 
-        {/* DATA SOURCE — hidden in this top slot; rendered at the bottom. */}
-        {null && (
-        <DataSourceCard
-          trackerLabel="Driver Qualification Files"
-          cfr="49 CFR § 391.51 (the 12 documents)"
-          initialStatus="manual"
-          recordCount={864}
-          vendors={[
-            { name: "Tenstreet", blurb: "Pulls full DQ file from candidate intake", badge: "Recommended", status: "live", cost: "Included" },
-            { name: "Foley Carrier Services", blurb: "DQ file management · annual reviews", badge: "API key", status: "live", cost: "$8/driver/mo" },
-            { name: "JJ Keller Encompass", blurb: "DQ files + medical card tracking", status: "manual-pull", cost: "$12/driver/mo" },
-            { name: "DocuSign", blurb: "eSign-completed forms route to DQ file", badge: "OAuth", status: "live", cost: "Included" },
-            { name: "Drive My Way", blurb: "ATS-to-DQ doc transfer", badge: "API key", status: "live", cost: "Included" },
-            { name: "Upload PDFs to X3", blurb: "Drag-and-drop · OCR + auto-classify", badge: "Recommended", status: "live", cost: "Included" },
-          ]}
-          csvTemplate={{
-            name: "x3-compass-dq-files-template.csv",
-            columns: ["driver_id", "document_type", "document_url", "issued_date", "expires_date", "verified_by"],
-          }}
-          manualLabel="Upload document"
-        />
-        )}
-
           {/* Driver header */}
           <div
             className="rounded-2xl p-5 border border-[#1E3556] flex items-center gap-4 flex-wrap"

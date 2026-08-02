@@ -9,10 +9,6 @@ export default function ExemptionsPage() {
     <HazmatSubPageShell
       activeId="hazmat-exemptions"
       pageTitle="EXEMPTION CHECKER"
-      eyebrow="X3 Compass · Hazmat Center · Exemption & Permit Checker"
-      heading={<>Limited Quantity · ORM-D · Materials of Trade · Special Permits.</>}
-      sub="Verify before you ship: are you actually inside a §173.150–156 exception, or did you just give yourself an audit finding? The checker walks the gross-weight, inner-packaging, and outer-package rules per division."
-      regs="49 CFR §§ 173.150–156 · Part 107 (Special Permits) · §173.6 (Materials of Trade)"
       eduSurface="Exemption Checker"
       eduSubtitle="49 CFR §§ 173.150–156 + Part 107 · the rules that let you ship without full placards"
       conciergeHref="/app/ask?context=hazmat-exemptions"

@@ -6,10 +6,6 @@ export default function EmergencyResponsePage() {
     <HazmatSubPageShell
       activeId="hazmat-emergency-response"
       pageTitle="EMERGENCY RESPONSE"
-      eyebrow="X3 Compass · Hazmat Center · Emergency Response"
-      heading={<>ERG sheet · CHEMTREC · 24-hour contact · in reach.</>}
-      sub="Every hazmat shipment carries the §172.600 emergency response info in the cab. The ERG guide for the substance, the §172.604 phone number that's staffed 24/7, and the response sheet that survives the first 30 minutes."
-      regs="49 CFR §§ 172.600–606 · ERG 2024 edition"
       eduSurface="Emergency Response"
       eduSubtitle="49 CFR Subpart G · what has to be in the cab and what has to answer the phone"
       conciergeHref="/app/ask?context=hazmat-emergency"

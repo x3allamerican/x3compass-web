@@ -5,6 +5,7 @@ on:
     paths:
       - "functions/api/**"
       - "functions/_shared/**"
+      - "src/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
@@ -17,12 +18,15 @@ on:
       - "tests/webhook-security.spec.ts"
       - "package.json"
       - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
       - ".github/workflows/api-security.yml"
   push:
     branches: [main]
     paths:
       - "functions/api/**"
       - "functions/_shared/**"
+      - "src/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
@@ -35,6 +39,8 @@ on:
       - "tests/webhook-security.spec.ts"
       - "package.json"
       - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
       - ".github/workflows/api-security.yml"
 
 permissions:
@@ -64,6 +70,9 @@ jobs:
 
       - name: Run API security regression suite
         run: npm run test:security
+
+      - name: Enforce TypeScript contracts
+        run: npm run typecheck
 
       - name: Bundle Cloudflare Pages Functions
         run: npx --yes wrangler@4.118.0 pages functions build functions --outdir /tmp/pages-functions-build

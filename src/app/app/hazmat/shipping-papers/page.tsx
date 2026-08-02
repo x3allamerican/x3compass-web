@@ -6,10 +6,6 @@ export default function ShippingPapersPage() {
     <HazmatSubPageShell
       activeId="hazmat-shipping-papers"
       pageTitle="SHIPPING PAPERS"
-      eyebrow="X3 Compass · Hazmat Center · Shipping Papers"
-      heading={<>BOL in the §172.202(a) sequence · every time.</>}
-      sub="Proper shipping name, hazard class, UN/NA, packing group — in that order, in the right column, with the right emergency contact. The builder writes the line, you sign it."
-      regs="49 CFR §§ 172.200–205 · 172.602–604 (emergency contact)"
       eduSurface="Shipping Papers"
       eduSubtitle="49 CFR § 172.202 · the line-order rule every audit checks"
       conciergeHref="/app/ask?context=hazmat-shipping-papers"

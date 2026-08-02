@@ -244,11 +244,6 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           userRole={isSuperAdmin ? "Founder" : "Fleet Manager"}
           live
           notificationCount={0}
-          stats={{
-            drivers: typeof carrier?.driver_count === "number" ? carrier.driver_count : undefined,
-            vehicles: typeof carrier?.vehicle_count === "number" ? carrier.vehicle_count : undefined,
-            dotStatus: carrier?.dot_status ?? null,
-          }}
         />
       </div>
 
