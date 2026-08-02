@@ -45,13 +45,13 @@ function validPayload(value: unknown, now: number): value is UploadTokenPayload 
 }
 
 export async function issueUploadToken(payload: UploadTokenPayload, secret: string): Promise<string> {
-  if (!secret || !validPayload(payload, 0)) throw new Error("Invalid upload token input");
+  if (secret.length < 32 || !validPayload(payload, 0)) throw new Error("Invalid upload token input");
   const encoded = btoa(JSON.stringify(payload));
   return `${encoded}.${await signature(encoded, secret)}`;
 }
 
 export async function verifyUploadToken(token: string, secret: string, now = Math.floor(Date.now() / 1000)): Promise<UploadTokenPayload | null> {
-  if (!secret) return null;
+  if (secret.length < 32) return null;
   const [encoded, supplied, extra] = token.split(".");
   if (!encoded || !supplied || extra) return null;
   const expected = await signature(encoded, secret);

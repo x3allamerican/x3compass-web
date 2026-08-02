@@ -29,3 +29,9 @@ test("rejects expired and malformed upload tokens", async () => {
   await expect(verifyUploadToken(token, secret, 101)).resolves.toBeNull();
   await expect(verifyUploadToken("not-a-token", secret, 1)).resolves.toBeNull();
 });
+
+test("refuses upload tokens protected by a weak secret", async () => {
+  await expect(issueUploadToken(payload, "short-secret")).rejects.toThrow("Invalid upload token input");
+  const token = await issueUploadToken(payload, secret);
+  await expect(verifyUploadToken(token, "short-secret", 1_700_000_000)).resolves.toBeNull();
+});
