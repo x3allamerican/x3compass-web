@@ -24,9 +24,7 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Cache-Control": "no-store",
     },
   });
 
@@ -55,16 +53,15 @@ function parseCsv(text: string): string[][] {
 }
 
 export const onRequestOptions: PagesFunction<Env> = async () =>
-  new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+  new Response(null, { status: 503, headers: { "Cache-Control": "no-store" } });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
+  // P0 containment: this endpoint previously accepted an arbitrary carrier_id
+  // and wrote with the service role. Keep it unavailable until tenant
+  // membership is verified server-side.
+  return json({ ok: false, error: "temporarily unavailable" }, 503);
+
+  /* c8 ignore start -- retained for the authenticated follow-up commit */
   let body: { carrier_id?: string; csv?: string; rows?: NormalizedDriver[] };
   try {
     body = await ctx.request.json();
@@ -111,4 +108,5 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     skipped: result.skipped,
     errors: result.errors,
   });
+  /* c8 ignore stop */
 };

@@ -29,7 +29,7 @@ const SUPABASE_HEADERS = (sr: string) => ({
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=30", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
 async function pgSelect(url: string, sr: string, table: string, query: string): Promise<unknown[]> {
@@ -57,6 +57,12 @@ function tierFor(score: number): string {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  // P0 containment: this endpoint previously trusted a caller-supplied carrier_id
+  // while querying with the service role. Keep it unavailable until tenant
+  // membership is verified server-side.
+  return json({ ok: false, error: "temporarily unavailable" }, 503);
+
+  /* c8 ignore start -- retained for the authenticated follow-up commit */
   const url = new URL(ctx.request.url);
   const carrierId = url.searchParams.get("carrier_id");
   if (!carrierId) return json({ ok: false, error: "Missing carrier_id" }, 400);
@@ -126,4 +132,5 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     scorecards,
     window_days: 90,
   });
+  /* c8 ignore stop */
 };
