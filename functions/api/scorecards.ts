@@ -15,7 +15,7 @@
  */
 import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../_shared/request-security";
 
-interface Env extends SecurityEnv {}
+type Env = SecurityEnv;
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,

@@ -6,7 +6,7 @@
  *   violation_count (int), report_url.
  */
 import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../_shared/request-security";
-interface Env extends SecurityEnv {}
+type Env = SecurityEnv;
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 function parseCsv(text: string): string[][] {

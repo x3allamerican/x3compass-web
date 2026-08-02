@@ -304,7 +304,7 @@ export default function AdminPartnersPage() {
           {!selected ? (
             <div style={{ color: "#94A3B8", textAlign: "center", padding: 60 }}>Select an application on the left</div>
           ) : (
-            <ApplicantDetail row={selected} updateRow={updateRow} />
+            <ApplicantDetail key={selected.id} row={selected} updateRow={updateRow} />
           )}
         </div>
       </div>
@@ -342,11 +342,6 @@ function ApplicantDetail({ row, updateRow }: { row: AppRow; updateRow: (id: stri
   const t = triageScore(row);
   const [notes, setNotes] = useState(row.notes || "");
   const [savedNotes, setSavedNotes] = useState(row.notes || "");
-
-  useEffect(() => {
-    setNotes(row.notes || "");
-    setSavedNotes(row.notes || "");
-  }, [row.id, row.notes]);
 
   return (
     <div>

@@ -16,7 +16,7 @@
 import { requireSuperAdmin, unauthorized, type AdminEnv } from "../../_shared/admin-auth";
 import { correlationId, isUuid, securityError } from "../../_shared/request-security";
 
-interface Env extends AdminEnv {}
+type Env = AdminEnv;
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,

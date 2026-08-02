@@ -11,7 +11,7 @@
 import { mapCsvVehicleRow, upsertVehicles, type NormalizedVehicle } from "../../_shared/vendor-mapper";
 import { correlationId, requireTenant, securityError, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env extends SecurityEnv {}
+type Env = SecurityEnv;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
