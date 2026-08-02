@@ -48,6 +48,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     params.append("line_items[0][quantity]", String(drivers));
     params.append("line_items[0][adjustable_quantity][enabled]", "true");
     params.append("line_items[0][adjustable_quantity][minimum]", "1");
+    params.append("line_items[0][adjustable_quantity][maximum]", "100000"); // Stripe defaults max to 99 — set high so 100+ driver fleets can check out
     if (carrier.trial_ends_at && new Date(carrier.trial_ends_at) > new Date()) {
       const trialDays = Math.ceil((new Date(carrier.trial_ends_at).getTime() - Date.now()) / 86400000);
       if (trialDays > 0) params.set("subscription_data[trial_period_days]", String(Math.min(trialDays, 7)));
