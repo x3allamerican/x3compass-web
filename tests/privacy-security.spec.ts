@@ -83,3 +83,16 @@ test("authenticated driver roster never substitutes demo people", () => {
   expect(source).not.toContain("DEMO_DRIVERS");
   expect(source).not.toContain("withDemoFallback");
 });
+
+test("client-side tenant mutations include carrier scope", () => {
+  const files = ["vehicles", "inspections", "accidents", "mvr"].map((name) =>
+    readFileSync(join(process.cwd(), `src/app/app/${name}/page.tsx`), "utf8"),
+  );
+
+  for (const source of files) {
+    const mutations = source.match(/\.(?:update|delete)\([\s\S]+?;/g) || [];
+    for (const mutation of mutations.filter((statement) => statement.includes('.eq("id"'))) {
+      expect(mutation).toContain('.eq("carrier_id"');
+    }
+  }
+});

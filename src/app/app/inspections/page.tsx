@@ -272,7 +272,7 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
       if (!form.inspection_date) throw new Error("Date required");
       const payload = { ...form, carrier_id };
       if (inspection?.id) {
-        const { error } = await getSupabase().from("compass_inspections").update(payload).eq("id", inspection.id);
+        const { error } = await getSupabase().from("compass_inspections").update(payload).eq("id", inspection.id).eq("carrier_id", carrier_id);
         if (error) throw error;
       } else {
         const { error } = await getSupabase().from("compass_inspections").insert([payload]);
@@ -285,7 +285,7 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
   async function handleDelete() {
     if (!inspection?.id || !confirm("Delete this inspection record?")) return;
     setBusy(true);
-    const { error } = await getSupabase().from("compass_inspections").delete().eq("id", inspection.id);
+    const { error } = await getSupabase().from("compass_inspections").delete().eq("id", inspection.id).eq("carrier_id", carrier_id);
     if (error) { setError(error.message); setBusy(false); return; }
     onSaved();
   }

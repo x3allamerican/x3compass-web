@@ -9,7 +9,7 @@
  * compass_drivers via the shared vendor-mapper.
  *
  * Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE
- * Auth: v1 open (will gate on JWT when Supabase auth is wired into the app).
+ * Auth: verified Supabase session plus server-resolved carrier membership.
  */
 
 import { mapCsvRow, upsertDrivers, type NormalizedDriver } from "../../_shared/vendor-mapper";

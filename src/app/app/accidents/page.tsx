@@ -267,7 +267,7 @@ function AccidentFormModal({ carrier_id, drivers, vehicles, accident, onClose, o
       if (!form.accident_date) throw new Error("Date required");
       const payload = { ...form, carrier_id };
       if (accident?.id) {
-        const { error } = await getSupabase().from("compass_accidents").update(payload).eq("id", accident.id);
+        const { error } = await getSupabase().from("compass_accidents").update(payload).eq("id", accident.id).eq("carrier_id", carrier_id);
         if (error) throw error;
       } else {
         const { error } = await getSupabase().from("compass_accidents").insert([payload]);
@@ -280,7 +280,7 @@ function AccidentFormModal({ carrier_id, drivers, vehicles, accident, onClose, o
   async function handleDelete() {
     if (!accident?.id || !confirm("Delete this accident record?")) return;
     setBusy(true);
-    const { error } = await getSupabase().from("compass_accidents").delete().eq("id", accident.id);
+    const { error } = await getSupabase().from("compass_accidents").delete().eq("id", accident.id).eq("carrier_id", carrier_id);
     if (error) { setError(error.message); setBusy(false); return; }
     onSaved();
   }
