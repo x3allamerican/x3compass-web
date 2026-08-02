@@ -13,11 +13,9 @@
  */
 
 import { mapCsvRow, upsertDrivers, type NormalizedDriver } from "../../_shared/vendor-mapper";
+import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-}
+interface Env extends SecurityEnv {}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -52,22 +50,22 @@ function parseCsv(text: string): string[][] {
   return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
 }
 
-export const onRequestOptions: PagesFunction<Env> = async () =>
-  new Response(null, { status: 503, headers: { "Cache-Control": "no-store" } });
+export const onRequestOptions: PagesFunction<Env> = async (ctx) =>
+  tenantPreflight(ctx.request, ctx.env, "POST, OPTIONS");
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  // P0 containment: this endpoint previously accepted an arbitrary carrier_id
-  // and wrote with the service role. Keep it unavailable until tenant
-  // membership is verified server-side.
-  return json({ ok: false, error: "temporarily unavailable" }, 503);
-
-  /* c8 ignore start -- retained for the authenticated follow-up commit */
   let body: { carrier_id?: string; csv?: string; rows?: NormalizedDriver[] };
   try {
     body = await ctx.request.json();
   } catch {
     return json({ ok: false, error: "Invalid JSON" }, 400);
   }
+
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
 
   if (!body.carrier_id || typeof body.carrier_id !== "string") {
     return json({ ok: false, error: "Missing carrier_id" }, 400);
@@ -99,8 +97,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     return json({ ok: false, error: `Too many rows (${rows.length}). Split into batches of 10,000 or fewer.` }, 413);
   }
 
-  const result = await upsertDrivers(ctx.env, body.carrier_id, rows);
-  return json({
+  const result = await upsertDrivers(ctx.env, authority.carrierId, rows);
+  return tenantJson(ctx.request, ctx.env, {
     ok: result.errors.length === 0,
     submitted: rows.length,
     inserted: result.inserted,
@@ -108,5 +106,4 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     skipped: result.skipped,
     errors: result.errors,
   });
-  /* c8 ignore stop */
 };

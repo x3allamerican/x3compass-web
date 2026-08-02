@@ -7,11 +7,9 @@
  * Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE
  * Auth: v1 open. Will gate on JWT when Supabase auth is wired.
  */
+import { correlationId, requireTenant, securityError, tenantJson, type SecurityEnv } from "../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-}
+interface Env extends SecurityEnv {}
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,
@@ -19,16 +17,6 @@ const SUPABASE_HEADERS = (sr: string) => ({
   Accept: "application/json",
   Prefer: "count=exact",
 });
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "private, max-age=30",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
 
 async function pgSelect(
   url: string,
@@ -61,23 +49,23 @@ function fmtExpiresLabel(d: string | null): string {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const url = new URL(ctx.request.url);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, url.searchParams.get("carrier_id")); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+
   const SUPABASE_URL = ctx.env.SUPABASE_URL;
   const SR = ctx.env.SUPABASE_SERVICE_ROLE;
 
   if (!SUPABASE_URL || !SR) {
-    return json({ ok: true, demo: true, reason: "env-missing" });
+    return securityError(503, "service_unavailable", requestId);
   }
 
-  const url = new URL(ctx.request.url);
-  let carrierId = url.searchParams.get("carrier_id");
+  const carrierId = authority.carrierId;
 
   try {
-    if (!carrierId) {
-      const { rows: cRows } = await pgSelect(SUPABASE_URL, SR, "compass_carriers", "select=id&order=created_at.desc&limit=1");
-      if (cRows.length === 0) return json({ ok: true, demo: true, reason: "no-carriers" });
-      carrierId = (cRows[0] as { id: string }).id;
-    }
-
     const sinceISO = new Date(Date.now() - 180 * 86_400_000).toISOString().slice(0,10);
     const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0,10);
     const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa, saferRows, inspections, accidents, daTests, hosLogs, training] = await Promise.all([
@@ -483,7 +471,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       cta: { href: "/app/drug-alcohol", label: "Mark reported →" },
     };
 
-    return json({
+    return tenantJson(ctx.request, ctx.env, {
       ok: true,
       demo: false,
       carrier_id: carrierId,
@@ -553,7 +541,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         action_items_row2: { incidents_awaiting: incidentsAwaiting, eldt_incomplete: eldtIncomplete, training_expiring: trainingExpiring, clearinghouse_owed: clearinghouseOwed },
       },
     });
-  } catch (err) {
-    return json({ ok: false, demo: true, reason: `error: ${err instanceof Error ? err.message : String(err)}` });
+  } catch {
+    console.error("dashboard request failed", { correlation_id: requestId });
+    return securityError(500, "request_failed", requestId);
   }
 };

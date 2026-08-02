@@ -19,6 +19,7 @@
 
 import { bearerFromRequest, verifySupabaseJwt } from "../_shared/supabase-admin";
 import { rateLimit } from "../_shared/rate-limit";
+import { correlationId, securityError } from "../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -29,7 +30,7 @@ interface Env {
 const PROMPT_VERSION = "v1.1";  // bump when SYSTEM_PROMPT changes
 
 const json = (d: unknown, s = 200) =>
-  new Response(JSON.stringify(d), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+  new Response(JSON.stringify(d), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 const SYSTEM_PROMPT = `You are X3 Compass, the AI Safety Director for FMCSA-regulated motor carriers (1-100 power units). You answer DOT compliance questions with these absolute rules:
 
@@ -176,7 +177,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         errored: true, error_class: `anthropic_${r.status}`, error_detail: txt.slice(0, 500),
         response_ms: Date.now() - t0,
       }));
-      return json({ ok: false, error: `Anthropic HTTP ${r.status}`, detail: txt.slice(0, 500) }, 502);
+      return securityError(502, "upstream_failed", correlationId(ctx.request));
     }
 
     const data = (await r.json()) as { content?: Array<{ type: string; text: string }>; usage?: Record<string, number>; model?: string };
@@ -223,6 +224,6 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       errored: true, error_class: "handler_error", error_detail: msg.slice(0, 500),
       response_ms: Date.now() - t0,
     }));
-    return json({ ok: false, error: "Server error" }, 500);
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

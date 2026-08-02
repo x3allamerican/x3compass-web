@@ -2,8 +2,8 @@
  * Super-admin auth helper for Pages Functions.
  *
  * Two valid auth paths:
- *  1. A logged-in user whose email is on the SUPER_ADMIN_EMAILS list, OR
- *     whose JWT contains user_metadata.role = 'super_admin'.
+ *  1. A logged-in user whose verified email is on the server-owned
+ *     SUPER_ADMIN_EMAILS allowlist.
  *  2. An internal-cron caller with the X3_INTERNAL_SECRET header (used by
  *     the GitHub Actions dispatcher workflow).
  */
@@ -11,6 +11,7 @@ import { verifySupabaseJwt, bearerFromRequest, type SupabaseAdminEnv } from "./s
 
 export interface AdminEnv extends SupabaseAdminEnv {
   X3_INTERNAL_SECRET?: string;
+  SUPER_ADMIN_EMAILS?: string;
 }
 
 const SUPER_ADMIN_EMAILS = new Set([
@@ -40,16 +41,9 @@ export async function requireSuperAdmin(ctx: { request: Request; env: AdminEnv }
     const user = await verifySupabaseJwt(ctx.env, token);
     if (user && user.email) {
       const email = user.email.toLowerCase().trim();
-      if (SUPER_ADMIN_EMAILS.has(email)) {
+      const configured = new Set((ctx.env.SUPER_ADMIN_EMAILS || "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean));
+      if (SUPER_ADMIN_EMAILS.has(email) || configured.has(email)) {
         return { type: "user", id: user.id, email };
-      }
-      // also check role
-      const r = await fetch(`${ctx.env.SUPABASE_URL?.replace(/\/$/, "")}/auth/v1/user`, {
-        headers: { apikey: ctx.env.SUPABASE_SERVICE_ROLE || "", Authorization: `Bearer ${token}` },
-      });
-      if (r.ok) {
-        const u = (await r.json()) as { user_metadata?: { role?: string } };
-        if (u.user_metadata?.role === "super_admin") return { type: "user", id: user.id, email };
       }
     }
   }

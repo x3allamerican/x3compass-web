@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { apiFetch } from "@/lib/api";
 
 type AppRow = {
   id: string;
@@ -102,28 +103,23 @@ function triageScore(r: AppRow): { score: number; tier: "HOT" | "WARM" | "COLD";
 }
 
 export default function AdminPartnersPage() {
-  const [key, setKey] = useState<string>("");
   const [rows, setRows] = useState<AppRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
 
-  // Load key from localStorage on mount
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("x3_admin_key") : null;
-    if (stored) setKey(stored);
+    void loadRows();
   }, []);
 
-  async function loadRows(useKey: string) {
+  async function loadRows() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/partners?key=${encodeURIComponent(useKey)}`);
-      const j = (await res.json()) as { ok: boolean; rows?: AppRow[]; error?: string };
+      const j = await apiFetch<{ ok: boolean; rows?: AppRow[]; error?: string }>("/api/admin/v1/partners");
       if (!j.ok) throw new Error(j.error || "Failed to load");
       setRows(j.rows || []);
-      localStorage.setItem("x3_admin_key", useKey);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Load failed");
       setRows(null);
@@ -134,14 +130,13 @@ export default function AdminPartnersPage() {
 
   async function updateRow(id: string, updates: { status?: string; notes?: string }) {
     try {
-      const res = await fetch(`/api/admin/partners?key=${encodeURIComponent(key)}&id=${id}`, {
+      const j = await apiFetch<{ ok: boolean; error?: string }>(`/api/admin/v1/partners?id=${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
-      const j = (await res.json()) as { ok: boolean; error?: string };
       if (!j.ok) throw new Error(j.error || "Update failed");
-      await loadRows(key);
+      await loadRows();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Update failed");
     }
@@ -172,28 +167,10 @@ export default function AdminPartnersPage() {
         <div style={{ maxWidth: 420, width: "100%" }}>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Admin · Partners</h1>
           <p style={{ color: "#94A3B8", fontSize: 14, marginBottom: 24 }}>
-            Internal review dashboard for Compass Partner applications. Requires admin key.
+            Sign in with an authorized X3 super-admin account to review partner applications.
           </p>
-          <input
-            type="password"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && key && loadRows(key)}
-            placeholder="Admin key"
-            style={{
-              width: "100%",
-              padding: "12px 14px",
-              borderRadius: 8,
-              background: "#0F2438",
-              border: "1px solid #1E3556",
-              color: "white",
-              fontSize: 14,
-              marginBottom: 12,
-            }}
-          />
           <button
-            onClick={() => key && loadRows(key)}
-            disabled={!key}
+            onClick={() => void loadRows()}
             style={{
               width: "100%",
               padding: "12px 14px",
@@ -202,11 +179,10 @@ export default function AdminPartnersPage() {
               color: "#000000",
               fontWeight: 700,
               border: 0,
-              cursor: key ? "pointer" : "not-allowed",
-              opacity: key ? 1 : 0.6,
+              cursor: "pointer",
             }}
           >
-            Unlock
+            Retry authenticated request
           </button>
           {error && <p style={{ color: "#F87171", fontSize: 13, marginTop: 12 }}>{error}</p>}
         </div>
@@ -227,7 +203,7 @@ export default function AdminPartnersPage() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
-              onClick={() => loadRows(key)}
+              onClick={() => void loadRows()}
               disabled={loading}
               style={{
                 padding: "8px 14px",
@@ -240,24 +216,6 @@ export default function AdminPartnersPage() {
               }}
             >
               {loading ? "Loading…" : "Refresh"}
-            </button>
-            <button
-              onClick={() => {
-                localStorage.removeItem("x3_admin_key");
-                setKey("");
-                setRows(null);
-              }}
-              style={{
-                padding: "8px 14px",
-                borderRadius: 6,
-                background: "#0F2438",
-                color: "#94A3B8",
-                border: "1px solid #1E3556",
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
-              Lock
             </button>
           </div>
         </div>

@@ -13,11 +13,9 @@
  *
  * Tier: A+ ≥95, A ≥90, B+ ≥85, B ≥80, C+ ≥70, C ≥60, D <60
  */
+import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-}
+interface Env extends SecurityEnv {}
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,
@@ -25,12 +23,6 @@ const SUPABASE_HEADERS = (sr: string) => ({
   Accept: "application/json",
   Prefer: "count=exact",
 });
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
 
 async function pgSelect(url: string, sr: string, table: string, query: string): Promise<unknown[]> {
   try {
@@ -57,17 +49,15 @@ function tierFor(score: number): string {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
-  // P0 containment: this endpoint previously trusted a caller-supplied carrier_id
-  // while querying with the service role. Keep it unavailable until tenant
-  // membership is verified server-side.
-  return json({ ok: false, error: "temporarily unavailable" }, 503);
-
-  /* c8 ignore start -- retained for the authenticated follow-up commit */
   const url = new URL(ctx.request.url);
-  const carrierId = url.searchParams.get("carrier_id");
-  if (!carrierId) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, url.searchParams.get("carrier_id")); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  const carrierId = authority.carrierId;
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
-    return json({ ok: false, demo: true, error: "Server missing Supabase env" }, 200);
+    return securityError(503, "service_unavailable", requestId);
   }
 
   const sb = ctx.env.SUPABASE_URL.replace(/\/$/, "");
@@ -125,12 +115,14 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const watchlist = scorecards.filter(s => s.tier === "D").length;
   const pctCrash24mo = drivers.length > 0 ? Math.round((driverIds24mo.size / drivers.length) * 1000) / 10 : 0;
 
-  return json({
+  return tenantJson(ctx.request, ctx.env, {
     ok: true,
     demo: scorecards.length === 0,
     fleet: { avg_score: fleetAvg, a_tier_count: aTier, watchlist_count: watchlist, pct_crash_24mo: pctCrash24mo, total_drivers: drivers.length },
     scorecards,
     window_days: 90,
   });
-  /* c8 ignore stop */
 };
+
+export const onRequestOptions: PagesFunction<Env> = async (ctx) =>
+  tenantPreflight(ctx.request, ctx.env, "GET, OPTIONS");

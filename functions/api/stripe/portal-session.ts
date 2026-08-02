@@ -1,4 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { correlationId, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -25,11 +26,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ customer, return_url: `${site}/app/settings/billing` }).toString(),
     });
-    if (!r.ok) return json({ ok: false, error: `Stripe HTTP ${r.status}`, detail: await r.text() }, 502);
+    if (!r.ok) return securityError(502, "upstream_failed", correlationId(ctx.request));
     const sess = (await r.json()) as { url?: string };
     return json({ ok: true, url: sess.url });
   } catch (err) {
     console.error("[portal-session] unexpected error:", err);
-    return json({ ok: false, error: "Server error", detail: err instanceof Error ? err.message : String(err) }, 500);
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };
