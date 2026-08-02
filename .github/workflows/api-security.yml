@@ -6,6 +6,7 @@ on:
       - "functions/api/**"
       - "functions/_shared/**"
       - "src/**"
+      - "public/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
@@ -20,6 +21,7 @@ on:
       - "package-lock.json"
       - "next.config.ts"
       - "tsconfig.json"
+      - "eslint.config.mjs"
       - ".github/workflows/api-security.yml"
   push:
     branches: [main]
@@ -27,6 +29,7 @@ on:
       - "functions/api/**"
       - "functions/_shared/**"
       - "src/**"
+      - "public/**"
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
@@ -41,6 +44,7 @@ on:
       - "package-lock.json"
       - "next.config.ts"
       - "tsconfig.json"
+      - "eslint.config.mjs"
       - ".github/workflows/api-security.yml"
 
 permissions:
@@ -73,6 +77,9 @@ jobs:
 
       - name: Enforce TypeScript contracts
         run: npm run typecheck
+
+      - name: Enforce repository lint
+        run: npm run lint
 
       - name: Bundle Cloudflare Pages Functions
         run: npx --yes wrangler@4.118.0 pages functions build functions --outdir /tmp/pages-functions-build

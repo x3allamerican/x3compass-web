@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync, readdirSync } from "node:fs";
+import { extname, join } from "node:path";
 import { privacySafePromptTelemetry, sanitizeClientDiagnostic } from "../functions/_shared/privacy";
+
+function publicCodeFiles(root: string): string[] {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) return publicCodeFiles(path);
+    return [".html", ".js", ".json"].includes(extname(entry.name)) ? [path] : [];
+  });
+}
 
 test("prompt telemetry excludes question, response, and provider error content", () => {
   const safe = privacySafePromptTelemetry({
@@ -33,4 +43,12 @@ test("client diagnostics redact common credentials and personal identifiers", ()
   expect(safe).not.toContain("123-45-6789");
   expect(safe).not.toContain("313) 555-0199");
   expect(safe).not.toContain("secret-value");
+});
+
+test("public assets never embed JWT credentials", () => {
+  const exposed = publicCodeFiles(join(process.cwd(), "public")).filter((path) =>
+    /eyJhbGciOi[A-Za-z0-9_-]+\./.test(readFileSync(path, "utf8")),
+  );
+
+  expect(exposed, "public files containing a JWT credential").toEqual([]);
 });

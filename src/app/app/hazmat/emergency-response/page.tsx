@@ -58,7 +58,7 @@ export default function EmergencyResponsePage() {
       <section style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 22 }}>
         <h2 style={{ margin: "0 0 6px", fontSize: 22, color: "#F8FAFC" }}>The cab kit</h2>
         <p style={{ color: "#94A3B8", margin: "0 0 18px", fontSize: 14 }}>
-          Three things have to be in reach of the driver's seat:
+          Three things have to be in reach of the driver&apos;s seat:
         </p>
         <ul style={{ color: "#CBD5E1", fontSize: 14, lineHeight: 1.7, paddingLeft: 20, margin: 0 }}>
           <li>Current ERG (2024 edition)</li>
