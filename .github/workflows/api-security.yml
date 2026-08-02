@@ -8,6 +8,7 @@ on:
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
+      - "tests/health-security.spec.ts"
       - "tests/api-route-classification.spec.ts"
       - "tests/upload-token.spec.ts"
       - "tests/webhook-security.spec.ts"
@@ -22,6 +23,7 @@ on:
       - "tests/*security*.spec.ts"
       - "tests/api-middleware.spec.ts"
       - "tests/admin-error-security.spec.ts"
+      - "tests/health-security.spec.ts"
       - "tests/api-route-classification.spec.ts"
       - "tests/upload-token.spec.ts"
       - "tests/webhook-security.spec.ts"
@@ -71,6 +73,7 @@ jobs:
           functions/api/_middleware.ts
           tests/api-middleware.spec.ts
           tests/admin-error-security.spec.ts
+          tests/health-security.spec.ts
           tests/api-route-classification.spec.ts
           tests/request-security.spec.ts
           tests/security-containment.spec.ts

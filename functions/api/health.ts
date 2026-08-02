@@ -55,9 +55,5 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     status: all_ok ? "operational" : "degraded",
     checked_at: new Date().toISOString(),
     total_ms: Date.now() - t0,
-    services: {
-      supabase: supa,
-      stripe: stripe,
-    },
   }, all_ok ? 200 : 503);
 };
