@@ -5,7 +5,7 @@
  * from Supabase where possible, demo-shape preserved everywhere else.
  *
  * Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE
- * Auth: v1 open. Will gate on JWT when Supabase auth is wired.
+ * Auth: verified Supabase session plus server-resolved carrier membership.
  */
 import { correlationId, requireTenant, securityError, tenantJson, type SecurityEnv } from "../_shared/request-security";
 
@@ -73,13 +73,13 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status,hire_date&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,vehicle_type,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,driver_id,doc_type,expires_on&carrier_id=eq.${carrierId}&order=expires_on.asc.nullslast&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
-      pgSelect(SUPABASE_URL, SR, "compass_carrier_safer", `select=*&carrier_id=eq.${carrierId}`),
-      pgSelect(SUPABASE_URL, SR, "compass_inspections", `select=*&carrier_id=eq.${carrierId}&inspection_date=gte.${sinceISO}&order=inspection_date.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_accidents", `select=*&carrier_id=eq.${carrierId}&order=accident_date.desc&limit=100`),
-      pgSelect(SUPABASE_URL, SR, "compass_da_tests", `select=*&carrier_id=eq.${carrierId}&collected_on=gte.${sinceISO}&order=collected_on.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_hos_logs", `select=*&carrier_id=eq.${carrierId}&log_date=gte.${since30}&order=log_date.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_training_records", `select=*&carrier_id=eq.${carrierId}&order=completed_on.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=unsafe_driving,crash_indicator,hos_compliance,vehicle_maint,hazmat,driver_fitness,ctrl_substances&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
+      pgSelect(SUPABASE_URL, SR, "compass_carrier_safer", `select=safety_rating,rating_date,rating_type,operating_authority,annual_miles,reported_power_units,reported_drivers,last_mcs150_filed,bipd_insurance_amount_cents,bipd_required_amount_cents,cargo_insurance_amount_cents,crashes_24mo_total,crashes_24mo_fatal,crashes_24mo_injury,driver_oos_rate_pct,driver_oos_national_pct,vehicle_oos_rate_pct,vehicle_oos_national_pct,last_synced_at&carrier_id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_inspections", `select=inspection_date,oos_driver,oos_vehicle,violation_count&carrier_id=eq.${carrierId}&inspection_date=gte.${sinceISO}&order=inspection_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_accidents", `select=id,accident_date,preventable,driver_id,description,cause_category&carrier_id=eq.${carrierId}&order=accident_date.desc&limit=100`),
+      pgSelect(SUPABASE_URL, SR, "compass_da_tests", `select=test_type,result,collected_on&carrier_id=eq.${carrierId}&collected_on=gte.${sinceISO}&order=collected_on.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_hos_logs", `select=total_drive_minutes,violations&carrier_id=eq.${carrierId}&log_date=gte.${since30}&order=log_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_training_records", `select=expires_on,course_name,course_category,driver_id&carrier_id=eq.${carrierId}&order=completed_on.desc&limit=500`),
     ]);
 
     type CarrierRow = { name?: string; usdot_number?: string; mc_number?: string; safety_rating?: string };
@@ -115,7 +115,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     const dqOverdue = docRows.filter(d => d.expires_on && d.expires_on < today).length;
     const dqValid = docRows.length - dqOverdue;
     const dqTarget = driversOnRoster * 12; // 12 required docs per driver
-    const dqScorePct = dqTarget > 0 ? Math.round((dqValid / dqTarget) * 100) : 0;
+    const dqScorePct = dqTarget > 0 ? Math.min(100, Math.round((dqValid / dqTarget) * 100)) : 0;
 
     // Open alerts = anything overdue or expiring soon
     let openAlerts = 0, urgent = 0;

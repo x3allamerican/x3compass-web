@@ -52,3 +52,9 @@ test("public assets never embed JWT credentials", () => {
 
   expect(exposed, "public files containing a JWT credential").toEqual([]);
 });
+
+test("tenant dashboard fetches only explicitly required database fields", () => {
+  const source = readFileSync(join(process.cwd(), "functions/api/dashboard.ts"), "utf8");
+
+  expect(source).not.toContain("select=*");
+});
