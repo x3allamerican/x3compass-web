@@ -20,6 +20,7 @@
 import { bearerFromRequest, verifySupabaseJwt } from "../_shared/supabase-admin";
 import { rateLimit } from "../_shared/rate-limit";
 import { correlationId, securityError } from "../_shared/request-security";
+import { privacySafePromptTelemetry } from "../_shared/privacy";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -87,8 +88,6 @@ async function verifyCitations(sections: string[]): Promise<string[]> {
     const base = sec.split("(")[0];
     const parts = base.split(".");
     if (parts.length !== 2) return { sec, ok: false };
-    const part = parts[0];
-    const url = `https://www.ecfr.gov/api/versioner/v1/structure/2026-01-01/title-49.json?section=${encodeURIComponent(base)}`;
     try {
       const r = await Promise.race([
         fetch(`https://www.ecfr.gov/current/title-49/section-${base}`, { method: "HEAD", redirect: "follow" }),
@@ -120,7 +119,7 @@ async function logEval(env: Env, row: Record<string, unknown>) {
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify(row),
+      body: JSON.stringify(privacySafePromptTelemetry(row)),
     });
   } catch (e) {
     console.error("[ask] logEval failed", e);
@@ -170,7 +169,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
     if (!r.ok) {
       const txt = await r.text();
-      console.error("[ask] Anthropic error", r.status, txt);
+      console.error("[ask] Anthropic error", { status: r.status });
       ctx.waitUntil(logEval(ctx.env, {
         user_id: userId, prompt_version: PROMPT_VERSION, model,
         user_question: userQuestion, question_category: category,
@@ -217,7 +216,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[ask] handler error", msg);
+    console.error("[ask] handler error", { correlation_id: correlationId(ctx.request) });
     ctx.waitUntil(logEval(ctx.env, {
       user_id: userId, prompt_version: PROMPT_VERSION,
       user_question: userQuestion, question_category: category,

@@ -16,6 +16,7 @@
  */
 
 import { rateLimit } from "../_shared/rate-limit";
+import { privacySafePromptTelemetry } from "../_shared/privacy";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -79,7 +80,7 @@ async function logDemo(env: Env, row: Record<string, unknown>) {
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify(row),
+      body: JSON.stringify(privacySafePromptTelemetry(row)),
     });
   } catch (e) { console.error("[ask-demo] log failed", e); }
 }
@@ -118,8 +119,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     });
 
     if (!r.ok) {
-      const txt = await r.text();
-      console.error("[ask-demo] Anthropic error", r.status, txt);
+      console.error("[ask-demo] Anthropic error", { status: r.status });
       return json({ ok: false, error: "AI service unavailable — try again in a moment" }, 502);
     }
 
@@ -152,8 +152,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       citation_quality_score: quality,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[ask-demo] handler error", msg);
+    void err;
+    console.error("[ask-demo] handler error");
     return json({ ok: false, error: "Server error — try again" }, 500);
   }
 };
