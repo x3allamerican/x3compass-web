@@ -58,3 +58,21 @@ test("tenant dashboard fetches only explicitly required database fields", () => 
 
   expect(source).not.toContain("select=*");
 });
+
+test("authenticated dashboard never presents demo compliance as tenant data", () => {
+  const page = readFileSync(join(process.cwd(), "src/app/app/page.tsx"), "utf8");
+  const api = readFileSync(join(process.cwd(), "functions/api/dashboard.ts"), "utf8");
+
+  for (const fabricatedSignal of [
+    "@/lib/demoData",
+    "As of May 12, 2024",
+    "Up 8%",
+    "Math.max(15",
+    "All Training Records Current",
+    "IFTA Filing Up to Date",
+    "const CSA_ROWS",
+  ]) {
+    expect(page).not.toContain(fabricatedSignal);
+  }
+  expect(api).not.toContain("const hosPct = 90");
+});

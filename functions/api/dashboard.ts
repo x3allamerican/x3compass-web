@@ -144,8 +144,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     // Compliance Overview bars
     // ─────────────────────────────────────────────────────────────────────
     // Per-domain compliance % — fraction of drivers with the relevant doc + not expired
-    function pctWithValidDoc(docTypes: string[]): number {
-      if (drvRows.length === 0) return 0;
+    function pctWithValidDoc(docTypes: string[]): number | null {
+      if (drvRows.length === 0) return null;
       let ok = 0;
       for (const d of drvRows) {
         const hasValid = docRows.some(doc =>
@@ -158,41 +158,62 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       return Math.round((ok / drvRows.length) * 100);
     }
     const cdlPct = pctWithValidDoc(["cdl_copy", "road_test_certificate"]);
-    const medPct = drvRows.length === 0 ? 0 : Math.round((drvRows.filter(d => d.medical_card_expires_on && d.medical_card_expires_on >= today).length / drvRows.length) * 100);
+    const medPct = drvRows.length === 0 ? null : Math.round((drvRows.filter(d => d.medical_card_expires_on && d.medical_card_expires_on >= today).length / drvRows.length) * 100);
     const daPct = pctWithValidDoc(["pre_employment_drug_test", "drug_test_result", "clearinghouse_full", "clearinghouse_query"]);
-    const trainingPct = pctWithValidDoc(["eldt_certificate", "eldt"]);
-    const vehMaintPct = vehRows.length === 0 ? 100 : Math.round((vehRows.filter(v => !v.next_dot_inspection_due || v.next_dot_inspection_due >= today).length / vehRows.length) * 100);
-    const hosPct = 90;  // No HOS data yet — keep demo
+    type TrainRow = { expires_on?: string; course_name?: string; course_category?: string; driver_id?: string };
+    type HosRow = { total_drive_minutes?: number; violations?: unknown[] };
+    const trainRows = training.rows as TrainRow[];
+    const hosRows = hosLogs.rows as HosRow[];
+    const driversWithCurrentTraining = new Set(
+      trainRows
+        .filter((row) => row.driver_id && (!row.expires_on || row.expires_on >= today))
+        .map((row) => row.driver_id),
+    ).size;
+    const trainingPct = drvRows.length === 0 ? null : Math.round((driversWithCurrentTraining / drvRows.length) * 100);
+    const vehMaintPct = vehRows.length === 0 ? null : Math.round((vehRows.filter(v => !v.next_dot_inspection_due || v.next_dot_inspection_due >= today).length / vehRows.length) * 100);
+    const hosPct = hosRows.length === 0
+      ? null
+      : Math.round((hosRows.filter((row) => !Array.isArray(row.violations) || row.violations.length === 0).length / hosRows.length) * 100);
 
+    const complianceBar = (label: string, pct: number | null) => ({
+      label,
+      pct,
+      color: pct == null ? "unknown" : pct >= 90 ? "green" : pct >= 75 ? "yellow" : "red",
+    });
     const complianceBars = [
-      { label: "Driver Qualification (CDL)", pct: cdlPct, color: cdlPct >= 90 ? "green" : cdlPct >= 75 ? "yellow" : "red" },
-      { label: "Medical Certificates",       pct: medPct, color: medPct >= 90 ? "green" : medPct >= 75 ? "yellow" : "red" },
-      { label: "HOS / ELD",                  pct: hosPct, color: "green" },
-      { label: "Drug & Alcohol",             pct: daPct, color: daPct >= 90 ? "green" : daPct >= 75 ? "yellow" : "red" },
-      { label: "Training Records",           pct: trainingPct, color: trainingPct >= 90 ? "green" : trainingPct >= 75 ? "yellow" : "red" },
-      { label: "Vehicle Maintenance",        pct: vehMaintPct, color: vehMaintPct >= 90 ? "green" : vehMaintPct >= 75 ? "yellow" : "red" },
+      complianceBar("Driver Qualification (CDL)", cdlPct),
+      complianceBar("Medical Certificates", medPct),
+      complianceBar("HOS / ELD", hosPct),
+      complianceBar("Drug & Alcohol", daPct),
+      complianceBar("Training Records", trainingPct),
+      complianceBar("Vehicle Maintenance", vehMaintPct),
     ];
-    const overallCompliancePct = Math.round(complianceBars.reduce((s, b) => s + b.pct, 0) / complianceBars.length);
+    const availableComplianceValues = complianceBars.flatMap((bar) => bar.pct == null ? [] : [bar.pct]);
+    const overallCompliancePct = availableComplianceValues.length
+      ? Math.round(availableComplianceValues.reduce((sum, value) => sum + value, 0) / availableComplianceValues.length)
+      : null;
 
     // ─────────────────────────────────────────────────────────────────────
     // CSA BASICS — from latest snapshot if present
     // ─────────────────────────────────────────────────────────────────────
     type CsaRow = { unsafe_driving?: number; crash_indicator?: number; hos_compliance?: number; vehicle_maint?: number; hazmat?: number; driver_fitness?: number; ctrl_substances?: number };
     const latestCsa = csa.rows[0] as CsaRow | undefined;
-    const csaBasic = (msr: number | undefined, threshold: number) => {
-      const v = msr ?? 0;
-      const status: "ok" | "warn" | "alert" = v >= threshold ? "alert" : v >= threshold * 0.75 ? "warn" : "ok";
-      return { msr: v, threshold, status };
+    const csaBasic = (name: string, msr: number | undefined, threshold: number) => {
+      if (typeof msr !== "number") return null;
+      const status: "ok" | "warn" | "alert" = msr >= threshold ? "alert" : msr >= threshold * 0.75 ? "warn" : "ok";
+      return { name, msr, threshold, status };
     };
-    const csaBasics = latestCsa ? [
-      { name: "Unsafe Driving",   ...csaBasic(latestCsa.unsafe_driving, 65) },
-      { name: "Crash Indicator",  ...csaBasic(latestCsa.crash_indicator, 65) },
-      { name: "HOS Compliance",   ...csaBasic(latestCsa.hos_compliance, 65) },
-      { name: "Vehicle Maint.",   ...csaBasic(latestCsa.vehicle_maint, 80) },
-      { name: "Hazmat",           ...csaBasic(latestCsa.hazmat, 80) },
-      { name: "Driver Fitness",   ...csaBasic(latestCsa.driver_fitness, 80) },
-      { name: "Ctrl. Substances", ...csaBasic(latestCsa.ctrl_substances, 80) },
-    ] : null;
+    const csaBasics = latestCsa
+      ? [
+          csaBasic("Unsafe Driving", latestCsa.unsafe_driving, 65),
+          csaBasic("Crash Indicator", latestCsa.crash_indicator, 65),
+          csaBasic("HOS Compliance", latestCsa.hos_compliance, 65),
+          csaBasic("Vehicle Maint.", latestCsa.vehicle_maint, 80),
+          csaBasic("Hazmat", latestCsa.hazmat, 80),
+          csaBasic("Driver Fitness", latestCsa.driver_fitness, 80),
+          csaBasic("Ctrl. Substances", latestCsa.ctrl_substances, 80),
+        ].filter((basic): basic is NonNullable<typeof basic> => basic != null)
+      : null;
 
     // ─────────────────────────────────────────────────────────────────────
     // Action Items — 8 cards (top 5 per category)
@@ -363,8 +384,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     });
 
     // ── HOS — last 30 days roll-up
-    type HosRow = { total_drive_minutes?: number; violations?: unknown[] };
-    const hosRows = hosLogs.rows as HosRow[];
     const totalLogs = hosRows.length;
     const totalDriveMins = hosRows.reduce((s, r) => s + (r.total_drive_minutes || 0), 0);
     const avgDriveMins = totalLogs > 0 ? Math.round(totalDriveMins / totalLogs) : 0;
@@ -394,8 +413,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       }
       return { "0_30": b0, "31_60": b1, "61_90": b2 };
     }
-    type TrainRow = { expires_on?: string; course_name?: string; course_category?: string; driver_id?: string };
-    const trainRows = training.rows as TrainRow[];
     const docExpirations = [
       { name: "CDL",      ...bucketDocs(d => (d as DrvRow).cdl_expires_on, drvRows) },
       { name: "MEC",      ...bucketDocs(d => (d as DrvRow).medical_card_expires_on, drvRows) },
