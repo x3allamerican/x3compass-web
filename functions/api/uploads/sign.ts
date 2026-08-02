@@ -4,7 +4,7 @@
  */
 import { rateLimit } from "../../_shared/rate-limit";
 import { correlationId, isUuid, requireTenant, securityError, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
-import { issueUploadToken } from "../../_shared/upload-token";
+import { issueUploadToken, uploadGrant } from "../../_shared/upload-token";
 
 interface Env extends SecurityEnv { UPLOAD_TOKEN_SECRET?: string; }
 
@@ -35,7 +35,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const tokenPayload = { k: objectKey, ct: body.content_type || "application/octet-stream", exp: Math.floor(Date.now()/1000) + 300, uid: authority.userId, cid: carrier_id };
     const signedToken = await issueUploadToken(tokenPayload, ctx.env.UPLOAD_TOKEN_SECRET);
 
-    return json({ ok: true, put_url: `/api/uploads/put?t=${encodeURIComponent(signedToken)}`, object_key: objectKey, get_url: `/api/uploads/get?k=${encodeURIComponent(objectKey)}`, max_bytes: 25 * 1024 * 1024, expires_in: 300 });
+    return json({ ok: true, ...uploadGrant(signedToken), object_key: objectKey, get_url: `/api/uploads/get?k=${encodeURIComponent(objectKey)}`, max_bytes: 25 * 1024 * 1024, expires_in: 300 });
   } catch {
     console.error("upload signing failed");
     return securityError(500, "request_failed", correlationId(ctx.request));

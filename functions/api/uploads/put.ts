@@ -1,8 +1,10 @@
 /**
- * PUT /api/uploads/put?t=<signed-token> — relay file body to R2 via S3 SigV4.
+ * PUT /api/uploads/put — relay file body to R2 via S3 SigV4.
+ * The short-lived upload token is carried in `Authorization: Upload <token>` so
+ * credentials do not enter URLs, access logs, referrers, or browser history.
  */
 import { correlationId, securityError } from "../../_shared/request-security";
-import { verifyUploadToken } from "../../_shared/upload-token";
+import { uploadTokenFromRequest, verifyUploadToken } from "../../_shared/upload-token";
 interface Env { R2_ACCESS_KEY_ID?: string; R2_SECRET_ACCESS_KEY?: string; R2_BUCKET?: string; R2_ACCOUNT_ID?: string; UPLOAD_TOKEN_SECRET?: string; }
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "Content-Type": "application/json" } });
 
@@ -26,8 +28,7 @@ export const onRequestPut: PagesFunction<Env> = async (ctx) => {
     if (!ctx.env.R2_ACCESS_KEY_ID || !ctx.env.R2_SECRET_ACCESS_KEY || !ctx.env.R2_BUCKET || !ctx.env.R2_ACCOUNT_ID) {
       return json({ ok: false, error: "R2 not configured (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ACCOUNT_ID)" }, 500);
     }
-    const url = new URL(ctx.request.url);
-    const tokenStr = url.searchParams.get("t");
+    const tokenStr = uploadTokenFromRequest(ctx.request);
     if (!tokenStr) return json({ ok: false, error: "Missing token" }, 401);
     const token = await verifyUploadToken(tokenStr, ctx.env.UPLOAD_TOKEN_SECRET || "");
     if (!token) return securityError(401, "invalid_upload_token", correlationId(ctx.request));

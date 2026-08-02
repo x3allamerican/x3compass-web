@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { issueUploadToken, verifyUploadToken } from "../functions/_shared/upload-token";
+import {
+  issueUploadToken,
+  uploadGrant,
+  uploadTokenFromRequest,
+  verifyUploadToken,
+} from "../functions/_shared/upload-token";
 
 const secret = "test-secret-with-sufficient-entropy";
 const payload = {
@@ -34,4 +39,20 @@ test("refuses upload tokens protected by a weak secret", async () => {
   await expect(issueUploadToken(payload, "short-secret")).rejects.toThrow("Invalid upload token input");
   const token = await issueUploadToken(payload, secret);
   await expect(verifyUploadToken(token, "short-secret", 1_700_000_000)).resolves.toBeNull();
+});
+
+test("keeps upload credentials out of request URLs", async () => {
+  const token = await issueUploadToken(payload, secret);
+  const grant = uploadGrant(token);
+
+  expect(grant).toEqual({
+    put_url: "/api/uploads/put",
+    upload_token: token,
+    upload_auth_scheme: "Upload",
+  });
+  expect(grant.put_url).not.toContain(token);
+  expect(uploadTokenFromRequest(new Request(`https://x3compass.com/api/uploads/put?t=${encodeURIComponent(token)}`))).toBe("");
+  expect(uploadTokenFromRequest(new Request("https://x3compass.com/api/uploads/put", {
+    headers: { Authorization: `Upload ${token}` },
+  }))).toBe(token);
 });

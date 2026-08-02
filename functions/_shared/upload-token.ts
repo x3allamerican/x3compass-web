@@ -8,6 +8,12 @@ export interface UploadTokenPayload {
   cid: string;
 }
 
+export interface UploadGrant {
+  put_url: string;
+  upload_token: string;
+  upload_auth_scheme: "Upload";
+}
+
 const encoder = new TextEncoder();
 
 async function signature(value: string, secret: string): Promise<string> {
@@ -48,6 +54,20 @@ export async function issueUploadToken(payload: UploadTokenPayload, secret: stri
   if (secret.length < 32 || !validPayload(payload, 0)) throw new Error("Invalid upload token input");
   const encoded = btoa(JSON.stringify(payload));
   return `${encoded}.${await signature(encoded, secret)}`;
+}
+
+export function uploadGrant(token: string): UploadGrant {
+  return {
+    put_url: "/api/uploads/put",
+    upload_token: token,
+    upload_auth_scheme: "Upload",
+  };
+}
+
+export function uploadTokenFromRequest(request: Request): string {
+  const authorization = request.headers.get("Authorization") || "";
+  const match = authorization.match(/^Upload\s+(.+)$/i);
+  return match?.[1]?.trim() || "";
 }
 
 export async function verifyUploadToken(token: string, secret: string, now = Math.floor(Date.now() / 1000)): Promise<UploadTokenPayload | null> {

@@ -49,7 +49,7 @@ This inventory is the security contract for every Cloudflare Pages Function unde
 | `/api/stripe/portal-session` | Authenticated user | Membership-derived Stripe customer |
 | `/api/stripe/webhook` | Public or signed | Stripe signature required |
 | `/api/uploads/get` | Authenticated user | Carrier ID parsed from object key and membership-verified |
-| `/api/uploads/put` | Public or signed | Short-lived HMAC token binds object path to carrier |
+| `/api/uploads/put` | Public or signed | Short-lived HMAC token binds object path to carrier and is supplied through the `Upload` authorization scheme, never the URL |
 | `/api/uploads/sign` | Authenticated user | Membership-derived carrier and UUID-validated driver ID |
 | `/api/vehicles/import` | Authenticated user | Carrier membership; server-derived carrier ID |
 | `/api/vendors/list` | Authenticated user | Carrier membership; server-derived carrier ID |
