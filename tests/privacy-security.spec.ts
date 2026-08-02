@@ -76,3 +76,10 @@ test("authenticated dashboard never presents demo compliance as tenant data", ()
   }
   expect(api).not.toContain("const hosPct = 90");
 });
+
+test("authenticated driver roster never substitutes demo people", () => {
+  const source = readFileSync(join(process.cwd(), "src/app/app/drivers/page.tsx"), "utf8");
+
+  expect(source).not.toContain("DEMO_DRIVERS");
+  expect(source).not.toContain("withDemoFallback");
+});
