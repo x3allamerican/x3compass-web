@@ -11,6 +11,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const carrier_id = u.searchParams.get("carrier_id");
   const status = u.searchParams.get("status");
   const platform = u.searchParams.get("platform");
+  if (carrier_id && !isUuid(carrier_id)) return json({ ok: false, error: "Invalid carrier_id" }, 400);
   let q = "select=*&order=scheduled_at.asc.nullslast,created_at.desc&limit=500";
   if (carrier_id) q += `&carrier_id=eq.${encodeURIComponent(carrier_id)}`;
   if (status && status !== "all") q += `&status=eq.${encodeURIComponent(status)}`;
@@ -25,4 +26,3 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   for (const r of all) (counts as Record<string, number>)[r.status]++;
   return json({ ok: true, rows, counts });
 };
-  if (carrier_id && !isUuid(carrier_id)) return json({ ok: false, error: "Invalid carrier_id" }, 400);

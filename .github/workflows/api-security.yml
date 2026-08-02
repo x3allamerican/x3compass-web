@@ -53,6 +53,9 @@ jobs:
       - name: Run API security regression suite
         run: npm run test:security
 
+      - name: Bundle Cloudflare Pages Functions
+        run: npx --yes wrangler@4.118.0 pages functions build functions --outdir /tmp/pages-functions-build
+
       - name: Lint security implementation
         run: >-
           npx eslint
