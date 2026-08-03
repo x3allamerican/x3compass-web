@@ -3,7 +3,10 @@ import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
+import { DQ_REQUIREMENTS, DQ_REQUIREMENT_COUNT } from "@/lib/dqRequirements";
 
 type DocStatus = "complete" | "missing" | "expiring" | "expired";
 
@@ -55,27 +58,12 @@ export default function DQFilesPage() {
   const { carrier } = useUser();
   const active = ROSTER[0];
 
-  // Real signed-in carrier: the sample "Ricardo Torres" DQ file below is demo
-  // content and must not be shown as if it were theirs. Until per-driver DQ
-  // documents are wired to Supabase, show an honest onboarding state.
-  if (carrier) {
-    return (
-      <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51">
-        <div className="p-8 max-w-2xl">
-          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
-            <div className="text-3xl mb-3" aria-hidden>📁</div>
-            <div className="text-[15px] font-extrabold text-white">No driver qualification files yet</div>
-            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">
-              Add your drivers and upload their documents, and X3 Compass builds each 49 CFR § 391.51 DQ file here — with citation mapping, expiry tracking, and audit-ready export.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <Link href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Add drivers →</Link>
-            </div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
+  // Real signed-in carrier: render their actual roster + the § 391.51 checklist.
+  // Document statuses come from compass_driver_documents once that table ships;
+  // until then every slot shows honestly as "not uploaded". The elaborate
+  // "Ricardo Torres" mockup below is demo content shown ONLY in the logged-out
+  // marketing preview.
+  if (carrier) return <RealDqFiles carrierId={carrier.id} />;
 
   return (
     <AppShell
@@ -294,6 +282,117 @@ export default function DQFilesPage() {
                   <div className="text-white/65 text-[12px]">Past expiration or never on file. Audit-fail risk.</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+
+// ── Real-tenant DQ Files: roster from compass_drivers + § 391.51 checklist ──
+type RosterDriver = { id: string; first_name: string; last_name: string; cdl_class: string | null; cdl_state: string | null };
+
+function RealDqFiles({ carrierId }: { carrierId: string }) {
+  const [drivers, setDrivers] = useState<RosterDriver[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    let live = true;
+    getSupabase().from("compass_drivers")
+      .select("id,first_name,last_name,cdl_class,cdl_state")
+      .eq("carrier_id", carrierId).order("last_name", { ascending: true })
+      .then(({ data }) => { if (!live) return; setDrivers((data as RosterDriver[]) || []); setLoading(false); });
+    return () => { live = false; };
+  }, [carrierId]);
+
+  const roster = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return needle ? drivers.filter(d => `${d.first_name} ${d.last_name}`.toLowerCase().includes(needle)) : drivers;
+  }, [drivers, q]);
+  const active = roster.find(d => d.id === selectedId) || roster[0] || null;
+
+  if (loading) {
+    return <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51"><div className="p-8 text-white/60 text-[13px]">Loading your roster…</div></AppShell>;
+  }
+  if (drivers.length === 0) {
+    return (
+      <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51">
+        <div className="p-8 max-w-2xl">
+          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+            <div className="text-3xl mb-3" aria-hidden>📁</div>
+            <div className="text-[15px] font-extrabold text-white">No driver qualification files yet</div>
+            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Add your drivers and X3 Compass builds each 49 CFR § 391.51 DQ file here — citation-mapped, expiry-tracked, audit-ready.</p>
+            <div className="mt-5"><Link href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Add drivers →</Link></div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  const initials = (d: RosterDriver) => `${(d.first_name||" ")[0]}${(d.last_name||" ")[0]}`.toUpperCase();
+
+  return (
+    <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51 · 12-DOCUMENT FILE">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
+        <aside className="border-r border-[#1E3556] bg-[#0C1A30] min-h-[calc(100vh-64px)] py-5 px-3">
+          <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[#16C7FF]/60 px-2 mb-3">Drivers · {drivers.length}</div>
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search drivers…" className="w-full bg-black border border-[#1E3556] rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-white/40 focus:border-[#16C7FF] focus:outline-none mb-3" />
+          <div className="space-y-1">
+            {roster.map((d) => (
+              <button key={d.id} onClick={() => setSelectedId(d.id)} className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors ${active && d.id === active.id ? "bg-[#16C7FF]/12 border border-[#16C7FF]/30" : "hover:bg-white/5 border border-transparent"}`}>
+                <div className="w-8 h-8 rounded-full grid place-items-center font-extrabold text-[11px] text-black flex-shrink-0" style={{ background: "linear-gradient(135deg, #16C7FF, #8B5CF6)" }}>{initials(d)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-semibold text-white truncate">{d.last_name}, {d.first_name}</div>
+                  <div className="text-[10px] text-white/45 font-mono">0 / {DQ_REQUIREMENT_COUNT}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <div className="px-6 py-6 space-y-6">
+          {active && (
+            <div className="rounded-2xl p-5 border border-[#1E3556] flex items-center gap-4 flex-wrap" style={{ background: "linear-gradient(180deg, #000 0%, #0F1C32 100%)" }}>
+              <div className="w-14 h-14 rounded-full grid place-items-center font-black text-[18px] text-black" style={{ background: "linear-gradient(135deg, #8B5CF6, #16C7FF)" }}>{initials(active)}</div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[20px] font-extrabold text-white">{active.first_name} {active.last_name}</h2>
+                <div className="text-[12px] text-white/55 mt-0.5">{active.cdl_class ? `CDL-${active.cdl_class}` : "CDL"}{active.cdl_state ? ` · ${active.cdl_state.toUpperCase()}` : ""}</div>
+              </div>
+              <div>
+                <div className="text-[10px] tracking-wider uppercase text-white/45">Coverage</div>
+                <div className="text-[20px] font-black text-amber-300">0 / {DQ_REQUIREMENT_COUNT}</div>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-[#1E3556] bg-[#0C1A30] px-4 py-3 text-[12px] text-white/70">
+            Document uploads are coming online — each § 391.51 slot below will fill in as you upload or connect a DQ vendor. Statuses shown are the required set, not yet on file.
+          </div>
+
+          <div>
+            <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+              <h3 className="text-[15px] font-extrabold text-white">The 12 documents · § 391.51</h3>
+              <span className="text-[11px] text-white/50">Click any slot to upload</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {DQ_REQUIREMENTS.map((r) => {
+                const st = STATUS_STYLE.missing;
+                return (
+                  <div key={r.key} className={`rounded-xl p-4 border ${st.bg} ${st.border} flex flex-col gap-2`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-[14px] font-bold text-white leading-snug">{r.slot}</div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${st.bg} ${st.text} border ${st.border} whitespace-nowrap`}>Not on file</span>
+                    </div>
+                    <div className="text-[10px] font-mono text-[#16C7FF]/80">{r.cfr}</div>
+                    <div className="text-[12px] text-white/60 leading-relaxed flex-1">{r.alwaysRequired ? "Required — not uploaded yet." : (r.note || "Conditionally required.")}</div>
+                    <div><button className="text-[11px] font-bold text-rose-300 hover:text-rose-200">⬆ Upload</button></div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
