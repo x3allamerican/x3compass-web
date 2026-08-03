@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 import CTPAPickerCard from "@/components/CTPAPickerCard";
@@ -53,23 +55,7 @@ const AVATAR_GRAD: Record<string, string> = {
 
 export default function DrugAlcoholPage() {
   const { carrier } = useUser();
-  // Real signed-in carrier: this surface is not yet wired to live data, so
-  // show an honest empty state rather than the demo mockup below (which is
-  // kept for the logged-out marketing preview).
-  if (carrier) {
-    return (
-      <AppShell title="Drug & Alcohol Testing">
-        <div className="p-8 max-w-2xl">
-          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
-            <div className="text-3xl mb-3" aria-hidden>🧪</div>
-            <div className="text-[15px] font-extrabold text-white">Nothing here yet</div>
-            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Drug & alcohol test records will appear here as you log tests or connect your C/TPA. We track your random pool, MRO results, and Clearinghouse queries against 49 CFR Part 382.</p>
-            <div className="mt-5"><a href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black inline-block" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Go to Drivers →</a></div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
+  if (carrier) return <RealDrugAlcohol carrierId={carrier.id} />;
 
   return (
     <AppShell
@@ -327,6 +313,76 @@ export default function DrugAlcoholPage() {
             ))}
           </div>
         </div>
+      </div>
+    </AppShell>
+  );
+}
+
+
+// ── Real-tenant Drug & Alcohol test log (49 CFR Part 382), from compass_da_tests ──
+type DaTestRow = { id: string; driver_name: string | null; test_date: string; test_type: string; panel: string | null; mro: string | null; result: TestResult };
+
+function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
+  const [rows, setRows] = useState<DaTestRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let live = true;
+    getSupabase().from("compass_da_tests")
+      .select("id,driver_name,test_date,test_type,panel,mro,result")
+      .eq("carrier_id", carrierId).order("test_date", { ascending: false })
+      .then(({ data }) => { if (!live) return; setRows((data as DaTestRow[]) || []); setLoading(false); });
+    return () => { live = false; };
+  }, [carrierId]);
+
+  const stats = useMemo(() => {
+    const total = rows.length;
+    const positives = rows.filter(r => r.result === "Positive" || r.result === "Refusal").length;
+    const pending = rows.filter(r => r.result === "Pending").length;
+    const random = rows.filter(r => r.test_type === "Random").length;
+    return { total, positives, pending, random };
+  }, [rows]);
+
+  if (loading) return <AppShell title="Drug & Alcohol Testing"><div className="p-8 text-white/60 text-[13px]">Loading test log…</div></AppShell>;
+
+  if (rows.length === 0) {
+    return (
+      <AppShell title="Drug & Alcohol Testing">
+        <div className="p-8 max-w-2xl">
+          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+            <div className="text-3xl mb-3" aria-hidden>🧪</div>
+            <div className="text-[15px] font-extrabold text-white">No test records yet</div>
+            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Log a DOT drug or alcohol test — or connect your C/TPA — and your random pool, MRO results, and Clearinghouse queries appear here, tracked against 49 CFR Part 382.</p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  return (
+    <AppShell title="Drug & Alcohol Testing">
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[["Tests on file", stats.total], ["Random tests", stats.random], ["Pending results", stats.pending], ["Positives / refusals", stats.positives]].map(([label, val]) => (
+            <div key={String(label)} className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4">
+              <div className="text-[10px] tracking-wider uppercase text-white/45">{label}</div>
+              <div className="text-[24px] font-black text-white tabular-nums">{val as number}</div>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl border border-[#1E3556] overflow-hidden">
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-white/40 bg-[#091525]">
+            <span>Driver</span><span>Type</span><span>Date</span><span>Result</span>
+          </div>
+          {rows.map((t) => (
+            <div key={t.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center px-4 py-3 border-t border-[#1E3556]">
+              <div className="min-w-0"><div className="text-[13px] font-semibold text-white truncate">{t.driver_name || "—"}</div><div className="text-[10px] text-white/45">{t.panel || ""}{t.mro ? ` · ${t.mro}` : ""}</div></div>
+              <span className="text-[12px] text-white/70">{t.test_type}</span>
+              <span className="text-[12px] text-white/60 tabular-nums">{t.test_date}</span>
+              <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${RESULT_PILL[t.result] || RESULT_PILL.Pending}`}>{t.result}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-white/40">Decision support · every determination is the carrier&apos;s and the MRO&apos;s. 49 CFR Part 382.</p>
       </div>
     </AppShell>
   );

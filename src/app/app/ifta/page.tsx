@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
@@ -35,23 +37,7 @@ const STATUS_PILL: Record<ReturnStatus, string> = {
 
 export default function IFTAPage() {
   const { carrier } = useUser();
-  // Real signed-in carrier: this surface is not yet wired to live data, so
-  // show an honest empty state rather than the demo mockup below (which is
-  // kept for the logged-out marketing preview).
-  if (carrier) {
-    return (
-      <AppShell title="IFTA Concierge">
-        <div className="p-8 max-w-2xl">
-          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
-            <div className="text-3xl mb-3" aria-hidden>🧾</div>
-            <div className="text-[15px] font-extrabold text-white">Nothing here yet</div>
-            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Your IFTA returns and per-jurisdiction mileage will appear here as fuel and mileage data flows in. We prep each quarterly return for review before you file.</p>
-            <div className="mt-5"><a href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black inline-block" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Go to Drivers →</a></div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
+  if (carrier) return <RealIfta carrierId={carrier.id} />;
 
   return (
     <AppShell
@@ -239,5 +225,58 @@ export default function IFTAPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+
+// ── Real-tenant IFTA returns, from compass_ifta_returns ──
+type IftaRow = { id: string; quarter: string; due_date: string | null; filed_date: string | null; tax_owed_cents: number | null; refund_cents: number | null; status: ReturnStatus };
+const money = (c: number | null) => (c == null ? "—" : `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+
+function RealIfta({ carrierId }: { carrierId: string }) {
+  const [rows, setRows] = useState<IftaRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let live = true;
+    getSupabase().from("compass_ifta_returns")
+      .select("id,quarter,due_date,filed_date,tax_owed_cents,refund_cents,status")
+      .eq("carrier_id", carrierId).order("due_date", { ascending: false })
+      .then(({ data }) => { if (!live) return; setRows((data as IftaRow[]) || []); setLoading(false); });
+    return () => { live = false; };
+  }, [carrierId]);
+  const stats = useMemo(() => ({
+    total: rows.length,
+    filed: rows.filter(r => r.status === "Filed").length,
+    overdue: rows.filter(r => r.status === "Overdue").length,
+    awaiting: rows.filter(r => r.status === "Awaiting data" || r.status === "Ready to submit").length,
+  }), [rows]);
+  if (loading) return <AppShell title="IFTA Concierge"><div className="p-8 text-white/60 text-[13px]">Loading returns…</div></AppShell>;
+  if (rows.length === 0) return (
+    <AppShell title="IFTA Concierge"><div className="p-8 max-w-2xl"><div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+      <div className="text-3xl mb-3" aria-hidden>🧾</div><div className="text-[15px] font-extrabold text-white">No IFTA returns yet</div>
+      <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">As fuel and mileage data flows in, each quarterly IFTA return is prepped here for your review before you file.</p>
+    </div></div></AppShell>
+  );
+  const PILL: Record<ReturnStatus, string> = { "Filed": "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30", "Ready to submit": "bg-[#16C7FF]/15 text-[#16C7FF] border border-[#16C7FF]/30", "Awaiting data": "bg-amber-500/15 text-amber-300 border border-amber-500/30", "Overdue": "bg-rose-500/15 text-rose-300 border border-rose-500/30" };
+  return (
+    <AppShell title="IFTA Concierge"><div className="p-6 space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[["Returns", stats.total], ["Filed", stats.filed], ["Awaiting/ready", stats.awaiting], ["Overdue", stats.overdue]].map(([l, v]) => (
+          <div key={String(l)} className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4"><div className="text-[10px] uppercase tracking-wider text-white/45">{l}</div><div className="text-[24px] font-black text-white tabular-nums">{v as number}</div></div>
+        ))}
+      </div>
+      <div className="rounded-xl border border-[#1E3556] overflow-hidden">
+        <div className="grid grid-cols-[auto_auto_auto_1fr_auto] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-white/40 bg-[#091525]"><span>Quarter</span><span>Due</span><span>Filed</span><span>Tax / refund</span><span>Status</span></div>
+        {rows.map((r) => (
+          <div key={r.id} className="grid grid-cols-[auto_auto_auto_1fr_auto] gap-3 items-center px-4 py-3 border-t border-[#1E3556]">
+            <span className="text-[13px] font-semibold text-white">{r.quarter}</span>
+            <span className="text-[12px] text-white/60 tabular-nums">{r.due_date || "—"}</span>
+            <span className="text-[12px] text-white/60 tabular-nums">{r.filed_date || "—"}</span>
+            <span className="text-[12px] text-white/70 tabular-nums">{r.refund_cents ? `refund ${money(r.refund_cents)}` : money(r.tax_owed_cents)}</span>
+            <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${PILL[r.status] || PILL["Awaiting data"]}`}>{r.status}</span>
+          </div>
+        ))}
+      </div>
+    </div></AppShell>
   );
 }
