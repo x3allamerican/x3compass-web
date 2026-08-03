@@ -13,6 +13,28 @@
 --   driver_id, document_type, document_url, issued_date, expires_date, verified_by
 -- ============================================================================
 
+-- Enforce the carrier/driver relationship for every table that stores both
+-- identifiers. RLS protects end-user access; this trigger also protects writes
+-- made by privileged server roles that bypass RLS.
+create or replace function public.enforce_compass_driver_carrier()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.driver_id is not null and not exists (
+    select 1
+      from public.compass_drivers d
+     where d.id = new.driver_id
+       and d.carrier_id = new.carrier_id
+  ) then
+    raise exception 'driver does not belong to carrier'
+      using errcode = '23503';
+  end if;
+  return new;
+end;
+$$;
+
 create table if not exists public.compass_driver_documents (
   id            uuid primary key default gen_random_uuid(),
   carrier_id    uuid not null references public.compass_carriers(id) on delete cascade,
@@ -38,7 +60,13 @@ create index if not exists idx_driver_docs_expiry  on public.compass_driver_docu
 
 alter table public.compass_driver_documents enable row level security;
 
+drop trigger if exists enforce_driver_documents_carrier on public.compass_driver_documents;
+create trigger enforce_driver_documents_carrier
+  before insert or update of carrier_id, driver_id on public.compass_driver_documents
+  for each row execute function public.enforce_compass_driver_carrier();
+
 -- Carrier-scoped access, mirroring the compass_drivers policy exactly.
+drop policy if exists "driver_documents_carrier_scope" on public.compass_driver_documents;
 create policy "driver_documents_carrier_scope" on public.compass_driver_documents for all
   using (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()))
   with check (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()));

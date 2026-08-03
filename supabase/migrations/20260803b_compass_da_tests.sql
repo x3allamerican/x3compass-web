@@ -15,6 +15,11 @@ create table if not exists public.compass_da_tests (
 );
 create index if not exists idx_da_tests_carrier on public.compass_da_tests(carrier_id, test_date desc);
 alter table public.compass_da_tests enable row level security;
+drop trigger if exists enforce_da_tests_carrier on public.compass_da_tests;
+create trigger enforce_da_tests_carrier
+  before insert or update of carrier_id, driver_id on public.compass_da_tests
+  for each row execute function public.enforce_compass_driver_carrier();
+drop policy if exists "da_tests_carrier_scope" on public.compass_da_tests;
 create policy "da_tests_carrier_scope" on public.compass_da_tests for all
   using (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()))
   with check (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()));
