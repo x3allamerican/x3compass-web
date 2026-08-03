@@ -82,11 +82,12 @@ export default function AuditLogPage() {
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier, actionFilter, entityFilter, actorFilter, sinceFilter]);
 
-  const ROWS = api?.rows && api.rows.length > 0 ? api.rows : DEMO_ROWS;
-  const STATS = api?.stats || { total: DEMO_ROWS.length, by_action: { CREATE: 4, UPDATE: 2, DELETE: 1, NOTIFY: 1, BULK_IMPORT: 1 }, by_entity: {} };
+  const allowDemo = !carrier; // fabricated audit rows are preview-only
+  const ROWS = api?.rows && api.rows.length > 0 ? api.rows : (allowDemo ? DEMO_ROWS : []);
+  const STATS = api?.stats || (allowDemo ? { total: DEMO_ROWS.length, by_action: { CREATE: 4, UPDATE: 2, DELETE: 1, NOTIFY: 1, BULK_IMPORT: 1 }, by_entity: {} } : { total: 0, by_action: {}, by_entity: {} });
   const ENTITIES = api?.distinct_entities || ["carrier", "driver", "vehicle", "dq_document", "training_record", "drug_alcohol_test", "membership", "compliance_digest", "csa_snapshot"];
   const ACTORS   = api?.distinct_actors   || [];
-  const isDemo = api?.demo !== false;
+  const isDemo = allowDemo && api?.demo !== false;
 
   // Client-side search refinement (in addition to server filters)
   const filtered = useMemo(() => {

@@ -1,7 +1,9 @@
+"use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
+import { useUser } from "@/lib/useUser";
 
 type DocStatus = "complete" | "missing" | "expiring" | "expired";
 
@@ -50,7 +52,30 @@ const RISK_COLOR: Record<string, string> = {
 };
 
 export default function DQFilesPage() {
+  const { carrier } = useUser();
   const active = ROSTER[0];
+
+  // Real signed-in carrier: the sample "Ricardo Torres" DQ file below is demo
+  // content and must not be shown as if it were theirs. Until per-driver DQ
+  // documents are wired to Supabase, show an honest onboarding state.
+  if (carrier) {
+    return (
+      <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51">
+        <div className="p-8 max-w-2xl">
+          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+            <div className="text-3xl mb-3" aria-hidden>📁</div>
+            <div className="text-[15px] font-extrabold text-white">No driver qualification files yet</div>
+            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">
+              Add your drivers and upload their documents, and X3 Compass builds each 49 CFR § 391.51 DQ file here — with citation mapping, expiry tracking, and audit-ready export.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <Link href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Add drivers →</Link>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell
