@@ -1,5 +1,6 @@
 import { supaFetch } from "../../_shared/supabase-admin";
 import { paymentFailedEmail, sendEmail } from "../../_shared/emails";
+import { opaqueStripeFailure, verifyStripeSignature } from "../../_shared/stripe-security.mjs";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -12,27 +13,10 @@ const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: 
 
 interface StripeEvent { id: string; type: string; data: { object: Record<string, unknown> }; }
 
-async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
-  const parts = sigHeader.split(",");
-  const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
-  const v1Sig = parts.find((p) => p.startsWith("v1="))?.slice(3);
-  if (!timestamp || !v1Sig) return false;
-  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
-  const signedPayload = `${timestamp}.${payload}`;
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(signedPayload));
-  const hex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  if (hex.length !== v1Sig.length) return false;
-  let diff = 0;
-  for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ v1Sig.charCodeAt(i);
-  return diff === 0;
-}
-
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const rawBody = await ctx.request.text();
   const sig = ctx.request.headers.get("Stripe-Signature") || "";
-  if (!ctx.env.STRIPE_WEBHOOK_SECRET) return json({ ok: false, error: "Webhook secret not configured" }, 500);
+  if (!ctx.env.STRIPE_WEBHOOK_SECRET) return json(opaqueStripeFailure(), 503);
   const verified = await verifyStripeSignature(rawBody, sig, ctx.env.STRIPE_WEBHOOK_SECRET);
   if (!verified) return json({ ok: false, error: "Invalid signature" }, 401);
 
@@ -44,6 +28,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("409") || msg.includes("duplicate")) return json({ ok: true, duplicate: true });
+    console.error("[stripe-webhook] event ledger failure", err);
+    return json(opaqueStripeFailure(), 500);
   }
 
   try {
@@ -98,6 +84,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     await supa.update("compass_stripe_events", `id=eq.${encodeURIComponent(event.id)}`, { processed_at: new Date().toISOString() });
     return json({ ok: true });
   } catch (err) {
-    return json({ ok: false, error: String(err) }, 500);
+    console.error("[stripe-webhook] processing failure", err);
+    return json(opaqueStripeFailure(), 500);
   }
 };

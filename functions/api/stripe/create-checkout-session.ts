@@ -1,4 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { opaqueStripeFailure } from "../../_shared/stripe-security.mjs";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -22,8 +23,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
     const drivers = Math.max(1, Math.floor(Number(body.drivers || 1)));
 
-    if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
-    if (!ctx.env.STRIPE_PRICE_COMPASS_DRIVER) return json({ ok: false, error: "Compass price not configured" }, 500);
+    if (!ctx.env.STRIPE_SECRET_KEY || !ctx.env.STRIPE_PRICE_COMPASS_DRIVER) {
+      return json(opaqueStripeFailure(), 503);
+    }
 
     const supa = supaFetch(ctx.env);
     const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id,trial_ends_at)`)) as Array<{ carrier_id: string; compass_carriers: { id: string; name: string; stripe_customer_id: string | null; trial_ends_at: string | null } }>;
@@ -55,6 +57,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     }
     params.set("metadata[carrier_id]", carrier.id);
     params.set("metadata[plan]", "compass");
+    // Checkout Session metadata is not copied to the Subscription by Stripe.
+    // Duplicate it so subscription events can resolve the carrier even if they
+    // arrive before checkout.session.completed stores the subscription id.
+    params.set("subscription_data[metadata][carrier_id]", carrier.id);
+    params.set("subscription_data[metadata][plan]", "compass");
     params.set("allow_promotion_codes", "true");
 
     const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -62,12 +69,15 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
     });
-    if (!r.ok) return json({ ok: false, error: `Stripe HTTP ${r.status}`, detail: await r.text() }, 502);
+    if (!r.ok) {
+      console.error("[create-checkout-session] Stripe request failed", { status: r.status });
+      return json(opaqueStripeFailure(), 502);
+    }
     const sess = (await r.json()) as { url?: string; id?: string };
     return json({ ok: true, url: sess.url, id: sess.id });
   } catch (err) {
     console.error("[create-checkout-session] unexpected error:", err);
-    return json({ ok: false, error: "Server error", detail: err instanceof Error ? err.message : String(err) }, 500);
+    return json(opaqueStripeFailure(), 500);
   }
 };
 
