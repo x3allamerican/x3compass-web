@@ -18,7 +18,7 @@ test("/api/auth/post-signup returns 401 without token", async ({ request }) => {
 });
 
 test("/api/stripe/create-checkout-session returns 401 without token", async ({ request }) => {
-  const r = await request.post("/api/stripe/create-checkout-session", { data: { plan: "diy" } });
+  const r = await request.post("/api/stripe/create-checkout-session", { data: { drivers: 1 } });
   expect(r.status()).toBe(401);
 });
 

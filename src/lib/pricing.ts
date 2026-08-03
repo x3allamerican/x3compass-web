@@ -92,6 +92,18 @@ export const PLAN = {
 } as const;
 
 /**
+ * Customer-facing commercial language shared by marketing, structured data,
+ * FAQ, and the authenticated app. Keep delivery-mode boundaries here beside
+ * the price canon so “one plan” cannot drift back into DIY/DFY tiers.
+ */
+export const COMPASS_COPY = {
+  pricing: "One graduated plan: $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so a 100-driver fleet pays $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included — Hazmat too, at no extra cost.",
+  included: "Every X3 product is included at every fleet size — the AI Safety Director, CFR-cited skills, DataQ drafter, DQ file generator, MVR cadence, Hazmat Center, and audit prep. Only the per-driver rate changes as you grow.",
+  trial: "Yes — 7 days, no credit card required. Every brain, the full knowledge base, and the Hazmat Center are included. After 7 days, activate the single Compass plan or cancel.",
+  delivery: "X3 Compass is the self-service AI platform. X3 Fleet Safety is a separate human-led service with a real safety advisor working your account; that service is not included in the Compass subscription. Same DOT expertise, different delivery model.",
+} as const;
+
+/**
  * Hazmat is INCLUDED in the plan as of 2026-07-31.
  *
  * There is no longer a $99/mo Hazmat add-on. "Every X3 product included"
