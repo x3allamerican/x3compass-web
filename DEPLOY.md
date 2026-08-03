@@ -10,7 +10,7 @@ What's needed to go from GitHub `main` to a paying-customer-accepting production
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public)
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE` (secret)
 - `STRIPE_SECRET_KEY` (sk_live_), `STRIPE_WEBHOOK_SECRET` (whsec_)
-- `STRIPE_PRICE_DIY_DRIVER`, `STRIPE_PRICE_DFY_DRIVER`, `STRIPE_PRICE_HAZMAT_ADDON`
+- `STRIPE_PRICE_COMPASS_DRIVER` (the single graduated per-driver plan; every X3 product is included)
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (pk_live_)
 - `RESEND_API_KEY`, `EMAIL_FROM_NO_REPLY`, `EMAIL_FROM_SUPPORT`
 - `CHECKR_ENV` (staging then live), `CHECKR_API_BASE`
@@ -36,10 +36,7 @@ Preview deployments must never inherit production service-role, payment, email, 
 
 ## 3 · Stripe
 
-1. Live mode. Create products + prices:
-   - DIY → recurring monthly $25 (`STRIPE_PRICE_DIY_DRIVER`)
-   - DFY → recurring monthly $50 (`STRIPE_PRICE_DFY_DRIVER`)
-   - Hazmat → recurring monthly $99 flat (`STRIPE_PRICE_HAZMAT_ADDON`)
+1. Live mode. Create one recurring price for the graduated per-driver X3 Compass plan and bind its ID as `STRIPE_PRICE_COMPASS_DRIVER`. The application computes graduated quantities from the canonical bands in `src/lib/pricing.ts`; every X3 product, including Hazmat, is included. Do not recreate the retired DIY, DFY, or Hazmat add-on prices.
 2. Webhooks → add `https://x3compass.com/api/stripe/webhook`
 3. Subscribe to: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_failed/payment_succeeded`
 4. Customer Portal → enable; configure: update card, cancel, invoices, plan up/down-grade
