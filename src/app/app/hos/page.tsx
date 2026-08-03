@@ -102,8 +102,8 @@ export default function HosPage() {
 
   // Demo-mode fallback: when no real rows ingested, populate from canned set.
   const rows: (H | DemoHosLog)[] = useMemo(
-    () => withDemoFallback<H | DemoHosLog>(realRows, DEMO_HOS_LOGS),
-    [realRows]
+    () => withDemoFallback<H | DemoHosLog>(realRows, DEMO_HOS_LOGS, !carrier),
+    [realRows, carrier]
   );
 
   // Derive KPIs from whichever rows are in play.
