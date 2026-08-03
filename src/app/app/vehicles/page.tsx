@@ -70,10 +70,10 @@ export default function VehiclesPage() {
   // Fall back to demo Apex-Logistics roster (10 power units) when the
   // real query came back empty. Adapter normalizes the demo shape to Vehicle.
   const effectiveRows = useMemo(
-    () => withDemoFallback(rows, DEMO_VEHICLES.map(adaptDemoVehicle)),
-    [rows]
+    () => withDemoFallback(rows, DEMO_VEHICLES.map(adaptDemoVehicle), !carrier),
+    [rows, carrier]
   );
-  const isDemo = rows.length === 0;
+  const isDemo = !carrier && rows.length === 0;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

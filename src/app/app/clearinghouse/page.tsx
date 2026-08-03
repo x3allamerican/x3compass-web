@@ -129,10 +129,10 @@ export default function ClearinghousePage() {
     return () => { cancelled = true; };
   }, [carrier]);
 
-  const effQueries    = useMemo(() => withDemoFallback(queries,    DEMO_CLEARINGHOUSE_QUERIES),    [queries]);
-  const effViolations = useMemo(() => withDemoFallback(violations, DEMO_CLEARINGHOUSE_VIOLATIONS), [violations]);
-  const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS),   [consents]);
-  const isDemo = queries.length === 0;
+  const effQueries    = useMemo(() => withDemoFallback(queries,    DEMO_CLEARINGHOUSE_QUERIES,    !carrier), [queries, carrier]);
+  const effViolations = useMemo(() => withDemoFallback(violations, DEMO_CLEARINGHOUSE_VIOLATIONS, !carrier), [violations, carrier]);
+  const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS,   !carrier), [consents, carrier]);
+  const isDemo = !carrier && queries.length === 0;
 
   // Consent modal state — drives both "Resend" and "+ New pre-employment".
   const [consentModal, setConsentModal] = useState<null | {
