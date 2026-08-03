@@ -16,6 +16,11 @@ create table if not exists public.compass_training_records (
 );
 create index if not exists idx_training_carrier on public.compass_training_records(carrier_id);
 alter table public.compass_training_records enable row level security;
+drop trigger if exists enforce_training_carrier on public.compass_training_records;
+create trigger enforce_training_carrier
+  before insert or update of carrier_id, driver_id on public.compass_training_records
+  for each row execute function public.enforce_compass_driver_carrier();
+drop policy if exists "training_carrier_scope" on public.compass_training_records;
 create policy "training_carrier_scope" on public.compass_training_records for all
   using (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()))
   with check (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()));

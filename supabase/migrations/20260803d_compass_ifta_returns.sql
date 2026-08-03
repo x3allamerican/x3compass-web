@@ -15,6 +15,7 @@ create table if not exists public.compass_ifta_returns (
 );
 create index if not exists idx_ifta_carrier on public.compass_ifta_returns(carrier_id);
 alter table public.compass_ifta_returns enable row level security;
+drop policy if exists "ifta_carrier_scope" on public.compass_ifta_returns;
 create policy "ifta_carrier_scope" on public.compass_ifta_returns for all
   using (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()))
   with check (carrier_id in (select carrier_id from public.compass_carrier_users where user_id = auth.uid()));
