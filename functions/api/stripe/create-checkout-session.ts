@@ -1,4 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { correlationId, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -9,7 +10,17 @@ interface Env {
 }
 
 const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+  new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+
+export function parseDriverQuantity(value: unknown): number | null {
+  const quantity = typeof value === "string" && value.trim() ? Number(value) : value;
+  return typeof quantity === "number"
+    && Number.isSafeInteger(quantity)
+    && quantity >= 1
+    && quantity <= 100_000
+    ? quantity
+    : null;
+}
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try {
@@ -20,7 +31,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     let body: { drivers?: number; success_path?: string; cancel_path?: string };
     try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
-    const drivers = Math.max(1, Math.floor(Number(body.drivers || 1)));
+    const drivers = parseDriverQuantity(body.drivers);
+    if (drivers === null) return json({ ok: false, error: "drivers must be a whole number from 1 to 100000" }, 400);
 
     if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
     if (!ctx.env.STRIPE_PRICE_COMPASS_DRIVER) return json({ ok: false, error: "Compass price not configured" }, 500);
@@ -62,14 +74,16 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
     });
-    if (!r.ok) return json({ ok: false, error: `Stripe HTTP ${r.status}`, detail: await r.text() }, 502);
+    if (!r.ok) {
+      console.error("Stripe checkout request failed", { correlation_id: correlationId(ctx.request), status: r.status });
+      return securityError(502, "upstream_failed", correlationId(ctx.request));
+    }
     const sess = (await r.json()) as { url?: string; id?: string };
     return json({ ok: true, url: sess.url, id: sess.id });
-  } catch (err) {
-    console.error("[create-checkout-session] unexpected error:", err);
-    return json({ ok: false, error: "Server error", detail: err instanceof Error ? err.message : String(err) }, 500);
+  } catch {
+    console.error("Stripe checkout request failed", { correlation_id: correlationId(ctx.request) });
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };
 
-export const onRequestOptions: PagesFunction = async () =>
-  new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" } });
+export const onRequestOptions: PagesFunction = async () => new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });

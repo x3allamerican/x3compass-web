@@ -16,11 +16,13 @@ What's needed to go from GitHub `main` to a paying-customer-accepting production
 - `CHECKR_ENV` (staging then live), `CHECKR_API_BASE`
 - `CHECKR_STAGING_API_KEY`, `CHECKR_STAGING_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_CHECKR_PUBLISHABLE_KEY`
-- `ADMIN_KEY` (legacy, rotating)
+- `APP_ALLOWED_ORIGINS` = `https://x3compass.com,https://www.x3compass.com`
+- `SUPER_ADMIN_EMAILS` = comma-separated, server-owned allowlist of verified administrator emails
+- `UPLOAD_TOKEN_SECRET` = dedicated high-entropy secret used only for short-lived upload grants
 - `NEXT_PUBLIC_CF_BEACON_TOKEN` (optional, Cloudflare Web Analytics)
 
 ### Preview branches
-Use `sk_test_…`, test prices, test webhook endpoint, `https://x3compass-web.pages.dev` as SITE_URL.
+Preview deployments must never inherit production service-role, payment, email, screening, or upload-token credentials. Use a separate non-production Supabase project, Stripe test-mode credentials and prices, test webhook endpoints, a dedicated preview `UPLOAD_TOKEN_SECRET`, and exact preview origins in `APP_ALLOWED_ORIGINS`. If isolated preview credentials are unavailable, leave privileged bindings unset so tenant routes fail closed.
 
 ## 2 · Supabase
 
@@ -73,7 +75,7 @@ Use `sk_test_…`, test prices, test webhook endpoint, `https://x3compass-web.pa
 ## 8 · Post-launch backlog
 
 - Wire 14 non-Checkr app pages to real per-carrier data (currently placeholder)
-- Replace ADMIN_KEY usages in `/admin/partners` with role-based Supabase Auth
+- Move the server-owned super-admin email allowlist to immutable identity-provider claims or a dedicated authorization table after the first reviewed admin-role migration.
 - `og-image.png`, `favicon.ico`, `apple-touch-icon.png` (currently placeholder)
 - News-monitor scheduled task (Cowork agent)
 - Skill-Builder scheduled tasks (Cowork agents)

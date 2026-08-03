@@ -13,6 +13,7 @@
 import { rateLimit } from "../_shared/rate-limit";
 import { supaFetch } from "../_shared/supabase-admin";
 import { logError } from "../_shared/log";
+import { sanitizeClientDiagnostic } from "../_shared/privacy";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -24,10 +25,7 @@ const json = (d: unknown, s = 200) =>
 
 function sanitize(s: string | undefined, maxLen = 500): string | null {
   if (!s) return null;
-  return s
-    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [redacted]")
-    .replace(/[?&](password|token|secret|key)=[^&\s]+/gi, (_, k) => `&${k}=[redacted]`)
-    .slice(0, maxLen);
+  return sanitizeClientDiagnostic(s, maxLen);
 }
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
@@ -52,7 +50,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     };
 
     // Log it (shows up in CF Pages Functions logs)
-    logError("client_error", body.message, event);
+    logError("client_error", "reported client error", event);
 
     // Best-effort: also write to compass_client_errors table if it exists
     if (ctx.env.SUPABASE_URL && ctx.env.SUPABASE_SERVICE_ROLE) {
@@ -62,8 +60,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     }
 
     return json({ ok: true });
-  } catch (err) {
-    console.error("[errors] capture failed:", err);
+  } catch {
+    console.error("[errors] capture failed");
     return json({ ok: false, error: "capture failed" }, 200); // 200 so client doesn't retry
   }
 };

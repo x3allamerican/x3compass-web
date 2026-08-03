@@ -146,7 +146,7 @@ export default function NotificationsPage() {
           </button>
           {isDemo && (
             <span className="text-[11px] text-amber-700 dark:text-amber-300 font-bold bg-amber-100 dark:bg-amber-500/20 border border-amber-500/40 rounded-full px-3 py-1">
-              Demo data · once events start firing you'll see the real log here
+              Demo data · once events start firing you&apos;ll see the real log here
             </span>
           )}
         </div>

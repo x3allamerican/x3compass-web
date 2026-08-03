@@ -4,6 +4,7 @@
  * Uses Anthropic to generate launch-month drafts in X3 Fleet Safety's brand voice.
  * Inserts as 'pending' so they show up on the admin review queue.
  */
+import { correlationId, isUuid, securityError } from "../../../_shared/request-security";
 interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; ANTHROPIC_API_KEY?: string; }
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 
@@ -25,7 +26,7 @@ Target reader: a dispatcher, safety manager, or owner-operator of a 5–50 truck
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; topic?: string; platforms?: string[]; count?: number };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
-  if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  if (!isUuid(body.carrier_id)) return json({ ok: false, error: "Invalid carrier_id" }, 400);
   if (!body.topic) return json({ ok: false, error: "Missing topic" }, 400);
   const platforms = body.platforms && body.platforms.length > 0 ? body.platforms : ["x", "linkedin", "tiktok", "instagram", "reddit"];
   const count = Math.min(body.count || 5, 20);
@@ -70,7 +71,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     headers: { apikey: ctx.env.SUPABASE_SERVICE_ROLE, Authorization: `Bearer ${ctx.env.SUPABASE_SERVICE_ROLE}`, "Content-Type": "application/json", Prefer: "return=representation" },
     body: JSON.stringify(drafts),
   });
-  if (!ins.ok) return json({ ok: false, error: `Supabase insert ${ins.status}: ${(await ins.text()).slice(0, 200)}` }, 500);
+  if (!ins.ok) return securityError(500, "request_failed", correlationId(ctx.request));
   const inserted = (await ins.json()) as unknown[];
   return json({ ok: true, inserted: inserted.length, platforms, count_per_platform: count });
 };

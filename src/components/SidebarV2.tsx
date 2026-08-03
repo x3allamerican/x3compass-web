@@ -44,7 +44,7 @@ function strokeIconFor(labelOrTitle: string): ReactNode | null {
 }
 
 type Dot = "emerald" | "cyan" | "amber" | "rose" | "violet" | "slate";
-type Leaf = { kind?: "leaf"; href: string; label: string; icon: string; dot?: Dot; pill?: { label: string; color: Dot } };
+type Leaf = { kind?: "leaf"; href: string; label: string; icon?: string; dot?: Dot; pill?: { label: string; color: Dot } };
 type Group = { kind: "group"; title: string; icon: string; defaultOpen?: boolean; pill?: { label: string; color: Dot }; items: Leaf[] };
 type Item = Leaf | Group;
 
@@ -252,7 +252,7 @@ export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boo
           <span aria-hidden="true">🎉</span>
         </div>
         <div className="min-w-0">
-          <div className="text-[11.5px] font-bold text-[var(--fg)] leading-tight">What's new</div>
+          <div className="text-[11.5px] font-bold text-[var(--fg)] leading-tight">What&apos;s new</div>
           <div className="text-[10px] text-[var(--fg-muted)] mt-0.5 truncate">v1.5.0 · MVR continuous + Samsara OAuth</div>
         </div>
       </div>

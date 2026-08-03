@@ -6,10 +6,6 @@ export default function TrainingPage() {
     <HazmatSubPageShell
       activeId="hazmat-training"
       pageTitle="TRAINING TRACKER"
-      eyebrow="X3 Compass · Hazmat Center · Training Tracker"
-      heading={<>§172.704 · every 3 years · documented per employee.</>}
-      sub="General awareness · function-specific · safety · security awareness · in-depth security (Table 1 only). Track the four (or five) modules per hazmat employee, with proof of completion the inspector can pull on demand."
-      regs="49 CFR § 172.704 (a) (1)–(5) · § 172.704 (d) record retention"
       eduSurface="Training Tracker"
       eduSubtitle="49 CFR § 172.704 · what every hazmat employee must complete and document"
       conciergeHref="/app/ask?context=hazmat-training"
