@@ -282,10 +282,30 @@ function RealTraining({ carrierId }: { carrierId: string }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let live = true;
-    getSupabase().from("compass_training_records")
-      .select("id,driver_name,course,cfr,provider,completed_on,expires_on,status")
-      .eq("carrier_id", carrierId).order("completed_on", { ascending: false })
-      .then(({ data }) => { if (!live) return; setRows((data as TrainRow[]) || []); setLoading(false); });
+    (async () => {
+      const sb = getSupabase();
+      const [recs, drivers] = await Promise.all([
+        sb.from("compass_training_records").select("id,driver_id,course_name,course_category,provider,completed_on,expires_on").eq("carrier_id", carrierId).order("completed_on", { ascending: false }),
+        sb.from("compass_drivers").select("id,first_name,last_name").eq("carrier_id", carrierId),
+      ]);
+      if (!live) return;
+      const nameById: Record<string, string> = {};
+      for (const d of (drivers.data as Array<{ id: string; first_name: string; last_name: string }>) || []) nameById[d.id] = `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim();
+      const today = new Date().toISOString().slice(0, 10);
+      const in60 = new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
+      const statusOf = (exp: string | null): CourseStatus => !exp ? "current" : (exp < today ? "overdue" : (exp <= in60 ? "due" : "current"));
+      const mapped: TrainRow[] = ((recs.data as Array<Record<string, unknown>>) || []).map((r) => ({
+        id: String(r.id),
+        driver_name: r.driver_id ? (nameById[String(r.driver_id)] || null) : null,
+        course: (r.course_name as string) || "—",
+        cfr: (r.course_category as string) ?? null,
+        provider: (r.provider as string) ?? null,
+        completed_on: (r.completed_on as string) ?? null,
+        expires_on: (r.expires_on as string) ?? null,
+        status: statusOf((r.expires_on as string) ?? null),
+      }));
+      setRows(mapped); setLoading(false);
+    })();
     return () => { live = false; };
   }, [carrierId]);
   const stats = useMemo(() => ({

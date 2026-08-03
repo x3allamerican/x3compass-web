@@ -327,10 +327,26 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let live = true;
-    getSupabase().from("compass_da_tests")
-      .select("id,driver_name,test_date,test_type,panel,mro,result")
-      .eq("carrier_id", carrierId).order("test_date", { ascending: false })
-      .then(({ data }) => { if (!live) return; setRows((data as DaTestRow[]) || []); setLoading(false); });
+    (async () => {
+      const sb = getSupabase();
+      const [tests, drivers] = await Promise.all([
+        sb.from("compass_da_tests").select("id,driver_id,test_type,collected_on,result,lab,mro_notes").eq("carrier_id", carrierId).order("collected_on", { ascending: false }),
+        sb.from("compass_drivers").select("id,first_name,last_name").eq("carrier_id", carrierId),
+      ]);
+      if (!live) return;
+      const nameById: Record<string, string> = {};
+      for (const d of (drivers.data as Array<{ id: string; first_name: string; last_name: string }>) || []) nameById[d.id] = `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim();
+      const mapped: DaTestRow[] = ((tests.data as Array<Record<string, unknown>>) || []).map((r) => ({
+        id: String(r.id),
+        driver_name: r.driver_id ? (nameById[String(r.driver_id)] || null) : null,
+        test_date: (r.collected_on as string) || "—",
+        test_type: (r.test_type as string) || "—",
+        panel: (r.lab as string) ?? null,
+        mro: (r.mro_notes as string) ?? null,
+        result: ((r.result as TestResult) || "Pending"),
+      }));
+      setRows(mapped); setLoading(false);
+    })();
     return () => { live = false; };
   }, [carrierId]);
 
