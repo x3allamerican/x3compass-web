@@ -50,8 +50,8 @@ export default function DriverInvitesPage() {
     setLoading(true);
     const supa = getSupabase();
     const [p, c] = await Promise.all([
-      supa.from("drivers").select("*").eq("carrier_id", carrier.id).eq("status", "pending_hire").order("created_at", { ascending: false }).limit(50),
-      supa.from("drivers").select("id", { count: "exact", head: true }).eq("carrier_id", carrier.id).eq("status", "active").gte("hire_date", new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)),
+      supa.from("compass_drivers").select("*").eq("carrier_id", carrier.id).eq("status", "pending_hire").order("created_at", { ascending: false }).limit(50),
+      supa.from("compass_drivers").select("id", { count: "exact", head: true }).eq("carrier_id", carrier.id).eq("status", "active").gte("hire_date", new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)),
     ]);
     setPending((p.data as Driver[] | null) || []);
     setRecentCompleted(c.count || 0);
@@ -68,7 +68,7 @@ export default function DriverInvitesPage() {
     }
     setBusy(true);
     try {
-      const { error } = await getSupabase().from("drivers").insert({
+      const { error } = await getSupabase().from("compass_drivers").insert({
         carrier_id: carrier.id,
         first_name: form.first_name.trim(),
         last_name:  form.last_name.trim(),
