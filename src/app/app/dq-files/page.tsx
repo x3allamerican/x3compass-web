@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { DQ_REQUIREMENTS, DQ_REQUIREMENT_COUNT } from "@/lib/dqRequirements";
+import { loadDqDocuments, uploadDqDocument, type DqDocRow } from "@/lib/dqUpload";
 
 type DocStatus = "complete" | "missing" | "expiring" | "expired";
 
@@ -135,6 +136,7 @@ export default function DQFilesPage() {
             structure where the title + KPIs + table lead, and any explainers
             sit below. Original PageGuide + DataSourceCard moved to render
             AFTER the 12-doc grid (see further down in this file). */}
+
 
           {/* Driver header */}
           <div
@@ -309,10 +311,31 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
     return () => { live = false; };
   }, [carrierId]);
 
+  const [docs, setDocs] = useState<Record<string, DqDocRow>>({});
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const refreshDocs = () => { loadDqDocuments(carrierId).then(setDocs); };
+  useEffect(() => { loadDqDocuments(carrierId).then(setDocs); }, [carrierId]);
+
   const roster = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return needle ? drivers.filter(d => `${d.first_name} ${d.last_name}`.toLowerCase().includes(needle)) : drivers;
   }, [drivers, q]);
+
+  const coverageFor = (driverId: string) =>
+    DQ_REQUIREMENTS.reduce((n, r) => n + (docs[`${driverId}::${r.key}`]?.status === "complete" ? 1 : 0), 0);
+
+  async function handleUpload(driverId: string, reqKey: string, file: File | undefined) {
+    if (!file) return;
+    const req = DQ_REQUIREMENTS.find(r => r.key === reqKey);
+    if (!req) return;
+    setBusyKey(`${driverId}::${reqKey}`); setUploadError(null);
+    const res = await uploadDqDocument(carrierId, driverId, req, file);
+    if (!res.ok) setUploadError(res.error);
+    else refreshDocs();
+    setBusyKey(null);
+  }
   const active = roster.find(d => d.id === selectedId) || roster[0] || null;
 
   if (loading) {
@@ -347,7 +370,7 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
                 <div className="w-8 h-8 rounded-full grid place-items-center font-extrabold text-[11px] text-black flex-shrink-0" style={{ background: "linear-gradient(135deg, #16C7FF, #8B5CF6)" }}>{initials(d)}</div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold text-white truncate">{d.last_name}, {d.first_name}</div>
-                  <div className="text-[10px] text-white/45 font-mono">0 / {DQ_REQUIREMENT_COUNT}</div>
+                  <div className="text-[10px] text-white/45 font-mono">{coverageFor(d.id)} / {DQ_REQUIREMENT_COUNT}</div>
                 </div>
               </button>
             ))}
@@ -364,7 +387,7 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
               </div>
               <div>
                 <div className="text-[10px] tracking-wider uppercase text-white/45">Coverage</div>
-                <div className="text-[20px] font-black text-amber-300">0 / {DQ_REQUIREMENT_COUNT}</div>
+                <div className="text-[20px] font-black text-amber-300">{coverageFor(active.id)} / {DQ_REQUIREMENT_COUNT}</div>
               </div>
             </div>
           )}
@@ -373,23 +396,33 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
             Document uploads are coming online — each § 391.51 slot below will fill in as you upload or connect a DQ vendor. Statuses shown are the required set, not yet on file.
           </div>
 
+          {uploadError && <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-200 text-[12px] px-4 py-2">{uploadError}</div>}
+
           <div>
             <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
               <h3 className="text-[15px] font-extrabold text-white">The 12 documents · § 391.51</h3>
               <span className="text-[11px] text-white/50">Click any slot to upload</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {DQ_REQUIREMENTS.map((r) => {
-                const st = STATUS_STYLE.missing;
+              {active && DQ_REQUIREMENTS.map((r) => {
+                const doc = docs[`${active.id}::${r.key}`];
+                const status: DocStatus = (doc?.status as DocStatus) || "missing";
+                const st = STATUS_STYLE[status] || STATUS_STYLE.missing;
+                const busy = busyKey === `${active.id}::${r.key}`;
                 return (
                   <div key={r.key} className={`rounded-xl p-4 border ${st.bg} ${st.border} flex flex-col gap-2`}>
                     <div className="flex items-start justify-between gap-2">
                       <div className="text-[14px] font-bold text-white leading-snug">{r.slot}</div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${st.bg} ${st.text} border ${st.border} whitespace-nowrap`}>Not on file</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${st.bg} ${st.text} border ${st.border} whitespace-nowrap`}>{doc ? st.label : "Not on file"}</span>
                     </div>
                     <div className="text-[10px] font-mono text-[#16C7FF]/80">{r.cfr}</div>
-                    <div className="text-[12px] text-white/60 leading-relaxed flex-1">{r.alwaysRequired ? "Required — not uploaded yet." : (r.note || "Conditionally required.")}</div>
-                    <div><button className="text-[11px] font-bold text-rose-300 hover:text-rose-200">⬆ Upload</button></div>
+                    <div className="text-[12px] text-white/60 leading-relaxed flex-1">{doc ? "On file." : (r.alwaysRequired ? "Required — not uploaded yet." : (r.note || "Conditionally required."))}</div>
+                    <div>
+                      <label className={`inline-flex items-center gap-1 text-[11px] font-bold cursor-pointer ${doc ? "text-[#16C7FF] hover:text-white" : "text-rose-300 hover:text-rose-200"} ${busy ? "opacity-60 pointer-events-none" : ""}`}>
+                        {busy ? "Uploading…" : (doc ? "Replace" : "⬆ Upload")}
+                        <input type="file" className="hidden" accept="application/pdf,image/*" onChange={(e) => handleUpload(active.id, r.key, e.target.files?.[0])} />
+                      </label>
+                    </div>
                   </div>
                 );
               })}
