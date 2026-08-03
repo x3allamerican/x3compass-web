@@ -1,5 +1,7 @@
+"use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import { useUser } from "@/lib/useUser";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 import CTPAPickerCard from "@/components/CTPAPickerCard";
@@ -50,6 +52,25 @@ const AVATAR_GRAD: Record<string, string> = {
 };
 
 export default function DrugAlcoholPage() {
+  const { carrier } = useUser();
+  // Real signed-in carrier: this surface is not yet wired to live data, so
+  // show an honest empty state rather than the demo mockup below (which is
+  // kept for the logged-out marketing preview).
+  if (carrier) {
+    return (
+      <AppShell title="Drug & Alcohol Testing">
+        <div className="p-8 max-w-2xl">
+          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+            <div className="text-3xl mb-3" aria-hidden>🧪</div>
+            <div className="text-[15px] font-extrabold text-white">Nothing here yet</div>
+            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Drug & alcohol test records will appear here as you log tests or connect your C/TPA. We track your random pool, MRO results, and Clearinghouse queries against 49 CFR Part 382.</p>
+            <div className="mt-5"><a href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black inline-block" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Go to Drivers →</a></div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell
       title="Drug & Alcohol Testing"
