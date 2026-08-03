@@ -321,7 +321,8 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
               </div>
             </header>
           )}
-          <main className="flex-1">{children}</main>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#16C7FF] focus:text-black focus:font-bold">Skip to main content</a>
+          <main id="main-content" className="flex-1">{children}</main>
         </div>
       </div>
       {/* SIGNATURE: the floating Ask Compass button is the ONE element in
