@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
@@ -62,23 +64,7 @@ const COURSE_LIBRARY = [
 
 export default function TrainingPage() {
   const { carrier } = useUser();
-  // Real signed-in carrier: this surface is not yet wired to live data, so
-  // show an honest empty state rather than the demo mockup below (which is
-  // kept for the logged-out marketing preview).
-  if (carrier) {
-    return (
-      <AppShell title="Training & ELDT">
-        <div className="p-8 max-w-2xl">
-          <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
-            <div className="text-3xl mb-3" aria-hidden>🎓</div>
-            <div className="text-[15px] font-extrabold text-white">Nothing here yet</div>
-            <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Training completions will appear here as you assign courses or upload certificates — ELDT (Part 380), HazMat, defensive driving, and more, tracked per driver.</p>
-            <div className="mt-5"><a href="/app/drivers" className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black inline-block" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Go to Drivers →</a></div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
+  if (carrier) return <RealTraining carrierId={carrier.id} />;
 
   return (
     <AppShell
@@ -284,5 +270,56 @@ export default function TrainingPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+
+// ── Real-tenant training/ELDT completions, from compass_training_records ──
+type TrainRow = { id: string; driver_name: string | null; course: string; cfr: string | null; provider: string | null; completed_on: string | null; expires_on: string | null; status: CourseStatus };
+
+function RealTraining({ carrierId }: { carrierId: string }) {
+  const [rows, setRows] = useState<TrainRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let live = true;
+    getSupabase().from("compass_training_records")
+      .select("id,driver_name,course,cfr,provider,completed_on,expires_on,status")
+      .eq("carrier_id", carrierId).order("completed_on", { ascending: false })
+      .then(({ data }) => { if (!live) return; setRows((data as TrainRow[]) || []); setLoading(false); });
+    return () => { live = false; };
+  }, [carrierId]);
+  const stats = useMemo(() => ({
+    total: rows.length,
+    overdue: rows.filter(r => r.status === "overdue").length,
+    due: rows.filter(r => r.status === "due").length,
+    missing: rows.filter(r => r.status === "missing").length,
+  }), [rows]);
+  if (loading) return <AppShell title="Training & ELDT"><div className="p-8 text-white/60 text-[13px]">Loading training records…</div></AppShell>;
+  if (rows.length === 0) return (
+    <AppShell title="Training & ELDT"><div className="p-8 max-w-2xl"><div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+      <div className="text-3xl mb-3" aria-hidden>🎓</div><div className="text-[15px] font-extrabold text-white">No training records yet</div>
+      <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">Assign courses or upload certificates and completions appear here per driver — ELDT (Part 380), HazMat (§ 172.704), and more.</p>
+    </div></div></AppShell>
+  );
+  const PILL: Record<CourseStatus, string> = { current: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30", due: "bg-amber-500/15 text-amber-300 border border-amber-500/30", overdue: "bg-rose-500/15 text-rose-300 border border-rose-500/30", missing: "bg-rose-500/15 text-rose-300 border border-rose-500/30" };
+  return (
+    <AppShell title="Training & ELDT"><div className="p-6 space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[["Records", stats.total], ["Due soon", stats.due], ["Overdue", stats.overdue], ["Missing", stats.missing]].map(([l, v]) => (
+          <div key={String(l)} className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4"><div className="text-[10px] uppercase tracking-wider text-white/45">{l}</div><div className="text-[24px] font-black text-white tabular-nums">{v as number}</div></div>
+        ))}
+      </div>
+      <div className="rounded-xl border border-[#1E3556] overflow-hidden">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-white/40 bg-[#091525]"><span>Driver · course</span><span>Completed</span><span>Expires</span><span>Status</span></div>
+        {rows.map((r) => (
+          <div key={r.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center px-4 py-3 border-t border-[#1E3556]">
+            <div className="min-w-0"><div className="text-[13px] font-semibold text-white truncate">{r.driver_name || "—"}</div><div className="text-[10px] text-white/45">{r.course}{r.cfr ? ` · ${r.cfr}` : ""}</div></div>
+            <span className="text-[12px] text-white/60 tabular-nums">{r.completed_on || "—"}</span>
+            <span className="text-[12px] text-white/60 tabular-nums">{r.expires_on || "—"}</span>
+            <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${PILL[r.status] || PILL.current}`}>{r.status}</span>
+          </div>
+        ))}
+      </div>
+    </div></AppShell>
   );
 }
