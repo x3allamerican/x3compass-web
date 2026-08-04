@@ -91,17 +91,23 @@ export default function DriversPage() {
 
 
   // KPI counters for the top stat-card row
+  const today = new Date().toISOString().slice(0, 10);
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const monthStart = today.slice(0, 8) + "01";
+  const inactiveCutoff = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
   const kpis = useMemo(() => {
-    let active = 0, pending = 0, cdlExp30 = 0, medExp30 = 0;
+    let active = 0, pending = 0, newThisMonth = 0, inactiveTerminated90 = 0, cdlExp30 = 0, medExp30 = 0;
     for (const d of effectiveDrivers) {
       if (d.status === "active") active++;
       if (d.status === "pending_hire") pending++;
-      if (d.cdl_expires_on && d.cdl_expires_on <= in30) cdlExp30++;
-      if (d.medical_card_expires_on && d.medical_card_expires_on <= in30) medExp30++;
+      const joinedOn = d.hire_date || d.created_at.slice(0, 10);
+      if (joinedOn >= monthStart && joinedOn <= today) newThisMonth++;
+      if (["inactive", "terminated"].includes(d.status) && d.termination_date && d.termination_date >= inactiveCutoff && d.termination_date <= today) inactiveTerminated90++;
+      if (d.cdl_expires_on && d.cdl_expires_on >= today && d.cdl_expires_on <= in30) cdlExp30++;
+      if (d.medical_card_expires_on && d.medical_card_expires_on >= today && d.medical_card_expires_on <= in30) medExp30++;
     }
-    return { active, pending, cdlExp30, medExp30 };
-  }, [effectiveDrivers, in30]);
+    return { active, pending, newThisMonth, inactiveTerminated90, cdlExp30, medExp30 };
+  }, [effectiveDrivers, today, monthStart, inactiveCutoff, in30]);
 
   return (
     <AppShell title="Drivers"
@@ -200,9 +206,9 @@ export default function DriversPage() {
         )}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           <KpiCard label="Active drivers"        value={kpis.active}    sub={`${kpis.pending} pending hire`} tone="ok" />
-          <KpiCard label="New this month"        value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
+          <KpiCard label="New this month"        value={kpis.newThisMonth} sub="Hire date this month" tone={kpis.newThisMonth > 0 ? "info" : "muted"} />
           <KpiCard label="DQ expiring ≤ 30d"     value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
-          <KpiCard label="Inactive / Terminated" value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
+          <KpiCard label="Inactive / Terminated" value={kpis.inactiveTerminated90} sub="Last 90 days" tone="muted" />
         </div>
 
         {/* ============================================================
