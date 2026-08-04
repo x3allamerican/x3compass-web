@@ -21,7 +21,7 @@
 ### Task 1: Pure expiration planner
 
 **Files:**
-- Create: `functions/_shared/expiration-sweep.ts`
+- Create: `functions/_shared/expiration-sweep.mjs`
 - Test: `tests/expiration-sweep.test.mjs`
 
 **Interfaces:**

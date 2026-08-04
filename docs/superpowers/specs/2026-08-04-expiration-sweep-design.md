@@ -10,7 +10,7 @@ This agent complements rather than replaces `agent-driver-reminders`. The existi
 
 ### Pure planner
 
-`functions/_shared/expiration-sweep.ts` owns deterministic date logic and email presentation. Its primary function is:
+`functions/_shared/expiration-sweep.mjs` owns deterministic date logic and email presentation. Its primary function is:
 
 ```ts
 buildExpirationDigest({ asOf, carrier, drivers, mvrRecords, insuranceDocuments })
