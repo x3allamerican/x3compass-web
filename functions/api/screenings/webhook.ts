@@ -411,6 +411,17 @@ async function applyContinuousMvr(
         notes: `Continuous MVR change detected${reportId ? ` · report ${reportId}` : ""}`,
       }),
     });
+    if (reportId) {
+      const period = nowIso.slice(0, 7);
+      await fetch(`${base}/rest/v1/compass_mvr_billing_events?on_conflict=dedupe_key`, {
+        method: "POST", headers: { ...sbHeaders, Prefer: "resolution=ignore-duplicates,return=minimal" },
+        body: JSON.stringify({
+          carrier_id: mon.carrier_id, monitor_id: mon.id, event_type: "triggered_report", service_period: period,
+          vendor_report_id: reportId, vendor_cost_cents: 950, retail_cents: 950,
+          dedupe_key: `triggered:${reportId}`,
+        }),
+      });
+    }
     await patchMonitor(mon.id, { ...(reportId ? { last_report_id: reportId } : {}), last_change_at: nowIso });
   }
 }

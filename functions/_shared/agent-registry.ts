@@ -14,6 +14,7 @@ import type { AdminEnv } from "./admin-auth";
 import { monthlyCents } from "./pricing";
 import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
+import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billing.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
 export type AgentResult = { status: AgentStatus; summary: string; log?: string };
@@ -44,6 +45,20 @@ async function stripeGet(env: Env, path: string): Promise<unknown> {
   if (!env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY not set");
   const r = await fetch(`https://api.stripe.com${path}`, { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } });
   if (!r.ok) throw new Error(`Stripe ${path} HTTP ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+async function stripePost(env: Env, path: string, params: URLSearchParams, idempotencyKey?: string): Promise<unknown> {
+  if (!env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY not set");
+  const r = await fetch(`https://api.stripe.com${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
+    },
+    body: params.toString(),
+  });
+  if (!r.ok) throw new Error(`Stripe ${path} HTTP ${r.status}`);
   return r.json();
 }
 async function askClaude(env: Env, system: string, prompt: string, maxTokens = 2048, attribution?: { carrier_id?: string | null; agent_name?: string; agent_run_id?: string }): Promise<string> {
@@ -1028,7 +1043,63 @@ async function agentFpaManager(env: FtEnv): Promise<AgentResult> {
 }
 
 // ============================================================================
-// 30. agent-finance-workflow (coordinator)
+// 30. agent-mvr-monthly-billing (registered disabled; owner supplies schedule)
+// ============================================================================
+async function agentMvrMonthlyBilling(env: FtEnv, inputs?: { period?: string }): Promise<AgentResult> {
+  const period = inputs?.period || new Date().toISOString().slice(0, 7);
+  if (!/^\d{4}-\d{2}$/.test(period)) return { status: "error", summary: "period must be YYYY-MM" };
+  const supa = supaFetch(env);
+  const monitors = await supa.select("compass_mvr_monitors", "status=eq.active&select=id,carrier_id") as Array<{ id: string; carrier_id: string }>;
+
+  const base = env.SUPABASE_URL!.replace(/\/$/, "");
+  const serviceKey = env.SUPABASE_SERVICE_ROLE!;
+  const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" };
+  for (const monitor of monitors) {
+    await fetch(`${base}/rest/v1/compass_mvr_billing_events?on_conflict=dedupe_key`, {
+      method: "POST",
+      headers: { ...headers, Prefer: "resolution=ignore-duplicates,return=minimal" },
+      body: JSON.stringify({
+        carrier_id: monitor.carrier_id, monitor_id: monitor.id, event_type: "monthly_monitor", service_period: period,
+        vendor_cost_cents: MVR_MONTHLY_VENDOR_CENTS, retail_cents: MVR_MONTHLY_RETAIL_CENTS,
+        dedupe_key: `monthly:${period}:${monitor.id}`,
+      }),
+    });
+  }
+
+  const periodEvents = await supa.select("compass_mvr_billing_events", `service_period=eq.${period}&select=id,carrier_id,event_type,status,retail_cents,vendor_cost_cents,dedupe_key`) as Array<{ id: string; carrier_id: string; event_type: string; status: string; retail_cents: number; vendor_cost_cents: number; dedupe_key: string }>;
+  const pending = periodEvents.filter((event) => event.status === "pending" || event.status === "error");
+  const carriers = await supa.select("compass_carriers", "select=id,name,stripe_customer_id&stripe_customer_id=not.is.null") as Array<{ id: string; name: string; stripe_customer_id: string }>;
+  const carrierById = new Map(carriers.map((carrier) => [carrier.id, carrier]));
+  let invoiced = 0, errors = 0;
+  for (const event of pending) {
+    const carrier = carrierById.get(event.carrier_id);
+    if (!carrier) { errors++; await supa.update("compass_mvr_billing_events", `id=eq.${event.id}`, { status: "error", last_error: "carrier has no Stripe customer" }); continue; }
+    try {
+      const params = new URLSearchParams({
+        customer: carrier.stripe_customer_id, amount: String(event.retail_cents), currency: "usd",
+        description: event.event_type === "monthly_monitor" ? `X3 Continuous MVR monitoring · ${period}` : `X3 Continuous MVR triggered report · ${period}`,
+        "metadata[dedupe_key]": event.dedupe_key, "metadata[carrier_id]": event.carrier_id,
+      });
+      const item = await stripePost(env, "/v1/invoiceitems", params, event.dedupe_key) as { id: string };
+      await supa.update("compass_mvr_billing_events", `id=eq.${event.id}`, { status: "invoiced", stripe_invoice_item_id: item.id, invoiced_at: new Date().toISOString(), last_error: null });
+      invoiced++;
+    } catch (error) {
+      errors++; await supa.update("compass_mvr_billing_events", `id=eq.${event.id}`, { status: "error", last_error: error instanceof Error ? error.message : "invoice item failed" });
+    }
+  }
+
+  if (periodEvents.length > 0) {
+    const vendorCost = periodEvents.reduce((sum, event) => sum + Number(event.vendor_cost_cents), 0);
+    await fetch(`${base}/rest/v1/compass_vendor_invoices?on_conflict=vendor,invoice_number`, {
+      method: "POST", headers: { ...headers, Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ vendor: "Checkr", invoice_number: `cmvr-${period}`, invoice_date: `${period}-01`, amount_cents: vendorCost, source: "agent-mvr-monthly-billing", status: "pending", raw: { period, event_count: periodEvents.length } }),
+    });
+  }
+  return { status: errors ? "partial" : pending.length ? "ok" : "skipped", summary: `${period} · ${monitors.length} active · ${pending.length} pending · ${invoiced} invoiced · ${errors} errors` };
+}
+
+// ============================================================================
+// 31. agent-finance-workflow (coordinator)
 // ============================================================================
 async function agentFinanceWorkflow(env: FtEnv): Promise<AgentResult> {
   const log = newLogger();
@@ -1111,6 +1182,7 @@ export async function runAgent(name: string, env: Env, inputs?: Record<string, u
       case "agent-control-manager":          return await agentControlManager(env);
       case "agent-reporting-manager":        return await agentReportingManager(env);
       case "agent-fpa-manager":              return await agentFpaManager(env);
+      case "agent-mvr-monthly-billing":      return await agentMvrMonthlyBilling(env, inputs as { period?: string });
       case "agent-finance-workflow":         return await agentFinanceWorkflow(env);
     }
     return { status: "error", summary: `Unknown agent '${name}' — not in registry.` };
