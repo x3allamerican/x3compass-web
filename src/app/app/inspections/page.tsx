@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { SkeletonRow } from "@/components/Skeleton";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
 import { InspectionImportModal } from "@/components/app/InspectionImportModal";
+import { DataqChallengePanel } from "@/components/app/DataqChallengePanel";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
@@ -128,6 +129,7 @@ export default function InspectionsPage() {
   const [search, setSearch] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [filterOutcome, setFilterOutcome] = useState("");
+  const [dataqTarget, setDataqTarget] = useState("");
 
   async function refresh() {
     if (!carrier) return;
@@ -173,6 +175,8 @@ export default function InspectionsPage() {
       <div className="p-6">
 
         <DefinitionsCard />
+
+        {carrier && <DataqChallengePanel inspections={rows} initialInspectionId={dataqTarget} />}
 
         {/* Filter bar */}
         <div className="space-y-3 mb-5">
@@ -246,7 +250,7 @@ export default function InspectionsPage() {
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="font-mono text-[12px] text-[var(--fg-muted)]">{r.report_number || "—"}</span></td>
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="text-[12px] text-[var(--fg-muted)]">{r.inspector || "—"}</span></td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
-                      {!isDemo && <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>}
+                      {!isDemo && <><button onClick={(e)=>{e.stopPropagation(); setDataqTarget(r.id); window.scrollTo({ top: 0, behavior: "smooth" });}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">Start DataQ</button><button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button></>}
                     </td>
                   </tr>
                 );
