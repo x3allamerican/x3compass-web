@@ -1,6 +1,7 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
 import { rateLimit } from "../../_shared/rate-limit";
 import { sendEmail, welcomeEmail } from "../../_shared/emails";
+import { correlationId, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -10,7 +11,7 @@ interface Env {
 }
 
 const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+  new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // Master try/catch — guarantees JSON response even if something unexpected throws.
@@ -99,13 +100,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       }
     }
 
-    return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan });
+    return json({ ok: true, carrier_id: carrier.id, stripe_customer_id: stripeCustomerId, plan: "compass" });
   } catch (err) {
     console.error("[post-signup] unexpected error:", err);
-    const msg = err instanceof Error ? err.message : String(err);
-    return json({ ok: false, error: "Server error", detail: msg }, 500);
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };
 
 export const onRequestOptions: PagesFunction = async () =>
-  new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" } });
+  new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });

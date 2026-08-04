@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 // Pages and the text we expect to find on them. Matched case-insensitively
 // because the brand renders as "X3 COMPASS" in the topbar but specs were
@@ -43,4 +45,12 @@ test("security headers are set", async ({ request }) => {
   expect(h["strict-transport-security"]).toContain("max-age=");
   expect(h["x-frame-options"]).toMatch(/SAMEORIGIN|DENY/i);
   expect(h["x-content-type-options"]).toBe("nosniff");
+});
+
+test("homepage and FAQ describe the shared X3 compliance corpus", () => {
+  for (const file of ["src/app/page.tsx", "src/app/faq/page.tsx"]) {
+    const source = readFileSync(join(process.cwd(), file), "utf8");
+    expect(source).toContain("The X3 compliance corpus powers");
+    expect(source).not.toContain("Twelve specialized brains");
+  }
 });

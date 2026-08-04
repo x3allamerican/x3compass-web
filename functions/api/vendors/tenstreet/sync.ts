@@ -19,10 +19,9 @@
  */
 
 import { mapTenStreet, upsertDrivers, markVendorSync } from "../../../_shared/vendor-mapper";
+import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
+interface Env extends SecurityEnv {
   TENSTREET_API_KEY?: string;
   TENSTREET_SUBDOMAIN?: string;
 }
@@ -30,7 +29,7 @@ interface Env {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
@@ -38,7 +37,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
   let body: { carrier_id?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
-  if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  const carrierId = authority.carrierId;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) return json({ ok: false, error: "Server missing Supabase env" }, 500);
 
   if (!TENSTREET_API_KEY || !TENSTREET_SUBDOMAIN) {
@@ -62,16 +66,16 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     });
     if (!r.ok) {
       const text = (await r.text()).slice(0, 500);
-      await markVendorSync(ctx.env, body.carrier_id, "tenstreet", { success: false, count: 0, error: `TenStreet ${r.status}: ${text}` });
-      return json({ ok: false, vendor: "tenstreet", error: `TenStreet API ${r.status}`, detail: text }, 502);
+      await markVendorSync(ctx.env, carrierId, "tenstreet", { success: false, count: 0, error: `TenStreet ${r.status}: ${text}` });
+      return securityError(502, "upstream_failed", requestId);
     }
     const payload = (await r.json()) as { applicants?: unknown[] };
     const applicants = Array.isArray(payload.applicants) ? payload.applicants : [];
 
     const normalized = mapTenStreet(applicants as Parameters<typeof mapTenStreet>[0]);
-    const upsert = await upsertDrivers(ctx.env, body.carrier_id, normalized);
+    const upsert = await upsertDrivers(ctx.env, carrierId, normalized);
     const success = upsert.errors.length === 0;
-    await markVendorSync(ctx.env, body.carrier_id, "tenstreet", {
+    await markVendorSync(ctx.env, carrierId, "tenstreet", {
       success,
       count: upsert.inserted + upsert.updated,
       error: success ? undefined : upsert.errors.slice(0, 3).map(e => e.reason).join("; "),
@@ -87,7 +91,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    await markVendorSync(ctx.env, body.carrier_id, "tenstreet", { success: false, count: 0, error: msg });
-    return json({ ok: false, vendor: "tenstreet", error: msg }, 500);
+    await markVendorSync(ctx.env, carrierId, "tenstreet", { success: false, count: 0, error: msg });
+    return securityError(500, "request_failed", requestId);
   }
 };

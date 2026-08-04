@@ -6,10 +6,6 @@ export default function ShippingPapersPage() {
     <HazmatSubPageShell
       activeId="hazmat-shipping-papers"
       pageTitle="SHIPPING PAPERS"
-      eyebrow="X3 Compass · Hazmat Center · Shipping Papers"
-      heading={<>BOL in the §172.202(a) sequence · every time.</>}
-      sub="Proper shipping name, hazard class, UN/NA, packing group — in that order, in the right column, with the right emergency contact. The builder writes the line, you sign it."
-      regs="49 CFR §§ 172.200–205 · 172.602–604 (emergency contact)"
       eduSurface="Shipping Papers"
       eduSubtitle="49 CFR § 172.202 · the line-order rule every audit checks"
       conciergeHref="/app/ask?context=hazmat-shipping-papers"
@@ -62,7 +58,7 @@ export default function ShippingPapersPage() {
       <section style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 22 }}>
         <h2 style={{ margin: "0 0 6px", fontSize: 22, color: "#F8FAFC" }}>§172.202(a) line builder</h2>
         <p style={{ color: "#94A3B8", margin: "0 0 18px", fontSize: 14 }}>
-          Type a UN number, get the BOL line in the regulation's exact sequence.
+          Type a UN number, get the BOL line in the regulation&apos;s exact sequence.
         </p>
         <code style={{ display: "block", background: "#000", border: "1px solid rgba(22, 199, 255,0.25)", borderRadius: 8, padding: 14, color: "#16C7FF", fontFamily: "var(--mono)", fontSize: 13 }}>
           UN1203, Gasoline, 3, II, 200 L · ERG 128 · 1-800-424-9300

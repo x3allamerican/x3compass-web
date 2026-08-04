@@ -1,0 +1,106 @@
+name: API Security Boundaries
+
+on:
+  pull_request:
+    paths:
+      - "functions/api/**"
+      - "functions/_shared/**"
+      - "src/**"
+      - "public/**"
+      - "tests/*security*.spec.ts"
+      - "tests/api-middleware.spec.ts"
+      - "tests/admin-error-security.spec.ts"
+      - "tests/client-auth-security.spec.ts"
+      - "tests/health-security.spec.ts"
+      - "tests/payment-security.spec.ts"
+      - "tests/privacy-security.spec.ts"
+      - "tests/api-route-classification.spec.ts"
+      - "tests/upload-token.spec.ts"
+      - "tests/webhook-security.spec.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "eslint.config.mjs"
+      - ".github/workflows/api-security.yml"
+  push:
+    branches: [main]
+    paths:
+      - "functions/api/**"
+      - "functions/_shared/**"
+      - "src/**"
+      - "public/**"
+      - "tests/*security*.spec.ts"
+      - "tests/api-middleware.spec.ts"
+      - "tests/admin-error-security.spec.ts"
+      - "tests/client-auth-security.spec.ts"
+      - "tests/health-security.spec.ts"
+      - "tests/payment-security.spec.ts"
+      - "tests/privacy-security.spec.ts"
+      - "tests/api-route-classification.spec.ts"
+      - "tests/upload-token.spec.ts"
+      - "tests/webhook-security.spec.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "eslint.config.mjs"
+      - ".github/workflows/api-security.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundaries:
+    name: Tenant isolation and route policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run API security regression suite
+        run: npm run test:security
+
+      - name: Enforce TypeScript contracts
+        run: npm run typecheck
+
+      - name: Enforce repository lint
+        run: npm run lint
+
+      - name: Bundle Cloudflare Pages Functions
+        run: npx --yes wrangler@4.118.0 pages functions build functions --outdir /tmp/pages-functions-build
+
+      - name: Lint security implementation
+        run: >-
+          npx eslint
+          functions/_shared/admin-auth.ts
+          functions/_shared/api-route-classification.ts
+          functions/_shared/request-security.ts
+          functions/_shared/supabase-admin.ts
+          functions/_shared/upload-token.ts
+          functions/api/_middleware.ts
+          tests/api-middleware.spec.ts
+          tests/admin-error-security.spec.ts
+          tests/client-auth-security.spec.ts
+          tests/health-security.spec.ts
+          tests/payment-security.spec.ts
+          tests/privacy-security.spec.ts
+          tests/api-route-classification.spec.ts
+          tests/request-security.spec.ts
+          tests/security-containment.spec.ts
+          tests/upload-token.spec.ts
+          tests/webhook-security.spec.ts

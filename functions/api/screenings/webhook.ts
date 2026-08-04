@@ -25,9 +25,8 @@
  *  - CHECKR_STAGING_WEBHOOK_SECRET (used when ?vendor=checkr and env CHECKR_ENV=staging)
  *  - CHECKR_LIVE_WEBHOOK_SECRET    (used when CHECKR_ENV=live or unset)
  *
- * Optional:
- *  - CHECKR_SKIP_SIGNATURE=1  (dev-only escape hatch, never set in production)
  */
+import { correlationId, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -35,7 +34,6 @@ interface Env {
   CHECKR_STAGING_WEBHOOK_SECRET?: string;
   CHECKR_LIVE_WEBHOOK_SECRET?: string;
   CHECKR_ENV?: "staging" | "live";
-  CHECKR_SKIP_SIGNATURE?: string;
 }
 
 const json = (data: unknown, status = 200): Response =>
@@ -66,10 +64,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       : ctx.env.CHECKR_STAGING_WEBHOOK_SECRET;
 
   let sigOk = false;
-  if (ctx.env.CHECKR_SKIP_SIGNATURE === "1") {
-    sigOk = true; // dev only
-  } else if (!secret) {
-    return json({ ok: false, error: `Webhook secret not configured for ${env}` }, 500);
+  if (!secret) {
+    return securityError(503, "service_unavailable", correlationId(ctx.request));
   } else if (!sigHeader) {
     return json({ ok: false, error: "Missing X-Checkr-Signature header" }, 401);
   } else {
@@ -77,7 +73,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   }
 
   if (!sigOk) {
-    return json({ ok: false, error: "Invalid signature" }, 401);
+    return securityError(401, "invalid_signature", correlationId(ctx.request));
   }
 
   // === Parse payload ===
@@ -130,10 +126,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (!insertRes.ok && insertRes.status !== 201) {
     const text = await insertRes.text();
     console.error("[checkr-webhook] failed to insert event:", insertRes.status, text);
-    return json(
-      { ok: false, error: `Supabase insert HTTP ${insertRes.status}: ${text}` },
-      500
-    );
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 
   // === Apply state transition to vendor_orders ===
@@ -302,12 +295,4 @@ async function applyCheckrEventToOrder(
 }
 
 // OPTIONS for CORS preflight (Checkr does not send OPTIONS but harmless)
-export const onRequestOptions: PagesFunction = async () =>
-  new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Checkr-Signature",
-    },
-  });
+export const onRequestOptions: PagesFunction = async () => new Response(null, { status: 204 });
