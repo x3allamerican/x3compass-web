@@ -21,8 +21,8 @@ test("every API handler has an explicit security classification", () => {
 
 test("tenant and privileged routes are never public", () => {
   for (const path of [
-    "/api/scorecards", "/api/dashboard", "/api/notifications", "/api/drivers/import",
-    "/api/vehicles/import", "/api/accidents/import", "/api/inspections/import",
+    "/api/scorecards", "/api/accident-register", "/api/audit/pdf", "/api/billing/usage-reconciliation", "/api/clearinghouse/status", "/api/compliance-calendar", "/api/csa/snapshots", "/api/dashboard", "/api/dataq/challenges", "/api/notifications", "/api/drivers/import",
+    "/api/vehicles/import", "/api/accidents/import", "/api/inspections/import", "/api/inspections/parse",
     "/api/vendors/list", "/api/screenings/order", "/api/uploads/sign",
   ]) expect(classifyApiRoute(path)).toBe("authenticated-user");
 
@@ -38,7 +38,7 @@ test("only documented intake, health, telemetry, and signed callbacks are public
 
 test("every caller-selectable tenant route invokes the shared membership guard", () => {
   const routes = [
-    "accidents/import.ts", "dashboard.ts", "drivers/import.ts", "inspections/import.ts",
+    "accident-register.ts", "accidents/import.ts", "audit/pdf.ts", "clearinghouse/status.ts", "compliance-calendar.ts", "csa/snapshots.ts", "dashboard.ts", "dataq/challenges.ts", "drivers/import.ts", "inspections/import.ts",
     "notifications.ts", "scorecards.ts", "screenings/order.ts", "vehicles/import.ts",
     "vendors/list.ts", "vendors/motive/sync.ts", "vendors/samsara/sync.ts",
     "vendors/tenstreet/sync.ts",

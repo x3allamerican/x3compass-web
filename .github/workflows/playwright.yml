@@ -22,6 +22,8 @@ jobs:
         with: { node-version: "20", cache: "npm" }
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+      - name: Run fast domain and contract tests
+        run: npm run test:unit
       # If we just pushed to main, give Cloudflare ~45s to deploy before testing prod
       - name: wait for deploy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

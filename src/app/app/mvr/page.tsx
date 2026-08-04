@@ -29,18 +29,15 @@ const RESULTS = ["clean", "minor", "major", "serious", "disqualifying", "pending
 // Continuous monitoring types
 // ───────────────────────────────────────────────────────────────────
 type ContinuousEnrollment = {
-  id: string; driver_id: string | null; driver_name: string;
+  id: string; driver_id: string;
   status: "pending" | "active" | "canceled" | "failed" | "paused";
-  enrolled_at: string | null; canceled_at: string | null; failed_reason: string | null;
-  last_hit_at: string | null; last_hit_assessment: string | null; last_hit_report_id: string | null;
-  hit_count_total: number; hit_count_30d: number;
-  monthly_fee_cents: number; work_state: string | null;
+  enrolled_at: string; last_change_at: string | null; last_report_id: string | null;
   checkr_continuous_check_id: string | null;
 };
 type ContinuousListResp = {
-  ok: boolean; carrier_id?: string;
-  enrollments?: ContinuousEnrollment[];
-  kpis?: { total_enrolled: number; active: number; pending: number; hits_30d: number; hits_total: number };
+  ok: boolean;
+  monitors?: ContinuousEnrollment[];
+  kpis?: { total: number; active: number; pending: number; canceled: number; failed: number; paused: number };
   error?: string;
 };
 
@@ -63,6 +60,40 @@ const STATUS_PILL: Record<DriverStatus, string> = {
 };
 
 const fmtDate = (s: string | null | undefined): string => (s ? new Date(s).toLocaleDateString() : "—");
+
+type MvrExtraction = {
+  license_state?: string | null; license_status?: string | null; license_class?: string | null;
+  expiration_date?: string | null; points?: number | null; pulled_on?: string | null;
+  endorsements?: string[] | null; restrictions?: string[] | null;
+  violations?: Array<{ date?: string; description?: string }> | null;
+};
+
+const fileToBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onerror = () => reject(new Error("Could not read this file"));
+  reader.onload = () => resolve(String(reader.result || "").split(",", 2)[1] || "");
+  reader.readAsDataURL(file);
+});
+
+function extractedToMvr(extracted: MvrExtraction | null): Partial<Mvr> {
+  if (!extracted) return { source: "ai_upload" };
+  const licenseStatus = String(extracted.license_status || "").toLowerCase();
+  const details = [
+    extracted.license_class ? `Class: ${extracted.license_class}` : "",
+    extracted.expiration_date ? `Expiration: ${extracted.expiration_date}` : "",
+    extracted.endorsements?.length ? `Endorsements: ${extracted.endorsements.join(", ")}` : "",
+    extracted.restrictions?.length ? `Restrictions: ${extracted.restrictions.join(", ")}` : "",
+  ].filter(Boolean);
+  return {
+    pulled_on: extracted.pulled_on || new Date().toISOString().slice(0, 10),
+    state: extracted.license_state?.toUpperCase() || null,
+    license_status: LICENSE_STATUS.includes(licenseStatus as typeof LICENSE_STATUS[number]) ? licenseStatus : null,
+    points: typeof extracted.points === "number" ? extracted.points : 0,
+    violations_count: extracted.violations?.length || 0,
+    notes: details.join(" · ") || null,
+    source: "ai_upload",
+  };
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // Hero with 3-step explainer
@@ -247,10 +278,9 @@ function UploadCard({ onManualEntry, onUploaded }: { onManualEntry: () => void; 
 // Continuous monitoring opt-in card · Compass differentiator
 // (Sits between Upload and KPIs. Vendor-neutral; just an offer.)
 // ═══════════════════════════════════════════════════════════════════
-function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEnrolled }: {
-  enrollmentCount: number; carrierId: string; drivers: DriverOpt[]; onEnrolled: () => void;
+function ContinuousMonitoringCallout({ enrollmentCount, drivers, onEnroll }: {
+  enrollmentCount: number; drivers: DriverOpt[]; onEnroll: () => void;
 }) {
-  const [showEnroll, setShowEnroll] = useState(false);
   return (
     <div className="x3-card p-5 border-l-4 border-l-[var(--accent)]">
       <div className="flex items-start gap-4 flex-wrap">
@@ -270,7 +300,7 @@ function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEn
           </p>
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => setShowEnroll(true)}
+              onClick={onEnroll}
               disabled={!drivers.length}
               className="px-4 py-2 rounded-full text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
@@ -286,22 +316,14 @@ function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEn
           </div>
         </div>
       </div>
-      {showEnroll && (
-        <EnrollModal
-          carrierId={carrierId}
-          drivers={drivers}
-          onClose={() => setShowEnroll(false)}
-          onEnrolled={() => { setShowEnroll(false); onEnrolled(); }}
-        />
-      )}
     </div>
   );
 }
 
-function EnrollModal({ carrierId, drivers, onClose, onEnrolled }: {
-  carrierId: string; drivers: DriverOpt[]; onClose: () => void; onEnrolled: () => void;
+function EnrollModal({ drivers, initialDriverId, onClose, onEnrolled }: {
+  drivers: DriverOpt[]; initialDriverId?: string; onClose: () => void; onEnrolled: () => void;
 }) {
-  const [driverId, setDriverId] = useState("");
+  const [driverId, setDriverId] = useState(initialDriverId || "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -314,7 +336,7 @@ function EnrollModal({ carrierId, drivers, onClose, onEnrolled }: {
       const r = await fetch("/api/screenings/continuous-mvr/enroll", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ driver_id: driverId, carrier_id: carrierId }),
+        body: JSON.stringify({ driver_id: driverId }),
       });
       const j = await r.json();
       if (!j.ok) {
@@ -359,7 +381,13 @@ export default function MvrPage() {
   const [rows, setRows] = useState<Mvr[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [continuousCount, setContinuousCount] = useState(0);
+  const [reviewUpload, setReviewUpload] = useState<{ uploadId: string; initial: Partial<Mvr>; manual: boolean } | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [continuousMonitors, setContinuousMonitors] = useState<ContinuousEnrollment[]>([]);
+  const [enrollDriverId, setEnrollDriverId] = useState<string | null>(null);
+  const [monitorBusyDriverId, setMonitorBusyDriverId] = useState<string | null>(null);
+  const [monitorError, setMonitorError] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -380,9 +408,28 @@ export default function MvrPage() {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const j = (await r.json()) as ContinuousListResp;
-      if (j.ok) setContinuousCount(j.kpis?.active || 0);
+      if (j.ok) setContinuousMonitors(j.monitors || []);
     } catch { /* no-op */ }
   }, []);
+
+  const unenroll = useCallback(async (driverId: string) => {
+    setMonitorBusyDriverId(driverId); setMonitorError(null);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in again to manage monitoring.");
+      const r = await fetch("/api/screenings/continuous-mvr/unenroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ driver_id: driverId }),
+      });
+      const j = await r.json() as { ok?: boolean; error?: string; warning?: string };
+      if (!r.ok || !j.ok) throw new Error(j.error || "Unenrollment failed");
+      if (j.warning) setMonitorError(`Monitoring stopped in Compass. ${j.warning}`);
+      await refreshContinuous();
+    } catch (error) {
+      setMonitorError(error instanceof Error ? error.message : "Unenrollment failed");
+    } finally { setMonitorBusyDriverId(null); }
+  }, [refreshContinuous]);
 
   useEffect(() => { if (carrier) { refresh(); refreshContinuous(); } }, [carrier, refresh, refreshContinuous]);
 
@@ -392,8 +439,12 @@ export default function MvrPage() {
       .filter((r) => r.driver_id === d.id)
       .sort((a, b) => (a.pulled_on > b.pulled_on ? -1 : 1))[0];
     const st = statusFor(last?.pulled_on || null);
-    return { driver: d, last, ...st };
+    const monitor = continuousMonitors.find((candidate) => candidate.driver_id === d.id);
+    const monitorStatus = monitor?.status || "none";
+    return { driver: d, last, monitor, monitorStatus, ...st };
   });
+
+  const continuousCount = continuousMonitors.filter((monitor) => monitor.status === "active").length;
 
   const kpis = {
     total: drivers.length,
@@ -412,11 +463,26 @@ export default function MvrPage() {
     return true;
   });
 
-  function handleUpload(file: File) {
-    // Phase 1: just open the manual modal so the user has feedback.
-    // Phase 2 (separate task): POST file to /api/screenings/mvr/parse → AI extract → pre-fill modal.
-    console.log("[mvr] file received:", file.name, file.size, "bytes");
-    setShowAdd(true);
+  async function handleUpload(file: File) {
+    setUploadMessage(null);
+    if (file.size > 20 * 1024 * 1024) { setUploadMessage("File is larger than 20 MB. Choose a smaller PDF or image, or use manual entry."); return; }
+    setUploadBusy(true);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in again before uploading.");
+      const file_base64 = await fileToBase64(file);
+      const response = await fetch("/api/screenings/mvr/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ filename: file.name, mime_type: file.type || "application/pdf", file_base64 }),
+      });
+      const parsed = await response.json() as { ok?: boolean; upload_id?: string; extracted?: MvrExtraction | null; needs_manual?: boolean; error?: string };
+      if (!response.ok || !parsed.ok || !parsed.upload_id) throw new Error(parsed.error || "MVR parsing failed");
+      setReviewUpload({ uploadId: parsed.upload_id, initial: extractedToMvr(parsed.extracted || null), manual: Boolean(parsed.needs_manual) });
+    } catch (error) {
+      setUploadMessage(`${error instanceof Error ? error.message : "Upload failed"} Manual entry is still available.`);
+      setShowAdd(true);
+    } finally { setUploadBusy(false); }
   }
 
   return (
@@ -427,15 +493,18 @@ export default function MvrPage() {
         <EduFaqGrid />
 
         <UploadCard onManualEntry={() => setShowAdd(true)} onUploaded={handleUpload} />
+        {uploadBusy && <div role="status" className="x3-card p-3 text-[12px] text-[var(--fg-muted)]">Reading and preparing the MVR review…</div>}
+        {uploadMessage && <div role="alert" className="x3-card p-3 text-[12px] text-amber-800 dark:text-amber-200 border-amber-500/50">{uploadMessage}</div>}
 
         {carrier && (
           <ContinuousMonitoringCallout
             enrollmentCount={continuousCount}
-            carrierId={carrier.id}
             drivers={drivers}
-            onEnrolled={refreshContinuous}
+            onEnroll={() => setEnrollDriverId("")}
           />
         )}
+
+        {monitorError && <div role="alert" className="x3-card p-3 text-[12px] text-amber-800 dark:text-amber-200 border-amber-500/50">{monitorError}</div>}
 
         {/* KPI grid · 4 tiles */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -497,6 +566,7 @@ export default function MvrPage() {
                     <th className="py-2 px-3 text-center">Points</th>
                     <th className="py-2 px-3 text-center">Violations</th>
                     <th className="py-2 px-3 text-left">License</th>
+                    <th className="py-2 px-3 text-left">Continuous monitoring</th>
                     <th className="py-2 px-4"></th>
                   </tr>
                 </thead>
@@ -510,6 +580,23 @@ export default function MvrPage() {
                       <td className="py-2 px-3 text-center tabular-nums">{d.last?.points ?? <span className="text-[var(--fg-faint)]">—</span>}</td>
                       <td className="py-2 px-3 text-center tabular-nums">{d.last?.violations_count ?? <span className="text-[var(--fg-faint)]">—</span>}</td>
                       <td className="py-2 px-3 text-[var(--fg-muted)] text-[11px]">{d.last?.license_status || <span className="text-[var(--fg-faint)]">—</span>}</td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            d.monitorStatus === "active" ? "text-emerald-800 dark:text-emerald-200 border-emerald-500/60 bg-emerald-500/10" :
+                            d.monitorStatus === "pending" ? "text-amber-800 dark:text-amber-200 border-amber-500/60 bg-amber-500/10" :
+                            d.monitorStatus === "failed" ? "text-rose-800 dark:text-rose-200 border-rose-500/60 bg-rose-500/10" :
+                            "text-[var(--fg-muted)] border-[var(--border)] bg-[var(--bg-3)]"
+                          }`}>{d.monitorStatus === "none" ? <>None</> : d.monitorStatus}</span>
+                          {["active", "pending", "paused"].includes(d.monitorStatus) ? (
+                            <button type="button" disabled={monitorBusyDriverId === d.driver.id} onClick={() => void unenroll(d.driver.id)} className="text-[10px] font-bold text-rose-700 dark:text-rose-300 hover:underline disabled:opacity-50">
+                              {monitorBusyDriverId === d.driver.id ? "Stopping…" : "Unenroll"}
+                            </button>
+                          ) : (
+                            <button type="button" onClick={() => setEnrollDriverId(d.driver.id)} className="text-[10px] font-bold text-[var(--accent)] hover:underline">Enroll</button>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-2 px-4 text-right">
                         {d.last?.file_url ? (
                           <a href={d.last.file_url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[var(--accent)] hover:underline">View file →</a>
@@ -534,6 +621,26 @@ export default function MvrPage() {
           onSaved={() => { refresh(); setShowAdd(false); }}
         />
       )}
+      {reviewUpload && carrier && (
+        <MvrFormModal
+          key={reviewUpload.uploadId}
+          carrier_id={carrier.id}
+          drivers={drivers}
+          initialForm={reviewUpload.initial}
+          uploadId={reviewUpload.uploadId}
+          title={reviewUpload.manual ? "Manual review required" : "Review extracted MVR"}
+          onClose={() => setReviewUpload(null)}
+          onSaved={() => { refresh(); setReviewUpload(null); }}
+        />
+      )}
+      {enrollDriverId !== null && (
+        <EnrollModal
+          drivers={drivers}
+          initialDriverId={enrollDriverId || undefined}
+          onClose={() => setEnrollDriverId(null)}
+          onEnrolled={() => { setEnrollDriverId(null); void refreshContinuous(); }}
+        />
+      )}
     </AppShell>
   );
 }
@@ -541,8 +648,8 @@ export default function MvrPage() {
 // ═══════════════════════════════════════════════════════════════════
 // Manual log modal
 // ═══════════════════════════════════════════════════════════════════
-function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: string; drivers: DriverOpt[]; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState<Partial<Mvr>>({ pulled_on: new Date().toISOString().slice(0, 10), license_status: "valid", points: 0, violations_count: 0, source: "manual" });
+function MvrFormModal({ carrier_id, drivers, initialForm, uploadId, title = "Log MVR pull (manual)", onClose, onSaved }: { carrier_id: string; drivers: DriverOpt[]; initialForm?: Partial<Mvr>; uploadId?: string; title?: string; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<Mvr>>({ pulled_on: new Date().toISOString().slice(0, 10), license_status: "valid", points: 0, violations_count: 0, source: "manual", ...initialForm });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -551,8 +658,12 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
     setBusy(true); setError(null);
     try {
       if (!form.driver_id) throw new Error("Select a driver");
-      const { error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]);
+      const { data: saved, error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]).select("id").single();
       if (error) throw error;
+      if (uploadId) {
+        const { error: linkError } = await getSupabase().from("mvr_uploads").update({ matched_mvr_id: saved.id, parser_status: "reviewed" }).eq("id", uploadId).eq("carrier_id", carrier_id);
+        if (linkError) throw new Error(`MVR saved, but its upload could not be linked: ${linkError.message}`);
+      }
       await getSupabase().from("compass_drivers").update({ last_mvr_pulled_on: form.pulled_on }).eq("id", form.driver_id).eq("carrier_id", carrier_id);
       onSaved();
     } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
@@ -560,7 +671,7 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
   }
 
   return (
-    <Modal title="Log MVR pull (manual)" onClose={onClose}>
+    <Modal title={title} onClose={onClose}>
       <p className="text-[12px] text-[var(--fg-muted)] mb-3">
         Skip the upload · type the values directly. Compass saves it to the audit file the same way.
       </p>

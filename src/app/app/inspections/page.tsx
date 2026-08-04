@@ -4,12 +4,13 @@ import AppShell from "@/components/AppShell";
 import { SkeletonRow } from "@/components/Skeleton";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
 import { InspectionImportModal } from "@/components/app/InspectionImportModal";
+import { DataqChallengePanel } from "@/components/app/DataqChallengePanel";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers";
 import { DEMO_INSPECTIONS, withDemoFallback } from "@/lib/demoFallback";
 
-type I = { id:string; driver_id:string|null; vehicle_id:string|null; inspection_date:string; level:number|null; state:string|null; inspector:string|null; report_number:string|null; oos_driver:boolean; oos_vehicle:boolean; violation_count:number; violations:unknown[]|null; report_url:string|null };
+type I = { id:string; driver_id:string|null; vehicle_id:string|null; inspection_date:string; level:number|null; state:string|null; inspector:string|null; report_number:string|null; oos_driver:boolean; oos_vehicle:boolean; violation_count:number; violations:unknown[]|null; report_url:string|null; report_filename?:string|null; report_mime_type?:string|null; parse_status?:string; parser_warnings?:string[] };
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
 
 /** Reshape DemoInspection → I so the existing renderer just works.
@@ -128,6 +129,33 @@ export default function InspectionsPage() {
   const [search, setSearch] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [filterOutcome, setFilterOutcome] = useState("");
+  const [dataqTarget, setDataqTarget] = useState("");
+  const [intakeDraft, setIntakeDraft] = useState<Partial<I> | null>(null);
+  const [intakeBusy, setIntakeBusy] = useState(false);
+  const [intakeMessage, setIntakeMessage] = useState<string | null>(null);
+
+  async function handleReportUpload(file: File) {
+    setIntakeBusy(true); setIntakeMessage(null);
+    try {
+      if (file.size > 20 * 1024 * 1024) throw new Error("Report exceeds the 20 MB limit.");
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in again before uploading.");
+      const file_base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || "").split(",")[1] || "");
+        reader.onerror = () => reject(new Error("Could not read report."));
+        reader.readAsDataURL(file);
+      });
+      const response = await fetch("/api/inspections/parse", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ filename: file.name, mime_type: file.type || "application/pdf", file_base64 }) });
+      const result = await response.json() as { ok?:boolean; extracted?:Partial<I>; needs_manual?:boolean; error?:string };
+      if (!response.ok || !result.ok) throw new Error(result.error || "Report parsing failed.");
+      setIntakeDraft({ ...(result.extracted || {}), report_filename: file.name, report_mime_type: file.type || "application/pdf", parse_status: "needs_human_review" });
+      setIntakeMessage(result.needs_manual ? "Automatic reading is unavailable. Enter the report manually." : "Report pre-filled. Review every extracted field before saving.");
+      setShowAdd(true);
+    } catch (error) {
+      setIntakeDraft(null); setIntakeMessage(`${error instanceof Error ? error.message : "Upload failed"} Manual entry remains available.`); setShowAdd(true);
+    } finally { setIntakeBusy(false); }
+  }
 
   async function refresh() {
     if (!carrier) return;
@@ -174,6 +202,8 @@ export default function InspectionsPage() {
 
         <DefinitionsCard />
 
+        {carrier && <DataqChallengePanel inspections={rows} initialInspectionId={dataqTarget} />}
+
         {/* Filter bar */}
         <div className="space-y-3 mb-5">
           <div className="relative">
@@ -192,10 +222,15 @@ export default function InspectionsPage() {
           </select>
           <div className="flex gap-2 flex-wrap">
             <button onClick={() => setShowImport(true)} className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)]">📥 Import CSV</button>
+            <label className="px-4 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-3)] cursor-pointer">
+              {intakeBusy ? "Reading report…" : "Upload inspection report"}
+              <input aria-label="Upload inspection report" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" disabled={intakeBusy} className="sr-only" onChange={(event)=>{ const file=event.target.files?.[0]; if(file) void handleReportUpload(file); event.target.value=""; }} />
+            </label>
             <button onClick={() => setShowAdd(true)} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-black" style={{ background: "linear-gradient(135deg, #FBBF24, #F59E0B)" }}>+ Log Inspection</button>
             <div className="ml-auto self-center text-[12px] text-[var(--fg-muted)]">{filtered.length} of {effectiveRows.length} inspection{effectiveRows.length===1?"":"s"}{isDemo && <span className="ml-2 text-[var(--accent)]/80 font-bold">· DEMO</span>}</div>
           </div>
         </div>
+        {intakeMessage && <div role="status" className="mb-4 rounded-lg border border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-[12px] text-amber-900 dark:text-amber-100">{intakeMessage}</div>}
 
         {/* Table */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] overflow-hidden">
@@ -246,7 +281,7 @@ export default function InspectionsPage() {
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="font-mono text-[12px] text-[var(--fg-muted)]">{r.report_number || "—"}</span></td>
                     <td className="px-3 py-3 hidden lg:table-cell"><span className="text-[12px] text-[var(--fg-muted)]">{r.inspector || "—"}</span></td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
-                      {!isDemo && <button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button>}
+                      {!isDemo && <><button onClick={(e)=>{e.stopPropagation(); setDataqTarget(r.id); window.scrollTo({ top: 0, behavior: "smooth" });}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">Start DataQ</button><button onClick={(e)=>{e.stopPropagation(); setEdit(r);}} className="text-[12px] text-[var(--accent)] font-bold hover:underline mr-2">✏️ Edit</button></>}
                     </td>
                   </tr>
                 );
@@ -256,14 +291,14 @@ export default function InspectionsPage() {
         </div>
       </div>
 
-      {(showAdd || edit) && <InspectionFormModal carrier_id={carrier!.id} drivers={drivers} vehicles={vehicles} inspection={edit} onClose={()=>{setShowAdd(false); setEdit(null);}} onSaved={()=>{refresh();setShowAdd(false);setEdit(null);}} />}
+      {(showAdd || edit) && <InspectionFormModal carrier_id={carrier!.id} drivers={drivers} vehicles={vehicles} inspection={edit} initial={intakeDraft} onClose={()=>{setShowAdd(false); setEdit(null); setIntakeDraft(null);}} onSaved={()=>{refresh();setShowAdd(false);setEdit(null);setIntakeDraft(null);}} />}
       {showImport && carrier && <InspectionImportModal carrierId={carrier.id} onClose={()=>setShowImport(false)} onImported={refresh} />}
     </AppShell>
   );
 }
 
-function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClose, onSaved }:{ carrier_id:string; drivers:DriverOpt[]; vehicles:VOpt[]; inspection:I|null; onClose:()=>void; onSaved:()=>void }) {
-  const [form, setForm] = useState<Partial<I>>(inspection || { inspection_date: new Date().toISOString().slice(0,10), level: 1, oos_driver: false, oos_vehicle: false, violation_count: 0 });
+function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, initial, onClose, onSaved }:{ carrier_id:string; drivers:DriverOpt[]; vehicles:VOpt[]; inspection:I|null; initial:Partial<I>|null; onClose:()=>void; onSaved:()=>void }) {
+  const [form, setForm] = useState<Partial<I>>(inspection || initial || { inspection_date: new Date().toISOString().slice(0,10), level: 1, oos_driver: false, oos_vehicle: false, violation_count: 0, parse_status: "manual" });
   const [busy, setBusy] = useState(false); const [error, setError] = useState<string|null>(null);
 
   async function handleSubmit(e: FormEvent) {
@@ -293,6 +328,7 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
   return (
     <Modal title={inspection ? "Edit inspection" : "Log inspection"} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-3">
+        {form.parse_status === "needs_human_review" && <div role="alert" className="rounded-lg border border-amber-500/60 bg-amber-50 dark:bg-amber-950/30 p-3 text-[12px] text-amber-900 dark:text-amber-100"><strong>Manual review required.</strong> Review every extracted field and violation against the original roadside report before saving.</div>}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Date *"><input required type="date" className="x3i" value={form.inspection_date||""} onChange={(e)=>setForm({...form,inspection_date:e.target.value})} /></Field>
           <Field label="Level *">
@@ -322,6 +358,15 @@ function InspectionFormModal({ carrier_id, drivers, vehicles, inspection, onClos
           <Field label="OOS Driver"><select className="x3i" value={String(form.oos_driver||false)} onChange={(e)=>setForm({...form,oos_driver:e.target.value==="true"})}><option value="false">No</option><option value="true">Yes</option></select></Field>
           <Field label="OOS Vehicle"><select className="x3i" value={String(form.oos_vehicle||false)} onChange={(e)=>setForm({...form,oos_vehicle:e.target.value==="true"})}><option value="false">No</option><option value="true">Yes</option></select></Field>
         </div>
+        {Array.isArray(form.violations) && form.violations.length > 0 && <Field label="Extracted violations · verify against report">
+          <div className="space-y-2 rounded-lg border border-[var(--border)] p-3">
+            {(form.violations as Array<{code?:string|null;description?:string|null;basic_category?:string|null;mapping_basis?:string}>).map((violation,index)=><div key={`${violation.code||"unknown"}-${index}`} className="text-[12px] text-[var(--fg)] border-b border-[var(--border)] last:border-0 pb-2 last:pb-0">
+              <div className="font-bold">{violation.code || "Code not extracted"} · {violation.basic_category || "BASIC category unknown"}</div>
+              <div className="text-[var(--fg-muted)]">{violation.description || "Description not extracted"}</div>
+              {!violation.basic_category && <div className="text-amber-700 dark:text-amber-300">Human classification required; X3 did not guess.</div>}
+            </div>)}
+          </div>
+        </Field>}
         <Field label="Report URL"><input className="x3i" type="url" value={form.report_url||""} onChange={(e)=>setForm({...form,report_url:e.target.value})} placeholder="https://…" /></Field>
         {error && <Err msg={error} />}
         <div className="flex justify-between items-center pt-2">

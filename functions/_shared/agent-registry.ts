@@ -14,6 +14,7 @@ import type { AdminEnv } from "./admin-auth";
 import { monthlyCents } from "./pricing";
 import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
+import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
 export type AgentResult = { status: AgentStatus; summary: string; log?: string };
@@ -691,6 +692,73 @@ async function agentCsaMonitor(env: Env, inputs?: { carrier_id?: string }): Prom
 }
 
 // ============================================================================
+// 26. agent-expiration-sweep — one evidence-backed digest per active carrier
+// ============================================================================
+async function agentExpirationSweep(env: Env, inputs?: { carrier_id?: string; dry_run?: boolean; as_of?: string }): Promise<AgentResult> {
+  const log = newLogger();
+  const supa = supaFetch(env);
+  const asOf = inputs?.as_of || new Date().toISOString().slice(0, 10);
+  const carrierId = inputs?.carrier_id;
+
+  if (!carrierId) {
+    const carriers = await supa.select("compass_carriers", "select=id,name&or=(subscription_status.eq.active,subscription_status.eq.trialing)") as Array<{ id: string; name: string }>;
+    let sent = 0, skipped = 0, failed = 0;
+    for (const carrier of carriers) {
+      const result = await agentExpirationSweep(env, { carrier_id: carrier.id, dry_run: inputs?.dry_run, as_of: asOf });
+      if (result.status === "error") failed++;
+      else if (result.status === "skipped") skipped++;
+      else if (result.summary.includes("sent")) sent++;
+      log.info(`[expiration-sweep] ${carrier.id} ${result.status}: ${result.summary}`);
+      if (result.log) log.info(result.log);
+    }
+    return {
+      status: failed === carriers.length && carriers.length > 0 ? "error" : failed > 0 ? "partial" : "ok",
+      summary: `Expiration sweep: ${carriers.length} carriers · ${sent} sent · ${skipped} skipped · ${failed} failed${inputs?.dry_run ? " · dry run" : ""}`,
+      log: log.text(),
+    };
+  }
+
+  const carriers = await supa.select("compass_carriers", `select=id,name,primary_contact_email,subscription_status&id=eq.${carrierId}&limit=1`) as Array<{ id: string; name: string; primary_contact_email: string | null; subscription_status: string | null }>;
+  const carrier = carriers[0];
+  if (!carrier || !["active", "trialing"].includes(String(carrier.subscription_status || "").toLowerCase())) {
+    return { status: "skipped", summary: `Carrier ${carrierId} is missing or inactive`, log: log.text() };
+  }
+
+  const [drivers, mvrRecords, insuranceDocuments] = await Promise.all([
+    supa.select("compass_drivers", `select=id,first_name,last_name,status,cdl_expires_on,medical_card_expires_on&carrier_id=eq.${carrierId}&status=eq.active&limit=2500`),
+    supa.select("compass_mvr_records", `select=id,driver_id,pulled_on&carrier_id=eq.${carrierId}&order=pulled_on.desc&limit=5000`),
+    supa.select("compass_dq_documents", `select=id,driver_id,doc_type,expires_on&carrier_id=eq.${carrierId}&expires_on=not.is.null&limit=5000`),
+  ]);
+  const digest = buildExpirationDigest({ asOf, carrier, drivers, mvrRecords, insuranceDocuments });
+  for (const entry of digest.items) log.info(`${entry.subject}|${entry.category}|${entry.dueDate}|${entry.urgency}`);
+  if (digest.items.length === 0) return { status: "skipped", summary: `${carrier.name}: no dated expirations within 60 days`, log: log.text() };
+  if (inputs?.dry_run) return { status: "ok", summary: `${carrier.name}: ${digest.items.length} items · dry run · 0 sent`, log: log.text() };
+  await supa.insert("notification_log", {
+    carrier_id: carrier.id,
+    event_type: "document_expiration_digest",
+    severity: digest.items.some((item) => item.urgency === "overdue") ? "critical" : "warning",
+    title: `${digest.items.length} document expiration${digest.items.length === 1 ? "" : "s"} need review`,
+    body: renderExpirationDigestText(digest),
+    channels_attempted: carrier.primary_contact_email ? ["in_app", "email"] : ["in_app"],
+    dedupe_key: `expiration:${asOf}`,
+    created_at: new Date().toISOString(),
+  });
+  if (!carrier.primary_contact_email) return { status: "skipped", summary: `${carrier.name}: ${digest.items.length} items · no carrier email`, log: log.text() };
+
+  const sent = await sendEmail(env, {
+    to: carrier.primary_contact_email,
+    subject: `${carrier.name} · ${digest.items.length} document expiration${digest.items.length === 1 ? "" : "s"} need review`,
+    html: renderExpirationDigestHtml(digest),
+    text: renderExpirationDigestText(digest),
+  });
+  return {
+    status: sent.ok ? "ok" : "partial",
+    summary: `${carrier.name}: ${digest.items.length} items · ${sent.ok ? "1 sent" : "email failed"}`,
+    log: log.text(),
+  };
+}
+
+// ============================================================================
 // 26. agent-onboarding-concierge — queue 5-step onboarding tasks for a new carrier
 // ============================================================================
 async function agentOnboardingConcierge(env: Env, inputs?: { carrier_id?: string }): Promise<AgentResult> {
@@ -1106,6 +1174,7 @@ export async function runAgent(name: string, env: Env, inputs?: Record<string, u
       case "agent-inbox-triage":             return await agentInboxTriage(env);
       case "agent-csa-baseline":             return await agentCsaBaseline(env, inputs as { carrier_id?: string });
       case "agent-csa-monitor":              return await agentCsaMonitor(env, inputs as { carrier_id?: string });
+      case "agent-expiration-sweep":         return await agentExpirationSweep(env, inputs as { carrier_id?: string; dry_run?: boolean; as_of?: string });
       case "agent-onboarding-concierge":     return await agentOnboardingConcierge(env, inputs as { carrier_id?: string });
       case "agent-revenue-manager":          return await agentRevenueManager(env);
       case "agent-control-manager":          return await agentControlManager(env);
