@@ -92,10 +92,10 @@ export default function NotificationsPage() {
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
   const allowDemo = !carrier; // demo tenant-metrics only in preview
-  const ZERO_KPIS = { delivered_30d: 0, total_30d: 0, delivery_rate_pct: 0, sms_credits: 0, sms_credits_resets_on: new Date().toISOString(), active_rules: DEMO_RULES.length, critical_rules: DEMO_RULES.filter(r => r.lead_time_days === 0).length };
+  const ZERO_KPIS = { delivered_30d: 0, total_30d: 0, delivery_rate_pct: 0, sms_credits: 0, sms_credits_resets_on: new Date().toISOString(), active_rules: 0, critical_rules: 0 };
   const KPIS     = api?.kpis ? { ...(allowDemo ? DEMO_KPIS : ZERO_KPIS), ...api.kpis } : (allowDemo ? DEMO_KPIS : ZERO_KPIS);
-  const RULES    = api?.active_rules && api.active_rules.length > 0 ? api.active_rules : DEMO_RULES;
-  const CHANNELS = api?.channel_breakdown && api.channel_breakdown.some(c => c.sent > 0) ? api.channel_breakdown : DEMO_CHANNELS;
+  const RULES    = api?.active_rules || (allowDemo ? DEMO_RULES : []);
+  const CHANNELS = api?.channel_breakdown || (allowDemo ? DEMO_CHANNELS : []);
   const LOG      = api?.recent_log || (allowDemo ? DEMO_LOG : []);
   const isDemo   = allowDemo && api?.demo !== false;
 

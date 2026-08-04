@@ -124,12 +124,13 @@ export default function MarketingPage() {
   }
   useEffect(() => { refresh(); }, []);
 
-  const KPIS = api?.kpis ? { ...DEMO_KPIS, ...api.kpis } : DEMO_KPIS;
-  const FUNNEL = api?.funnel && api.funnel.length > 0 ? api.funnel : DEMO_FUNNEL;
-  const TRAFFIC = api?.traffic && api.traffic.length > 0 ? api.traffic : DEMO_TRAFFIC;
-  const LEADS = api?.recent_leads && api.recent_leads.length > 0 ? api.recent_leads : DEMO_LEADS;
+  const EMPTY_KPIS = { clicks_30d: 0, leads_30d: 0, invites_total: 0, audits_completed_total: 0, converted_total: 0, cost_per_lead: 0, click_to_lead_pct: 0, lead_to_audit_pct: 0 };
+  const KPIS = api?.kpis ? { ...EMPTY_KPIS, ...api.kpis } : EMPTY_KPIS;
+  const FUNNEL = api?.funnel || [];
+  const TRAFFIC = api?.traffic || [];
+  const LEADS = api?.recent_leads || [];
   const CAMPAIGNS = api?.campaigns || [];
-  const isDemo = api?.demo !== false;
+  const isDemo = false;
 
   const filtered = LEADS.filter(l => statusFilter === "all" || l.status === statusFilter);
 
