@@ -7,7 +7,7 @@
 import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 import { supaFetch } from "../../_shared/supabase-admin";
 
-interface Env extends SecurityEnv {}
+type Env = SecurityEnv;
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try {

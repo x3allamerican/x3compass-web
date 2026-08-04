@@ -121,7 +121,7 @@ export default function CsaScoresPage() {
         )}
 
         <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-[12px] text-[var(--fg-muted)]">
-          <strong className="text-[var(--fg)]">Threshold note:</strong> this view uses the platform's established 65th-percentile thresholds for Unsafe Driving, Crash Indicator, and HOS Compliance, and 80th-percentile thresholds for Vehicle Maintenance, Hazardous Materials, Driver Fitness, and Controlled Substances. Carrier type and FMCSA program rules can change intervention treatment; this screen is decision support, not an FMCSA determination.
+          <strong className="text-[var(--fg)]">Threshold note:</strong> this view uses the platform&apos;s established 65th-percentile thresholds for Unsafe Driving, Crash Indicator, and HOS Compliance, and 80th-percentile thresholds for Vehicle Maintenance, Hazardous Materials, Driver Fitness, and Controlled Substances. Carrier type and FMCSA program rules can change intervention treatment; this screen is decision support, not an FMCSA determination.
         </section>
       </div>
     </AppShell>
