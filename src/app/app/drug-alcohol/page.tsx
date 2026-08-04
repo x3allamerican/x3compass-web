@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
-import CTPAPickerCard from "@/components/CTPAPickerCard";
+import CTPAPickerCard, { type Ctpa } from "@/components/CTPAPickerCard";
 
 type TestType = "Pre-employment" | "Random" | "Post-accident" | "Reasonable suspicion" | "Return-to-duty" | "Follow-up";
 type TestResult = "Negative" | "Negative-dilute" | "Positive" | "Refusal" | "Pending";
@@ -325,15 +325,22 @@ type DaTestRow = { id: string; driver_name: string | null; test_date: string; te
 function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
   const [rows, setRows] = useState<DaTestRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ctpaInitial, setCtpaInitial] = useState<ComponentProps<typeof CTPAPickerCard>["initial"]>(undefined);
   useEffect(() => {
     let live = true;
     (async () => {
       const sb = getSupabase();
-      const [tests, drivers] = await Promise.all([
+      const [tests, drivers, cs] = await Promise.all([
         sb.from("compass_da_tests").select("id,driver_id,test_type,collected_on,result,lab,mro_notes").eq("carrier_id", carrierId).order("collected_on", { ascending: false }),
         sb.from("compass_drivers").select("id,first_name,last_name").eq("carrier_id", carrierId),
+        sb.from("compass_carriers").select("ctpa_mode,ctpa_custom_name,ctpa_id,ctpa:compass_ctpas(*)").eq("id", carrierId).maybeSingle(),
       ]);
       if (!live) return;
+      if (cs.data) {
+        const c = cs.data as Record<string, unknown>;
+        const ctpaObj = (Array.isArray(c.ctpa) ? c.ctpa[0] : c.ctpa) as Ctpa | null | undefined;
+        setCtpaInitial({ ctpa_id: (c.ctpa_id as string) ?? null, ctpa_mode: c.ctpa_mode, ctpa_custom_name: (c.ctpa_custom_name as string) ?? null, ctpa: ctpaObj ?? null } as ComponentProps<typeof CTPAPickerCard>["initial"]);
+      }
       const nameById: Record<string, string> = {};
       for (const d of (drivers.data as Array<{ id: string; first_name: string; last_name: string }>) || []) nameById[d.id] = `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim();
       const mapped: DaTestRow[] = ((tests.data as Array<Record<string, unknown>>) || []).map((r) => ({
@@ -363,7 +370,8 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
   if (rows.length === 0) {
     return (
       <AppShell title="Drug & Alcohol Testing">
-        <div className="p-8 max-w-2xl">
+        <div className="p-6"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
+        <div className="p-8 pt-2 max-w-2xl">
           <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
             <div className="text-3xl mb-3" aria-hidden>🧪</div>
             <div className="text-[15px] font-extrabold text-white">No test records yet</div>
@@ -376,6 +384,7 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
 
   return (
     <AppShell title="Drug & Alcohol Testing">
+      <div className="p-6 pb-0"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[["Tests on file", stats.total], ["Random tests", stats.random], ["Pending results", stats.pending], ["Positives / refusals", stats.positives]].map(([label, val]) => (
