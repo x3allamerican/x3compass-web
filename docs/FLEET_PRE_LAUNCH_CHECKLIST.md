@@ -11,9 +11,12 @@ written founder decision that states the customer impact, mitigation, owner, and
 expiration date. Security, tenant isolation, billing integrity, and destructive
 data behavior cannot be waived.
 
-Current decision: **NO-GO**. Tenant-isolation PR #50, secret-gate PR #51, coherent
-tenant data wiring, and billing-path verification have not completed the full
-merge → approved deploy → production verification chain.
+Current decision: **NO-GO**. Tenant isolation is merged, but the secret gate,
+coherent tenant-data verification, billing-path walkthrough, and healthy
+production release evidence have not completed the full
+merge → approved deploy → production verification chain. The production health
+endpoint returned `503 degraded` during the 2026-08-03 merge-train smoke test;
+that condition must be diagnosed and cleared before launch approval.
 
 ## Evidence states
 
@@ -27,8 +30,9 @@ An item is complete only when it reaches the state named in its acceptance line.
 ## P0 — security and tenant boundaries
 
 - [ ] Tenant isolation is MERGED, DEPLOYED, and VERIFIED for every carrier-owned
-  table and API route. Evidence: Fleet PR #50 is currently an open draft; it must
-  complete negative cross-tenant tests before approval.
+  table and API route. Evidence: Fleet PR #50 was merged as `d4a69a95` on
+  2026-08-03 with negative cross-tenant source tests. Deployment and production
+  boundary verification still require recorded evidence before this box closes.
 - [ ] Authentication rejects missing, expired, malformed, wrong-audience, and
   wrong-tenant credentials with opaque client errors.
 - [ ] Service-role access is server-only. Browser bundles, HTML, logs, and API
@@ -38,9 +42,11 @@ An item is complete only when it reaches the state named in its acceptance line.
 - [ ] Secret findings are dispositioned by location and credential type without
   placing any secret value in an issue, log, artifact, or pull request.
 - [ ] Stripe webhooks verify the signature against the raw request body before
-  parsing or provisioning a plan.
+  parsing or provisioning a plan. Source evidence: Fleet PR #55 merged as
+  `61456f51` with signature-contract tests passing.
 - [ ] Replayed or duplicate Stripe events are idempotent and cannot provision or
-  charge twice.
+  charge twice. Source evidence: Fleet PR #55 covers the retry-safe event ledger;
+  production verification remains outstanding.
 - [ ] Client-visible billing failures are opaque; provider response bodies,
   signatures, request IDs, and stack traces stay server-side.
 - [ ] Destructive account or carrier operations require explicit authorization,
@@ -108,7 +114,9 @@ release candidate.
 
 - [ ] `/trust/` renders data protection, infrastructure, grounded-AI limitations,
   reliability, customer data control, and responsible disclosure content.
-  Evidence: Fleet PR #53 is the additive source tranche and awaits review.
+  Evidence: the current trust center shipped through Fleet PR #59; the older
+  Fleet PR #53 was closed because it was superseded. `/trust/` returned HTTP 200
+  during the 2026-08-03 production smoke test.
 - [ ] Privacy, terms, cookies, accessibility, and privacy-choice links return 200
   and identify X3 Fleet Safety, LLC consistently.
 - [ ] Decision-support pages do not promise an audit rating, enforcement result,
@@ -126,7 +134,8 @@ Acceptance: route/link/metadata/a11y suites pass on the deployed release candida
 
 - [ ] Uptime checks cover marketing, sign-in, authenticated dashboard health,
   checkout creation, webhook health, and critical vendor dependencies without
-  using customer data.
+  using customer data. Current evidence gap: `/api/health` returned HTTP 503 with
+  a redacted `degraded` response during the 2026-08-03 production smoke test.
 - [ ] Journey probes exercise new-tenant onboarding and a seeded-tenant roster at
   polite frequency with synthetic identities only.
 - [ ] Client exception aggregation produces a redacted, actionable incident and
@@ -149,9 +158,9 @@ and one simulated alert plus one rollback rehearsal are recorded.
 |---|---|
 | Release commit | None approved |
 | Approved deployment | None |
-| P0 evidence | Incomplete; Fleet PRs #50 and #51 remain open drafts |
-| P1 evidence | Incomplete; additive trust-page PR #53 awaits review |
-| Known non-blocking limitations | None adjudicated; open items remain blocking |
+| P0 evidence | Incomplete; tenant isolation PR #50 and billing hardening PR #55 are merged, while secret-gate PR #51 and production verification remain open |
+| P1 evidence | Incomplete; the current trust center is merged through PR #59 and responds in production, but remaining route, accessibility, and communications evidence is incomplete |
+| Known non-blocking limitations | None adjudicated; the degraded production health response and open evidence items are blocking |
 | Rollback target | Not selected because no release is approved |
 | Deployment approver | No approval issued |
 | Verification operator | Not assigned because no release is approved |
