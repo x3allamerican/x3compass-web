@@ -9,24 +9,20 @@
  * compass_drivers via the shared vendor-mapper.
  *
  * Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE
- * Auth: v1 open (will gate on JWT when Supabase auth is wired into the app).
+ * Auth: verified Supabase session plus server-resolved carrier membership.
  */
 
 import { mapCsvRow, upsertDrivers, type NormalizedDriver } from "../../_shared/vendor-mapper";
+import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-}
+type Env = SecurityEnv;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Cache-Control": "no-store",
     },
   });
 
@@ -54,15 +50,8 @@ function parseCsv(text: string): string[][] {
   return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
 }
 
-export const onRequestOptions: PagesFunction<Env> = async () =>
-  new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+export const onRequestOptions: PagesFunction<Env> = async (ctx) =>
+  tenantPreflight(ctx.request, ctx.env, "POST, OPTIONS");
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; csv?: string; rows?: NormalizedDriver[] };
@@ -71,6 +60,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   } catch {
     return json({ ok: false, error: "Invalid JSON" }, 400);
   }
+
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
 
   if (!body.carrier_id || typeof body.carrier_id !== "string") {
     return json({ ok: false, error: "Missing carrier_id" }, 400);
@@ -102,8 +97,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     return json({ ok: false, error: `Too many rows (${rows.length}). Split into batches of 10,000 or fewer.` }, 413);
   }
 
-  const result = await upsertDrivers(ctx.env, body.carrier_id, rows);
-  return json({
+  const result = await upsertDrivers(ctx.env, authority.carrierId, rows);
+  return tenantJson(ctx.request, ctx.env, {
     ok: result.errors.length === 0,
     submitted: rows.length,
     inserted: result.inserted,

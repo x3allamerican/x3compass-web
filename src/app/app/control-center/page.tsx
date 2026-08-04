@@ -12,18 +12,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { useUser } from "@/lib/useUser";
+import { useIsSuperAdmin } from "@/lib/superAdmin";
 import { getSupabase } from "@/lib/supabase";
-
-/* Allowlist for the Control Center super-admin gate.
- * Same list as src/lib/superAdmin.ts but checked synchronously against the
- * useUser() user so the gate resolves on the same tick — `useIsSuperAdmin`
- * has its own internal getUser() call that lags one render behind and was
- * showing the "locked" screen even when the user IS on the allowlist. */
-const SUPER_ADMIN_EMAILS = new Set([
-  "joshua@x3compass.com",
-  "joshua@x3fleetsafety.com",
-  "joshuakovarik@yahoo.com",
-]);
 
 type AgentKind = "scheduled" | "on-demand" | "event";
 type Agent = {
@@ -93,7 +83,7 @@ type Tab = "agents" | "activity" | "prefs";
 
 export default function ControlCenterPage() {
   const { user, loading: userLoading } = useUser();
-  const isSuperAdmin = !!(user?.email && SUPER_ADMIN_EMAILS.has(user.email.toLowerCase()));
+  const isSuperAdmin = useIsSuperAdmin();
   const [tab, setTab] = useState<Tab>("agents");
   const [authToken, setAuthToken] = useState<string>("");
 

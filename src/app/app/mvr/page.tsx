@@ -553,7 +553,7 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
       if (!form.driver_id) throw new Error("Select a driver");
       const { error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]);
       if (error) throw error;
-      await getSupabase().from("compass_drivers").update({ last_mvr_pulled_on: form.pulled_on }).eq("id", form.driver_id);
+      await getSupabase().from("compass_drivers").update({ last_mvr_pulled_on: form.pulled_on }).eq("id", form.driver_id).eq("carrier_id", carrier_id);
       onSaved();
     } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
     finally { setBusy(false); }

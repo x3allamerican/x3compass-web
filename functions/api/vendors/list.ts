@@ -8,10 +8,9 @@
  * If env is missing, returns a curated default list so the UI still has
  * something to show in dev / unconfigured environments.
  */
+import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
+interface Env extends SecurityEnv {
   TENSTREET_API_KEY?: string;
   TENSTREET_SUBDOMAIN?: string;
 }
@@ -38,20 +37,23 @@ const FALLBACK: Vendor[] = [
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const url = new URL(ctx.request.url);
-  const carrierId = url.searchParams.get("carrier_id");
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, url.searchParams.get("carrier_id")); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  const carrierId = encodeURIComponent(authority.carrierId);
   const env = ctx.env;
   const envFlags = {
     tenstreet: !!(env.TENSTREET_API_KEY && env.TENSTREET_SUBDOMAIN),
   };
 
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE || !carrierId) {
-    return json({ ok: true, demo: true, vendors: FALLBACK.map(v => ({ ...v, env_configured: envFlags[v.vendor as keyof typeof envFlags] || false })) });
-  }
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return securityError(503, "service_unavailable", requestId);
 
   const base = env.SUPABASE_URL.replace(/\/$/, "");
   const sr = env.SUPABASE_SERVICE_ROLE;

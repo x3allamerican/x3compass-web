@@ -5,9 +5,10 @@
  *   location, recordable, fatalities, injuries, tow_required, preventable
  *   (preventable|non_preventable|undetermined), description, cause_category.
  */
+import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
-const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+type Env = SecurityEnv;
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 function parseCsv(text: string): string[][] {
   const rows: string[][] = []; let cur: string[] = []; let f = ""; let q = false;
@@ -36,7 +37,11 @@ const ALLOWED_PREVENT = new Set(["preventable", "non_preventable", "undetermined
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; csv?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
-  if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
   if (!body.csv) return json({ ok: false, error: "Missing csv" }, 400);
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) return json({ ok: false, error: "Server missing Supabase env" }, 500);
 
@@ -48,10 +53,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // Look up drivers + vehicles for name/plate matching
   const baseUrl = ctx.env.SUPABASE_URL.replace(/\/$/, "");
   const sr = ctx.env.SUPABASE_SERVICE_ROLE;
+  const carrierId = encodeURIComponent(authority.carrierId);
   const supaH = { apikey: sr, Authorization: `Bearer ${sr}`, Accept: "application/json" };
   const [drvR, vehR] = await Promise.all([
-    fetch(`${baseUrl}/rest/v1/compass_drivers?select=id,first_name,last_name&carrier_id=eq.${body.carrier_id}&limit=1000`, { headers: supaH }),
-    fetch(`${baseUrl}/rest/v1/compass_vehicles?select=id,license_plate&carrier_id=eq.${body.carrier_id}&limit=1000`, { headers: supaH }),
+    fetch(`${baseUrl}/rest/v1/compass_drivers?select=id,first_name,last_name&carrier_id=eq.${carrierId}&limit=1000`, { headers: supaH }),
+    fetch(`${baseUrl}/rest/v1/compass_vehicles?select=id,license_plate&carrier_id=eq.${carrierId}&limit=1000`, { headers: supaH }),
   ]);
   const drivers = (await drvR.json()) as { id: string; first_name?: string; last_name?: string }[];
   const vehicles = (await vehR.json()) as { id: string; license_plate?: string }[];
@@ -77,7 +83,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     if (!preventable || !ALLOWED_PREVENT.has(preventable)) preventable = null;
 
     out.push({
-      carrier_id: body.carrier_id,
+      carrier_id: authority.carrierId,
       driver_id: driverId,
       vehicle_id: vehicleId,
       accident_date: acc,
@@ -100,12 +106,13 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       body: JSON.stringify(out),
     });
     if (!r.ok) {
-      const text = (await r.text()).slice(0, 300);
-      return json({ ok: false, submitted: out.length, error: `Supabase ${r.status}: ${text}`, errors }, 500);
+      console.error("accident import failed", { correlation_id: requestId, status: r.status });
+      return securityError(500, "request_failed", requestId);
     }
     const inserted = await r.json() as unknown[];
     return json({ ok: errors.length === 0, submitted: out.length, inserted: inserted.length, skipped: 0, updated: 0, errors });
-  } catch (err) {
-    return json({ ok: false, error: err instanceof Error ? err.message : String(err) }, 500);
+  } catch {
+    console.error("accident import failed", { correlation_id: requestId });
+    return securityError(500, "request_failed", requestId);
   }
 };

@@ -47,17 +47,11 @@ async function pingStripe(env: Env): Promise<{ ok: boolean; ms: number; err?: st
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
-  const t0 = Date.now();
   const [supa, stripe] = await Promise.all([pingSupabase(ctx.env), pingStripe(ctx.env)]);
   const all_ok = supa.ok && stripe.ok;
   return json({
     ok: all_ok,
     status: all_ok ? "operational" : "degraded",
     checked_at: new Date().toISOString(),
-    total_ms: Date.now() - t0,
-    services: {
-      supabase: supa,
-      stripe: stripe,
-    },
   }, all_ok ? 200 : 503);
 };

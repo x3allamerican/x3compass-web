@@ -7,7 +7,6 @@ import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
-import { DEMO_DRIVERS, withDemoFallback } from "@/lib/demoFallback";
 
 type Driver = {
   id: string; carrier_id: string;
@@ -32,13 +31,9 @@ const STATUSES = ["active", "pending_hire", "on_leave", "inactive", "terminated"
 
 export default function DriversPage() {
   const { carrier } = useUser();
-  // Initialize with DEMO_DRIVERS so the table is never empty on first paint.
-  // refresh() overwrites this once Supabase returns the carrier's real rows.
-  const [drivers, setDrivers] = useState<Driver[]>(DEMO_DRIVERS as Driver[]);
-  // IMPORTANT: start `loading=false` so TenantTable renders the demo rows
-  // immediately. If we start true and no carrier is wired yet, the table
-  // sits on a "Loading…" spinner forever and the user sees an empty page.
-  const [loading, setLoading] = useState(false);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [classFilter, setClassFilter] = useState<string>("");
@@ -53,34 +48,24 @@ export default function DriversPage() {
 
   async function refresh() {
     if (!carrier) return;
-    // IMPORTANT: do NOT call setLoading(true) here. The demo rows are already
-    // rendered and a flash to "Loading…" wipes them off-screen — which is the
-    // exact bug Joshua keeps hitting. Refresh quietly in the background and
-    // only swap rows in when we actually have real data.
+    setLoading(true);
+    setLoadError(false);
     try {
       const { data, error } = await getSupabase().from("compass_drivers")
-        .select("*").eq("carrier_id", carrier.id).order("last_name", { ascending: true });
-      if (error) return; // keep existing rows; never fall back to a spinner
-      const real = (data as Driver[]) || [];
-      // Only overwrite the table if Supabase actually returned real rows.
-      // Empty result → keep the DEMO_DRIVERS already on screen.
-      if (real.length > 0) setDrivers(real);
+        .select("id,carrier_id,first_name,middle_name,last_name,email,phone,cdl_state,cdl_number,cdl_class,cdl_expires_on,hire_date,termination_date,status,medical_card_expires_on,last_mvr_pulled_on,last_drug_test_on,bg_check_status,created_at")
+        .eq("carrier_id", carrier.id).order("last_name", { ascending: true });
+      if (error) throw error;
+      setDrivers((data as Driver[]) || []);
     } catch {
-      // network blip — keep whatever's on screen
+      setLoadError(true);
+      setDrivers([]);
     } finally {
       setLoading(false);
     }
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
-  // When no real driver rows exist yet (new carrier / empty Supabase table),
-  // fall back to demo data so the page never looks broken on first load.
-  // Once even one real row exists, demo data is dropped automatically.
-  const effectiveDrivers = useMemo(
-    () => withDemoFallback(drivers, DEMO_DRIVERS as Driver[]),
-    [drivers]
-  );
-  const isDemo = drivers.length === 0;
+  const effectiveDrivers = drivers;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -106,7 +91,6 @@ export default function DriversPage() {
 
 
   // KPI counters for the top stat-card row
-  const today = new Date().toISOString().slice(0, 10);
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const kpis = useMemo(() => {
     let active = 0, pending = 0, cdlExp30 = 0, medExp30 = 0;
@@ -118,9 +102,6 @@ export default function DriversPage() {
     }
     return { active, pending, cdlExp30, medExp30 };
   }, [effectiveDrivers, in30]);
-  const in60 = new Date(Date.now() + 60*86400000).toISOString().slice(0, 10);
-  const isExpiring = (d?: string | null) => !!(d && d >= today && d <= in60);
-  const isExpired = (d?: string | null) => !!(d && d < today);
 
   return (
     <AppShell title="Drivers"
@@ -212,9 +193,13 @@ export default function DriversPage() {
         {/* ============================================================
             KPI STRIP — matches static reference at app.x3compass.com/drivers.html
             ============================================================ */}
-        {/* Demo data banner removed per Joshua's request. */}
+        {loadError && (
+          <div className="mb-5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-[13px] text-rose-200">
+            Verified driver records could not be loaded. No sample people are shown. <button onClick={refresh} className="font-bold underline">Retry</button>
+          </div>
+        )}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-          <KpiCard label="Active drivers"        value={kpis.active}    sub={`↑ +${kpis.pending} vs last 30 days`} tone="ok" />
+          <KpiCard label="Active drivers"        value={kpis.active}    sub={`${kpis.pending} pending hire`} tone="ok" />
           <KpiCard label="New this month"        value={kpis.pending}   sub="Onboarding in progress" tone={kpis.pending > 0 ? "info" : "muted"} />
           <KpiCard label="DQ expiring ≤ 30d"     value={kpis.cdlExp30 + kpis.medExp30}  sub="⚠ Needs attention" tone={(kpis.cdlExp30 + kpis.medExp30) > 0 ? "warn" : "ok"} />
           <KpiCard label="Inactive / Terminated" value={Math.max(0, effectiveDrivers.length - kpis.active)}  sub="Last 90 days" tone="muted" />
@@ -268,7 +253,7 @@ export default function DriversPage() {
               emptyTitle={effectiveDrivers.length ? "No matches" : "No drivers yet"}
               emptyDesc={effectiveDrivers.length ? "Try clearing filters." : "Add your first driver to start building DQ files, ordering MVRs, and running background checks."}
               emptyAction={effectiveDrivers.length === 0 ? <button onClick={() => setShowAdd(true)} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Add first driver</button> : undefined}
-              onRowClick={(d) => { if (!isDemo) setEditDriver(d); }}
+              onRowClick={setEditDriver}
               columns={[
                 /* Joshua's column set: Driver / Class / Hire date / Status / CDL state / Domicile state.
                    License expiry + DQ file completeness moved to /app/dq-files where they belong. */
@@ -337,7 +322,7 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
       const sb = getSupabase();
       const payload = { ...form, carrier_id };
       if (driver?.id) {
-        const { error } = await sb.from("compass_drivers").update(payload).eq("id", driver.id);
+        const { error } = await sb.from("compass_drivers").update(payload).eq("id", driver.id).eq("carrier_id", carrier_id);
         if (error) throw error;
       } else {
         if (!form.first_name?.trim() || !form.last_name?.trim()) throw new Error("First and last name required");
@@ -353,7 +338,7 @@ function DriverFormModal({ carrier_id, driver, onClose, onSaved }: { carrier_id:
     if (!driver?.id) return;
     if (!confirm(`Remove ${driver.first_name} ${driver.last_name}? This cannot be undone.`)) return;
     setBusy(true);
-    const { error } = await getSupabase().from("compass_drivers").delete().eq("id", driver.id);
+    const { error } = await getSupabase().from("compass_drivers").delete().eq("id", driver.id).eq("carrier_id", carrier_id);
     if (error) { setError(error.message); setBusy(false); return; }
     onSaved();
   }
@@ -481,4 +466,3 @@ function StatusRow({ color, label, value }: { color: string; label: string; valu
     </div>
   );
 }
-

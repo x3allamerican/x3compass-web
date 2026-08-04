@@ -303,9 +303,9 @@ async function agentSynthesizeTraining(env: Env, inputs?: { topic?: string }): P
   const log = newLogger();
   const topic = inputs?.topic || "Pre-trip inspection";
   try {
-    const module = await askClaude(env, "You are an FMCSA-aligned training-content designer. Produce a 1-hour ELDT-style training module in markdown. Structure: 1. Learning objectives (3-5), 2. Why this matters (regulatory + safety), 3. Step-by-step procedure with checklist, 4. Common errors, 5. Quiz with 5 multiple-choice questions and explanations. Cite the controlling CFR section once per section.", `Training topic: ${topic}`, 3500);
-    log.info(`[synthesize-training] ${module.length} chars`);
-    return { status: "ok", summary: `Training module ready: ${topic} (${module.length} chars)`, log: log.text() + "\n\n---\n\n" + module };
+    const trainingModule = await askClaude(env, "You are an FMCSA-aligned training-content designer. Produce a 1-hour ELDT-style training module in markdown. Structure: 1. Learning objectives (3-5), 2. Why this matters (regulatory + safety), 3. Step-by-step procedure with checklist, 4. Common errors, 5. Quiz with 5 multiple-choice questions and explanations. Cite the controlling CFR section once per section.", `Training topic: ${topic}`, 3500);
+    log.info(`[synthesize-training] ${trainingModule.length} chars`);
+    return { status: "ok", summary: `Training module ready: ${topic} (${trainingModule.length} chars)`, log: log.text() + "\n\n---\n\n" + trainingModule };
   } catch (e) { return { status: "error", summary: `Anthropic call failed: ${e}`, log: log.text() }; }
 }
 

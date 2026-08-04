@@ -20,7 +20,7 @@ const SUPABASE_HEADERS = (sr: string) => ({
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=30", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" },
   });
 
 async function pgSelect(url: string, sr: string, table: string, query: string): Promise<unknown[]> {

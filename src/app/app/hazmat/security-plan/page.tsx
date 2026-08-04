@@ -6,10 +6,6 @@ export default function SecurityPlanPage() {
     <HazmatSubPageShell
       activeId="hazmat-security-plan"
       pageTitle="SECURITY PLAN"
-      eyebrow="X3 Compass · Hazmat Center · Security Plan"
-      heading={<>Written security plan · §172.800 · personnel + en-route + unauthorized access.</>}
-      sub="If you move a Table 1 substance, you owe PHMSA a written security plan — three required components, reviewed annually, signed by an officer. The builder maps the §172.802 elements to your routes, terminals, and personnel."
-      regs="49 CFR §§ 172.800–804 · § 172.704(a)(5) in-depth security training"
       eduSurface="Security Plan"
       eduSubtitle="49 CFR § 172.800 · who needs a plan, what it contains, who signs it"
       conciergeHref="/app/ask?context=hazmat-security"
