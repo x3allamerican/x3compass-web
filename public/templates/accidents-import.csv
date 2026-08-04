@@ -1,0 +1,2 @@
+accident_date,driver_first_name,driver_last_name,license_plate,location,recordable,fatalities,injuries,tow_required,preventable,description,cause_category
+2026-03-15,James,Carter,7XYZ123,I-35 TX,true,0,1,true,preventable,Rear-end at slow speed,following_distance
