@@ -321,6 +321,12 @@ async function applyContinuousMvr(
     const rows = (await r.json()) as Array<{ id: string; carrier_id: string; driver_id: string }>;
     return rows[0] || null;
   }
+  async function findDriverByCandidate(candidateId: string): Promise<{ carrier_id: string; driver_id: string } | null> {
+    const r = await fetch(`${base}/rest/v1/vendor_orders?vendor=eq.checkr&checkr_candidate_id=eq.${encodeURIComponent(candidateId)}&driver_id=not.is.null&select=carrier_id,driver_id&order=completed_at.desc&limit=1`, { headers: sbHeaders });
+    if (!r.ok) return null;
+    const rows = (await r.json()) as Array<{ carrier_id: string; driver_id: string }>;
+    return rows[0] || null;
+  }
   async function patchMonitor(id: string, patch: Record<string, unknown>): Promise<void> {
     await fetch(`${base}/rest/v1/compass_mvr_monitors?id=eq.${id}`, {
       method: "PATCH", headers: { ...sbHeaders, Prefer: "return=minimal" },
@@ -329,15 +335,43 @@ async function applyContinuousMvr(
   }
 
   // --- continuous_check.* lifecycle events ---
+  // Enrollment can happen in the Checkr Dashboard (Post Hire -> toggle C-MVR)
+  // OR via our enroll API. Either way Checkr emits continuous_check.created, so
+  // we upsert a monitor row — backfilling one for dashboard enrollments by
+  // mapping the candidate back to a driver via a prior order.
   if (eventType.startsWith("continuous_check.")) {
     const ccId = str(obj.id);
     const candId = str(obj.candidate_id);
     let mon = ccId ? await findMonitor(`checkr_continuous_check_id=eq.${encodeURIComponent(ccId)}`) : null;
     if (!mon && candId) mon = await findMonitor(`checkr_candidate_id=eq.${encodeURIComponent(candId)}`);
-    if (!mon) return;
-    if (eventType === "continuous_check.created") {
-      await patchMonitor(mon.id, { status: "active", ...(ccId ? { checkr_continuous_check_id: ccId } : {}), raw: obj });
-    } else if (/cancel|complete|delete|clear/.test(eventType)) {
+
+    const isCreate = eventType === "continuous_check.created" || eventType === "continuous_check.resumed";
+    const isCancel = /cancel|complete|delete|clear|suspend/.test(eventType);
+
+    if (isCreate) {
+      if (mon) {
+        await patchMonitor(mon.id, { status: "active", ...(ccId ? { checkr_continuous_check_id: ccId } : {}), raw: obj });
+      } else if (candId) {
+        const link = await findDriverByCandidate(candId);
+        if (link) {
+          await fetch(`${base}/rest/v1/compass_mvr_monitors?on_conflict=carrier_id,driver_id`, {
+            method: "POST",
+            headers: { ...sbHeaders, Prefer: "resolution=merge-duplicates,return=minimal" },
+            body: JSON.stringify({
+              carrier_id: link.carrier_id,
+              driver_id: link.driver_id,
+              checkr_candidate_id: candId,
+              checkr_continuous_check_id: ccId || null,
+              type: str(obj.type) || "mvr",
+              status: "active",
+              enrolled_at: nowIso,
+              raw: obj,
+              updated_at: nowIso,
+            }),
+          });
+        }
+      }
+    } else if (isCancel && mon) {
       await patchMonitor(mon.id, { status: "canceled", canceled_at: nowIso, raw: obj });
     }
     return;

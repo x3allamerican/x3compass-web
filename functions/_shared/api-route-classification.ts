@@ -29,6 +29,7 @@ const AUTHENTICATED = new Set([
   "/api/notifications",
   "/api/scorecards",
   "/api/screenings/continuous-mvr/enroll",
+  "/api/screenings/continuous-mvr/unenroll",
   "/api/screenings/continuous-mvr/list",
   "/api/screenings/mvr/parse",
   "/api/screenings/order",
