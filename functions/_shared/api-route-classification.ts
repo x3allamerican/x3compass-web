@@ -32,6 +32,7 @@ const AUTHENTICATED = new Set([
   "/api/dataq/challenges",
   "/api/drivers/import",
   "/api/inspections/import",
+  "/api/inspections/parse",
   "/api/notifications",
   "/api/scorecards",
   "/api/screenings/continuous-mvr/enroll",
