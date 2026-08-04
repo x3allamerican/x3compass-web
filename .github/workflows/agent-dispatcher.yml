@@ -16,7 +16,7 @@ on:
     # Every 5 minutes. Note: GitHub Actions cron is not exact — drift up to a
     # few minutes is expected. That's why agents run on their own schedule
     # within compass_agents.cron_expr, not "exactly when this workflow fires".
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 jobs:

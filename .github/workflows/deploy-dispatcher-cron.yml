@@ -1,0 +1,49 @@
+name: Deploy Agent Dispatcher Cron (Worker)
+
+# One-shot deploy of the Cloudflare cron Worker that replaces the Actions
+# dispatcher. Runs only when the worker files change, or manually. The
+# recurring schedule lives on Cloudflare (free) — this workflow does not run
+# on a cron and therefore does not burn Actions minutes on a schedule.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/agent-dispatcher-cron/**'
+      - '.github/workflows/deploy-dispatcher-cron.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: workers/agent-dispatcher-cron
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Deploy worker + set secret
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          X3_INTERNAL_SECRET: ${{ secrets.X3_INTERNAL_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID repo secrets missing"; exit 1
+          fi
+          npm i -g wrangler@3
+          # Create/update the worker first (so secret put has a target), then the cron is applied from wrangler.toml.
+          wrangler deploy
+          if [ -n "${X3_INTERNAL_SECRET:-}" ]; then
+            printf '%s' "$X3_INTERNAL_SECRET" | wrangler secret put X3_INTERNAL_SECRET
+          else
+            echo "::warning::X3_INTERNAL_SECRET repo secret missing — worker will no-op until set"
+          fi
+          echo "::notice::x3-agent-dispatcher-cron deployed with */15 cron trigger"

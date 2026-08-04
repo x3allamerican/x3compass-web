@@ -1,0 +1,11 @@
+# X3 Agent Dispatcher — Cloudflare Cron Trigger
+# Replaces the every-5-min GitHub Actions dispatcher. Cloudflare cron triggers
+# are free and do not consume GitHub Actions minutes. This Worker simply pings
+# the Pages dispatch endpoint, which fires every due agent (per compass_agents
+# .cron_expr). Secret X3_INTERNAL_SECRET is set via `wrangler secret put`.
+name = "x3-agent-dispatcher-cron"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[triggers]
+crons = ["*/15 * * * *"]

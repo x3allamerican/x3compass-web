@@ -10,7 +10,7 @@ name: client-error-aggregator
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:

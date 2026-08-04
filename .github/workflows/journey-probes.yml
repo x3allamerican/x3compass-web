@@ -9,7 +9,7 @@ name: journey-probes
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '23 * * * *'
   workflow_dispatch:
   # Also run after every push to main as the "deployment health gate"
   # — gives us a known-good baseline within 5 min of every release.
