@@ -6,6 +6,11 @@ tmp_dir=$(mktemp -d)
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 capture="$tmp_dir/args"
 
+if grep -Eq '^[[:space:]]*schedule:' "$repo_root/.github/workflows/secret-scan.yml"; then
+  echo "secret scan must not consume scheduled Actions minutes" >&2
+  exit 1
+fi
+
 printf '%s\n' '#!/bin/sh' "printf '%s\\n' \"\$*\" > '$capture'" 'exit 0' > "$tmp_dir/gitleaks"
 chmod +x "$tmp_dir/gitleaks"
 

@@ -1,5 +1,7 @@
 # Baseline fingerprints from the redacted 2026-08-02 full-history sweep.
 # Existing findings are documented in docs/security; every new fingerprint fails CI.
-bfd81d0a977bc2f8656a7284d067d6f3ae0ac2bc:.github/workflows/vendor-health.yml:curl-auth-user:46
-bfd81d0a977bc2f8656a7284d067d6f3ae0ac2bc:functions/api/admin/dispatch.ts:generic-api-key:37
-bfd81d0a977bc2f8656a7284d067d6f3ae0ac2bc:public/hazmat/hz-supabase.js:jwt:9
+833feea770e3b993d9a32a0d1d7ac0019169ff1e:public/hazmat/hz-supabase.js:jwt:9
+f3901515c3cee4933df3e0084900cecd0db59685:functions/functions-stash/api/admin/dispatch.ts:generic-api-key:41
+f3901515c3cee4933df3e0084900cecd0db59685:public/hazmat/hz-supabase.js:jwt:9
+2f26a8874bae296c4e8d676365014fb512aff9e5:functions/api/admin/dispatch.ts:generic-api-key:37
+251a9ab0547f5dc016cdf474ea31365126e1e760:.github/workflows/vendor-health.yml:curl-auth-user:45

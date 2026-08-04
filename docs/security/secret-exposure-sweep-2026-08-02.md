@@ -2,11 +2,11 @@
 
 ## Scope and handling
 
-Gitleaks 8.30.1 scanned all 23 reachable commits and the Task 1 remediated tree with 100% redaction. This report contains path/type/count only and no detected values or credentials.
+Gitleaks 8.30.1 scanned the reachable history and the Task 1 remediated tree with 100% redaction. The exact commit count may increase as reviewed branches merge. This report contains path/type/count only and no detected values or credentials.
 
 ## Result
 
-- Full history: 3 redacted detections across 3 path/type groups.
+- Full reachable history after tenant-isolation reconciliation: 5 redacted detections across 3 path/type groups.
 - Current Task 1 tree: 2 detections; the legacy public HazMat JWT asset is removed.
 - The removed JWT decoded as a public Supabase `anon` role, not `service_role`. It remains in Git history and warrants access-log review plus rotation consideration.
 - The remaining generic API-key and curl-auth-user matches are non-secret fallback/probe patterns, not embedded production credential values. They remain fingerprinted so the full-history baseline is explicit rather than silently excluded by broad paths.
