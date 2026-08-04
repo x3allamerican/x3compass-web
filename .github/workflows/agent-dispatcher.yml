@@ -11,12 +11,11 @@
 
 name: Agent Dispatcher
 
+# NOTE: Scheduled dispatch now runs on a free Cloudflare Cron Trigger
+# (worker: x3-agent-dispatcher-cron, */15). This workflow is kept as a
+# MANUAL fallback only (workflow_dispatch) so it no longer consumes GitHub
+# Actions minutes on a schedule.
 on:
-  schedule:
-    # Every 5 minutes. Note: GitHub Actions cron is not exact — drift up to a
-    # few minutes is expected. That's why agents run on their own schedule
-    # within compass_agents.cron_expr, not "exactly when this workflow fires".
-    - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 jobs:
