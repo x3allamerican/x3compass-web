@@ -572,11 +572,25 @@ async function agentInboxTriage(env: Env): Promise<AgentResult> {
 // ============================================================================
 // 24. agent-csa-baseline — compute initial CSA snapshot from inspection history
 // ============================================================================
-async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Promise<AgentResult> {
+async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string; force?: boolean }): Promise<AgentResult> {
   const log = newLogger();
   const supa = supaFetch(env);
   const carrierId = inputs?.carrier_id;
-  if (!carrierId) return { status: "error", summary: "Missing inputs.carrier_id", log: log.text() };
+
+  // ─── Sweep mode: no carrier_id (dispatcher/cron) → refresh every active carrier.
+  if (!carrierId) {
+    const actives = await supa.select("compass_carriers", `select=id,name&or=(subscription_status.eq.active,subscription_status.eq.trialing)`) as Array<{ id: string; name: string }>;
+    if (!actives.length) return { status: "ok", summary: "CSA sweep: no active carriers to refresh", log: log.text() };
+    let okN = 0, errN = 0;
+    for (const c of actives) {
+      try {
+        const r = await agentCsaBaseline(env, { carrier_id: c.id, force: inputs?.force });
+        if (r.status === "ok") okN++; else errN++;
+      } catch (e) { errN++; log.warn(`[csa-baseline] sweep ${c.name}: ${e instanceof Error ? e.message : String(e)}`); }
+    }
+    log.info(`[csa-baseline] weekly sweep: ${okN} refreshed, ${errN} failed across ${actives.length} active carriers`);
+    return { status: errN && !okN ? "error" : "ok", summary: `CSA weekly sweep: ${okN} refreshed, ${errN} failed (${actives.length} active carriers)`, log: log.text() };
+  }
 
   // Look up the carrier's USDOT so we can hit CarrierOk
   const carrierRow = (await supa.select("compass_carriers", `select=id,name,usdot_number,subscription_status&id=eq.${carrierId}`)) as Array<{ id: string; name: string; usdot_number: string | null; subscription_status: string | null }>;
@@ -593,8 +607,8 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   const carrierOkPresent = !!carrierOkKey(env2);
   const status = (carrier.subscription_status || "").toLowerCase();
   const isActive = status === "active" || status === "trialing";
-  const minDays = Number(env2.CARRIEROK_MIN_DAYS ?? 30) || 30;
-  const force = !!(inputs as { force?: boolean } | undefined)?.force;
+  const minDays = Number(env2.CARRIEROK_MIN_DAYS ?? 6) || 6;
+  const force = !!inputs?.force;
 
   if (carrierOkPresent && carrier.usdot_number && isActive) {
     // Freshness guard: skip (and don't re-bill) if a CarrierOk snapshot
@@ -645,7 +659,22 @@ async function agentCsaMonitor(env: Env, inputs?: { carrier_id?: string }): Prom
   const log = newLogger();
   const supa = supaFetch(env);
   const carrierId = inputs?.carrier_id;
-  if (!carrierId) return { status: "error", summary: "Missing inputs.carrier_id", log: log.text() };
+
+  // ─── Sweep mode: no carrier_id → check every active carrier's latest snapshot.
+  if (!carrierId) {
+    const actives = await supa.select("compass_carriers", `select=id,name&or=(subscription_status.eq.active,subscription_status.eq.trialing)`) as Array<{ id: string; name: string }>;
+    if (!actives.length) return { status: "ok", summary: "CSA monitor sweep: no active carriers", log: log.text() };
+    let breached = 0, checked = 0;
+    for (const c of actives) {
+      try {
+        const r = await agentCsaMonitor(env, { carrier_id: c.id });
+        if (r.status === "partial") breached++;
+        if (r.status !== "skipped") checked++;
+      } catch (e) { log.warn(`[csa-monitor] sweep ${c.name}: ${e instanceof Error ? e.message : String(e)}`); }
+    }
+    return { status: "ok", summary: `CSA monitor sweep: ${checked} carriers checked, ${breached} with threshold breaches`, log: log.text() };
+  }
+
   const recent = await supa.select("compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`) as Array<{ unsafe_driving: number; crash_indicator: number; hos_compliance: number; vehicle_maint: number; hazmat: number; driver_fitness: number; ctrl_substances: number }>;
   if (recent.length === 0) return { status: "skipped", summary: `No CSA snapshot for carrier ${carrierId} yet · run agent-csa-baseline first`, log: log.text() };
   const s = recent[0];
