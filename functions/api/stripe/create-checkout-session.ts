@@ -34,8 +34,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const drivers = parseDriverQuantity(body.drivers);
     if (drivers === null) return json({ ok: false, error: "drivers must be a whole number from 1 to 100000" }, 400);
 
-    if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
-    if (!ctx.env.STRIPE_PRICE_COMPASS_DRIVER) return json({ ok: false, error: "Compass price not configured" }, 500);
+    if (!ctx.env.STRIPE_SECRET_KEY || !ctx.env.STRIPE_PRICE_COMPASS_DRIVER) {
+      return securityError(503, "service_unavailable", correlationId(ctx.request));
+    }
 
     const supa = supaFetch(ctx.env);
     const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id,compass_carriers(id,name,stripe_customer_id,trial_ends_at)`)) as Array<{ carrier_id: string; compass_carriers: { id: string; name: string; stripe_customer_id: string | null; trial_ends_at: string | null } }>;
@@ -67,6 +68,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     }
     params.set("metadata[carrier_id]", carrier.id);
     params.set("metadata[plan]", "compass");
+    // Checkout Session metadata is not copied to the Subscription by Stripe.
+    // Duplicate it so subscription events can resolve the carrier even if they
+    // arrive before checkout.session.completed stores the subscription id.
+    params.set("subscription_data[metadata][carrier_id]", carrier.id);
+    params.set("subscription_data[metadata][plan]", "compass");
     params.set("allow_promotion_codes", "true");
 
     const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {
