@@ -64,8 +64,8 @@
   --border-strong:#94A3B8;        /* slate-400 · emphasized */
   --hairline:     rgba(15, 23, 42, 0.08);
 
-  --accent:       #16C7FF;        /* cyan-700 · AA contrast on white */
-  --accent-2:     #16C7FF;        /* cyan-800 */
+  --accent:       #007C9F;        /* X3 cyan, darkened for 4.79:1 AA contrast on white */
+  --accent-2:     #007C9F;
   --accent-fg:    #FFFFFF;
 
   --success:      #047857;        /* emerald-700 */
@@ -123,8 +123,8 @@
 
   /* Brand cyan · matches app.x3compass.com/assets/styles.css line 19-21 verbatim.
      Was #16C7FF (Tailwind cyan-400) — the design system skill explicitly bans it. */
-  --accent:        #16C7FF;
-  --accent-2:      #16C7FF;
+  --accent:        #007C9F;
+  --accent-2:      #007C9F;
   --accent-dim:    rgba(22, 199, 255, 0.18);
   --accent-fg:     #000000;
 

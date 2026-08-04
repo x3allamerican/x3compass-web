@@ -7,8 +7,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-[#000000] text-white">
       <TopNav />
       {/* Spacer: header is fixed (h-24 = 96px), so pad content so it doesn't slide under it */}
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#16C7FF] focus:text-black focus:font-bold">Skip to main content</a>
-      <main id="main-content" className="flex-1 pt-24">{children}</main>
+      <div className="flex-1 pt-24">{children}</div>
 
       <footer className="bg-[#091525] border-t border-[#1E3556] text-white/65 px-6 py-12">
         <div className="max-w-7xl mx-auto">
