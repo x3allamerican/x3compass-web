@@ -9,17 +9,16 @@
  */
 
 import { mapCsvVehicleRow, upsertVehicles, type NormalizedVehicle } from "../../_shared/vendor-mapper";
+import { correlationId, requireTenant, securityError, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
+type Env = SecurityEnv;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Cache-Control": "no-store",
     },
   });
 
@@ -46,13 +45,19 @@ function parseCsv(text: string): string[][] {
   return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
 }
 
-export const onRequestOptions: PagesFunction<Env> = async () =>
-  new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" } });
+export const onRequestOptions: PagesFunction<Env> = async (ctx) =>
+  tenantPreflight(ctx.request, ctx.env, "POST, OPTIONS");
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; csv?: string; rows?: NormalizedVehicle[] };
   try { body = await ctx.request.json(); }
   catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
+
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
 
   if (!body.carrier_id || typeof body.carrier_id !== "string") return json({ ok: false, error: "Missing carrier_id" }, 400);
 
@@ -74,7 +79,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (rows.length === 0) return json({ ok: false, error: "No valid rows found — every row must include vin or license_plate" }, 400);
   if (rows.length > 10_000) return json({ ok: false, error: `Too many rows (${rows.length}). Split into batches of 10,000 or fewer.` }, 413);
 
-  const result = await upsertVehicles(ctx.env, body.carrier_id, rows);
+  const result = await upsertVehicles(ctx.env, authority.carrierId, rows);
   return json({
     ok: result.errors.length === 0,
     submitted: rows.length,

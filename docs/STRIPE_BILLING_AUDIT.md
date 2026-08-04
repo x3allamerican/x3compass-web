@@ -32,7 +32,7 @@ Stripe object, or deployment is configured in production.
 
 | Severity | Finding | Disposition |
 |---|---|---|
-| P0 | Checkout and portal handlers returned raw Stripe response bodies in `detail`; catch paths returned internal exception messages. | Fixed. Provider/configuration failures now return only `Billing service unavailable`; logs retain endpoint name and HTTP status without response bodies. |
+| P0 | Checkout and portal handlers returned raw Stripe response bodies in `detail`; catch paths returned internal exception messages. | Fixed on current `main`. Provider/configuration failures now use the opaque correlation-ID security error contract; logs retain endpoint name and HTTP status without response bodies. |
 | P0 | Webhook processing failures returned `String(err)` to the caller. | Fixed. Failures are logged server-side and use the same opaque client contract. |
 | P0 | Checkout Session metadata was not copied onto the Subscription. A `customer.subscription.created` event arriving before `checkout.session.completed` could fail to resolve a carrier. | Fixed. Carrier and plan metadata are explicitly attached through `subscription_data[metadata]`. |
 | P1 | Signature verification considered only the first `v1` value, which could reject a valid event during Stripe signing-secret rotation. | Fixed. Verification accepts any valid `v1` candidate while retaining constant-time comparison and the five-minute replay window. |

@@ -1,5 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
-import { opaqueStripeFailure } from "../../_shared/stripe-security.mjs";
+import { correlationId, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -12,7 +12,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);
     if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
-    if (!ctx.env.STRIPE_SECRET_KEY) return json(opaqueStripeFailure(), 503);
+    if (!ctx.env.STRIPE_SECRET_KEY) return securityError(503, "service_unavailable", correlationId(ctx.request));
 
     const supa = supaFetch(ctx.env);
     const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=compass_carriers(id,stripe_customer_id)`)) as Array<{ compass_carriers: { id: string; stripe_customer_id: string | null } }>;
@@ -26,14 +26,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ customer, return_url: `${site}/app/settings/billing` }).toString(),
     });
-    if (!r.ok) {
-      console.error("[portal-session] Stripe request failed", { status: r.status });
-      return json(opaqueStripeFailure(), 502);
-    }
+    if (!r.ok) return securityError(502, "upstream_failed", correlationId(ctx.request));
     const sess = (await r.json()) as { url?: string };
     return json({ ok: true, url: sess.url });
   } catch (err) {
     console.error("[portal-session] unexpected error:", err);
-    return json(opaqueStripeFailure(), 500);
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

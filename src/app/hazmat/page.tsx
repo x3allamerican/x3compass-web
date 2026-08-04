@@ -354,7 +354,7 @@ export default function Hazmat() {
         </section>
 
         <Related
-          links={[
+          items={[
             { href: "/case-studies/sample", title: "Sample audit walkthrough", desc: "See where hazmat preparation lands in a 6-day compliance review." },
             { href: "/skills", title: "All 300 skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
             { href: "/pricing", title: "Pricing + ROI", desc: "Graduated per-driver pricing. Hazmat included at no extra cost." },

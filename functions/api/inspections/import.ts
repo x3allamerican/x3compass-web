@@ -5,8 +5,9 @@
  *   level (1-6), state, inspector, report_number, oos_driver (bool), oos_vehicle (bool),
  *   violation_count (int), report_url.
  */
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
-const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../_shared/request-security";
+type Env = SecurityEnv;
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 function parseCsv(text: string): string[][] {
   const rows: string[][] = []; let cur: string[] = []; let f = ""; let q = false;
@@ -24,7 +25,11 @@ function intOr(v: string, d = 0): number { const n = parseInt(v, 10); return Num
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; csv?: string };
   try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
-  if (!body.carrier_id) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
   if (!body.csv) return json({ ok: false, error: "Missing csv" }, 400);
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) return json({ ok: false, error: "Server missing Supabase env" }, 500);
 
@@ -35,10 +40,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
   const baseUrl = ctx.env.SUPABASE_URL.replace(/\/$/, "");
   const sr = ctx.env.SUPABASE_SERVICE_ROLE;
+  const carrierId = encodeURIComponent(authority.carrierId);
   const supaH = { apikey: sr, Authorization: `Bearer ${sr}`, Accept: "application/json" };
   const [drvR, vehR] = await Promise.all([
-    fetch(`${baseUrl}/rest/v1/compass_drivers?select=id,first_name,last_name&carrier_id=eq.${body.carrier_id}&limit=1000`, { headers: supaH }),
-    fetch(`${baseUrl}/rest/v1/compass_vehicles?select=id,license_plate&carrier_id=eq.${body.carrier_id}&limit=1000`, { headers: supaH }),
+    fetch(`${baseUrl}/rest/v1/compass_drivers?select=id,first_name,last_name&carrier_id=eq.${carrierId}&limit=1000`, { headers: supaH }),
+    fetch(`${baseUrl}/rest/v1/compass_vehicles?select=id,license_plate&carrier_id=eq.${carrierId}&limit=1000`, { headers: supaH }),
   ]);
   const drivers = (await drvR.json()) as { id: string; first_name?: string; last_name?: string }[];
   const vehicles = (await vehR.json()) as { id: string; license_plate?: string }[];
@@ -56,7 +62,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     if (lev < 1 || lev > 6) { errors.push({ row: i, reason: "level must be 1-6" }); continue; }
 
     out.push({
-      carrier_id: body.carrier_id,
+      carrier_id: authority.carrierId,
       driver_id: drvByName.get(`${get("driver_first_name").toLowerCase()} ${get("driver_last_name").toLowerCase()}`.trim()) || null,
       vehicle_id: vehByPlate.get(get("license_plate").toUpperCase()) || null,
       inspection_date: date,
@@ -76,7 +82,10 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     headers: { ...supaH, "Content-Type": "application/json", Prefer: "return=representation" },
     body: JSON.stringify(out),
   });
-  if (!r.ok) return json({ ok: false, submitted: out.length, error: `Supabase ${r.status}: ${(await r.text()).slice(0, 200)}`, errors }, 500);
+  if (!r.ok) {
+    console.error("inspection import failed", { correlation_id: requestId, status: r.status });
+    return securityError(500, "request_failed", requestId);
+  }
   const inserted = await r.json() as unknown[];
   return json({ ok: errors.length === 0, submitted: out.length, inserted: inserted.length, skipped: 0, updated: 0, errors });
 };

@@ -4,7 +4,6 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
-  opaqueStripeFailure,
   verifyStripeSignature,
 } from "../functions/_shared/stripe-security.mjs";
 
@@ -38,13 +37,6 @@ test("accepts a valid rotating v1 signature when another v1 value is invalid", a
   assert.equal(await verifyStripeSignature(payload, header, secret, now), true);
 });
 
-test("returns an opaque client failure without upstream detail", () => {
-  const response = opaqueStripeFailure();
-
-  assert.deepEqual(response, { ok: false, error: "Billing service unavailable" });
-  assert.equal("detail" in response, false);
-});
-
 test("checkout attaches carrier identity to the subscription for race-safe provisioning", async () => {
   const source = await readFile(
     new URL("../functions/api/stripe/create-checkout-session.ts", import.meta.url),
@@ -55,12 +47,12 @@ test("checkout attaches carrier identity to the subscription for race-safe provi
   assert.match(source, /subscription_data\[metadata\]\[plan\]/);
 });
 
-test("event-ledger failures use the opaque webhook response contract", async () => {
+test("webhook delegates signature verification to the rotation-safe helper", async () => {
   const source = await readFile(
     new URL("../functions/api/stripe/webhook.ts", import.meta.url),
     "utf8",
   );
 
-  assert.doesNotMatch(source, /catch \(err\) \{[\s\S]*?throw err;[\s\S]*?\}/);
-  assert.match(source, /\[stripe-webhook\] event ledger failure/);
+  assert.match(source, /import \{ verifyStripeSignature \} from "\.\.\/\.\.\/_shared\/stripe-security\.mjs"/);
+  assert.doesNotMatch(source, /async function verifyStripeSignature/);
 });

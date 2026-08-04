@@ -1,7 +1,11 @@
 /**
- * PUT /api/uploads/put?t=<signed-token> — relay file body to R2 via S3 SigV4.
+ * PUT /api/uploads/put — relay file body to R2 via S3 SigV4.
+ * The short-lived upload token is carried in `Authorization: Upload <token>` so
+ * credentials do not enter URLs, access logs, referrers, or browser history.
  */
-interface Env { R2_ACCESS_KEY_ID?: string; R2_SECRET_ACCESS_KEY?: string; R2_BUCKET?: string; R2_ACCOUNT_ID?: string; }
+import { correlationId, securityError } from "../../_shared/request-security";
+import { uploadTokenFromRequest, verifyUploadToken } from "../../_shared/upload-token";
+interface Env { R2_ACCESS_KEY_ID?: string; R2_SECRET_ACCESS_KEY?: string; R2_BUCKET?: string; R2_ACCOUNT_ID?: string; UPLOAD_TOKEN_SECRET?: string; }
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "Content-Type": "application/json" } });
 
 const enc = new TextEncoder();
@@ -24,12 +28,10 @@ export const onRequestPut: PagesFunction<Env> = async (ctx) => {
     if (!ctx.env.R2_ACCESS_KEY_ID || !ctx.env.R2_SECRET_ACCESS_KEY || !ctx.env.R2_BUCKET || !ctx.env.R2_ACCOUNT_ID) {
       return json({ ok: false, error: "R2 not configured (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ACCOUNT_ID)" }, 500);
     }
-    const url = new URL(ctx.request.url);
-    const tokenStr = url.searchParams.get("t");
+    const tokenStr = uploadTokenFromRequest(ctx.request);
     if (!tokenStr) return json({ ok: false, error: "Missing token" }, 401);
-    let token: { k: string; ct: string; exp: number };
-    try { token = JSON.parse(atob(tokenStr)); } catch { return json({ ok: false, error: "Bad token" }, 401); }
-    if (token.exp < Math.floor(Date.now()/1000)) return json({ ok: false, error: "Token expired" }, 401);
+    const token = await verifyUploadToken(tokenStr, ctx.env.UPLOAD_TOKEN_SECRET || "");
+    if (!token) return securityError(401, "invalid_upload_token", correlationId(ctx.request));
 
     const body = await ctx.request.arrayBuffer();
     if (body.byteLength === 0) return json({ ok: false, error: "Empty body" }, 400);
@@ -52,10 +54,10 @@ export const onRequestPut: PagesFunction<Env> = async (ctx) => {
     const auth = `AWS4-HMAC-SHA256 Credential=${ctx.env.R2_ACCESS_KEY_ID}/${dateStamp}/${region}/${service}/aws4_request, SignedHeaders=${signedHeaders}, Signature=${sig}`;
 
     const r = await fetch(r2url, { method: "PUT", headers: { "Content-Type": token.ct, Host: host, "X-Amz-Content-SHA256": payloadHash, "X-Amz-Date": amzDate, Authorization: auth }, body: body as unknown as BodyInit });
-    if (!r.ok) return json({ ok: false, error: `R2 HTTP ${r.status}`, detail: (await r.text()).slice(0,300) }, 502);
+    if (!r.ok) return securityError(502, "upstream_failed", correlationId(ctx.request));
     return json({ ok: true, key: token.k, size: body.byteLength });
-  } catch (err) {
-    console.error("[uploads/put] error:", err);
-    return json({ ok: false, error: "Upload failed", detail: err instanceof Error ? err.message : String(err) }, 500);
+  } catch {
+    console.error("upload relay failed");
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

@@ -7,29 +7,24 @@
  *  2. POST /v1/invitations with candidate_id + package + work_location
  *  3. Return the invitation URL for the candidate
  *
- * Authentication for v1: ADMIN_KEY header (shared secret) for staging tests.
- * In production this will switch to Supabase user JWT once auth is wired
- * end-to-end in Compass v4.
+ * Authentication: Supabase JWT plus server-side carrier membership.
  *
  * Required Pages env vars:
  *  - SUPABASE_URL
  *  - SUPABASE_SERVICE_ROLE
  *  - CHECKR_STAGING_API_KEY (used when CHECKR_ENV=staging or unset)
  *  - CHECKR_LIVE_API_KEY    (used when CHECKR_ENV=live)
- *  - ADMIN_KEY              (gates the endpoint until full auth ships)
  *
  * Optional:
  *  - CHECKR_API_BASE  default https://api.checkr.com
  */
+import { correlationId, isUuid, requireTenant, securityError, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
+interface Env extends SecurityEnv {
   CHECKR_STAGING_API_KEY?: string;
   CHECKR_LIVE_API_KEY?: string;
   CHECKR_ENV?: "staging" | "live";
   CHECKR_API_BASE?: string;
-  ADMIN_KEY?: string;
 }
 
 type OrderBody = {
@@ -59,26 +54,26 @@ const json = (data: unknown, status = 200): Response =>
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-store",
     },
   });
 
 const REQUIRED: (keyof OrderBody)[] = ["first_name", "last_name", "email", "package", "work_location"];
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
-  // === Auth gate ===
-  const url = new URL(ctx.request.url);
-  const key = url.searchParams.get("key") || ctx.request.headers.get("X-Admin-Key") || "";
-  if (!ctx.env.ADMIN_KEY || key !== ctx.env.ADMIN_KEY) {
-    return json({ ok: false, error: "Unauthorized" }, 401);
-  }
-
   let body: Partial<OrderBody>;
   try {
     body = (await ctx.request.json()) as Partial<OrderBody>;
   } catch {
     return json({ ok: false, error: "Invalid JSON" }, 400);
   }
+
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  if (body.driver_id && !isUuid(body.driver_id)) return securityError(400, "invalid_resource_id", requestId);
 
   for (const f of REQUIRED) {
     if (!body[f] || (typeof body[f] === "string" && (body[f] as string).trim() === "")) {
@@ -146,16 +141,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   });
 
   if (!candidateRes.ok) {
-    const text = await candidateRes.text();
-    return json(
-      {
-        ok: false,
-        step: "create_candidate",
-        error: `Checkr HTTP ${candidateRes.status}`,
-        detail: tryParseJson(text),
-      },
-      502
-    );
+    console.error("screening candidate request failed", { correlation_id: requestId, status: candidateRes.status });
+    return securityError(502, "upstream_failed", requestId);
   }
   const candidate = (await candidateRes.json()) as { id: string; [k: string]: unknown };
 
@@ -183,17 +170,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   });
 
   if (!inviteRes.ok) {
-    const text = await inviteRes.text();
-    return json(
-      {
-        ok: false,
-        step: "create_invitation",
-        error: `Checkr HTTP ${inviteRes.status}`,
-        detail: tryParseJson(text),
-        candidate_id: candidate.id,
-      },
-      502
-    );
+    console.error("screening invitation request failed", { correlation_id: requestId, status: inviteRes.status });
+    return securityError(502, "upstream_failed", requestId);
   }
   const invite = (await inviteRes.json()) as {
     id: string;
@@ -218,7 +196,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
           vendor: "checkr",
           service: `checkr_${body.package}`, // satisfy NOT NULL in shared schema
           checkr_env: env,
-          carrier_id: body.carrier_id || null,
+          carrier_id: authority.carrierId,
           driver_id: body.driver_id || null,
           custom_id: body.custom_id || null,
           checkr_candidate_id: candidate.id,
@@ -259,20 +237,5 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   });
 };
 
-function tryParseJson(s: string): unknown {
-  try {
-    return JSON.parse(s);
-  } catch {
-    return s;
-  }
-}
-
-export const onRequestOptions: PagesFunction = async () =>
-  new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key",
-    },
-  });
+export const onRequestOptions: PagesFunction<Env> = async (ctx) =>
+  tenantPreflight(ctx.request, ctx.env, "POST, OPTIONS");

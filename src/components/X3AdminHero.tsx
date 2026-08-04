@@ -17,7 +17,7 @@ export function X3AdminHero({
   eyebrow: string;
   title: ReactNode;
   intro: ReactNode;
-  dataSource?: { items: ReactNode[] };
+  dataSource?: { items: ReactNode[]; footnote?: ReactNode };
 }) {
   return (
     <section className="rounded-xl overflow-hidden border border-[var(--border)] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -37,6 +37,11 @@ export function X3AdminHero({
               <li key={i} className="pl-4 border-l-2 border-cyan-500/40">{item}</li>
             ))}
           </ul>
+          {dataSource.footnote && (
+            <div className="px-6 pb-5 text-[11.5px] text-slate-400 leading-relaxed">
+              {dataSource.footnote}
+            </div>
+          )}
         </details>
       )}
     </section>

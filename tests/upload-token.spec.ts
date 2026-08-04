@@ -1,0 +1,58 @@
+import { expect, test } from "@playwright/test";
+import {
+  issueUploadToken,
+  uploadGrant,
+  uploadTokenFromRequest,
+  verifyUploadToken,
+} from "../functions/_shared/upload-token";
+
+const secret = "test-secret-with-sufficient-entropy";
+const payload = {
+  k: "carriers/00000000-0000-4000-8000-000000000001/dq/file.pdf",
+  ct: "application/pdf",
+  exp: 4_102_444_800,
+  uid: "user-1",
+  cid: "00000000-0000-4000-8000-000000000001",
+};
+
+test("accepts an authentic unexpired upload token", async () => {
+  const token = await issueUploadToken(payload, secret);
+  await expect(verifyUploadToken(token, secret, 1_700_000_000)).resolves.toEqual(payload);
+});
+
+test("rejects a token whose tenant object path was altered", async () => {
+  const token = await issueUploadToken(payload, secret);
+  const [encoded, signature] = token.split(".");
+  const decoded = JSON.parse(atob(encoded));
+  decoded.k = "carriers/00000000-0000-4000-8000-000000000002/dq/file.pdf";
+  const tampered = `${btoa(JSON.stringify(decoded))}.${signature}`;
+  await expect(verifyUploadToken(tampered, secret, 1_700_000_000)).resolves.toBeNull();
+});
+
+test("rejects expired and malformed upload tokens", async () => {
+  const token = await issueUploadToken({ ...payload, exp: 100 }, secret);
+  await expect(verifyUploadToken(token, secret, 101)).resolves.toBeNull();
+  await expect(verifyUploadToken("not-a-token", secret, 1)).resolves.toBeNull();
+});
+
+test("refuses upload tokens protected by a weak secret", async () => {
+  await expect(issueUploadToken(payload, "short-secret")).rejects.toThrow("Invalid upload token input");
+  const token = await issueUploadToken(payload, secret);
+  await expect(verifyUploadToken(token, "short-secret", 1_700_000_000)).resolves.toBeNull();
+});
+
+test("keeps upload credentials out of request URLs", async () => {
+  const token = await issueUploadToken(payload, secret);
+  const grant = uploadGrant(token);
+
+  expect(grant).toEqual({
+    put_url: "/api/uploads/put",
+    upload_token: token,
+    upload_auth_scheme: "Upload",
+  });
+  expect(grant.put_url).not.toContain(token);
+  expect(uploadTokenFromRequest(new Request(`https://x3compass.com/api/uploads/put?t=${encodeURIComponent(token)}`))).toBe("");
+  expect(uploadTokenFromRequest(new Request("https://x3compass.com/api/uploads/put", {
+    headers: { Authorization: `Upload ${token}` },
+  }))).toBe(token);
+});

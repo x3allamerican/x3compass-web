@@ -47,8 +47,3 @@ export async function verifyStripeSignature(
   ).join("");
   return signatures.some((candidate) => constantTimeHexEqual(expected, candidate));
 }
-
-/** Stable client response for provider/configuration failures. */
-export function opaqueStripeFailure() {
-  return { ok: false, error: "Billing service unavailable" };
-}

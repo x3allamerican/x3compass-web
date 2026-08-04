@@ -1,4 +1,5 @@
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { correlationId, isUuid, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -125,7 +126,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     let body: { id?: string } = {};
     try { body = await ctx.request.json(); } catch { /* ok */ }
     const exportId = body.id || new URL(ctx.request.url).searchParams.get("id") || "";
-    if (!exportId) return json({ ok: false, error: "Missing export id" }, 400);
+    if (!isUuid(exportId)) return securityError(400, "invalid_resource_id", correlationId(ctx.request));
 
     const supa = supaFetch(ctx.env);
     const userRow = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id`)) as Array<{ carrier_id: string }>;
@@ -157,13 +158,13 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const up = await r2Put(ctx.env, key, zip, "application/zip");
     if (!up.ok) {
       await supa.update("compass_audit_exports", `id=eq.${exportId}`, { status: "failed" });
-      return json({ ok: false, error: "R2 upload failed", detail: up.detail }, 502);
+      return securityError(502, "upstream_failed", correlationId(ctx.request));
     }
     const packet_url = `/api/uploads/get?k=${encodeURIComponent(key)}`;
     await supa.update("compass_audit_exports", `id=eq.${exportId}`, { status: "ready", packet_url, size_bytes: zip.length, exported_on: new Date().toISOString() });
     return json({ ok: true, key, size: zip.length, packet_url, counts });
   } catch (err) {
     console.error("[audit/build] error:", err);
-    return json({ ok: false, error: "Server error", detail: err instanceof Error ? err.message : String(err) }, 500);
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

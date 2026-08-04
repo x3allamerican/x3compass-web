@@ -1,24 +1,22 @@
 /**
- * GET /api/admin/partners?key=<ADMIN_KEY>
+ * GET /api/admin/v1/partners
  *
  * Returns all rows from partner_applications, newest first.
- * Auth: shared-secret via ADMIN_KEY env var (required).
+ * Auth: short-lived Supabase session verified as super-admin.
  *
  * Required Pages env vars:
  *  - SUPABASE_URL          — e.g., https://your-project.supabase.co
  *  - SUPABASE_SERVICE_ROLE — Supabase service-role key
- *  - ADMIN_KEY             — shared secret to gate this endpoint
  *
- * PATCH /api/admin/partners?key=<ADMIN_KEY>&id=<row-id>
+ * PATCH /api/admin/v1/partners?id=<row-id>
  *  Body: { status?, notes?, reviewed_by? }
  *  Updates the row, sets reviewed_at=now() if status changed.
  */
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-  ADMIN_KEY?: string;
-}
+import { requireSuperAdmin, unauthorized, type AdminEnv } from "../../_shared/admin-auth";
+import { correlationId, isUuid, securityError } from "../../_shared/request-security";
+
+type Env = AdminEnv;
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,
@@ -27,14 +25,7 @@ const SUPABASE_HEADERS = (sr: string) => ({
 });
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
-  const url = new URL(ctx.request.url);
-  const key = url.searchParams.get("key");
-  if (!ctx.env.ADMIN_KEY || key !== ctx.env.ADMIN_KEY) {
-    return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (!await requireSuperAdmin(ctx)) return unauthorized();
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
     return new Response(JSON.stringify({ ok: false, error: "Server not configured" }), {
       status: 500,
@@ -50,25 +41,16 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     return new Response(JSON.stringify({ ok: true, rows }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     });
-  } catch (err: unknown) {
-    return new Response(
-      JSON.stringify({ ok: false, error: err instanceof Error ? err.message : "fetch error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  } catch {
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };
 
 export const onRequestPatch: PagesFunction<Env> = async (ctx) => {
   const url = new URL(ctx.request.url);
-  const key = url.searchParams.get("key");
   const id = url.searchParams.get("id");
-  if (!ctx.env.ADMIN_KEY || key !== ctx.env.ADMIN_KEY) {
-    return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  if (!id) {
+  if (!await requireSuperAdmin(ctx)) return unauthorized();
+  if (!id || !isUuid(id)) {
     return new Response(JSON.stringify({ ok: false, error: "Missing id" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
@@ -112,19 +94,12 @@ export const onRequestPatch: PagesFunction<Env> = async (ctx) => {
       }
     );
     if (!r.ok) {
-      const text = await r.text();
-      return new Response(JSON.stringify({ ok: false, error: `Supabase HTTP ${r.status}: ${text}` }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      return securityError(500, "request_failed", correlationId(ctx.request));
     }
     return new Response(JSON.stringify({ ok: true }), {
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err: unknown) {
-    return new Response(
-      JSON.stringify({ ok: false, error: err instanceof Error ? err.message : "patch error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  } catch {
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

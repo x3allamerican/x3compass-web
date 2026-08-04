@@ -247,6 +247,10 @@ export const DEMO_HOS_LOGS: DemoHosLog[] = [
 /** Returns demo rows ONLY when real-data array is empty AND we're in demo mode.
  *  Demo mode = no carrier yet OR no real data ingested yet. Once a row exists,
  *  the page shows real data. */
-export function withDemoFallback<T>(real: T[], demo: T[]): T[] {
-  return real.length === 0 ? demo : real;
+export function withDemoFallback<T>(real: T[], demo: T[], allowDemo: boolean = false): T[] {
+  // Demo rows are ONLY for the unauthenticated marketing/preview experience.
+  // A real authenticated carrier (allowDemo=false) with zero rows must see an
+  // empty table + honest empty state — never another company's demo data.
+  if (real.length > 0) return real;
+  return allowDemo ? demo : real;
 }

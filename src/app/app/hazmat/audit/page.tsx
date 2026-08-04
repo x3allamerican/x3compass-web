@@ -6,10 +6,6 @@ export default function AuditPage() {
     <HazmatSubPageShell
       activeId="hazmat-audit"
       pageTitle="AUDIT CHECKLIST"
-      eyebrow="X3 Compass · Hazmat Center · Audit Checklist"
-      heading={<>The four audit areas FMCSA actually scores.</>}
-      sub="Classification accuracy · Shipping paper sequence · Placard correctness · Training currency. Walk every CR with the same playbook the inspector uses."
-      regs="49 CFR §§ 172.101 · 172.202 · 172.504 · 172.704"
       eduSurface="Audit Checklist"
       eduSubtitle="49 CFR Part 172 · the four areas that drive every Compliance Review finding"
       conciergeHref="/app/ask?context=hazmat-audit"

@@ -90,7 +90,6 @@ const cors = {
   // === Send notification email via Resend ===
   let emailOk = false;
   let emailId: string | null = null;
-  let emailError: string | null = null;
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -112,16 +111,13 @@ const cors = {
       emailOk = true;
       emailId = j.id;
     } else {
-      emailError = j.message || `Resend HTTP ${r.status}`;
+      console.error("partner notification delivery failed", { status: r.status });
     }
-  } catch (err: unknown) {
-    emailError = err instanceof Error ? err.message : "unknown email error";
+  } catch {
+    console.error("partner notification delivery failed");
   }
 
   // === Send auto-acknowledgment to applicant (best-effort) ===
-  let ackOk = false;
-  let ackId: string | null = null;
-  let ackError: string | null = null;
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -138,20 +134,13 @@ const cors = {
         text: renderAckText(submission),
       }),
     });
-    const j = await r.json() as { id?: string; message?: string };
-    if (r.ok && j.id) {
-      ackOk = true;
-      ackId = j.id;
-    } else {
-      ackError = j.message || `Resend HTTP ${r.status}`;
-    }
-  } catch (err: unknown) {
-    ackError = err instanceof Error ? err.message : "unknown ack-email error";
+    if (!r.ok) console.error("partner acknowledgment delivery failed", { status: r.status });
+  } catch {
+    console.error("partner acknowledgment delivery failed");
   }
 
   // === Write to Supabase (best-effort) ===
   let supabaseOk = false;
-  let supabaseError: string | null = null;
   if (ctx.env.SUPABASE_URL && ctx.env.SUPABASE_SERVICE_ROLE) {
     try {
       const r = await fetch(`${ctx.env.SUPABASE_URL}/rest/v1/partner_applications`, {
@@ -183,22 +172,19 @@ const cors = {
         }),
       });
       if (r.ok) supabaseOk = true;
-      else supabaseError = `Supabase HTTP ${r.status}: ${await r.text()}`;
-    } catch (err: unknown) {
-      supabaseError = err instanceof Error ? err.message : "unknown supabase error";
+      else console.error("partner application persistence failed", { status: r.status });
+    } catch {
+      console.error("partner application persistence failed");
     }
   }
 
   // Email-or-DB failure is logged but doesn't fail the user request unless both fail
   if (!emailOk && !supabaseOk) {
-    return new Response(
-      JSON.stringify({ ok: false, error: "All delivery channels failed", emailError, supabaseError }),
-      { status: 500, headers: { "Content-Type": "application/json", ...cors } }
-    );
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 
   return new Response(
-    JSON.stringify({ ok: true, emailSent: emailOk, dbWritten: supabaseOk, ackSent: ackOk, ackId, ackError }),
+    JSON.stringify({ ok: true }),
     { status: 200, headers: { "Content-Type": "application/json", ...cors } }
   );
 };
@@ -341,3 +327,4 @@ Submitted ${now} from x3compass.com/partners/apply
 Reply to this email to respond to the applicant.`;
 }
 import { rateLimit } from "../../_shared/rate-limit";
+import { correlationId, securityError } from "../../_shared/request-security";

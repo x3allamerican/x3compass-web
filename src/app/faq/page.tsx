@@ -5,7 +5,7 @@ const FAQS = [
   {
     section: "GENERAL",
     items: [
-      { q: "What is X3 Compass?", a: "X3 Compass is the AI Safety Director for motor carriers running 1–100 power units. Twelve specialized brains (DQ Files, MVR, HOS, D&A, CSA, Training, Hazmat, etc.), backed by a 67,000-document CFR knowledge base — every answer grounded in the actual CFR." },
+      { q: "What is X3 Compass?", a: "X3 Compass is the AI Safety Director for motor carriers running 1–100 power units. The X3 compliance corpus powers DQ Files, MVR, HOS, D&A, CSA, Training, Hazmat, and the rest of the integrated product family — every answer grounded in the actual CFR." },
       { q: "Who is it for?", a: "Owner-operators, small fleets, and mid-size carriers who can't justify a full-time $100K/yr Safety Director. One plan, graduated per-driver: $50/driver for your first 50, then $40, $30 and $25 per driver as the fleet grows. Every product is included at every size." },
       { q: "How is this different from X3 Fleet Safety?", a: "X3 Fleet Safety is the human-led compliance service · a real safety advisor working your account. X3 Compass is the AI platform that powers it, now shipping as one plan with every product included. Same DOT expertise. Different delivery model." },
       { q: "Is this a real product or vaporware?", a: "Real. Twelve brains live, dashboard built, and a 67,000-document CFR knowledge base behind every answer — with our skills library published on GitHub (github.com/x3fleetsafety/skills). You can start a 7-day trial right now." },
