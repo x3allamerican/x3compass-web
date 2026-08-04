@@ -53,3 +53,10 @@ test("rejects malformed as-of dates and ignores pending/error queries as complet
   ], consents: [], violations: [] });
   assert.equal(result.drivers[0].annualStatus, "missing_evidence");
 });
+
+test("accepts database timestamptz query evidence without changing its calendar date", () => {
+  const result = buildClearinghouseStatus({ asOf: "2026-08-04", drivers: drivers.slice(0, 1), queries: [
+    { driver_id: "d1", query_type: "annual_limited", query_run_at: "2026-01-15T18:30:00.000Z", result: "no_information" },
+  ], consents: [], violations: [] });
+  assert.equal(result.drivers[0].annualDueOn, "2027-01-15");
+});

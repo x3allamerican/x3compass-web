@@ -4,9 +4,11 @@ const DAY = 86_400_000;
 const GUARDRAIL = "Decision support only. Missing or recorded Clearinghouse evidence requires human review before any safety-sensitive duty decision.";
 
 function date(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value ? parsed : null;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}(?:$|T)/.test(value)) return null;
+  const calendarDate = value.slice(0, 10);
+  const source = value.length === 10 ? `${calendarDate}T00:00:00Z` : value;
+  const parsed = new Date(source);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === calendarDate ? new Date(`${calendarDate}T00:00:00Z`) : null;
 }
 
 function addYear(value) {
@@ -24,6 +26,15 @@ function latest(rows, field) {
   return rows.filter((row) => date(row[field])).sort((a, b) => String(b[field]).localeCompare(String(a[field])))[0] || null;
 }
 
+/**
+ * @param {{
+ *   asOf: string,
+ *   drivers?: Array<Record<string, any>>,
+ *   queries?: Array<Record<string, any>>,
+ *   consents?: Array<Record<string, any>>,
+ *   violations?: Array<Record<string, any>>
+ * }} input
+ */
 export function buildClearinghouseStatus({ asOf, drivers = [], queries = [], consents = [], violations = [] }) {
   const today = date(asOf);
   if (!today) throw new Error("asOf must be a valid YYYY-MM-DD date");
