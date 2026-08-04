@@ -1,136 +1,156 @@
 /**
- * CarrierOk API client — fetches SAFER + SMS (CSA BASIC) data for a USDOT.
+ * CarrierOk API client — fetches the live FMCSA carrier profile (SAFER + SMS /
+ * CSA BASIC percentiles) for a USDOT number.
  *
- * CarrierOk is the canonical CSA data feed we chose in Sprint #125. The Dev
- * tier ($) gives us real BASIC percentile measures (unsafe driving, crash
- * indicator, HOS compliance, vehicle maintenance, hazmat, driver fitness,
- * controlled substances) plus underlying inspection + crash records.
+ * Verified against the real CarrierOk v2 API (developers.carrierok.com, Aug 2026):
+ *   Base:     https://api.carrierok.com
+ *   Auth:     Authorization: Bearer sk_live_*   (keep server-side only)
+ *   Endpoint: GET /v2/profile?dot_number=<usdot>
+ *   Response: { items: CarrierProfile[], total_count } — profile at items[0],
+ *             BASIC fields are FLAT on the profile object.
  *
- * REQUIRED env: CARRIEROK_API_KEY
- * Optional env: CARRIEROK_BASE_URL  (defaults to https://api.carrierok.com/v1)
+ * BASIC categories use CarrierOk's field spelling (note "maintence" and
+ * "hazardous_materials"):
+ *   basic_percentile_<cat>  — 0..1 percentile relative to peer group (higher = worse)
+ *   basic_measure_<cat>     — raw BASIC measure (fallback when no percentile)
  *
- * Endpoints used:
- *   GET /carriers/{usdot}                 — SAFER profile + summary
- *   GET /carriers/{usdot}/sms             — BASIC percentile measures
- *   GET /carriers/{usdot}/inspections     — last 24mo of inspections
- *   GET /carriers/{usdot}/crashes         — last 24mo of crashes
- *
- * NOTE: until the developer signup completes and we confirm the response
- * shapes against real data, the mapToSnapshot() function is the only thing
- * that needs to change. The wrapper, retry, and error handling are stable.
+ * REQUIRED env (any of, first wins):
+ *   CARRIER-OK_API_KEY_LIVE  (canonical vault name — hyphenated)
+ *   CARRIEROK_API_KEY_LIVE
+ *   CARRIEROK_API_KEY        (legacy)
+ * Optional env: CARRIEROK_BASE_URL (defaults to https://api.carrierok.com)
  */
 
 export interface CarrierOkEnv {
+  "CARRIER-OK_API_KEY_LIVE"?: string;
+  CARRIEROK_API_KEY_LIVE?: string;
   CARRIEROK_API_KEY?: string;
   CARRIEROK_BASE_URL?: string;
-}
-
-export interface CarrierOkSmsRecord {
-  // The five fields below are what we actually map to compass_csa_snapshots.
-  // Names follow CarrierOk's documented "msr" (measure) convention but the
-  // exact JSON keys may differ — verify against a real response on first run.
-  unsafe_driving?:  number | null;
-  crash_indicator?: number | null;
-  hos_compliance?:  number | null;
-  vehicle_maint?:   number | null;
-  hazmat?:          number | null;
-  driver_fitness?:  number | null;
-  ctrl_substances?: number | null;
-  measured_at?:     string;
-  // Whatever else CarrierOk returns we keep in `raw` for forensic lookback
   [key: string]: unknown;
 }
 
-interface CarrierOkProfile {
+/** Resolve the CarrierOk API key from the accepted env names (first non-empty wins). */
+export function carrierOkKey(env: CarrierOkEnv): string | undefined {
+  const candidates = [
+    env["CARRIER-OK_API_KEY_LIVE"],
+    env.CARRIEROK_API_KEY_LIVE,
+    env.CARRIEROK_API_KEY,
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  return undefined;
+}
+
+/** A single carrier profile object (subset of the ~280 CarrierOk fields we use). */
+export interface CarrierOkProfile {
+  dot_number?: string | number;
+  docket_number?: string;
   legal_name?: string;
   dba_name?: string;
-  carrier_operation?: string;
-  hazmat_flag?: boolean;
-  total_power_units?: number;
-  total_drivers?: number;
   state?: string;
-  out_of_service_date?: string | null;
+  total_power_units?: string | number;
+  total_drivers?: string | number;
+  mcs150_date?: string;
+  // BASIC percentiles / measures are flat, keyed by category — see helpers below.
   [key: string]: unknown;
 }
 
 export interface CarrierOkPayload {
   profile: CarrierOkProfile | null;
-  sms:     CarrierOkSmsRecord | null;
   ok:      boolean;
   errors:  string[];
   raw:     Record<string, unknown>;
 }
 
-/**
- * Map a CarrierOk SMS response onto our compass_csa_snapshots row shape.
- * The keys on the left are the column names in compass_csa_snapshots.
- *
- * If CarrierOk uses different JSON keys than we guessed, change ONLY this
- * function. The mapping is the single source of truth for the field-name
- * translation.
- */
-export function mapToSnapshot(carrierId: string, payload: CarrierOkPayload): Record<string, unknown> {
-  const sms = payload.sms || {};
-  // Coerce nullable numbers — null and missing both become null
-  const num = (v: unknown): number | null => {
-    if (v == null) return null;
-    const n = typeof v === "number" ? v : parseFloat(String(v));
-    return Number.isFinite(n) ? n : null;
-  };
-
-  return {
-    carrier_id:      carrierId,
-    source:          "carrierok",
-    unsafe_driving:  num(sms.unsafe_driving),
-    crash_indicator: num(sms.crash_indicator),
-    hos_compliance:  num(sms.hos_compliance),
-    vehicle_maint:   num(sms.vehicle_maint),
-    hazmat:          num(sms.hazmat),
-    driver_fitness:  num(sms.driver_fitness),
-    ctrl_substances: num(sms.ctrl_substances),
-    raw:             payload.raw,
-  };
+/** Coerce number|string|null -> number|null. */
+function num(v: unknown): number | null {
+  if (v == null || v === "") return null;
+  const n = typeof v === "number" ? v : parseFloat(String(v));
+  return Number.isFinite(n) ? n : null;
 }
 
 /**
- * Fetch a carrier's full CarrierOk profile + SMS + recent inspections/crashes.
- *
- * Designed to be safe to call from any agent — never throws, returns
- * `{ ok: false, errors: [...] }` if the API key is missing or the request fails.
+ * Category name (CarrierOk spelling) -> our compass_csa_snapshots column.
+ * Order is stable for readability; the map is the single source of truth.
+ */
+const BASIC_MAP: Array<[cat: string, col: string]> = [
+  ["unsafe_driving",       "unsafe_driving"],
+  ["crash_indicator",      "crash_indicator"],
+  ["hours_of_service",     "hos_compliance"],
+  ["vehicle_maintence",    "vehicle_maint"],
+  ["hazardous_materials",  "hazmat"],
+  ["driver_fitness",       "driver_fitness"],
+  ["controlled_substance", "ctrl_substances"],
+];
+
+/**
+ * Read one BASIC category as a 0–100 percentile for display.
+ * Prefers basic_percentile_<cat> (0..1 -> x100). Falls back to
+ * basic_measure_<cat>: if it looks like a 0..1 fraction, x100; else raw.
+ * Returns null when neither is present.
+ */
+function basicPercentile(p: CarrierOkProfile, cat: string): number | null {
+  const pct = num(p[`basic_percentile_${cat}`]);
+  if (pct != null) return Math.round(pct * 100 * 10) / 10;
+  const m = num(p[`basic_measure_${cat}`]);
+  if (m == null) return null;
+  return m <= 1 ? Math.round(m * 100 * 10) / 10 : Math.round(m * 10) / 10;
+}
+
+/**
+ * Map a CarrierOk profile onto a compass_csa_snapshots row.
+ * Columns: carrier_id, taken_at, <7 BASIC percentiles>, source, raw.
+ */
+export function mapToSnapshot(carrierId: string, payload: CarrierOkPayload): Record<string, unknown> {
+  const p = payload.profile || {};
+  const row: Record<string, unknown> = {
+    carrier_id: carrierId,
+    taken_at:   new Date().toISOString(),
+    source:     "carrierok",
+    raw:        payload.raw,
+  };
+  for (const [cat, col] of BASIC_MAP) {
+    row[col] = basicPercentile(p, cat);
+  }
+  return row;
+}
+
+/**
+ * Fetch a carrier's live CarrierOk profile by USDOT.
+ * Never throws — returns { ok:false, errors:[...] } on missing key / HTTP error.
  */
 export async function fetchCarrierOk(env: CarrierOkEnv, usdot: string | number): Promise<CarrierOkPayload> {
   const errors: string[] = [];
   const raw: Record<string, unknown> = {};
-  if (!env.CARRIEROK_API_KEY) {
-    return { profile: null, sms: null, ok: false, errors: ["CARRIEROK_API_KEY not set"], raw };
+  const key = carrierOkKey(env);
+  if (!key) {
+    return { profile: null, ok: false, errors: ["CarrierOk API key not set"], raw };
   }
 
-  const base = (env.CARRIEROK_BASE_URL || "https://api.carrierok.com/v1").replace(/\/$/, "");
+  const base = (env.CARRIEROK_BASE_URL || "https://api.carrierok.com").replace(/\/$/, "");
+  const url = `${base}/v2/profile?dot_number=${encodeURIComponent(String(usdot))}`;
   const headers = {
-    "Authorization": `Bearer ${env.CARRIEROK_API_KEY}`,
+    "Authorization": `Bearer ${key}`,
     "Accept":        "application/json",
     "User-Agent":    "X3Compass/1.0 (+https://x3compass.com)",
   };
 
-  async function getJson(path: string): Promise<unknown> {
-    const url = `${base}${path}`;
+  try {
     const r = await fetch(url, { headers });
-    if (!r.ok) throw new Error(`${path} HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
-    return r.json();
+    if (!r.ok) {
+      const body = (await r.text()).slice(0, 200);
+      return { profile: null, ok: false, errors: [`profile HTTP ${r.status}: ${body}`], raw };
+    }
+    const json = (await r.json()) as { items?: CarrierOkProfile[]; total_count?: number };
+    raw.response = json;
+    const profile = Array.isArray(json.items) && json.items.length ? json.items[0] : null;
+    if (!profile) {
+      return { profile: null, ok: false, errors: [`no carrier found for USDOT ${usdot}`], raw };
+    }
+    return { profile, ok: true, errors, raw };
+  } catch (e) {
+    errors.push(`profile: ${e instanceof Error ? e.message : String(e)}`);
+    return { profile: null, ok: false, errors, raw };
   }
-
-  let profile: CarrierOkProfile | null = null;
-  let sms:     CarrierOkSmsRecord  | null = null;
-
-  try {
-    profile = (await getJson(`/carriers/${usdot}`)) as CarrierOkProfile;
-    raw.profile = profile;
-  } catch (e) { errors.push(`profile: ${e instanceof Error ? e.message : String(e)}`); }
-
-  try {
-    sms = (await getJson(`/carriers/${usdot}/sms`)) as CarrierOkSmsRecord;
-    raw.sms = sms;
-  } catch (e) { errors.push(`sms: ${e instanceof Error ? e.message : String(e)}`); }
-
-  return { profile, sms, ok: errors.length === 0, errors, raw };
 }

@@ -10,6 +10,7 @@ const APP_PAGES = [
   "/app/accidents", "/app/inspections", "/app/drug-alcohol", "/app/hos",
   "/app/training", "/app/mvr", "/app/ifta", "/app/audit-export",
   "/app/settings", "/app/da-concierge", "/app/background-checks", "/app/ask",
+  "/app/onboarding",
 ];
 
 for (const path of APP_PAGES) {

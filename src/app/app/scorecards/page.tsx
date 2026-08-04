@@ -104,14 +104,17 @@ export default function ScorecardsPage() {
       .catch(() => setApi(null));
   }, [carrierId]);
 
+  // Demo data is preview-only; a signed-in carrier sees real values / honest zeros.
+  const allowDemo = !carrier;
+  const ZERO_FLEET = { avg_score: 0, a_tier_count: 0, watchlist_count: 0, pct_crash_24mo: 0, total_drivers: 0 };
   const scorecards = useMemo(() => {
     const live = api?.scorecards;
-    const data = live && live.length > 0 ? live : DEMO_SCORECARDS;
+    const data = live && live.length > 0 ? live : (allowDemo ? DEMO_SCORECARDS : []);
     return tierFilter === "ALL" ? data : data.filter(s => s.tier === tierFilter);
-  }, [api, tierFilter]);
+  }, [api, tierFilter, allowDemo]);
 
-  const fleet = api?.fleet ? { ...DEMO_FLEET, ...api.fleet } : DEMO_FLEET;
-  const isDemo = !api?.scorecards || api.scorecards.length === 0;
+  const fleet = api?.fleet ? { ...(allowDemo ? DEMO_FLEET : ZERO_FLEET), ...api.fleet } : (allowDemo ? DEMO_FLEET : ZERO_FLEET);
+  const isDemo = allowDemo && (!api?.scorecards || api.scorecards.length === 0);
 
   if (userLoading) {
     return <AppShell title="Safety Scorecards" crumbs="Drivers · Performance ranking"><div className="p-6"><SkeletonShell kpis={4} rows={6} /></div></AppShell>;

@@ -6,6 +6,7 @@ import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
 import { SkeletonShell } from "@/components/Skeleton";
+import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { monthlyFor, effectiveRate, usd } from "@/lib/pricing";
 
 type Step = 1 | 2 | 3;
@@ -27,6 +28,7 @@ export default function OnboardingPage() {
   const [drivers, setDrivers] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDriverImport, setShowDriverImport] = useState(false);
 
   useEffect(() => { if (!loading && !user) router.replace("/signin?return_to=/app/onboarding"); }, [user, loading, router]);
   useEffect(() => { if (carrier) { setCarrierName(carrier.name); setUsdot(carrier.usdot_number || ""); } }, [carrier]);
@@ -104,8 +106,20 @@ export default function OnboardingPage() {
             </div>
           </>)}
           {step === 2 && (<>
-            <h2 className="text-xl font-extrabold mb-1">2 · Add your first driver</h2>
-            <p className="text-[12px] text-[var(--fg-muted)] mb-6">Optional · you can skip.</p>
+            <h2 className="text-xl font-extrabold mb-1">2 · Import your drivers</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-5">Start with your real roster so Compass can build accurate DQ, MVR, training, and expiration views. Nothing is prefilled with demo drivers.</p>
+            <button
+              disabled={!carrier}
+              onClick={() => setShowDriverImport(true)}
+              className="x3-btn-primary mb-6"
+            >
+              Import driver roster →
+            </button>
+            <div className="flex items-center gap-3 mb-5" aria-hidden="true">
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-faint)] font-bold">Or add one driver manually</span>
+              <div className="h-px flex-1 bg-[var(--border)]" />
+            </div>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="First"><input className="x3-input" value={driverFirst} onChange={(e) => setDriverFirst(e.target.value)} /></Field>
@@ -118,7 +132,7 @@ export default function OnboardingPage() {
               </div>
               {error && <Err msg={error} />}
               <div className="flex gap-3">
-                <button disabled={busy} onClick={() => setStep(3)} className="x3-btn-secondary">Skip</button>
+                <button disabled={busy} onClick={() => setStep(3)} className="x3-btn-secondary">Skip for now</button>
                 <button disabled={busy} onClick={saveDriver} className="x3-btn-primary flex-1">{busy ? "Saving…" : "Add driver →"}</button>
               </div>
             </div>
@@ -149,6 +163,16 @@ export default function OnboardingPage() {
         </div>
         <p className="text-center mt-6 text-[12px] text-[var(--fg-faint)]">Want to talk first? <Link href="/faq" className="text-[var(--accent)]">FAQ →</Link></p>
       </div>
+      {showDriverImport && carrier && (
+        <DriverImportModal
+          carrierId={carrier.id}
+          onClose={() => setShowDriverImport(false)}
+          onImported={() => {
+            setShowDriverImport(false);
+            setStep(3);
+          }}
+        />
+      )}
       <style jsx global>{`
         .x3-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
         .x3-input:focus { outline: none; border-color: #16C7FF; }
@@ -166,4 +190,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Err({ msg }: { msg: string }) {
   return <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
 }
-

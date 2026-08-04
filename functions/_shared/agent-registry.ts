@@ -584,12 +584,13 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   if (!carrier) return { status: "error", summary: `Carrier ${carrierId} not found`, log: log.text() };
 
   // ─── Path A: CarrierOk (real CSA / SMS data) ─────────────────────────
-  const env2 = env as Env & { CARRIEROK_API_KEY?: string; CARRIEROK_BASE_URL?: string };
-  if (env2.CARRIEROK_API_KEY && carrier.usdot_number) {
+  const env2 = env as Env & Record<string, unknown>;
+  const { fetchCarrierOk, mapToSnapshot, carrierOkKey } = await import("./carrierok");
+  const carrierOkPresent = !!carrierOkKey(env2);
+  if (carrierOkPresent && carrier.usdot_number) {
     try {
-      const { fetchCarrierOk, mapToSnapshot } = await import("./carrierok");
       const payload = await fetchCarrierOk(env2, carrier.usdot_number);
-      if (payload.ok && payload.sms) {
+      if (payload.ok && payload.profile) {
         const snap = mapToSnapshot(carrierId, payload);
         await supa.insert("compass_csa_snapshots", snap);
         log.info(`[csa-baseline] carrier ${carrier.name} (DOT ${carrier.usdot_number}): CarrierOk snapshot written`);
@@ -599,8 +600,8 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
     } catch (e) {
       log.warn(`[csa-baseline] CarrierOk threw: ${e instanceof Error ? e.message : String(e)} — falling back`);
     }
-  } else if (!env2.CARRIEROK_API_KEY) {
-    log.info("[csa-baseline] CARRIEROK_API_KEY not set — using inspection approximation");
+  } else if (!carrierOkPresent) {
+    log.info("[csa-baseline] CarrierOk API key not set — using inspection approximation");
   } else if (!carrier.usdot_number) {
     log.info(`[csa-baseline] carrier ${carrier.name} has no usdot_number on file — using inspection approximation`);
   }
@@ -608,7 +609,7 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   // ─── Path B: Inspection-based approximation (no key, or CarrierOk failed) ──
   const inspections = await supa.select("compass_inspections", `select=id,inspection_date,violation_count,oos_driver,oos_vehicle&carrier_id=eq.${carrierId}&inspection_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; violation_count: number | null; oos_driver: boolean | null; oos_vehicle: boolean | null }>;
   const accidents = await supa.select("compass_accidents", `select=id,accident_date,recordable,fatalities,injuries&carrier_id=eq.${carrierId}&accident_date=gte.${new Date(Date.now() - 730 * 86400_000).toISOString().slice(0, 10)}`) as Array<{ id: string; recordable: boolean | null; fatalities: number | null; injuries: number | null }>;
-  const snap = { carrier_id: carrierId, source: "computed_from_inspections", raw: { inspections: inspections.length, accidents: accidents.length, computed_at: new Date().toISOString() }, unsafe_driving: 0, crash_indicator: accidents.length * 0.5, hos_compliance: 0, vehicle_maint: 0, hazmat: 0, driver_fitness: 0, ctrl_substances: 0 };
+  const snap = { carrier_id: carrierId, taken_at: new Date().toISOString(), source: "computed_from_inspections", raw: { inspections: inspections.length, accidents: accidents.length, computed_at: new Date().toISOString() }, unsafe_driving: 0, crash_indicator: accidents.length * 0.5, hos_compliance: 0, vehicle_maint: 0, hazmat: 0, driver_fitness: 0, ctrl_substances: 0 };
   await supa.insert("compass_csa_snapshots", snap);
   log.info(`[csa-baseline] carrier ${carrierId}: ${inspections.length} inspections · ${accidents.length} accidents`);
   return { status: "ok", summary: `Baseline snapshot written for carrier ${carrierId} (${inspections.length} inspections, ${accidents.length} accidents · approximation until CarrierOk key is set)`, log: log.text() };

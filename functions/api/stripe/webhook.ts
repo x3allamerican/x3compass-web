@@ -1,6 +1,9 @@
 import { supaFetch } from "../../_shared/supabase-admin";
 import { paymentFailedEmail, sendEmail } from "../../_shared/emails";
 import { correlationId, isUuid, securityError } from "../../_shared/request-security";
+import { verifyStripeSignature } from "../../_shared/stripe-security.mjs";
+
+export { verifyStripeSignature };
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -33,24 +36,6 @@ export async function reserveStripeEvent(store: StripeEventStore, event: StripeE
     return rows[0].processed_at ? "processed" : "retry";
   }
 }
-
-export async function verifyStripeSignature(payload: string, sigHeader: string, secret: string, now = Date.now() / 1000): Promise<boolean> {
-  const parts = sigHeader.split(",");
-  const timestamp = parts.find((p) => p.startsWith("t="))?.slice(2);
-  const v1Sig = parts.find((p) => p.startsWith("v1="))?.slice(3);
-  if (!timestamp || !v1Sig) return false;
-  if (!Number.isFinite(Number(timestamp)) || Math.abs(now - Number(timestamp)) > 300) return false;
-  const signedPayload = `${timestamp}.${payload}`;
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(signedPayload));
-  const hex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  if (hex.length !== v1Sig.length) return false;
-  let diff = 0;
-  for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ v1Sig.charCodeAt(i);
-  return diff === 0;
-}
-
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const requestId = correlationId(ctx.request);
   const rawBody = await ctx.request.text();

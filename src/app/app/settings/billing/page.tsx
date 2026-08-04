@@ -52,12 +52,12 @@ function BillingInner() {
         <div className="grid md:grid-cols-2 gap-4">
           <button onClick={openPortal} disabled={portalLoading} className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] text-left">
             <div className="text-xl font-extrabold mb-1">Manage subscription</div>
-            <div className="text-[12px] text-[var(--fg-muted)]">Update card · cancel · invoices · change plan</div>
+            <div className="text-[12px] text-[var(--fg-muted)]">Update card · cancel · view invoices</div>
             {portalLoading && <div className="text-[11px] text-[var(--accent)] mt-3">Opening Stripe portal…</div>}
           </button>
           <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] block">
-            <div className="text-xl font-extrabold mb-1">Switch plan</div>
-            <div className="text-[12px] text-[var(--fg-muted)]">Graduated per-driver · every X3 product included</div>
+            <div className="text-xl font-extrabold mb-1">View pricing details</div>
+            <div className="text-[12px] text-[var(--fg-muted)]">One graduated per-driver plan · every X3 product included</div>
           </Link>
         </div>
         {error && <div className="mt-6 text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}

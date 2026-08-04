@@ -143,10 +143,10 @@ export default function InspectionsPage() {
   // Fall back to demo Apex-Logistics inspection log (7 records, 21d window)
   // when the real Supabase query returns no rows for this carrier yet.
   const effectiveRows = useMemo(
-    () => withDemoFallback(rows, DEMO_INSPECTIONS.map(adaptDemoInspection) as I[]),
-    [rows]
+    () => withDemoFallback(rows, DEMO_INSPECTIONS.map(adaptDemoInspection) as I[], !carrier),
+    [rows, carrier]
   );
-  const isDemo = rows.length === 0;
+  const isDemo = !carrier && rows.length === 0;
 
   const filtered = useMemo(() => effectiveRows.filter(r => {
     if (filterLevel && String(r.level) !== filterLevel) return false;

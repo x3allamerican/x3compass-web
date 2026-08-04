@@ -12,7 +12,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const token = bearerFromRequest(ctx.request);
     const user = await verifySupabaseJwt(ctx.env, token);
     if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
-    if (!ctx.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Stripe not configured" }, 500);
+    if (!ctx.env.STRIPE_SECRET_KEY) return securityError(503, "service_unavailable", correlationId(ctx.request));
 
     const supa = supaFetch(ctx.env);
     const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=compass_carriers(id,stripe_customer_id)`)) as Array<{ compass_carriers: { id: string; stripe_customer_id: string | null } }>;
