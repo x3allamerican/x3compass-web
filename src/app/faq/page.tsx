@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteShell from "@/components/SiteShell";
+import { COMPASS_COPY } from "@/lib/pricing";
 
 const FAQS = [
   {
@@ -7,16 +8,16 @@ const FAQS = [
     items: [
       { q: "What is X3 Compass?", a: "X3 Compass is the AI Safety Director for motor carriers running 1–100 power units. The X3 compliance corpus powers DQ Files, MVR, HOS, D&A, CSA, Training, Hazmat, and the rest of the integrated product family — every answer grounded in the actual CFR." },
       { q: "Who is it for?", a: "Owner-operators, small fleets, and mid-size carriers who can't justify a full-time $100K/yr Safety Director. One plan, graduated per-driver: $50/driver for your first 50, then $40, $30 and $25 per driver as the fleet grows. Every product is included at every size." },
-      { q: "How is this different from X3 Fleet Safety?", a: "X3 Fleet Safety is the human-led compliance service · a real safety advisor working your account. X3 Compass is the AI platform that powers it, now shipping as one plan with every product included. Same DOT expertise. Different delivery model." },
+      { q: "How is this different from X3 Fleet Safety?", a: COMPASS_COPY.delivery },
       { q: "Is this a real product or vaporware?", a: "Real. Twelve brains live, dashboard built, and a 67,000-document CFR knowledge base behind every answer — with our skills library published on GitHub (github.com/x3fleetsafety/skills). You can start a 7-day trial right now." },
     ],
   },
   {
     section: "PRICING & BILLING",
     items: [
-      { q: "How much does it cost?", a: "One graduated plan: $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so a 100-driver fleet pays $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included — hazmat too, at no extra cost." },
-      { q: "Is there a free trial?", a: "Yes · 7 days, no credit card required. Every brain, the full knowledge base, and the Hazmat Center are included. After 7 days you pick a plan or cancel." },
-      { q: "Do I lose features at the lower rates?", a: "No. Every X3 product is included at every fleet size. The rate per driver falls as you grow; the product never changes." },
+      { q: "How much does it cost?", a: COMPASS_COPY.pricing },
+      { q: "Is there a free trial?", a: COMPASS_COPY.trial },
+      { q: "Do I lose features at the lower rates?", a: COMPASS_COPY.included },
       { q: "What if I have more than 100 drivers?", a: "That's Enterprise. Call us. Volume pricing, dedicated advisor team, white-label dashboard for partners, SSO, custom CFR skills." },
     ],
   },
@@ -40,7 +41,7 @@ const FAQS = [
   {
     section: "ACCOUNT & SECURITY",
     items: [
-      { q: "How do team seats work?", a: "Every tier includes unlimited team seats. Roles: owner, admin, dispatcher, safety, billing. Invite people from Settings. They each get their own login, audit trail, and notification preferences." },
+      { q: "How do team seats work?", a: "The Compass plan includes unlimited team seats. Roles: owner, admin, dispatcher, safety, billing. Invite people from Settings. They each get their own login, audit trail, and notification preferences." },
       { q: "How secure is my data?", a: "Encrypted in transit (TLS 1.3) and at rest (AES-256). Hosted on Cloudflare + Supabase. SOC 2 Type II inheritance via our infrastructure providers. Dedicated security page coming with our own attestation." },
       { q: "Can I export my data and leave?", a: "Yes, any time. Export every CSV, every PDF, every audit bundle. No lock-in. We charge for the brain, not for keeping your files hostage." },
     ],
