@@ -7,6 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 import CTPAPickerCard, { type Ctpa } from "@/components/CTPAPickerCard";
+import { ClearinghouseStatusPanel } from "@/components/app/ClearinghouseStatusPanel";
 
 type TestType = "Pre-employment" | "Random" | "Post-accident" | "Reasonable suspicion" | "Return-to-duty" | "Follow-up";
 type TestResult = "Negative" | "Negative-dilute" | "Positive" | "Refusal" | "Pending";
@@ -369,9 +370,10 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
 
   if (rows.length === 0) {
     return (
-      <AppShell title="Drug & Alcohol Testing">
-        <div className="p-6"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
-        <div className="p-8 pt-2 max-w-2xl">
+          <AppShell title="Drug & Alcohol Testing">
+            <div className="p-6"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
+            <div className="px-6"><ClearinghouseStatusPanel /></div>
+            <div className="p-8 pt-2 max-w-2xl">
           <div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
             <div className="text-3xl mb-3" aria-hidden>🧪</div>
             <div className="text-[15px] font-extrabold text-white">No test records yet</div>
@@ -386,6 +388,7 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
     <AppShell title="Drug & Alcohol Testing">
       <div className="p-6 pb-0"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
       <div className="p-6 space-y-6">
+        <ClearinghouseStatusPanel />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[["Tests on file", stats.total], ["Random tests", stats.random], ["Pending results", stats.pending], ["Positives / refusals", stats.positives]].map(([label, val]) => (
             <div key={String(label)} className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4">
