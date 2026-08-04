@@ -29,6 +29,8 @@
  *
  */
 import { correlationId, securityError } from "../../_shared/request-security";
+import { sendEmail } from "../../_shared/emails";
+import { mvrChangeAlert, shouldSendMvrChangeAlert } from "../../_shared/mvr-change-alert.mjs";
 
 interface Env {
   SUPABASE_URL?: string;
@@ -36,6 +38,9 @@ interface Env {
   CHECKR_STAGING_WEBHOOK_SECRET?: string;
   CHECKR_LIVE_WEBHOOK_SECRET?: string;
   CHECKR_ENV?: "staging" | "live";
+  RESEND_API_KEY?: string;
+  EMAIL_FROM_NO_REPLY?: string;
+  NEXT_PUBLIC_SITE_URL?: string;
 }
 
 const json = (data: unknown, status = 200): Response =>
@@ -411,6 +416,33 @@ export async function applyContinuousMvr(
         notes: `Continuous MVR change detected${reportId ? ` · report ${reportId}` : ""}`,
       }),
     });
+    if (reportId) {
+      const period = nowIso.slice(0, 7);
+      const claimResponse = await fetch(`${base}/rest/v1/compass_mvr_billing_events?on_conflict=dedupe_key`, {
+        method: "POST", headers: { ...sbHeaders, Prefer: "resolution=ignore-duplicates,return=representation" },
+        body: JSON.stringify({
+          carrier_id: mon.carrier_id, monitor_id: mon.id, event_type: "triggered_report", service_period: period,
+          vendor_report_id: reportId, vendor_cost_cents: 950, retail_cents: 950,
+          dedupe_key: `triggered:${reportId}`,
+        }),
+      });
+      const claimed = claimResponse.ok ? await claimResponse.json() as Array<{ id: string }> : [];
+      if (shouldSendMvrChangeAlert(claimed)) {
+        const carrierResponse = await fetch(`${base}/rest/v1/compass_carriers?id=eq.${mon.carrier_id}&select=name,primary_contact_email&limit=1`, { headers: sbHeaders });
+        const carriers = carrierResponse.ok ? await carrierResponse.json() as Array<{ name: string; primary_contact_email: string | null }> : [];
+        const carrier = carriers[0];
+        if (carrier?.primary_contact_email) {
+          const message = mvrChangeAlert({ carrierName: carrier.name, result, violationsCount, reportId, siteUrl: env.NEXT_PUBLIC_SITE_URL });
+          const sent = await sendEmail(env, { to: carrier.primary_contact_email, ...message });
+          await fetch(`${base}/rest/v1/compass_mvr_billing_events?id=eq.${claimed[0].id}`, {
+            method: "PATCH", headers: { ...sbHeaders, Prefer: "return=minimal" },
+            body: JSON.stringify(sent.ok
+              ? { alert_sent_at: nowIso, alert_email_id: sent.id || null, alert_error: null }
+              : { alert_error: sent.error || "email delivery failed" }),
+          });
+        }
+      }
+    }
     await patchMonitor(mon.id, { ...(reportId ? { last_report_id: reportId } : {}), last_change_at: nowIso });
     await fetch(`${base}/rest/v1/notification_log?on_conflict=carrier_id,dedupe_key`, {
       method: "POST", headers: { ...sbHeaders, Prefer: "resolution=ignore-duplicates,return=minimal" },
