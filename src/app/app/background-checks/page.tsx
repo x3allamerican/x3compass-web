@@ -65,17 +65,23 @@ type OrderRow = {
   completed_at: string | null;
   last_event_at: string | null;
   adverse_action_at: string | null;
+  eta_completion_at: string | null;
   invitation_url: string | null;
   vendor_ref_id: string | null;
 };
 
-function isCompletedOrder(order: OrderRow): boolean {
-  return order.status === "completed" || ["clear", "eligible", "engaged"].includes((order.effective_status || "").toLowerCase());
+function isAdverseAction(status: string): boolean {
+  return status === "pre_adverse_action" || status === "post_adverse_action";
 }
 
-function needsAdverseReview(order: OrderRow): boolean {
-  return [order.checkr_assessment, order.checkr_result, order.effective_status].some((value) => ["consider", "escalated"].includes((value || "").toLowerCase()))
-    || ["pre_adverse_action", "post_adverse_action"].includes(order.status);
+function reportStatus(order: OrderRow): string {
+  return order.effective_status || order.checkr_assessment || order.checkr_result || "Pending";
+}
+
+function adverseActionLabel(order: OrderRow): string {
+  if (order.status === "pre_adverse_action") return "Pre-adverse action · FCRA review window";
+  if (order.status === "post_adverse_action") return "Final adverse action";
+  return "—";
 }
 
 function relTime(iso: string | null | undefined): string {
@@ -160,7 +166,7 @@ export default function BackgroundChecksPage() {
     try {
       const { data } = await getSupabase()
         .from("vendor_orders")
-        .select("id,status,package,work_state,checkr_candidate_id,report_id,checkr_result,checkr_assessment,effective_status,ordered_at,completed_at,last_event_at,adverse_action_at,invitation_url,vendor_ref_id")
+        .select("id,status,package,work_state,checkr_candidate_id,report_id,checkr_result,checkr_assessment,effective_status,ordered_at,completed_at,last_event_at,adverse_action_at,eta_completion_at,invitation_url,vendor_ref_id")
         .eq("vendor", "checkr")
         .eq("carrier_id", carrier.id)
         .order("last_event_at", { ascending: false, nullsFirst: false });
@@ -176,9 +182,9 @@ export default function BackgroundChecksPage() {
   // KPIs
   const stats = useMemo(() => {
     const total = orders.length;
-    const completed = orders.filter(isCompletedOrder).length;
+    const completed = orders.filter(o => o.status === "completed").length;
     const inFlight = orders.filter(o => ["invited", "in_progress", "awaiting_driver"].includes(o.status)).length;
-    const consider = orders.filter(needsAdverseReview).length;
+    const consider = orders.filter(o => o.checkr_assessment === "consider" || o.checkr_result === "consider" || o.status === "pre_adverse_action" || o.status === "post_adverse_action").length;
     return { total, completed, inFlight, consider };
   }, [orders]);
 
@@ -448,8 +454,8 @@ export default function BackgroundChecksPage() {
                   <th className="text-left px-3 py-2 font-bold">Candidate</th>
                   <th className="text-left px-3 py-2 font-bold">Package</th>
                   <th className="text-left px-3 py-2 font-bold">Status</th>
-                  <th className="text-left px-3 py-2 font-bold">Result</th>
-                  <th className="text-left px-3 py-2 font-bold">Assessment</th>
+                  <th className="text-left px-3 py-2 font-bold">Report status</th>
+                  <th className="text-left px-3 py-2 font-bold">Estimated completion</th>
                   <th className="text-left px-3 py-2 font-bold">Last event</th>
                   <th className="text-left px-3 py-2 font-bold">Adverse-action</th>
                   <th className="text-right px-3 py-2 font-bold">Actions</th>
@@ -459,9 +465,13 @@ export default function BackgroundChecksPage() {
                 {ordersLoading ? (
                   Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={9} />)
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={9} className="px-3 py-8 text-center text-[var(--fg-muted)]">{orders.length === 0 ? "No background checks ordered yet. Use the form above to send the first invitation." : "No orders match these filters."}</td></tr>
+                  <tr><td colSpan={9} className="px-3 py-8 text-center text-[var(--fg-muted)]">{orders.length === 0 ? "No background checks ordered yet. Use the form above to send the first secure invitation." : "No orders match these filters."}</td></tr>
                 ) : filtered.map(o => (
-                  <tr key={o.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] transition-colors">
+                  <tr
+                    key={o.id}
+                    data-adverse-action={isAdverseAction(o.status) ? o.status : undefined}
+                    className={`border-t transition-colors ${isAdverseAction(o.status) ? "border-amber-500/60 bg-amber-100/70 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/15" : "border-[var(--border)] hover:bg-[var(--surface-2)]"}`}
+                  >
                     <td className="px-3 py-2.5 text-[var(--fg-muted)] tabular-nums whitespace-nowrap">{o.ordered_at ? new Date(o.ordered_at).toLocaleDateString() : "—"}</td>
                     <td className="px-3 py-2.5">
                       <div className="font-mono text-[10px] text-[var(--accent)]" title={o.checkr_candidate_id || ""}>{o.checkr_candidate_id ? `${o.checkr_candidate_id.slice(0, 14)}…` : "—"}</div>
@@ -470,19 +480,21 @@ export default function BackgroundChecksPage() {
                     <td className="px-3 py-2.5 text-[var(--fg)]">{o.package || "—"}{o.work_state && <span className="text-[10px] text-[var(--fg-muted)]"> · {o.work_state}</span>}</td>
                     <td className="px-3 py-2.5"><StatusPill status={o.status} /></td>
                     <td className="px-3 py-2.5">
-                      {o.checkr_result === "clear" && <span className="text-emerald-700 dark:text-emerald-300 font-extrabold">CLEAR</span>}
-                      {o.checkr_result === "consider" && <span className="text-amber-700 dark:text-amber-300 font-extrabold">CONSIDER</span>}
-                      {!o.checkr_result && <span className="text-[var(--fg-faint)]">—</span>}
+                      <span className={`font-extrabold uppercase ${["clear", "eligible"].includes(reportStatus(o).toLowerCase()) ? "text-emerald-700 dark:text-emerald-300" : reportStatus(o).toLowerCase() === "pending" ? "text-[var(--fg-faint)]" : "text-amber-700 dark:text-amber-300"}`}>
+                        {reportStatus(o)}
+                      </span>
+                      {o.checkr_result && o.checkr_assessment && <div className="text-[9px] text-[var(--fg-muted)]">result {o.checkr_result} · assessment {o.checkr_assessment}</div>}
                     </td>
-                    <td className="px-3 py-2.5">
-                      {o.checkr_assessment === "eligible" && <span className="text-emerald-700 dark:text-emerald-300 font-extrabold">ELIGIBLE</span>}
-                      {o.checkr_assessment === "escalated" && <span className="text-amber-700 dark:text-amber-300 font-extrabold">ESCALATED</span>}
-                      {!o.checkr_assessment && <span className="text-[var(--fg-faint)]">—</span>}
+                    <td className="px-3 py-2.5 text-[var(--fg-muted)] whitespace-nowrap">
+                      {o.eta_completion_at ? new Date(o.eta_completion_at).toLocaleString() : "Not provided"}
                     </td>
                     <td className="px-3 py-2.5 text-[var(--fg-muted)] whitespace-nowrap">{relTime(o.last_event_at)}</td>
                     <td className="px-3 py-2.5">
-                      {o.adverse_action_at
-                        ? <span className="text-rose-700 dark:text-rose-300 font-bold whitespace-nowrap">{new Date(o.adverse_action_at).toLocaleDateString()}</span>
+                      {isAdverseAction(o.status)
+                        ? <div className={o.status === "post_adverse_action" ? "text-rose-700 dark:text-rose-300 font-extrabold" : "text-amber-800 dark:text-amber-200 font-extrabold"}>
+                            {adverseActionLabel(o)}
+                            {o.adverse_action_at && <div className="text-[10px] font-medium whitespace-nowrap">{new Date(o.adverse_action_at).toLocaleDateString()}</div>}
+                          </div>
                         : <span className="text-[var(--fg-faint)]">—</span>}
                     </td>
                     <td className="px-3 py-2.5 text-right whitespace-nowrap">

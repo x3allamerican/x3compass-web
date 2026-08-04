@@ -32,7 +32,7 @@ async function pgSelect(url: string, sr: string, table: string, query: string): 
   } catch { return []; }
 }
 
-type LogRow = { id: string; event_type: string; severity: string | null; title: string | null; body: string | null; channels_attempted: string[] | null; email_sent_at: string | null; sms_sent_at: string | null; in_app_dismissed_at: string | null; created_at: string; related_driver_id: string | null };
+type LogRow = { id: string; event_type: string; severity: string | null; title: string | null; body: string | null; channels_attempted: string[] | null; email_sent_at: string | null; sms_sent_at: string | null; in_app_dismissed_at: string | null; read_at: string | null; created_at: string; related_driver_id: string | null };
 type RuleRow = { id: string; event_type: string; lead_time_days: number | null; channels: string[] | null; recipients: string[] | null; is_active: boolean };
 type DefaultRow = { event_type: string; default_channel: string; description: string | null; fcra_category: string | null };
 
@@ -73,8 +73,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const cutoff30 = new Date(Date.now() - 30 * 86_400_000).toISOString();
 
   const [logs30, logsAll100, rules, defaults] = await Promise.all([
-    pgSelect(sb, sr, "notification_log",            `select=id,event_type,severity,channels_attempted,email_sent_at,sms_sent_at,in_app_dismissed_at,created_at&carrier_id=eq.${carrierId}&created_at=gte.${cutoff30}&limit=5000`) as Promise<LogRow[]>,
-    pgSelect(sb, sr, "notification_log",            `select=id,event_type,severity,title,body,channels_attempted,email_sent_at,sms_sent_at,in_app_dismissed_at,created_at,related_driver_id&carrier_id=eq.${carrierId}&order=created_at.desc&limit=100`) as Promise<LogRow[]>,
+    pgSelect(sb, sr, "notification_log",            `select=id,event_type,severity,channels_attempted,email_sent_at,sms_sent_at,in_app_dismissed_at,read_at,created_at&carrier_id=eq.${carrierId}&created_at=gte.${cutoff30}&limit=5000`) as Promise<LogRow[]>,
+    pgSelect(sb, sr, "notification_log",            `select=id,event_type,severity,title,body,channels_attempted,email_sent_at,sms_sent_at,in_app_dismissed_at,read_at,created_at,related_driver_id&carrier_id=eq.${carrierId}&order=created_at.desc&limit=100`) as Promise<LogRow[]>,
     pgSelect(sb, sr, "notification_rules",          `select=id,event_type,lead_time_days,channels,recipients,is_active&carrier_id=eq.${carrierId}&is_active=eq.true&order=event_type.asc&limit=200`) as Promise<RuleRow[]>,
     pgSelect(sb, sr, "notification_event_defaults", `select=event_type,default_channel,description,fcra_category&order=event_type.asc&limit=200`) as Promise<DefaultRow[]>,
   ]);
@@ -150,6 +150,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     sent_at: r.email_sent_at || r.sms_sent_at || r.in_app_dismissed_at || null,
     created_at: r.created_at,
     related_driver_id: r.related_driver_id,
+    read_at: r.read_at,
   }));
 
   return tenantJson(ctx.request, ctx.env, {
@@ -167,6 +168,26 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     channel_breakdown,
     active_rules,
     recent_log,
+    unread_count: logsAll100.filter((row) => !row.read_at).length,
     window_days: 30,
   });
+};
+
+export const onRequestPatch: PagesFunction<Env> = async (ctx) => {
+  const requestId = correlationId(ctx.request);
+  let body: { carrier_id?: string; id?: string; all?: boolean };
+  try { body = await ctx.request.json(); } catch { return tenantJson(ctx.request, ctx.env, { ok: false, error: "Invalid JSON" }, 400); }
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, body.carrier_id); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  if (!body.all && !body.id) return tenantJson(ctx.request, ctx.env, { ok: false, error: "id or all required" }, 400);
+  if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) return securityError(503, "service_unavailable", requestId);
+  const query = body.all ? `carrier_id=eq.${authority.carrierId}&read_at=is.null` : `carrier_id=eq.${authority.carrierId}&id=eq.${encodeURIComponent(body.id!)}`;
+  const response = await fetch(`${ctx.env.SUPABASE_URL.replace(/\/$/, "")}/rest/v1/notification_log?${query}`, {
+    method: "PATCH", headers: { ...SUPABASE_HEADERS(ctx.env.SUPABASE_SERVICE_ROLE), "Content-Type": "application/json", Prefer: "return=representation" }, body: JSON.stringify({ read_at: new Date().toISOString() }),
+  });
+  if (!response.ok) return securityError(500, "request_failed", requestId);
+  const updated = await response.json() as unknown[];
+  return tenantJson(ctx.request, ctx.env, { ok: true, updated: updated.length });
 };

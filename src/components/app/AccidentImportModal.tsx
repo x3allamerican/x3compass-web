@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getSupabase } from "@/lib/supabase";
 
 const TEMPLATE = `accident_date,driver_first_name,driver_last_name,license_plate,location,recordable,fatalities,injuries,tow_required,preventable,description,cause_category
 2026-03-15,James,Carter,7XYZ123,I-35 · TX,true,0,1,true,preventable,Rear-end at slow speed,following_distance
@@ -14,8 +15,7 @@ export function AccidentImportModal({ carrierId, onClose, onImported }: { carrie
   const [result, setResult] = useState<ImportResult | null>(null); const [error, setError] = useState<string | null>(null);
 
   function downloadTemplate() {
-    const blob = new Blob([TEMPLATE], { type: "text/csv" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "accidents_template.csv"; a.click();
+    const a = document.createElement("a"); a.href = "/templates/accidents-import.csv"; a.download = "accidents-import.csv"; a.click();
   }
   function onFile(f: File | null | undefined) {
     if (!f) return;
@@ -28,9 +28,11 @@ export function AccidentImportModal({ carrierId, onClose, onImported }: { carrie
     if (!csv) { setError("Pick a CSV first."); return; }
     setBusy(true); setError(null); setResult(null);
     try {
-      const r = await fetch("/api/accidents/import", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ carrier_id: carrierId, csv }) });
+      const token = (await getSupabase().auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error("Authentication required");
+      const r = await fetch("/api/accidents/import", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ carrier_id: carrierId, csv }) });
       const body = await r.json() as ImportResult & { error?: string };
-      if (!r.ok) setError(body.error || `Server error ${r.status}`); else { setResult(body); if (body.ok) onImported(); }
+      if (!r.ok) setError(body.error || `Server error ${r.status}`); else { setResult(body); if (body.inserted > 0) onImported(); }
     } catch (err) { setError(err instanceof Error ? err.message : String(err)); } finally { setBusy(false); }
   }
 
@@ -73,6 +75,7 @@ export function AccidentImportModal({ carrierId, onClose, onImported }: { carrie
             <div className={`rounded-lg border p-4 text-[13px] ${result.ok ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               <div className="font-bold mb-1">{result.ok ? "✓ Import complete" : "⚠ Import finished with errors"}</div>
               <div className="text-[12px]">Submitted: <strong>{result.submitted}</strong> · Saved: <strong>{result.inserted + result.updated}</strong>{result.errors.length ? <> · Errors: <strong>{result.errors.length}</strong></> : null}</div>
+              {result.errors.length > 0 && <ul className="mt-2 list-disc pl-5 text-[11px]">{result.errors.map((item) => <li key={`${item.row}-${item.reason}`}>CSV row {item.row}: {item.reason}</li>)}</ul>}
             </div>
           )}
         </div>

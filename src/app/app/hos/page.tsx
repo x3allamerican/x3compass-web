@@ -17,8 +17,8 @@
       using the FMCSA ELD output file directly)
    6. Audit ledger · full HOS logs table (last 200)
 
-   Demo-mode safe · withDemoFallback() fills the page with
-   realistic violations + driver mix so it never looks empty.
+   Signed-in carriers always see real rows or an honest empty state.
+   Preview-only examples are gated on the absence of a carrier.
 
    Regs covered:
      §395.3(a)(1)  · 11-hr drive limit
@@ -82,9 +82,6 @@ export default function HosPage() {
   const drivers = useDrivers(carrier?.id);
   const [realRows, setRealRows] = useState<H[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [uploadBusy, setUploadBusy] = useState(false);
-  const [uploadMsg, setUploadMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   useEffect(() => {
     if (!carrier) return;
@@ -105,6 +102,7 @@ export default function HosPage() {
     () => withDemoFallback<H | DemoHosLog>(realRows, DEMO_HOS_LOGS, !carrier),
     [realRows, carrier]
   );
+  const latestImported = realRows[0] || null;
 
   // Derive KPIs from whichever rows are in play.
   const kpis = useMemo(() => {
@@ -137,59 +135,11 @@ export default function HosPage() {
     [rows]
   );
 
-  async function handleUpload(file: File | null) {
-    if (!file) return;
-    setUploadBusy(true);
-    setUploadMsg(null);
-    try {
-      // Demo short-circuit when no carrier (not yet signed in).
-      if (!carrier) {
-        await new Promise((r) => setTimeout(r, 700));
-        setUploadMsg({ kind: "ok", text: `Demo mode · would have ingested ${file.name} (${(file.size / 1024).toFixed(1)} KB) and parsed daily logs into compass_hos_logs.` });
-        setUploadBusy(false);
-        return;
-      }
-      const form = new FormData();
-      form.append("file", file);
-      form.append("carrier_id", carrier.id);
-      const token = (await getSupabase().auth.getSession()).data.session?.access_token;
-      const res = await fetch("/api/hos/upload-log", {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: form,
-      });
-      const data = await res.json().catch(() => ({ ok: false, error: "Bad response" }));
-      if (!data.ok) {
-        setUploadMsg({ kind: "err", text: data.error || "Upload failed" });
-      } else {
-        setUploadMsg({ kind: "ok", text: `Ingested ${data.rows_inserted || 0} daily logs from ${file.name}.` });
-        // Refresh
-        getSupabase()
-          .from("compass_hos_logs")
-          .select("*")
-          .eq("carrier_id", carrier.id)
-          .order("log_date", { ascending: false })
-          .limit(200)
-          .then(({ data }) => setRealRows((data as H[]) || []));
-      }
-    } catch (e) {
-      setUploadMsg({ kind: "err", text: e instanceof Error ? e.message : "Upload error" });
-    }
-    setUploadBusy(false);
-  }
-
   return (
     <AppShell
       crumbs="HOS / ELD · 49 CFR PART 395"
       title="Hours of Service"
       actions={
-        <>
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
-          >
-            ⬆ Upload ELD output
-          </button>
           <Link
             href="/app/settings"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--bg)]"
@@ -197,7 +147,6 @@ export default function HosPage() {
           >
             🔌 Connect ELD →
           </Link>
-        </>
       }
     >
       <div className="p-6 space-y-6">
@@ -254,6 +203,25 @@ export default function HosPage() {
             },
           ]}
         />
+
+        {carrier && !loading && realRows.length === 0 && (
+          <section className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
+            <div className="text-[16px] font-extrabold text-[var(--fg)]">No HOS data imported yet</div>
+            <p className="mx-auto mt-2 max-w-xl text-[12.5px] text-[var(--fg-muted)]">
+              Connect your ELD or use the documented CSV template. Automated HOS sync is not enabled yet, so X3 will not claim a connection until a verified importer writes to <code>compass_hos_logs</code>.
+            </p>
+            <div className="mt-4 flex justify-center gap-2">
+              <Link href="/app/settings#eld" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-[12px] font-extrabold text-[var(--bg)]">Connect your ELD →</Link>
+              <a href="/templates/hos-log-import.csv" className="rounded-lg border border-[var(--border)] px-4 py-2 text-[12px] font-bold text-[var(--fg)]">CSV specification</a>
+            </div>
+          </section>
+        )}
+
+        {carrier && latestImported && (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-[12px] text-[var(--fg-muted)]">
+            <strong className="text-[var(--fg)]">Latest imported log:</strong> {fmtDate(latestImported.log_date)} · source {latestImported.eld_source || "manual"}. Backing source: <code>compass_hos_logs</code>.
+          </div>
+        )}
 
         {/* 2 · KPI STRIP */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -313,7 +281,7 @@ export default function HosPage() {
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5" style={{ boxShadow: "var(--card-shadow)" }}>
             <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">🔌 Connect an ELD provider</div>
             <p className="text-[var(--fg-muted)] text-[12.5px] leading-relaxed mb-3">
-              Compass HOS ingests RODS data from any FMCSA-registered ELD via the standardized output file. Tokens stored encrypted · scoped to read-only on the vendor side.
+              Compass reads verified rows from <code>compass_hos_logs</code>. Automated HOS sync is not enabled yet; Motive and Samsara currently synchronize vehicle records only.
             </p>
             <div className="flex flex-wrap gap-1.5 mb-4">
               {ELD_VENDORS.map((v) => (
@@ -344,21 +312,14 @@ export default function HosPage() {
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5" style={{ boxShadow: "var(--card-shadow)" }}>
             <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">⬆ Manual log upload</div>
             <p className="text-[var(--fg-muted)] text-[12.5px] leading-relaxed mb-3">
-              Short-haul exempt drivers, paper RODS for ELD malfunctions, or the FMCSA-standardized ELD output file. CSV columns: <code className="text-[11px] bg-[var(--surface-3)] px-1.5 rounded">driver_id, log_date, drive_min, on_duty_min, violations</code>.
+              The repository includes the validated CSV field specification for a future tenant-scoped importer. No upload is offered until that authenticated endpoint exists.
             </p>
             <div className="flex gap-2">
-              <button
-                onClick={() => setUploadOpen(true)}
-                className="px-3.5 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)]"
-                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
-              >
-                Upload log file →
-              </button>
               <a
                 href="/templates/hos-log-import.csv"
                 className="px-3.5 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
               >
-                Download template
+                View CSV specification
               </a>
             </div>
           </div>
@@ -403,63 +364,6 @@ export default function HosPage() {
         </section>
       </div>
 
-      {/* CSV UPLOAD MODAL */}
-      {uploadOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Upload HOS log file"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(2, 6, 12, 0.65)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setUploadOpen(false); }}
-        >
-          <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6" style={{ boxShadow: "0 24px 60px rgba(2, 6, 12, 0.55)" }}>
-            <header className="flex items-start justify-between mb-4">
-              <div>
-                <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-1">⬆ Upload HOS log file</div>
-                <h3 className="text-[16px] font-extrabold text-[var(--fg)] m-0">Daily log ingest</h3>
-              </div>
-              <button onClick={() => setUploadOpen(false)} aria-label="Close" className="text-[var(--fg-muted)] hover:text-[var(--fg)] text-[18px]">✕</button>
-            </header>
-
-            <p className="text-[12.5px] text-[var(--fg-muted)] leading-relaxed mb-3">
-              Accepts FMCSA ELD output files (<code className="text-[11px] bg-[var(--surface-3)] px-1.5 rounded">.csv</code> / <code className="text-[11px] bg-[var(--surface-3)] px-1.5 rounded">.json</code>) or our simple CSV template. We parse, validate against §395.3 rules, and insert into your audit ledger.
-            </p>
-
-            <label className="block">
-              <span className="sr-only">Choose log file</span>
-              <input
-                type="file"
-                accept=".csv,.json,.txt"
-                disabled={uploadBusy}
-                onChange={(e) => handleUpload(e.target.files?.[0] || null)}
-                className="block w-full text-[12px] text-[var(--fg-muted)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-bold file:text-[var(--bg)] file:cursor-pointer disabled:opacity-50"
-                style={{ ["--file-bg" as never]: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
-              />
-            </label>
-
-            <style jsx>{`
-              input[type="file"]::file-selector-button {
-                background: linear-gradient(135deg, var(--accent), var(--accent-2));
-              }
-            `}</style>
-
-            {uploadMsg && (
-              <div
-                role="status"
-                className={`mt-4 rounded-lg p-3 text-[12px] ${uploadMsg.kind === "ok" ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300" : "bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300"}`}
-              >
-                {uploadMsg.text}
-              </div>
-            )}
-
-            <footer className="mt-5 flex items-center justify-between gap-3 text-[11px] text-[var(--fg-faint)]">
-              <span>Files are validated · invalid rows skipped with a per-row reason.</span>
-              <a href="/templates/hos-log-import.csv" className="text-[var(--accent)] hover:underline">Template</a>
-            </footer>
-          </div>
-        </div>
-      )}
     </AppShell>
   );
 }

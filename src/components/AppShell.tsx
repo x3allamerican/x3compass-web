@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import TopNav from "@/components/TopNav";
@@ -11,6 +11,7 @@ import { useUser } from "@/lib/useUser";
 import { useIsSuperAdmin } from "@/lib/superAdmin";
 import ConciergeModal from "@/components/ConciergeModal";
 import EducationHubModal from "@/components/EducationHubModal";
+import { getSupabase } from "@/lib/supabase";
 
 type NavItem = { href: string; label: string; icon: string };
 
@@ -28,6 +29,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/training",       label: "Training",        icon: "🎓" },
   ]},
   { title: "Compliance Trackers", items: [
+    { href: "/app/calendar",           label: "Compliance Calendar", icon: "🗓" },
     { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
     { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
     { href: "/app/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
@@ -80,6 +82,19 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
   const { user, carrier, loading, signOut } = useUser();
   const isSuperAdmin = useIsSuperAdmin();
   const asideRef = useRef<HTMLElement>(null);
+  const [notificationCount, setNotificationCount] = useState(0);
+  useEffect(() => {
+    if (!carrier) { setNotificationCount(0); return; }
+    let active = true;
+    void getSupabase().auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.access_token) return;
+      const response = await fetch(`/api/notifications?carrier_id=${carrier.id}`, { cache: "no-store", headers: { Authorization: `Bearer ${session.access_token}` } });
+      if (!response.ok || !active) return;
+      const payload = await response.json() as { unread_count?:number };
+      if (active) setNotificationCount(payload.unread_count || 0);
+    }).catch(()=>{});
+    return () => { active = false; };
+  }, [carrier]);
 
   // Sidebar v2 is the default as of Sprint 1 (Phase B). The Manus group
   // structure (Driver Brain, Vehicle Brain, Ops Brain, Audit & Reports,
@@ -243,7 +258,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           userName={(user.user_metadata?.full_name as string) || null}
           userRole={isSuperAdmin ? "Founder" : "Fleet Manager"}
           live
-          notificationCount={0}
+          notificationCount={notificationCount}
         />
       </div>
 

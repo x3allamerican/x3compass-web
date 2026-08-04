@@ -88,6 +88,7 @@ const NAV: Item[] = [
   ]},
 
   { kind: "group", title: "Ops Brain", icon: "⚙", items: [
+    { href: "/app/calendar",    label: "Compliance Calendar", icon: "🗓", dot: "cyan" },
     { href: "/app/hos",         label: "Hours of Service", icon: "⏱", dot: "cyan" },
     { href: "/app/ifta",        label: "IFTA Concierge",   icon: "⛽", dot: "emerald" },
     { href: "/app/scorecards",  label: "Safety Scorecards", icon: "🏆", dot: "violet" },
