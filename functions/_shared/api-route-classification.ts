@@ -17,6 +17,7 @@ const ADMIN = new Set([
 ]);
 
 const AUTHENTICATED = new Set([
+  "/api/accident-register",
   "/api/accidents/import",
   "/api/ask",
   "/api/audit/build",
