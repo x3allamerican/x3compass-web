@@ -61,6 +61,40 @@ const STATUS_PILL: Record<DriverStatus, string> = {
 
 const fmtDate = (s: string | null | undefined): string => (s ? new Date(s).toLocaleDateString() : "—");
 
+type MvrExtraction = {
+  license_state?: string | null; license_status?: string | null; license_class?: string | null;
+  expiration_date?: string | null; points?: number | null; pulled_on?: string | null;
+  endorsements?: string[] | null; restrictions?: string[] | null;
+  violations?: Array<{ date?: string; description?: string }> | null;
+};
+
+const fileToBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onerror = () => reject(new Error("Could not read this file"));
+  reader.onload = () => resolve(String(reader.result || "").split(",", 2)[1] || "");
+  reader.readAsDataURL(file);
+});
+
+function extractedToMvr(extracted: MvrExtraction | null): Partial<Mvr> {
+  if (!extracted) return { source: "ai_upload" };
+  const licenseStatus = String(extracted.license_status || "").toLowerCase();
+  const details = [
+    extracted.license_class ? `Class: ${extracted.license_class}` : "",
+    extracted.expiration_date ? `Expiration: ${extracted.expiration_date}` : "",
+    extracted.endorsements?.length ? `Endorsements: ${extracted.endorsements.join(", ")}` : "",
+    extracted.restrictions?.length ? `Restrictions: ${extracted.restrictions.join(", ")}` : "",
+  ].filter(Boolean);
+  return {
+    pulled_on: extracted.pulled_on || new Date().toISOString().slice(0, 10),
+    state: extracted.license_state?.toUpperCase() || null,
+    license_status: LICENSE_STATUS.includes(licenseStatus as typeof LICENSE_STATUS[number]) ? licenseStatus : null,
+    points: typeof extracted.points === "number" ? extracted.points : 0,
+    violations_count: extracted.violations?.length || 0,
+    notes: details.join(" · ") || null,
+    source: "ai_upload",
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // Hero with 3-step explainer
 // ═══════════════════════════════════════════════════════════════════
@@ -347,6 +381,9 @@ export default function MvrPage() {
   const [rows, setRows] = useState<Mvr[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [reviewUpload, setReviewUpload] = useState<{ uploadId: string; initial: Partial<Mvr>; manual: boolean } | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [continuousMonitors, setContinuousMonitors] = useState<ContinuousEnrollment[]>([]);
   const [enrollDriverId, setEnrollDriverId] = useState<string | null>(null);
   const [monitorBusyDriverId, setMonitorBusyDriverId] = useState<string | null>(null);
@@ -426,11 +463,26 @@ export default function MvrPage() {
     return true;
   });
 
-  function handleUpload(file: File) {
-    // Phase 1: just open the manual modal so the user has feedback.
-    // Phase 2 (separate task): POST file to /api/screenings/mvr/parse → AI extract → pre-fill modal.
-    console.log("[mvr] file received:", file.name, file.size, "bytes");
-    setShowAdd(true);
+  async function handleUpload(file: File) {
+    setUploadMessage(null);
+    if (file.size > 20 * 1024 * 1024) { setUploadMessage("File is larger than 20 MB. Choose a smaller PDF or image, or use manual entry."); return; }
+    setUploadBusy(true);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in again before uploading.");
+      const file_base64 = await fileToBase64(file);
+      const response = await fetch("/api/screenings/mvr/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ filename: file.name, mime_type: file.type || "application/pdf", file_base64 }),
+      });
+      const parsed = await response.json() as { ok?: boolean; upload_id?: string; extracted?: MvrExtraction | null; needs_manual?: boolean; error?: string };
+      if (!response.ok || !parsed.ok || !parsed.upload_id) throw new Error(parsed.error || "MVR parsing failed");
+      setReviewUpload({ uploadId: parsed.upload_id, initial: extractedToMvr(parsed.extracted || null), manual: Boolean(parsed.needs_manual) });
+    } catch (error) {
+      setUploadMessage(`${error instanceof Error ? error.message : "Upload failed"} Manual entry is still available.`);
+      setShowAdd(true);
+    } finally { setUploadBusy(false); }
   }
 
   return (
@@ -441,6 +493,8 @@ export default function MvrPage() {
         <EduFaqGrid />
 
         <UploadCard onManualEntry={() => setShowAdd(true)} onUploaded={handleUpload} />
+        {uploadBusy && <div role="status" className="x3-card p-3 text-[12px] text-[var(--fg-muted)]">Reading and preparing the MVR review…</div>}
+        {uploadMessage && <div role="alert" className="x3-card p-3 text-[12px] text-amber-800 dark:text-amber-200 border-amber-500/50">{uploadMessage}</div>}
 
         {carrier && (
           <ContinuousMonitoringCallout
@@ -567,6 +621,18 @@ export default function MvrPage() {
           onSaved={() => { refresh(); setShowAdd(false); }}
         />
       )}
+      {reviewUpload && carrier && (
+        <MvrFormModal
+          key={reviewUpload.uploadId}
+          carrier_id={carrier.id}
+          drivers={drivers}
+          initialForm={reviewUpload.initial}
+          uploadId={reviewUpload.uploadId}
+          title={reviewUpload.manual ? "Manual review required" : "Review extracted MVR"}
+          onClose={() => setReviewUpload(null)}
+          onSaved={() => { refresh(); setReviewUpload(null); }}
+        />
+      )}
       {enrollDriverId !== null && (
         <EnrollModal
           drivers={drivers}
@@ -582,8 +648,8 @@ export default function MvrPage() {
 // ═══════════════════════════════════════════════════════════════════
 // Manual log modal
 // ═══════════════════════════════════════════════════════════════════
-function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: string; drivers: DriverOpt[]; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState<Partial<Mvr>>({ pulled_on: new Date().toISOString().slice(0, 10), license_status: "valid", points: 0, violations_count: 0, source: "manual" });
+function MvrFormModal({ carrier_id, drivers, initialForm, uploadId, title = "Log MVR pull (manual)", onClose, onSaved }: { carrier_id: string; drivers: DriverOpt[]; initialForm?: Partial<Mvr>; uploadId?: string; title?: string; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<Mvr>>({ pulled_on: new Date().toISOString().slice(0, 10), license_status: "valid", points: 0, violations_count: 0, source: "manual", ...initialForm });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -592,8 +658,12 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
     setBusy(true); setError(null);
     try {
       if (!form.driver_id) throw new Error("Select a driver");
-      const { error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]);
+      const { data: saved, error } = await getSupabase().from("compass_mvr_records").insert([{ ...form, carrier_id }]).select("id").single();
       if (error) throw error;
+      if (uploadId) {
+        const { error: linkError } = await getSupabase().from("mvr_uploads").update({ matched_mvr_id: saved.id, parser_status: "reviewed" }).eq("id", uploadId).eq("carrier_id", carrier_id);
+        if (linkError) throw new Error(`MVR saved, but its upload could not be linked: ${linkError.message}`);
+      }
       await getSupabase().from("compass_drivers").update({ last_mvr_pulled_on: form.pulled_on }).eq("id", form.driver_id).eq("carrier_id", carrier_id);
       onSaved();
     } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
@@ -601,7 +671,7 @@ function MvrFormModal({ carrier_id, drivers, onClose, onSaved }: { carrier_id: s
   }
 
   return (
-    <Modal title="Log MVR pull (manual)" onClose={onClose}>
+    <Modal title={title} onClose={onClose}>
       <p className="text-[12px] text-[var(--fg-muted)] mb-3">
         Skip the upload · type the values directly. Compass saves it to the audit file the same way.
       </p>
