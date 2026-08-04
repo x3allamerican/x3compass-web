@@ -14,6 +14,7 @@ function fixtureFetch(calls: string[]) {
     ]);
     if (url.includes("compass_mvr_records")) return Response.json([{ id: "m1", driver_id: "d1", pulled_on: "2025-08-15" }]);
     if (url.includes("compass_dq_documents")) return Response.json([{ id: "i1", driver_id: null, doc_type: "commercial_insurance", expires_on: "2026-08-25" }]);
+    if (url.includes("notification_log")) return Response.json([{ id: "n1" }]);
     if (url.includes("api.resend.com")) return Response.json({ id: "email-1" });
     throw new Error(`unexpected request: ${url}`);
   }) as typeof fetch;
@@ -45,6 +46,7 @@ test.describe("expiration sweep agent", () => {
     expect(result.status).toBe("ok");
     expect(result.summary).toContain("1 sent");
     expect(calls.filter((url) => url.includes("api.resend.com"))).toHaveLength(1);
+    expect(calls.filter((url) => url.includes("notification_log"))).toHaveLength(1);
     const evidenceReads = calls.filter((url) => /compass_(drivers|mvr_records|dq_documents)/.test(url));
     expect(evidenceReads).toHaveLength(3);
     for (const url of evidenceReads) {

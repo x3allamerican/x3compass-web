@@ -412,6 +412,10 @@ export async function applyContinuousMvr(
       }),
     });
     await patchMonitor(mon.id, { ...(reportId ? { last_report_id: reportId } : {}), last_change_at: nowIso });
+    await fetch(`${base}/rest/v1/notification_log?on_conflict=carrier_id,dedupe_key`, {
+      method: "POST", headers: { ...sbHeaders, Prefer: "resolution=ignore-duplicates,return=minimal" },
+      body: JSON.stringify({ carrier_id: mon.carrier_id, event_type: "mvr_change_detected", severity: "warning", title: "Continuous MVR change detected", body: `A completed monitoring report requires review${reportId ? ` · report ${reportId}` : ""}.`, channels_attempted: ["in_app"], related_driver_id: mon.driver_id, dedupe_key: `mvr-change:${reportId || ccId || candId}`, created_at: nowIso }),
+    });
   }
 }
 

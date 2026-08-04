@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { X3AdminHero, X3KPITile } from "@/components/X3AdminHero";
 import { useUser } from "@/lib/useUser";
+import { getSupabase } from "@/lib/supabase";
 
 type RuleRow   = { event_type: string; name: string; description: string; channels: string[]; recipients: string; lead_time_days: number | null; fcra_category: string | null; explicit: boolean };
-type LogRow    = { id: string; event_type: string; severity: string | null; title: string; body: string; channel: "email" | "sms" | "in_app" | "—"; status: "delivered" | "pending" | "failed"; sent_at: string | null; created_at: string; related_driver_id: string | null };
+type LogRow    = { id: string; event_type: string; severity: string | null; title: string; body: string; channel: "email" | "sms" | "in_app" | "—"; status: "delivered" | "pending" | "failed"; sent_at: string | null; created_at: string; related_driver_id: string | null; read_at:string|null };
 type ChannelBd = { name: string; sent: number; pct: number };
 
 type ApiPayload = {
@@ -16,6 +17,7 @@ type ApiPayload = {
   channel_breakdown?: ChannelBd[];
   active_rules?: RuleRow[];
   recent_log?: LogRow[];
+  unread_count?: number;
 };
 
 // DEMO_* overlay · keeps the dashboard alive when notification_log is empty.
@@ -83,13 +85,23 @@ export default function NotificationsPage() {
     if (!carrier) return;
     setRefreshing(true);
     try {
-      const r = await fetch(`/api/notifications?carrier_id=${carrier.id}`, { cache: "no-store" });
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) return;
+      const r = await fetch(`/api/notifications?carrier_id=${carrier.id}`, { cache: "no-store", headers: { Authorization: `Bearer ${session.access_token}` } });
       const body = await r.json() as ApiPayload;
       setApi(body);
     } catch { /* keep previous */ }
     finally { setRefreshing(false); }
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
+
+  async function markRead(id?: string) {
+    if (!carrier) return;
+    const { data: { session } } = await getSupabase().auth.getSession();
+    if (!session?.access_token) return;
+    const response = await fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify(id ? { carrier_id: carrier.id, id } : { carrier_id: carrier.id, all: true }) });
+    if (response.ok) await refresh();
+  }
 
   const allowDemo = !carrier; // demo tenant-metrics only in preview
   const ZERO_KPIS = { delivered_30d: 0, total_30d: 0, delivery_rate_pct: 0, sms_credits: 0, sms_credits_resets_on: new Date().toISOString(), active_rules: DEMO_RULES.length, critical_rules: DEMO_RULES.filter(r => r.lead_time_days === 0).length };
@@ -217,7 +229,7 @@ export default function NotificationsPage() {
         {/* Notification Log · the missing third section */}
         <div className="x3-card overflow-hidden">
           <div className="px-5 py-3 border-b border-[var(--border)] flex items-center gap-3 flex-wrap">
-            <div className="text-[15px] font-extrabold text-[var(--fg)]">Notification Log</div>
+            <div className="text-[15px] font-extrabold text-[var(--fg)]">Notification Log <span className="text-[11px] text-[var(--accent)]">{api?.unread_count || 0} unread</span></div>
             <select value={channelFilter} onChange={(e) => setChannelFilter(e.target.value)} className="px-2 py-1 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[var(--fg)] text-[12px]">
               <option value="all">All Channels</option>
               <option value="email">Email</option>
@@ -231,7 +243,8 @@ export default function NotificationsPage() {
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
             </select>
-            <button onClick={exportLog} disabled={filteredLog.length === 0} className="ml-auto px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-2)] disabled:opacity-40">Export CSV</button>
+            <button onClick={()=>void markRead()} disabled={!api?.unread_count} className="ml-auto px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-2)] disabled:opacity-40">Mark all read</button>
+            <button onClick={exportLog} disabled={filteredLog.length === 0} className="px-3 py-1.5 rounded-lg font-bold text-[12px] text-[var(--fg)] border border-[var(--border)] hover:bg-[var(--surface-2)] disabled:opacity-40">Export CSV</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
@@ -242,20 +255,22 @@ export default function NotificationsPage() {
                   <th className="text-left px-3 py-2 font-bold">Title</th>
                   <th className="text-left px-3 py-2 font-bold">Channel</th>
                   <th className="text-left px-3 py-2 font-bold">Status</th>
+                  <th className="text-right px-3 py-2 font-bold">Read</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredLog.length === 0 ? (
-                  <tr><td colSpan={5} className="px-3 py-8 text-center text-[var(--fg-muted)] text-[12px]">
+                  <tr><td colSpan={6} className="px-3 py-8 text-center text-[var(--fg-muted)] text-[12px]">
                     {LOG.length === 0 ? "No notifications yet. They'll appear here as events fire." : "No log entries match these filters."}
                   </td></tr>
                 ) : filteredLog.map(l => (
-                  <tr key={l.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-2)] transition-colors">
+                  <tr key={l.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-2)] transition-colors ${l.read_at ? "" : "bg-cyan-50/50 dark:bg-cyan-950/20"}`}>
                     <td className="px-3 py-2.5 text-[var(--fg-muted)] whitespace-nowrap tabular-nums">{new Date(l.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td>
                     <td className="px-3 py-2.5"><code className="font-mono text-[10px] text-[var(--fg)]">{l.event_type}</code></td>
                     <td className="px-3 py-2.5 text-[var(--fg)] font-semibold">{l.title}</td>
                     <td className="px-3 py-2.5"><ChannelPill channel={l.channel} /></td>
                     <td className="px-3 py-2.5"><StatusPill status={l.status} /></td>
+                    <td className="px-3 py-2.5 text-right">{l.read_at ? <span className="text-[var(--fg-muted)]">Read</span> : <button onClick={()=>void markRead(l.id)} className="font-bold text-[var(--accent)] hover:underline">Mark read</button>}</td>
                   </tr>
                 ))}
               </tbody>

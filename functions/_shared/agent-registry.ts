@@ -733,6 +733,16 @@ async function agentExpirationSweep(env: Env, inputs?: { carrier_id?: string; dr
   for (const entry of digest.items) log.info(`${entry.subject}|${entry.category}|${entry.dueDate}|${entry.urgency}`);
   if (digest.items.length === 0) return { status: "skipped", summary: `${carrier.name}: no dated expirations within 60 days`, log: log.text() };
   if (inputs?.dry_run) return { status: "ok", summary: `${carrier.name}: ${digest.items.length} items · dry run · 0 sent`, log: log.text() };
+  await supa.insert("notification_log", {
+    carrier_id: carrier.id,
+    event_type: "document_expiration_digest",
+    severity: digest.items.some((item) => item.urgency === "overdue") ? "critical" : "warning",
+    title: `${digest.items.length} document expiration${digest.items.length === 1 ? "" : "s"} need review`,
+    body: renderExpirationDigestText(digest),
+    channels_attempted: carrier.primary_contact_email ? ["in_app", "email"] : ["in_app"],
+    dedupe_key: `expiration:${asOf}`,
+    created_at: new Date().toISOString(),
+  });
   if (!carrier.primary_contact_email) return { status: "skipped", summary: `${carrier.name}: ${digest.items.length} items · no carrier email`, log: log.text() };
 
   const sent = await sendEmail(env, {

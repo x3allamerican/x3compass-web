@@ -9,6 +9,7 @@
    ============================================================ */
 
 import { useTenant } from "./TenantThemeProvider";
+import Link from "next/link";
 
 type Props = {
   /** Page name (used only for accessibility · VISUAL topbar title is the brand banner "AI SAFETY DIRECTOR" per Joshua). */
@@ -131,7 +132,7 @@ export default function AppTopbar({
 
       {/* RIGHT · bell + user widget (pinned to right edge) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 14, flexShrink: 0 }}>
-        <button
+        <Link href="/app/notifications"
           aria-label={`Notifications${notificationCount ? `, ${notificationCount} unread` : ""}`}
           style={{
             position: "relative", width: 36, height: 36, borderRadius: 999, border: "none",
@@ -145,7 +146,7 @@ export default function AppTopbar({
               {notificationCount > 99 ? "99+" : notificationCount}
             </span>
           )}
-        </button>
+        </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
