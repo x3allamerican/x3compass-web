@@ -151,23 +151,23 @@ export default function ProspectsPage() {
   // Reset selection when tab changes
   useEffect(() => { setSelected(new Set()); }, [tab]);
 
-  const KPIS  = api?.kpis  || DEMO_KPIS;
-  const ROWS_NEW   = api?.rows?.new_entrants  && api.rows.new_entrants.length  > 0 ? api.rows.new_entrants  : DEMO_NEW_ENTRANTS;
-  const ROWS_BELOW = api?.rows?.below_sat     && api.rows.below_sat.length     > 0 ? api.rows.below_sat     : DEMO_BELOW_SAT;
-  const ROWS_WEEK  = api?.rows?.new_this_week && api.rows.new_this_week.length > 0 ? api.rows.new_this_week : DEMO_NEW_ENTRANTS.filter(r => (r.first_seen_days || 99) <= 7);
-  const ROWS_ALL   = api?.rows?.all_in_region && api.rows.all_in_region.length > 0 ? api.rows.all_in_region : [...DEMO_NEW_ENTRANTS, ...DEMO_BELOW_SAT];
-  const TEMPLATES  = api?.templates || DEMO_TEMPLATES;
+  const KPIS  = api?.kpis  || { in_region: 0, new_entrants: 0, below_sat: 0, new_this_week: 0, outreach_sent: 0, replies: 0 };
+  const ROWS_NEW   = api?.rows?.new_entrants  || [];
+  const ROWS_BELOW = api?.rows?.below_sat     || [];
+  const ROWS_WEEK  = api?.rows?.new_this_week || [];
+  const ROWS_ALL   = api?.rows?.all_in_region || [];
+  const TEMPLATES  = api?.templates || [];
   const LOG        = api?.outreach_log || [];
   const RUNS       = api?.scraper_runs || [];
-  const isDemo = api?.demo !== false;
+  const isDemo = false;
 
   // Choose the active row-set and distribution scope
   const { activeRows, distData, distLabel } = useMemo(() => {
-    if (tab === "new")        return { activeRows: ROWS_NEW,   distData: api?.distributions?.new_entrants  || DEMO_DIST, distLabel: "New entrants <12 mo" };
-    if (tab === "below_sat")  return { activeRows: ROWS_BELOW, distData: api?.distributions?.below_sat     || DEMO_DIST, distLabel: "Below-satisfactory carriers" };
-    if (tab === "this_week")  return { activeRows: ROWS_WEEK,  distData: api?.distributions?.new_this_week || DEMO_DIST, distLabel: "New this week" };
-    if (tab === "all")        return { activeRows: ROWS_ALL,   distData: api?.distributions?.all           || DEMO_DIST, distLabel: "All in-region carriers" };
-    return { activeRows: ROWS_ALL, distData: api?.distributions?.all || DEMO_DIST, distLabel: "All in-region carriers" };
+    if (tab === "new")        return { activeRows: ROWS_NEW,   distData: api?.distributions?.new_entrants  || [], distLabel: "New entrants <12 mo" };
+    if (tab === "below_sat")  return { activeRows: ROWS_BELOW, distData: api?.distributions?.below_sat     || [], distLabel: "Below-satisfactory carriers" };
+    if (tab === "this_week")  return { activeRows: ROWS_WEEK,  distData: api?.distributions?.new_this_week || [], distLabel: "New this week" };
+    if (tab === "all")        return { activeRows: ROWS_ALL,   distData: api?.distributions?.all           || [], distLabel: "All in-region carriers" };
+    return { activeRows: ROWS_ALL, distData: api?.distributions?.all || [], distLabel: "All in-region carriers" };
   }, [tab, api, ROWS_NEW, ROWS_BELOW, ROWS_WEEK, ROWS_ALL]);
 
   // Filter active rows by search + rating + state

@@ -107,8 +107,8 @@ export default function IntegrationsPage() {
   }
   useEffect(() => { if (isSuperAdmin) refresh(); }, [isSuperAdmin]);
 
-  const VENDORS = (api?.vendors && api.vendors.length > 0) ? api.vendors : DEMO_VENDORS;
-  const isDemo  = !api?.vendors || api.vendors.length === 0 || !isSuperAdmin;
+  const VENDORS = api?.vendors || [];
+  const isDemo  = false;
 
   const SUMMARY: Summary = api?.summary || {
     live:       VENDORS.filter(v => v.status === "live").length,
