@@ -29,18 +29,15 @@ const RESULTS = ["clean", "minor", "major", "serious", "disqualifying", "pending
 // Continuous monitoring types
 // ───────────────────────────────────────────────────────────────────
 type ContinuousEnrollment = {
-  id: string; driver_id: string | null; driver_name: string;
+  id: string; driver_id: string;
   status: "pending" | "active" | "canceled" | "failed" | "paused";
-  enrolled_at: string | null; canceled_at: string | null; failed_reason: string | null;
-  last_hit_at: string | null; last_hit_assessment: string | null; last_hit_report_id: string | null;
-  hit_count_total: number; hit_count_30d: number;
-  monthly_fee_cents: number; work_state: string | null;
+  enrolled_at: string; last_change_at: string | null; last_report_id: string | null;
   checkr_continuous_check_id: string | null;
 };
 type ContinuousListResp = {
-  ok: boolean; carrier_id?: string;
-  enrollments?: ContinuousEnrollment[];
-  kpis?: { total_enrolled: number; active: number; pending: number; hits_30d: number; hits_total: number };
+  ok: boolean;
+  monitors?: ContinuousEnrollment[];
+  kpis?: { total: number; active: number; pending: number; canceled: number; failed: number; paused: number };
   error?: string;
 };
 
@@ -247,10 +244,9 @@ function UploadCard({ onManualEntry, onUploaded }: { onManualEntry: () => void; 
 // Continuous monitoring opt-in card · Compass differentiator
 // (Sits between Upload and KPIs. Vendor-neutral; just an offer.)
 // ═══════════════════════════════════════════════════════════════════
-function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEnrolled }: {
-  enrollmentCount: number; carrierId: string; drivers: DriverOpt[]; onEnrolled: () => void;
+function ContinuousMonitoringCallout({ enrollmentCount, drivers, onEnroll }: {
+  enrollmentCount: number; drivers: DriverOpt[]; onEnroll: () => void;
 }) {
-  const [showEnroll, setShowEnroll] = useState(false);
   return (
     <div className="x3-card p-5 border-l-4 border-l-[var(--accent)]">
       <div className="flex items-start gap-4 flex-wrap">
@@ -270,7 +266,7 @@ function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEn
           </p>
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => setShowEnroll(true)}
+              onClick={onEnroll}
               disabled={!drivers.length}
               className="px-4 py-2 rounded-full text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
@@ -286,22 +282,14 @@ function ContinuousMonitoringCallout({ enrollmentCount, carrierId, drivers, onEn
           </div>
         </div>
       </div>
-      {showEnroll && (
-        <EnrollModal
-          carrierId={carrierId}
-          drivers={drivers}
-          onClose={() => setShowEnroll(false)}
-          onEnrolled={() => { setShowEnroll(false); onEnrolled(); }}
-        />
-      )}
     </div>
   );
 }
 
-function EnrollModal({ carrierId, drivers, onClose, onEnrolled }: {
-  carrierId: string; drivers: DriverOpt[]; onClose: () => void; onEnrolled: () => void;
+function EnrollModal({ drivers, initialDriverId, onClose, onEnrolled }: {
+  drivers: DriverOpt[]; initialDriverId?: string; onClose: () => void; onEnrolled: () => void;
 }) {
-  const [driverId, setDriverId] = useState("");
+  const [driverId, setDriverId] = useState(initialDriverId || "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -314,7 +302,7 @@ function EnrollModal({ carrierId, drivers, onClose, onEnrolled }: {
       const r = await fetch("/api/screenings/continuous-mvr/enroll", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ driver_id: driverId, carrier_id: carrierId }),
+        body: JSON.stringify({ driver_id: driverId }),
       });
       const j = await r.json();
       if (!j.ok) {
@@ -359,7 +347,10 @@ export default function MvrPage() {
   const [rows, setRows] = useState<Mvr[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [continuousCount, setContinuousCount] = useState(0);
+  const [continuousMonitors, setContinuousMonitors] = useState<ContinuousEnrollment[]>([]);
+  const [enrollDriverId, setEnrollDriverId] = useState<string | null>(null);
+  const [monitorBusyDriverId, setMonitorBusyDriverId] = useState<string | null>(null);
+  const [monitorError, setMonitorError] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -380,9 +371,28 @@ export default function MvrPage() {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const j = (await r.json()) as ContinuousListResp;
-      if (j.ok) setContinuousCount(j.kpis?.active || 0);
+      if (j.ok) setContinuousMonitors(j.monitors || []);
     } catch { /* no-op */ }
   }, []);
+
+  const unenroll = useCallback(async (driverId: string) => {
+    setMonitorBusyDriverId(driverId); setMonitorError(null);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Sign in again to manage monitoring.");
+      const r = await fetch("/api/screenings/continuous-mvr/unenroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ driver_id: driverId }),
+      });
+      const j = await r.json() as { ok?: boolean; error?: string; warning?: string };
+      if (!r.ok || !j.ok) throw new Error(j.error || "Unenrollment failed");
+      if (j.warning) setMonitorError(`Monitoring stopped in Compass. ${j.warning}`);
+      await refreshContinuous();
+    } catch (error) {
+      setMonitorError(error instanceof Error ? error.message : "Unenrollment failed");
+    } finally { setMonitorBusyDriverId(null); }
+  }, [refreshContinuous]);
 
   useEffect(() => { if (carrier) { refresh(); refreshContinuous(); } }, [carrier, refresh, refreshContinuous]);
 
@@ -392,8 +402,12 @@ export default function MvrPage() {
       .filter((r) => r.driver_id === d.id)
       .sort((a, b) => (a.pulled_on > b.pulled_on ? -1 : 1))[0];
     const st = statusFor(last?.pulled_on || null);
-    return { driver: d, last, ...st };
+    const monitor = continuousMonitors.find((candidate) => candidate.driver_id === d.id);
+    const monitorStatus = monitor?.status || "none";
+    return { driver: d, last, monitor, monitorStatus, ...st };
   });
+
+  const continuousCount = continuousMonitors.filter((monitor) => monitor.status === "active").length;
 
   const kpis = {
     total: drivers.length,
@@ -431,11 +445,12 @@ export default function MvrPage() {
         {carrier && (
           <ContinuousMonitoringCallout
             enrollmentCount={continuousCount}
-            carrierId={carrier.id}
             drivers={drivers}
-            onEnrolled={refreshContinuous}
+            onEnroll={() => setEnrollDriverId("")}
           />
         )}
+
+        {monitorError && <div role="alert" className="x3-card p-3 text-[12px] text-amber-800 dark:text-amber-200 border-amber-500/50">{monitorError}</div>}
 
         {/* KPI grid · 4 tiles */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -497,6 +512,7 @@ export default function MvrPage() {
                     <th className="py-2 px-3 text-center">Points</th>
                     <th className="py-2 px-3 text-center">Violations</th>
                     <th className="py-2 px-3 text-left">License</th>
+                    <th className="py-2 px-3 text-left">Continuous monitoring</th>
                     <th className="py-2 px-4"></th>
                   </tr>
                 </thead>
@@ -510,6 +526,23 @@ export default function MvrPage() {
                       <td className="py-2 px-3 text-center tabular-nums">{d.last?.points ?? <span className="text-[var(--fg-faint)]">—</span>}</td>
                       <td className="py-2 px-3 text-center tabular-nums">{d.last?.violations_count ?? <span className="text-[var(--fg-faint)]">—</span>}</td>
                       <td className="py-2 px-3 text-[var(--fg-muted)] text-[11px]">{d.last?.license_status || <span className="text-[var(--fg-faint)]">—</span>}</td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            d.monitorStatus === "active" ? "text-emerald-800 dark:text-emerald-200 border-emerald-500/60 bg-emerald-500/10" :
+                            d.monitorStatus === "pending" ? "text-amber-800 dark:text-amber-200 border-amber-500/60 bg-amber-500/10" :
+                            d.monitorStatus === "failed" ? "text-rose-800 dark:text-rose-200 border-rose-500/60 bg-rose-500/10" :
+                            "text-[var(--fg-muted)] border-[var(--border)] bg-[var(--bg-3)]"
+                          }`}>{d.monitorStatus === "none" ? <>None</> : d.monitorStatus}</span>
+                          {["active", "pending", "paused"].includes(d.monitorStatus) ? (
+                            <button type="button" disabled={monitorBusyDriverId === d.driver.id} onClick={() => void unenroll(d.driver.id)} className="text-[10px] font-bold text-rose-700 dark:text-rose-300 hover:underline disabled:opacity-50">
+                              {monitorBusyDriverId === d.driver.id ? "Stopping…" : "Unenroll"}
+                            </button>
+                          ) : (
+                            <button type="button" onClick={() => setEnrollDriverId(d.driver.id)} className="text-[10px] font-bold text-[var(--accent)] hover:underline">Enroll</button>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-2 px-4 text-right">
                         {d.last?.file_url ? (
                           <a href={d.last.file_url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[var(--accent)] hover:underline">View file →</a>
@@ -532,6 +565,14 @@ export default function MvrPage() {
           drivers={drivers}
           onClose={() => setShowAdd(false)}
           onSaved={() => { refresh(); setShowAdd(false); }}
+        />
+      )}
+      {enrollDriverId !== null && (
+        <EnrollModal
+          drivers={drivers}
+          initialDriverId={enrollDriverId || undefined}
+          onClose={() => setEnrollDriverId(null)}
+          onEnrolled={() => { setEnrollDriverId(null); void refreshContinuous(); }}
         />
       )}
     </AppShell>
