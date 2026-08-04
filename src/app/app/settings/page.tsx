@@ -28,16 +28,20 @@ type TeamMember = {
   invited_at: string | null; accepted_at: string | null;
 };
 
-const TABS: { key: "profile" | "team" | "billing"; label: React.ReactNode }[] = [
+type SettingsTab = "profile" | "team" | "billing" | "integrations";
+type VendorStatus = { vendor:string; status:string; last_sync_at?:string|null; last_sync_count?:number|null; last_error_text?:string|null; env_configured?:boolean };
+const TABS: { key: SettingsTab; label: React.ReactNode }[] = [
   { key: "profile", label: <>🏢 Profile</> },
   { key: "team",    label: <>👥 Team</> },
   { key: "billing", label: <>💳 Billing</> },
+  { key: "integrations", label: <>🔌 Integrations</> },
 ];
 
 
 export default function SettingsPage() {
   const { user, carrier, refresh: refreshUser, signOut } = useUser();
-  const [tab, setTab] = useState<"profile" | "team" | "billing">("profile");
+  const [tab, setTab] = useState<SettingsTab>("profile");
+  const [vendors,setVendors]=useState<VendorStatus[]>([]); const [syncBusy,setSyncBusy]=useState(false); const [syncMessage,setSyncMessage]=useState<string|null>(null);
 
   // Profile state
   const [form, setForm] = useState<Partial<CarrierFull>>({});
@@ -76,6 +80,10 @@ export default function SettingsPage() {
       setTeamLoading(false);
     })();
   }, [tab, carrier]);
+
+  async function loadVendors(){if(!carrier)return;try{const body=await apiFetch<{vendors?:VendorStatus[]}>(`/api/vendors/list?carrier_id=${carrier.id}`);setVendors(body.vendors||[]);}catch{setVendors([]);}}
+  useEffect(()=>{if(tab==="integrations")void loadVendors();},[tab,carrier]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function syncSamsara(){if(!carrier)return;setSyncBusy(true);setSyncMessage(null);try{const body=await apiFetch<{ok?:boolean;vehicles?:{reconciled:number};drivers?:{reconciled:number};hos?:{reconciled:number}}>("/api/vendors/samsara/sync",{method:"POST",body:JSON.stringify({carrier_id:carrier.id})});setSyncMessage(`Samsara sync complete · ${body.drivers?.reconciled||0} drivers · ${body.vehicles?.reconciled||0} vehicles · ${body.hos?.reconciled||0} HOS days`);await loadVendors();}catch(error){setSyncMessage(error instanceof Error?error.message:"Samsara sync failed");}finally{setSyncBusy(false);}}
 
   function set<K extends keyof CarrierFull>(k: K, v: string | number | boolean | null) {
     setForm((p) => ({ ...p, [k]: v === "" ? null : v as CarrierFull[K] }));
@@ -193,7 +201,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <X3AdminTabs tabs={TABS} active={tab} onChange={(k) => setTab(k as "profile" | "team" | "billing")} />
+        <X3AdminTabs tabs={TABS} active={tab} onChange={(k) => setTab(k as SettingsTab)} />
       </div>
 
       <div className="px-6 py-6 max-w-3xl">
@@ -338,6 +346,13 @@ export default function SettingsPage() {
             </Block>
           </div>
         )}
+
+        {tab === "integrations" && <div className="space-y-6"><Block title="Fleet data synchronization">
+          <p className="text-[12px] text-[var(--fg-muted)] mb-4">Samsara reconciliation imports active drivers, vehicles, and the prior seven days of HOS summaries. Stable vendor IDs make repeat runs idempotent.</p>
+          {vendors.filter(v=>v.vendor==="samsara").map(v=><div key={v.vendor} className="rounded-lg border border-[var(--border)] p-4 flex items-center justify-between gap-4 flex-wrap"><div><div className="font-extrabold text-[var(--fg)]">Samsara</div><div className="text-[11px] text-[var(--fg-muted)]">Status: {v.status} · Last sync: {v.last_sync_at?new Date(v.last_sync_at).toLocaleString():"never"} · Last count: {v.last_sync_count??"—"}</div>{v.last_error_text&&<div className="text-[11px] text-rose-700 dark:text-rose-300">{v.last_error_text}</div>}</div><button type="button" onClick={()=>void syncSamsara()} disabled={syncBusy||!v.env_configured} className="px-4 py-2 rounded-lg font-extrabold text-[12px] text-[var(--bg)] disabled:opacity-50" style={{background:"linear-gradient(135deg,var(--accent),var(--accent-2))"}}>{syncBusy?"Syncing…":"Sync Samsara"}</button></div>)}
+          {!vendors.some(v=>v.vendor==="samsara")&&<div className="text-[12px] text-[var(--fg-muted)]">Samsara is not configured for this carrier.</div>}
+          {syncMessage&&<div role="status" className="mt-3 text-[12px] text-[var(--fg)]">{syncMessage}</div>}
+        </Block></div>}
 
         {/* BILLING TAB */}
         {tab === "billing" && (

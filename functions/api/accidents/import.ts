@@ -32,6 +32,11 @@ function parseCsv(text: string): string[][] {
 
 function bool(v: string): boolean { return /^(true|t|yes|y|1)$/i.test(v.trim()); }
 function intOr(v: string, d = 0): number { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; }
+function validIsoDate(v: string): boolean { return /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`)); }
+function nonNegativeInt(v: string, field: string): { value?: number; error?: string } {
+  if (!/^\d+$/.test(v.trim())) return { error: `${field} must be a non-negative integer` };
+  return { value: Number(v) };
+}
 const ALLOWED_PREVENT = new Set(["preventable", "non_preventable", "undetermined"]);
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
@@ -70,7 +75,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const r = parsed[i];
     const get = (n: string) => { const c = col(n); return c >= 0 ? (r[c] || "").trim() : ""; };
     const acc = get("accident_date") || get("date");
-    if (!acc) { errors.push({ row: i, reason: "missing accident_date" }); continue; }
+    if (!acc) { errors.push({ row: i + 1, reason: "missing accident_date" }); continue; }
+    if (!validIsoDate(acc)) { errors.push({ row: i + 1, reason: "accident_date must be YYYY-MM-DD" }); continue; }
+    const fatalities = nonNegativeInt(get("fatalities") || "0", "fatalities");
+    const injuries = nonNegativeInt(get("injuries") || "0", "injuries");
+    if (fatalities.error || injuries.error) { errors.push({ row: i + 1, reason: fatalities.error || injuries.error! }); continue; }
 
     const fname = get("driver_first_name").toLowerCase();
     const lname = get("driver_last_name").toLowerCase();
@@ -89,8 +98,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       accident_date: acc,
       location: get("location") || null,
       recordable: bool(get("recordable")),
-      fatalities: intOr(get("fatalities"), 0),
-      injuries: intOr(get("injuries"), 0),
+      fatalities: fatalities.value,
+      injuries: injuries.value,
       tow_required: bool(get("tow_required")),
       preventable,
       description: get("description") || null,
@@ -110,7 +119,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       return securityError(500, "request_failed", requestId);
     }
     const inserted = await r.json() as unknown[];
-    return json({ ok: errors.length === 0, submitted: out.length, inserted: inserted.length, skipped: 0, updated: 0, errors });
+    return json({ ok: errors.length === 0, submitted: parsed.length - 1, inserted: inserted.length, skipped: errors.length, updated: 0, errors });
   } catch {
     console.error("accident import failed", { correlation_id: requestId });
     return securityError(500, "request_failed", requestId);

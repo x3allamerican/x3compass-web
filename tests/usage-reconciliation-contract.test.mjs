@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import{readFile}from"node:fs/promises";import{test}from"node:test";const root=new URL("../",import.meta.url);const api=await readFile(new URL("functions/api/billing/usage-reconciliation.ts",root),"utf8");const page=await readFile(new URL("src/app/app/settings/billing/page.tsx",root),"utf8");
+test("API is tenant guarded and Stripe read-only",()=>{assert.match(api,/requireTenant/);assert.match(api,/\/v1\/invoices/);assert.doesNotMatch(api,/method:\s*["']POST["']/);assert.doesNotMatch(api,/invoiceitems/);});
+test("billing page renders mismatch categories and source period",()=>{assert.match(page,/usage-reconciliation/);assert.match(page,/Usage reconciliation/);assert.match(page,/invoice_over/);assert.match(page,/month/);});

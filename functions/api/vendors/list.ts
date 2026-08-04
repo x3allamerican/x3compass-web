@@ -13,6 +13,7 @@ import { correlationId, requireTenant, securityError, type SecurityEnv } from ".
 interface Env extends SecurityEnv {
   TENSTREET_API_KEY?: string;
   TENSTREET_SUBDOMAIN?: string;
+  SAMSARA_API_TOKEN?: string;
 }
 
 type Vendor = {
@@ -31,6 +32,7 @@ const FALLBACK: Vendor[] = [
   { vendor: "hireright",    category: "mvr",        status: "available" },
   { vendor: "samba_safety", category: "mvr",        status: "available" },
   { vendor: "checkr",       category: "background", status: "available" },
+  { vendor: "samsara",      category: "eld",        status: "available" },
   { vendor: "manual_api",   category: "other",      status: "available" },
 ];
 
@@ -51,6 +53,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const env = ctx.env;
   const envFlags = {
     tenstreet: !!(env.TENSTREET_API_KEY && env.TENSTREET_SUBDOMAIN),
+    samsara: !!env.SAMSARA_API_TOKEN,
   };
 
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return securityError(503, "service_unavailable", requestId);

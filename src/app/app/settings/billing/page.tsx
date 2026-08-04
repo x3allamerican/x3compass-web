@@ -11,9 +11,11 @@ function BillingInner() {
   const params = useSearchParams();
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usage,setUsage]=useState<{month:string;status:string;mismatches:number;categories:Record<string,{actual_quantity:number;invoice_quantity:number;delta:number;status:string}>}|null>(null);
   const checkoutResult = params?.get("checkout");
 
   useEffect(() => { if (!loading && !user) window.location.href = "/signin?return_to=/app/settings/billing"; }, [user, loading]);
+  useEffect(()=>{if(!carrier)return;const month=new Date().toISOString().slice(0,7);apiFetch<{report?:typeof usage}>(`/api/billing/usage-reconciliation?carrier_id=${carrier.id}&month=${month}`).then(body=>setUsage(body.report||null)).catch(()=>setUsage(null));},[carrier]);
 
   async function openPortal() {
     setPortalLoading(true); setError(null);
@@ -59,6 +61,10 @@ function BillingInner() {
             <div className="text-xl font-extrabold mb-1">View pricing details</div>
             <div className="text-[12px] text-[var(--fg-muted)]">One graduated per-driver plan · every X3 product included</div>
           </Link>
+        </div>
+        <div className="rounded-2xl p-6 mt-6 bg-[var(--surface-3)] border border-[var(--border)]">
+          <div className="flex items-center justify-between gap-3 mb-3"><div><div className="text-xl font-extrabold">Usage reconciliation</div><div className="text-[12px] text-[var(--fg-muted)]">Operational evidence compared with labeled Stripe invoice lines · {usage?.month||"current month"}</div></div>{usage&&<span className={`text-[11px] font-extrabold uppercase ${usage.status==="matched"?"text-emerald-700 dark:text-emerald-300":"text-amber-700 dark:text-amber-300"}`}>{usage.status} · {usage.mismatches}</span>}</div>
+          {!usage?<div className="text-[12px] text-[var(--fg-muted)]">No reconciliation report is available.</div>:<div className="space-y-2">{Object.entries(usage.categories).map(([key,row])=><div key={key} className="grid grid-cols-[1fr_auto_auto_auto] gap-3 text-[12px] border-t border-[var(--border)] pt-2"><span className="font-bold text-[var(--fg)]">{key.replaceAll("_"," ")}</span><span>Actual {row.actual_quantity}</span><span>Invoice {row.invoice_quantity}</span><span className={row.status==="matched"?"text-emerald-700 dark:text-emerald-300":"text-amber-700 dark:text-amber-300"}>{row.status}{row.status==="invoice_over"?` +${row.delta}`:row.delta?` ${row.delta}`:""}</span></div>)}</div>}
         </div>
         {error && <div className="mt-6 text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{error}</div>}
       </div>

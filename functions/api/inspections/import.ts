@@ -21,6 +21,11 @@ function parseCsv(text: string): string[][] {
 }
 function bool(v: string): boolean { return /^(true|t|yes|y|1)$/i.test(v.trim()); }
 function intOr(v: string, d = 0): number { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; }
+function validIsoDate(v: string): boolean { return /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`)); }
+function nonNegativeInt(v: string, field: string): { value?: number; error?: string } {
+  if (!/^\d+$/.test(v.trim())) return { error: `${field} must be a non-negative integer` };
+  return { value: Number(v) };
+}
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   let body: { carrier_id?: string; csv?: string };
@@ -57,9 +62,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const r = parsed[i];
     const get = (n: string) => { const c = col(n); return c >= 0 ? (r[c] || "").trim() : ""; };
     const date = get("inspection_date") || get("date");
-    if (!date) { errors.push({ row: i, reason: "missing inspection_date" }); continue; }
+    if (!date) { errors.push({ row: i + 1, reason: "missing inspection_date" }); continue; }
+    if (!validIsoDate(date)) { errors.push({ row: i + 1, reason: "inspection_date must be YYYY-MM-DD" }); continue; }
     const lev = intOr(get("level"), 0);
-    if (lev < 1 || lev > 6) { errors.push({ row: i, reason: "level must be 1-6" }); continue; }
+    if (lev < 1 || lev > 6) { errors.push({ row: i + 1, reason: "level must be 1-6" }); continue; }
+    const violationCount = nonNegativeInt(get("violation_count") || "0", "violation_count");
+    if (violationCount.error) { errors.push({ row: i + 1, reason: violationCount.error }); continue; }
 
     out.push({
       carrier_id: authority.carrierId,
@@ -72,7 +80,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       report_number: get("report_number") || null,
       oos_driver: bool(get("oos_driver")),
       oos_vehicle: bool(get("oos_vehicle")),
-      violation_count: intOr(get("violation_count"), 0),
+      violation_count: violationCount.value,
       report_url: get("report_url") || null,
     });
   }
@@ -87,5 +95,5 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     return securityError(500, "request_failed", requestId);
   }
   const inserted = await r.json() as unknown[];
-  return json({ ok: errors.length === 0, submitted: out.length, inserted: inserted.length, skipped: 0, updated: 0, errors });
+  return json({ ok: errors.length === 0, submitted: parsed.length - 1, inserted: inserted.length, skipped: errors.length, updated: 0, errors });
 };

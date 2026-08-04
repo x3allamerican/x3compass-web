@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { TenantTable, StatCard, fmtDate } from "@/components/app/TenantTable";
 import { Modal, Field, Err, ModalActions } from "@/components/app/Modal";
+import { driverLabel, useDrivers } from "@/components/app/useDrivers";
 import { useUser } from "@/lib/useUser";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
@@ -56,6 +57,10 @@ export default function AuditExportPage() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [quickBusy, setQuickBusy] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState("");
+  const [pdfBusy, setPdfBusy] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const drivers = useDrivers(carrier?.id);
 
   async function refresh() {
     if (!carrier) return;
@@ -77,6 +82,33 @@ export default function AuditExportPage() {
       // silently fall through; user can retry
     } finally {
       setQuickBusy(false);
+    }
+  }
+
+  async function downloadPdf(type: "dq-file" | "drug-alcohol" | "accident-register") {
+    if (pdfBusy || (type === "dq-file" && !selectedDriverId)) return;
+    setPdfBusy(type);
+    setPdfError(null);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("Your session expired. Sign in and try again.");
+      const driver = type === "dq-file" ? `&driver_id=${encodeURIComponent(selectedDriverId)}` : "";
+      const response = await fetch(`/api/audit/pdf?type=${type}${driver}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!response.ok) throw new Error(`PDF generation failed (${response.status}). Try again.`);
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = type === "dq-file" ? `dq-file-${selectedDriverId}.pdf` : `${type}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      setPdfError(error instanceof Error ? error.message : "PDF generation failed. Try again.");
+    } finally {
+      setPdfBusy(null);
     }
   }
 
@@ -117,6 +149,37 @@ export default function AuditExportPage() {
       }
     >
       <div className="p-6 space-y-6">
+
+        <section className="x3-card p-5" aria-labelledby="audit-pdf-heading">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-2xl">
+              <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-1">Native evidence exports</div>
+              <h2 id="audit-pdf-heading" className="text-lg font-extrabold text-[var(--fg)]">Audit-ready PDFs</h2>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--fg-muted)]">
+                Generate a current, branded PDF directly from your tenant records. Empty results remain explicit; X3 never fills missing evidence with sample data.
+              </p>
+            </div>
+            <div className="grid w-full gap-3 md:grid-cols-[minmax(210px,1fr)_auto_auto_auto] xl:max-w-4xl">
+              <label className="text-[11px] font-bold text-[var(--fg-muted)]">
+                Select a driver for the DQ file
+                <select className="x3i mt-1" value={selectedDriverId} onChange={(event) => setSelectedDriverId(event.target.value)}>
+                  <option value="">Select a driver</option>
+                  {drivers.map((driver) => <option key={driver.id} value={driver.id}>{driverLabel(driver)}</option>)}
+                </select>
+              </label>
+              <button type="button" onClick={() => downloadPdf("dq-file")} disabled={!selectedDriverId || pdfBusy !== null} className="self-end rounded-lg border border-[var(--border)] px-4 py-2.5 text-[12px] font-extrabold text-[var(--fg)] hover:bg-[var(--surface-3)] disabled:opacity-40">
+                {pdfBusy === "dq-file" ? "Generating…" : "↓ DQ file"}
+              </button>
+              <button type="button" onClick={() => downloadPdf("drug-alcohol")} disabled={pdfBusy !== null} className="self-end rounded-lg border border-[var(--border)] px-4 py-2.5 text-[12px] font-extrabold text-[var(--fg)] hover:bg-[var(--surface-3)] disabled:opacity-40">
+                {pdfBusy === "drug-alcohol" ? "Generating…" : "↓ D&A summary"}
+              </button>
+              <button type="button" onClick={() => downloadPdf("accident-register")} disabled={pdfBusy !== null} className="self-end rounded-lg px-4 py-2.5 text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-40" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
+                {pdfBusy === "accident-register" ? "Generating…" : "↓ Accident register"}
+              </button>
+            </div>
+          </div>
+          {pdfError && <p role="alert" className="mt-3 text-sm font-bold text-rose-500">{pdfError}</p>}
+        </section>
 
         {/* KPI cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
