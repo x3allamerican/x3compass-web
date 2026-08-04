@@ -21,6 +21,7 @@ const AUTHENTICATED = new Set([
   "/api/accidents/import",
   "/api/ask",
   "/api/audit/build",
+  "/api/audit/pdf",
   "/api/auth/invite",
   "/api/auth/post-signup",
   "/api/checkr/session-token",
