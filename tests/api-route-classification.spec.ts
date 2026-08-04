@@ -21,7 +21,7 @@ test("every API handler has an explicit security classification", () => {
 
 test("tenant and privileged routes are never public", () => {
   for (const path of [
-    "/api/scorecards", "/api/accident-register", "/api/audit/pdf", "/api/clearinghouse/status", "/api/compliance-calendar", "/api/dashboard", "/api/dataq/challenges", "/api/notifications", "/api/drivers/import",
+    "/api/scorecards", "/api/accident-register", "/api/audit/pdf", "/api/billing/usage-reconciliation", "/api/clearinghouse/status", "/api/compliance-calendar", "/api/dashboard", "/api/dataq/challenges", "/api/notifications", "/api/drivers/import",
     "/api/vehicles/import", "/api/accidents/import", "/api/inspections/import", "/api/inspections/parse",
     "/api/vendors/list", "/api/screenings/order", "/api/uploads/sign",
   ]) expect(classifyApiRoute(path)).toBe("authenticated-user");
