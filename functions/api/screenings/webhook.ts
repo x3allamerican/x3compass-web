@@ -160,7 +160,7 @@ interface CheckrEvent {
   data?: { object?: Record<string, unknown> };
 }
 
-async function verifyHmacSha256(
+export async function verifyHmacSha256(
   body: string,
   secret: string,
   expectedHex: string
@@ -304,7 +304,7 @@ async function applyCheckrEventToOrder(
  * event maps to a row in compass_mvr_monitors. Regular one-off reports (no
  * continuous_check_id / unmonitored candidate) are ignored here.
  */
-async function applyContinuousMvr(
+export async function applyContinuousMvr(
   env: Env,
   sbHeaders: Record<string, string>,
   eventType: string,

@@ -23,6 +23,7 @@ const AUTHENTICATED = new Set([
   "/api/auth/invite",
   "/api/auth/post-signup",
   "/api/checkr/session-token",
+  "/api/carrier/set-ctpa",
   "/api/dashboard",
   "/api/drivers/import",
   "/api/inspections/import",

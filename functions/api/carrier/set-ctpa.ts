@@ -4,29 +4,24 @@
  * (never trusted from the client). Body: { ctpa_slug, custom_name, mode,
  * disclosure_acked?, disclosure_version? }.
  */
-import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
+import { correlationId, requireTenant, securityError, tenantJson, tenantPreflight, type SecurityEnv } from "../../_shared/request-security";
+import { supaFetch } from "../../_shared/supabase-admin";
 
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
-
-const json = (d: unknown, s = 200) =>
-  new Response(JSON.stringify(d), { status: s, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+interface Env extends SecurityEnv {}
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   try {
-    const user = await verifySupabaseJwt(ctx.env, bearerFromRequest(ctx.request));
-    if (!user) return json({ ok: false, error: "Unauthorized" }, 401);
+    const authority = await requireTenant(ctx.request, ctx.env, null);
+    if (!authority.ok) return securityError(authority.status, authority.code, correlationId(ctx.request));
 
     let body: { ctpa_slug?: string | null; custom_name?: string | null; mode?: string | null };
-    try { body = await ctx.request.json(); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
+    try { body = await ctx.request.json(); } catch { return tenantJson(ctx.request, ctx.env, { ok: false, error: "Invalid JSON" }, 400); }
 
     const mode = (body.mode || "").toString().slice(0, 32) || null;
     const custom = body.custom_name ? String(body.custom_name).slice(0, 200) : null;
 
     const supa = supaFetch(ctx.env);
-    // Server-derived carrier — never trust a carrier id from the client.
-    const rows = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&select=carrier_id`)) as Array<{ carrier_id: string }>;
-    if (rows.length === 0) return json({ ok: false, error: "No carrier for user" }, 400);
-    const carrier_id = rows[0].carrier_id;
+    const carrier_id = authority.carrierId;
 
     // Resolve ctpa_id from slug (null for BYO/custom or unknown slug).
     let ctpa_id: string | null = null;
@@ -41,13 +36,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       ctpa_id,
     });
 
-    return json({ ok: true, note: "C/TPA saved." });
+    return tenantJson(ctx.request, ctx.env, { ok: true, note: "C/TPA saved." });
   } catch (err) {
     const ref = crypto.randomUUID();
     console.error("[set-ctpa] error ref=%s:", ref, err);
-    return json({ ok: false, error: "Could not save. Please try again.", ref }, 500);
+    return tenantJson(ctx.request, ctx.env, { ok: false, error: "Could not save. Please try again.", ref }, 500);
   }
 };
 
-export const onRequestOptions: PagesFunction = async () =>
-  new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" } });
+export const onRequestOptions: PagesFunction<Env> = async (ctx) => tenantPreflight(ctx.request, ctx.env, "POST, OPTIONS");
