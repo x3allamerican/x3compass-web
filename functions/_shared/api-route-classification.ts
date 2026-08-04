@@ -29,6 +29,7 @@ const AUTHENTICATED = new Set([
   "/api/checkr/session-token",
   "/api/carrier/set-ctpa",
   "/api/compliance-calendar",
+  "/api/csa/snapshots",
   "/api/dashboard",
   "/api/dataq/challenges",
   "/api/drivers/import",
