@@ -11,7 +11,7 @@ import { useDrivers, driverLabel, DriverOpt } from "@/components/app/useDrivers"
 type A = {
   id:string; driver_id:string|null; vehicle_id:string|null;
   accident_date:string; occurred_time:string|null;
-  location:string|null; recordable:boolean;
+  location:string|null; city:string|null; state:string|null; hazmat_released:boolean|null; recordable:boolean;
   fatalities:number; injuries:number; tow_required:boolean;
   preventable:string|null; severity:string|null;
   description:string|null; cause_category:string|null; citation:string|null;
@@ -19,6 +19,12 @@ type A = {
   police_report_url:string|null;
 };
 type VOpt = { id:string; year:number|null; make:string|null; model:string|null; license_plate:string|null };
+type RegisterRecord = {
+  id:string; accidentDate:string|null; city:string|null; state:string|null; driverName:string|null;
+  fatalities:number|null; injuries:number|null; hazmatReleased:boolean|null; retentionThrough:string|null;
+  retentionStatus:"retain"|"retention_complete"|"date_missing"; missingFields:string[]; citation:string; guardrail:string;
+};
+type RegisterPayload = { ok:boolean; records:RegisterRecord[]; counts:{ total:number; complete:number; missing_evidence:number; retain:number; retention_complete:number; date_missing:number } };
 
 // =========================================================================
 // COLOR PALETTE · matches the FMCSA/DOT criteria reference card
@@ -97,6 +103,61 @@ function DefinitionsCard() {
   );
 }
 
+function AccidentRegisterPanel({ state, payload, rows, filter, setFilter, search, setSearch }:{
+  state:"loading"|"ready"|"error"; payload:RegisterPayload|null; rows:RegisterRecord[];
+  filter:"all"|"retain"|"retention_complete"|"missing_evidence";
+  setFilter:(value:"all"|"retain"|"retention_complete"|"missing_evidence")=>void;
+  search:string; setSearch:(value:string)=>void;
+}) {
+  const format = (value:string|null) => value ? new Intl.DateTimeFormat("en-US", { timeZone:"UTC", year:"numeric", month:"short", day:"numeric" }).format(new Date(`${value}T00:00:00Z`)) : "Not documented";
+  const filters = [
+    ["all", "All records"], ["retain", "Retain"], ["missing_evidence", "Missing evidence"], ["retention_complete", "Retention complete"],
+  ] as const;
+  return (
+    <section className="x3-card p-5 mb-5" aria-labelledby="dot-register-title">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 id="dot-register-title" className="text-[18px] font-extrabold text-[var(--fg)]">DOT accident register</h2>
+          <p className="text-[12px] text-[var(--fg-muted)] mt-1">49 CFR 390.15(b)(1) · stored facts and three-year retention tracking</p>
+        </div>
+        <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[10px] font-bold uppercase tracking-[.1em] text-[var(--fg-muted)]">Decision support</span>
+      </div>
+      {state === "loading" && <div className="py-8 text-[13px] text-[var(--fg-muted)]">Loading register evidence…</div>}
+      {state === "error" && <div role="alert" className="mt-4 rounded-lg border border-rose-500/40 p-4 text-[12px] text-rose-700 dark:text-rose-200">Register evidence is unavailable. No incomplete or sample register was substituted.</div>}
+      {state === "ready" && payload && <>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {[
+            ["Total records", payload.counts.total], ["Complete", payload.counts.complete],
+            ["Missing evidence", payload.counts.missing_evidence], ["Retention complete", payload.counts.retention_complete],
+          ].map(([label, value]) => <div key={label} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3"><div className="text-[10px] uppercase tracking-[.12em] font-bold text-[var(--fg-muted)]">{label}</div><div className="text-[24px] font-black text-[var(--fg)] tabular-nums">{value}</div></div>)}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {filters.map(([value, label]) => <button key={value} type="button" onClick={()=>setFilter(value)} aria-pressed={filter===value} className={`rounded-full border px-3 py-1.5 text-[11px] font-bold ${filter===value ? "border-[var(--accent)] bg-[var(--accent)] text-black" : "border-[var(--border)] text-[var(--fg-muted)]"}`}>{label}</button>)}
+          <input aria-label="Search DOT accident register" value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search date, city, state, driver" className="ml-auto min-w-[260px] rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[12px] text-[var(--fg)]" />
+        </div>
+        <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
+          <table className="w-full min-w-[1080px] text-[12px]">
+            <thead className="bg-[var(--surface-2)] text-[10px] uppercase tracking-[.1em] text-[var(--fg-muted)]"><tr>
+              <th className="p-3 text-left">Date</th><th className="p-3 text-left">City / State</th><th className="p-3 text-left">Driver</th><th className="p-3 text-right">Fatalities</th><th className="p-3 text-right">Injuries</th><th className="p-3 text-left">Hazmat released</th><th className="p-3 text-left">Retain through</th><th className="p-3 text-left">Evidence status</th>
+            </tr></thead>
+            <tbody>{rows.map((record)=><tr key={record.id} className="border-t border-[var(--border)]">
+              <td className="p-3 text-[var(--fg)]">{format(record.accidentDate)}</td>
+              <td className="p-3 text-[var(--fg)]">{record.city && record.state ? `${record.city}, ${record.state}` : <span className="text-amber-700 dark:text-amber-300">Missing</span>}</td>
+              <td className="p-3 text-[var(--fg)]">{record.driverName || <span className="text-amber-700 dark:text-amber-300">Missing</span>}</td>
+              <td className="p-3 text-right tabular-nums">{record.fatalities ?? "Missing"}</td><td className="p-3 text-right tabular-nums">{record.injuries ?? "Missing"}</td>
+              <td className="p-3">{record.hazmatReleased === null ? "Not documented" : record.hazmatReleased ? "Yes" : "No"}</td>
+              <td className="p-3">{format(record.retentionThrough)}<div className="text-[10px] text-[var(--fg-muted)]">{record.retentionStatus.replaceAll("_", " ")}</div></td>
+              <td className="p-3">{record.missingFields.length === 0 ? <span className="text-emerald-700 dark:text-emerald-300 font-bold">Complete</span> : <span className="text-amber-700 dark:text-amber-300 font-bold">Missing: {record.missingFields.join(", ")}</span>}</td>
+            </tr>)}</tbody>
+          </table>
+          {rows.length === 0 && <div className="p-8 text-center text-[12px] text-[var(--fg-muted)]">No accident register records match this filter.</div>}
+        </div>
+        <p className="mt-3 text-[11px] text-[var(--fg-faint)]">Decision support only. Verify source records, register scope, and retention obligations with a qualified reviewer.</p>
+      </>}
+    </section>
+  );
+}
+
 export default function AccidentsPage() {
   const { carrier } = useUser();
   const drivers = useDrivers(carrier?.id);
@@ -109,15 +170,31 @@ export default function AccidentsPage() {
   const [search, setSearch] = useState("");
   const [filterSev, setFilterSev] = useState("");
   const [filterPrev, setFilterPrev] = useState("");
+  const [register, setRegister] = useState<RegisterPayload | null>(null);
+  const [registerState, setRegisterState] = useState<"loading"|"ready"|"error">("loading");
+  const [registerFilter, setRegisterFilter] = useState<"all"|"retain"|"retention_complete"|"missing_evidence">("all");
+  const [registerSearch, setRegisterSearch] = useState("");
+
+  async function loadRegister() {
+    setRegisterState("loading");
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      if (!session?.access_token) throw new Error("missing session");
+      const response = await fetch("/api/accident-register", { cache: "no-store", headers: { Authorization: `Bearer ${session.access_token}` } });
+      const body = await response.json() as RegisterPayload;
+      if (!response.ok || !body.ok) throw new Error("register unavailable");
+      setRegister(body); setRegisterState("ready");
+    } catch { setRegister(null); setRegisterState("error"); }
+  }
 
   async function refresh() {
     if (!carrier) return;
     setLoading(true);
     const [a, v] = await Promise.all([
-      getSupabase().from("compass_accidents").select("*").eq("carrier_id", carrier.id).order("accident_date",{ascending:false}),
+      getSupabase().from("compass_accidents").select("id,driver_id,vehicle_id,accident_date,occurred_time,location,city,state,hazmat_released,recordable,fatalities,injuries,tow_required,preventable,severity,description,cause_category,citation,alc_test_status,drug_test_status,police_report_url").eq("carrier_id", carrier.id).order("accident_date",{ascending:false}),
       getSupabase().from("compass_vehicles").select("id,year,make,model,license_plate").eq("carrier_id", carrier.id),
     ]);
-    setRows((a.data as A[]) || []); setVehicles((v.data as VOpt[]) || []); setLoading(false);
+    setRows((a.data as A[]) || []); setVehicles((v.data as VOpt[]) || []); setLoading(false); await loadRegister();
   }
   useEffect(() => { if (carrier) refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [carrier]);
 
@@ -135,6 +212,14 @@ export default function AccidentsPage() {
     });
   }, [rows, drivers, filterSev, filterPrev, search]);
 
+  const registerRows = useMemo(() => (register?.records || []).filter((record) => {
+    if (registerFilter === "retain" && record.retentionStatus !== "retain") return false;
+    if (registerFilter === "retention_complete" && record.retentionStatus !== "retention_complete") return false;
+    if (registerFilter === "missing_evidence" && record.missingFields.length === 0) return false;
+    const query = registerSearch.trim().toLowerCase();
+    return !query || `${record.accidentDate||""} ${record.city||""} ${record.state||""} ${record.driverName||""}`.toLowerCase().includes(query);
+  }), [register, registerFilter, registerSearch]);
+
   function vehLabel(id: string | null) {
     if (!id) return null;
     const v = vehicles.find(x => x.id === id);
@@ -148,6 +233,12 @@ export default function AccidentsPage() {
       <div className="p-6">
 
         <DefinitionsCard />
+
+        <AccidentRegisterPanel
+          state={registerState} payload={register} rows={registerRows}
+          filter={registerFilter} setFilter={setRegisterFilter}
+          search={registerSearch} setSearch={setRegisterSearch}
+        />
 
         {/* Filter bar */}
         <div className="space-y-3 mb-5">
@@ -304,7 +395,16 @@ function AccidentFormModal({ carrier_id, drivers, vehicles, accident, onClose, o
             {vehicles.map(v => <option key={v.id} value={v.id}>{v.year} {v.make} {v.model} ({v.license_plate})</option>)}
           </select>
         </Field>
-        <Field label="Location"><input className="x3i" value={form.location||""} onChange={(e)=>setForm({...form,location:e.target.value})} placeholder="e.g. I-35 · Dallas TX" /></Field>
+            <Field label="Location"><input className="x3i" value={form.location||""} onChange={(e)=>setForm({...form,location:e.target.value})} placeholder="e.g. I-35 · Dallas TX" /></Field>
+            <div className="grid grid-cols-[1fr_120px] gap-3">
+              <Field label="City · §390.15"><input className="x3i" value={form.city||""} onChange={(e)=>setForm({...form,city:e.target.value||null})} placeholder="Detroit" /></Field>
+              <Field label="State"><input className="x3i" maxLength={2} value={form.state||""} onChange={(e)=>setForm({...form,state:e.target.value.toUpperCase()||null})} placeholder="MI" /></Field>
+            </div>
+            <Field label="Hazardous materials released · excluding fuel-tank spills">
+              <select className="x3i" value={form.hazmat_released === null || form.hazmat_released === undefined ? "unknown" : String(form.hazmat_released)} onChange={(e)=>setForm({...form,hazmat_released:e.target.value === "unknown" ? null : e.target.value === "true"})}>
+                <option value="unknown">Not documented</option><option value="false">No</option><option value="true">Yes</option>
+              </select>
+            </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Severity">
             <select className="x3i" value={form.severity||"minor"} onChange={(e)=>setForm({...form,severity:e.target.value})}>
