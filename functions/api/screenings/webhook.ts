@@ -15,6 +15,8 @@
  *  - We listen for: invitation.created/completed/expired/deleted,
  *    report.created/updated/completed/canceled/suspended/resumed/disputed/engaged,
  *    report.pre_adverse_action, report.post_adverse_action
+ *  - Continuous MVR: continuous_check.created/canceled and change-triggered
+ *    report.completed (obj.continuous_check_id) -> compass_mvr_records
  *  - report.completed handling: first check `assessment` field (Assess output),
  *    fall back to `result` field. Honor `includes_canceled` boolean for
  *    partial-completion display logic.
@@ -131,6 +133,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
   // === Apply state transition to vendor_orders ===
   await applyCheckrEventToOrder(ctx.env, sbHeaders, eventType, obj, payload);
+
+  // Continuous MVR monitoring: enrollment lifecycle + change-triggered MVR reports
+  await applyContinuousMvr(ctx.env, sbHeaders, eventType, obj);
 
   // Mark event as processed
   await fetch(
@@ -292,6 +297,88 @@ async function applyCheckrEventToOrder(
     headers: { ...sbHeaders, Prefer: "return=minimal" },
     body: JSON.stringify(update),
   });
+}
+
+/**
+ * Continuous MVR monitoring side-effects. Non-breaking: only acts when the
+ * event maps to a row in compass_mvr_monitors. Regular one-off reports (no
+ * continuous_check_id / unmonitored candidate) are ignored here.
+ */
+async function applyContinuousMvr(
+  env: Env,
+  sbHeaders: Record<string, string>,
+  eventType: string,
+  obj: Record<string, unknown>,
+): Promise<void> {
+  const base = env.SUPABASE_URL;
+  if (!base) return;
+  const nowIso = new Date().toISOString();
+  const str = (v: unknown): string | undefined => (typeof v === "string" && v ? v : undefined);
+
+  async function findMonitor(filter: string): Promise<{ id: string; carrier_id: string; driver_id: string } | null> {
+    const r = await fetch(`${base}/rest/v1/compass_mvr_monitors?${filter}&select=id,carrier_id,driver_id&limit=1`, { headers: sbHeaders });
+    if (!r.ok) return null;
+    const rows = (await r.json()) as Array<{ id: string; carrier_id: string; driver_id: string }>;
+    return rows[0] || null;
+  }
+  async function patchMonitor(id: string, patch: Record<string, unknown>): Promise<void> {
+    await fetch(`${base}/rest/v1/compass_mvr_monitors?id=eq.${id}`, {
+      method: "PATCH", headers: { ...sbHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({ ...patch, updated_at: nowIso }),
+    });
+  }
+
+  // --- continuous_check.* lifecycle events ---
+  if (eventType.startsWith("continuous_check.")) {
+    const ccId = str(obj.id);
+    const candId = str(obj.candidate_id);
+    let mon = ccId ? await findMonitor(`checkr_continuous_check_id=eq.${encodeURIComponent(ccId)}`) : null;
+    if (!mon && candId) mon = await findMonitor(`checkr_candidate_id=eq.${encodeURIComponent(candId)}`);
+    if (!mon) return;
+    if (eventType === "continuous_check.created") {
+      await patchMonitor(mon.id, { status: "active", ...(ccId ? { checkr_continuous_check_id: ccId } : {}), raw: obj });
+    } else if (/cancel|complete|delete|clear/.test(eventType)) {
+      await patchMonitor(mon.id, { status: "canceled", canceled_at: nowIso, raw: obj });
+    }
+    return;
+  }
+
+  // --- change-triggered MVR report on a monitored candidate ---
+  if (eventType.startsWith("report.")) {
+    const ccId = str(obj.continuous_check_id);
+    const candId = str(obj.candidate_id);
+    if (!ccId && !candId) return;
+    let mon = ccId ? await findMonitor(`checkr_continuous_check_id=eq.${encodeURIComponent(ccId)}`) : null;
+    if (!mon && candId) mon = await findMonitor(`checkr_candidate_id=eq.${encodeURIComponent(candId)}`);
+    if (!mon) return; // not a monitored driver
+
+    const reportId = str(obj.id);
+    if (eventType !== "report.completed") {
+      if (reportId) await patchMonitor(mon.id, { last_report_id: reportId });
+      return;
+    }
+    const result = str(obj.assessment) || str(obj.result) || "updated";
+    const mvr = (obj.motor_vehicle_report || obj.mvr) as Record<string, unknown> | undefined;
+    let violationsCount: number | null = null;
+    if (mvr && Array.isArray((mvr as { violations?: unknown[] }).violations)) violationsCount = ((mvr as { violations: unknown[] }).violations).length;
+    else if (Array.isArray((obj as { records?: unknown[] }).records)) violationsCount = ((obj as { records: unknown[] }).records).length;
+    const state = str(mvr?.state) || str(obj.state) || null;
+
+    await fetch(`${base}/rest/v1/compass_mvr_records`, {
+      method: "POST", headers: { ...sbHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({
+        carrier_id: mon.carrier_id,
+        driver_id: mon.driver_id,
+        pulled_on: nowIso.slice(0, 10),
+        state,
+        result,
+        violations_count: violationsCount,
+        source: "checkr_continuous",
+        notes: `Continuous MVR change detected${reportId ? ` · report ${reportId}` : ""}`,
+      }),
+    });
+    await patchMonitor(mon.id, { ...(reportId ? { last_report_id: reportId } : {}), last_change_at: nowIso });
+  }
 }
 
 // OPTIONS for CORS preflight (Checkr does not send OPTIONS but harmless)
