@@ -70,10 +70,10 @@ export default function VehiclesPage() {
   // Fall back to demo Apex-Logistics roster (10 power units) when the
   // real query came back empty. Adapter normalizes the demo shape to Vehicle.
   const effectiveRows = useMemo(
-    () => withDemoFallback(rows, DEMO_VEHICLES.map(adaptDemoVehicle)),
-    [rows]
+    () => withDemoFallback(rows, DEMO_VEHICLES.map(adaptDemoVehicle), !carrier),
+    [rows, carrier]
   );
-  const isDemo = rows.length === 0;
+  const isDemo = !carrier && rows.length === 0;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -171,7 +171,7 @@ function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_i
       const sb = getSupabase();
       const payload = { ...form, carrier_id };
       if (vehicle?.id) {
-        const { error } = await sb.from("compass_vehicles").update(payload).eq("id", vehicle.id);
+        const { error } = await sb.from("compass_vehicles").update(payload).eq("id", vehicle.id).eq("carrier_id", carrier_id);
         if (error) throw error;
       } else {
         const { error } = await sb.from("compass_vehicles").insert([payload]);
@@ -186,7 +186,7 @@ function VehicleFormModal({ carrier_id, vehicle, onClose, onSaved }: { carrier_i
     if (!vehicle?.id) return;
     if (!confirm("Remove this vehicle? This cannot be undone.")) return;
     setBusy(true);
-    const { error } = await getSupabase().from("compass_vehicles").delete().eq("id", vehicle.id);
+    const { error } = await getSupabase().from("compass_vehicles").delete().eq("id", vehicle.id).eq("carrier_id", carrier_id);
     if (error) { setError(error.message); setBusy(false); return; }
     onSaved();
   }
@@ -268,4 +268,3 @@ function KpiCard({ label, value, sub, tone = "ok" }: { label: string; value: num
     </div>
   );
 }
-

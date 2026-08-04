@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { COMPASS_COPY } from "@/lib/pricing";
 import "./globals.css";
 
 // Font subset trim (Sprint #21 follow-up): Inter 6→3, Playfair 8→2 → ~120KB removed
@@ -14,7 +15,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://x3compass.com";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { default: "X3 Compass · AI Safety Director for fleets", template: "%s · X3 Compass" },
-  description: "An AI Safety Director · or a real one. Both work. 300+ FMCSA skills across the full CFR corpus, every answer cited. Graduated per-driver pricing from $50/driver down to $25. 7-day free trial, no card.",
+  description: "The self-service AI Safety Director. 300+ FMCSA skills across the full CFR corpus, every answer cited. One graduated per-driver plan from $50 down to $25. 7-day free trial, no card.",
   keywords: ["FMCSA compliance","DOT compliance software","fleet safety","AI safety director","DataQ disputes","hazmat compliance","DQ files","CDL compliance","hours of service","driver qualification file","X3 Compass"],
   authors: [{ name: "X3 Fleet Safety LLC" }],
   alternates: { canonical: SITE },
@@ -105,17 +106,17 @@ const FAQ_JSONLD = {
     {
       "@type": "Question",
       name: "How much does X3 Compass cost?",
-      acceptedAnswer: { "@type": "Answer", text: "One graduated plan: $50/driver/mo for drivers 1–50, $40 for 51–75, $30 for 76–100, and $25 for 101+. Each rate applies only to the drivers in that band, so a 100-driver fleet pays $4,250/mo — not 100 × $30. $100/mo minimum. Every X3 product is included." },
+      acceptedAnswer: { "@type": "Answer", text: COMPASS_COPY.pricing },
     },
     {
       "@type": "Question",
       name: "Do I lose features at the lower per-driver rates?",
-      acceptedAnswer: { "@type": "Answer", text: "No. Every X3 product is included at every fleet size — the AI Safety Director, CFR-cited skills, DataQ drafter, DQ file generator, MVR cadence, dedicated safety advisor and audit prep. Only the per-driver rate changes as you grow." },
+      acceptedAnswer: { "@type": "Answer", text: COMPASS_COPY.included },
     },
     {
       "@type": "Question",
       name: "Is there a free trial?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes · 7-day free trial, no credit card required. Cancel any time from /app/settings/billing." },
+      acceptedAnswer: { "@type": "Answer", text: COMPASS_COPY.trial },
     },
     {
       "@type": "Question",

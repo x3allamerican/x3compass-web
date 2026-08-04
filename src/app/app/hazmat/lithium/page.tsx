@@ -12,10 +12,6 @@ export default function LithiumPage() {
     <HazmatSubPageShell
       activeId="hazmat-lithium"
       pageTitle="LITHIUM DECISION TREE"
-      eyebrow="X3 Compass · Hazmat Center · Lithium Decision Tree"
-      heading={<>Lithium · classified right or it's a fire on board.</>}
-      sub="UN 3480 / 3481 / 3090 / 3091 — five answers and you know whether your shipment is full-reg Class 9, Section IB excepted, or Section II excepted. Built off §173.185 with every reg change since 2022."
-      regs="49 CFR § 173.185 · IATA PI 965–970 · IMDG SP 188 · ICAO TI"
       eduSurface="Lithium Decision Tree"
       eduSubtitle="49 CFR § 173.185 · ion vs metal, watt-hours, packed vs in-equipment, Section II vs IB"
       conciergeHref="/app/ask?context=hazmat-lithium"

@@ -1,4 +1,5 @@
 export interface SupabaseAdminEnv { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function supaFetch(env: SupabaseAdminEnv) {
   const base = env.SUPABASE_URL?.replace(/\/$/, "") || "";
@@ -42,7 +43,7 @@ export async function verifySupabaseJwt(env: SupabaseAdminEnv, token: string): P
   });
   if (!r.ok) return null;
   const u = (await r.json()) as { id?: string; email?: string };
-  if (!u.id) return null;
+  if (!u.id || !UUID_PATTERN.test(u.id)) return null;
   return { id: u.id, email: u.email };
 }
 

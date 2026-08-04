@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import { useUser } from "@/lib/useUser";
-import { DEMO_CARRIER, DEMO_FLEET, COMPLIANCE_BARS, ACTION_ITEMS } from "@/lib/demoData";
 
 /* ----------- helpers ----------- */
 
@@ -47,30 +46,6 @@ function Donut({
         </div>
       </div>
     </div>
-  );
-}
-
-/** Tiny SVG sparkline · fake-positive cyan line for the dashboard hero KPIs. */
-function Sparkline({ trend = "up", width = 180, height = 60 }: { trend?: "up" | "flat" | "down"; width?: number; height?: number }) {
-  const points = trend === "up"   ? [10, 12, 9, 15, 13, 22, 18, 25, 24, 32]
-                : trend === "down" ? [32, 28, 30, 22, 25, 18, 19, 12, 14, 8]
-                :                    [18, 22, 19, 21, 20, 22, 18, 21, 19, 20];
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const range = max - min || 1;
-  const step = width / (points.length - 1);
-  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${i * step} ${height - ((p - min) / range) * (height - 8) - 4}`).join(" ");
-  return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" style={{ flex: 1, minWidth: 0 }}>
-      <defs>
-        <linearGradient id="x3-spark-fill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${path} L ${width} ${height} L 0 ${height} Z`} fill="url(#x3-spark-fill)" />
-      <path d={path} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
   );
 }
 
@@ -117,68 +92,84 @@ function BarChart({ data, height = 200 }: { data: Array<{ label: string; value: 
   );
 }
 
-/** Trend line chart · Compliance Health Trend (90 days). */
-function TrendChart({ values, height = 200 }: { values: number[]; height?: number }) {
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-  const width = 100;
-  const step = width / (values.length - 1);
-  const path = values.map((v, i) => `${i === 0 ? "M" : "L"} ${i * step} ${100 - ((v - min) / range) * 80 - 10}`).join(" ");
-  return (
-    <svg viewBox={`0 0 ${width} 100`} preserveAspectRatio="none" style={{ width: "100%", height }} aria-hidden="true">
-      <defs>
-        <linearGradient id="trend-fill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${path} L ${width} 100 L 0 100 Z`} fill="url(#trend-fill)" />
-      <path d={path} fill="none" stroke="var(--accent)" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 /* ----------- page ----------- */
 
+type FleetData = {
+  active_drivers: number;
+  drivers_on_roster: number;
+  open_alerts: number;
+  open_alerts_urgent: number;
+  cdls_expired: number;
+  mecs_expiring_30d: number;
+  dq_score_pct: number;
+  compliance_pct: number | null;
+};
+type ComplianceBar = { label: string; pct: number | null; color: string };
+type CsaBasic = { name: string; msr: number; threshold: number; status: "ok" | "warn" | "alert" };
+type ActionCard = {
+  title: string;
+  items: Array<{ who: string; meta: string; status: string; statusKind: "overdue" | "warn" }>;
+};
+type ExpirationBucket = { name: string; "0_30": number; "31_60": number; "61_90": number };
 type ApiData = {
-  carrier?: typeof DEMO_CARRIER;
-  fleet?: typeof DEMO_FLEET;
-  compliance_bars?: typeof COMPLIANCE_BARS;
-  /** Reserved: real CSA BASIC data when the FMCSA SAFER feed wires in.
-   *  Currently the dashboard renders a hardcoded canonical B/A/S/I/C
-   *  5-row table to match the live reference at app.x3compass.com. */
-  csa_basics?: Array<{ letter: string; name: string; score: number; rating: "Good" | "Fair" | "Alert" }>;
-  action_items?: typeof ACTION_ITEMS;
-  action_items_row2?: typeof ACTION_ITEMS;
+  fleet: FleetData;
+  compliance_bars: ComplianceBar[];
+  csa_basics: CsaBasic[] | null;
+  action_items: Record<string, ActionCard>;
+  doc_expirations: ExpirationBucket[];
 };
 
 export default function CompassDashboard() {
   const { user } = useUser();
   const [api, setApi] = useState<ApiData | null>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/dashboard").then(r => r.ok ? r.json() : null).then(setApi).catch(() => {});
+    let cancelled = false;
+    fetch("/api/dashboard")
+      .then(async (response) => {
+        if (!response.ok) throw new Error("dashboard_unavailable");
+        const payload = await response.json() as { data?: ApiData };
+        if (!payload.data) throw new Error("dashboard_payload_invalid");
+        if (!cancelled) {
+          setApi(payload.data);
+          setLoadState("ready");
+        }
+      })
+      .catch(() => { if (!cancelled) setLoadState("error"); });
+    return () => { cancelled = true; };
   }, [user]);
 
-  const CARRIER = api?.carrier ? { ...DEMO_CARRIER, ...api.carrier } : DEMO_CARRIER;
-  const FLEET   = api?.fleet ? { ...DEMO_FLEET, ...api.fleet } : DEMO_FLEET;
-  const BARS    = (api?.compliance_bars?.length ? api.compliance_bars : COMPLIANCE_BARS).slice(0, 6);
-  // CSA BASICS now hardcoded inline (5 rows, canonical B/A/S/I/C
-  // acronym) to match the live reference exactly. When real CSA
-  // data ships, reattach via api?.csa_basics here.
+  if (loadState !== "ready" || !api) {
+    return (
+      <AppShell>
+        <main style={{ padding: 24 }}>
+          <Card>
+            <h2 style={{ margin: 0, color: "var(--fg)", fontSize: 18 }}>{loadState === "error" ? "Verified dashboard data is unavailable" : "Loading verified tenant data…"}</h2>
+            <p style={{ color: "var(--fg-muted)", marginBottom: 0 }}>{loadState === "error" ? "No demo or estimated compliance values are shown. Retry after the data service is available." : "Compliance indicators will appear after authenticated records are loaded."}</p>
+          </Card>
+        </main>
+      </AppShell>
+    );
+  }
 
-  // Static action items inline to match Manus design (vertical list, badges, due dates).
-  // When the API ships richer data we'll source from `api.action_items_inline`.
-  const ACTIONS = [
-    { id: 1, severity: "urgent",  badge: "URGENT",  text: `${Math.max(15, FLEET.cdls_expired ?? 0)} Drivers with Expired/Expiring Medical Certificates`, due: "Due Now" },
-    { id: 2, severity: "urgent",  badge: "URGENT",  text: `${FLEET.open_alerts_urgent ?? 8} Drivers with Expired Drug Test Results`, due: "Due Now" },
-    { id: 3, severity: "warning", badge: "WARNING", text: `${FLEET.mecs_expiring_30d ?? 12} Drivers with Expiring HOS/ELD Exemptions`, due: "Due in 7 days" },
-    { id: 4, severity: "warning", badge: "WARNING", text: `7 Vehicle Inspections Overdue`, due: "Due in 7 days" },
-    { id: 5, severity: "good",    badge: "GOOD",    text: `All Training Records Current`, due: "" },
-    { id: 6, severity: "good",    badge: "GOOD",    text: `IFTA Filing Up to Date`, due: "" },
-  ];
+  const FLEET = api.fleet;
+  const BARS = api.compliance_bars.slice(0, 6);
+  const ACTIONS = Object.values(api.action_items).flatMap((card) =>
+    card.items.map((item, index) => ({
+      id: `${card.title}-${index}`,
+      severity: item.statusKind === "overdue" ? "urgent" as const : "warning" as const,
+      badge: item.status,
+      text: `${item.who}${item.meta ? ` · ${item.meta}` : ""}`,
+    })),
+  ).slice(0, 6);
+  const EXPIRING = api.doc_expirations.map((bucket) => ({
+    label: bucket.name,
+    value: bucket["0_30"],
+    color: "var(--accent)",
+  }));
+  const compliancePct = FLEET.compliance_pct;
 
   return (
     <AppShell>
@@ -192,14 +183,17 @@ export default function CompassDashboard() {
           <Card>
             <CardHeader title="Compliance Health" />
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <Donut pct={FLEET.compliance_pct} label="Good" labelTone="success" />
+              {compliancePct == null ? (
+                <div style={{ color: "var(--fg-muted)", fontSize: 14 }}>Not enough verified records to calculate.</div>
+              ) : (
+                <Donut
+                  pct={compliancePct}
+                  label={compliancePct >= 90 ? "Strong" : compliancePct >= 75 ? "Review" : "Action"}
+                  labelTone={compliancePct >= 90 ? "success" : compliancePct >= 75 ? "warning" : "danger"}
+                />
+              )}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600 }}>
-                  <span style={{ color: "var(--success)" }}>Up 8%</span>
-                  <span style={{ color: "var(--success)" }}>↑</span>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>vs last 30 days</div>
-                <Sparkline trend="up" />
+                <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>Calculated from the currently available tenant records. This is decision support, not a compliance determination.</div>
               </div>
             </div>
           </Card>
@@ -210,10 +204,7 @@ export default function CompassDashboard() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 56, fontWeight: 800, color: "var(--fg)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{FLEET.active_drivers}</div>
-                <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span aria-hidden="true">👥</span>
-                  <span style={{ color: "var(--success)" }}>+3 vs last 30 days</span>
-                </div>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 6 }}>Verified active roster</div>
                 <div style={{ fontSize: 11, color: "var(--fg-faint)", marginTop: 4 }}>{Math.max(0, (FLEET.drivers_on_roster ?? 0) - (FLEET.active_drivers ?? 0))} Inactive</div>
               </div>
               <div aria-hidden="true" style={{ fontSize: 38, opacity: 0.6 }}>🚛</div>
@@ -251,12 +242,7 @@ export default function CompassDashboard() {
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <Donut pct={FLEET.dq_score_pct} label={FLEET.dq_score_pct >= 85 ? "Good" : FLEET.dq_score_pct >= 70 ? "Fair" : "Poor"} labelTone={FLEET.dq_score_pct >= 85 ? "success" : "warning"} />
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600 }}>
-                  <span style={{ color: "var(--success)" }}>Up 5%</span>
-                  <span style={{ color: "var(--success)" }}>↑</span>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>vs last 30 days</div>
-                <Sparkline trend="up" />
+                <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>Based on current DQ artifacts found versus the expected record set.</div>
               </div>
             </div>
           </Card>
@@ -276,17 +262,17 @@ export default function CompassDashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {BARS.map((b) => {
                 const icon = ({ "Driver Qualification (CDL)": "📋", "Medical Certificates": "💚", "HOS / ELD": "⏱", "Drug & Alcohol": "🧪", "Training Records": "🎓", "Vehicle Maintenance": "🔧" } as Record<string, string>)[b.label] || "•";
-                const color = b.color === "green" ? "var(--accent)" : b.color === "yellow" ? "var(--warning)" : "var(--danger)";
+                const color = b.color === "green" ? "var(--accent)" : b.color === "yellow" ? "var(--warning)" : b.color === "unknown" ? "var(--fg-faint)" : "var(--danger)";
                 return (
                   <div key={b.label} style={{ display: "grid", gridTemplateColumns: "24px 1fr 50px 14px", alignItems: "center", gap: 10, padding: "4px 0" }}>
                     <span aria-hidden="true" style={{ fontSize: 16, opacity: 0.85 }}>{icon}</span>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginBottom: 4 }}>{b.label}</div>
                       <div style={{ height: 6, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
-                        <div style={{ width: `${b.pct}%`, height: "100%", background: color, borderRadius: 999 }} />
+                        <div style={{ width: `${b.pct ?? 0}%`, height: "100%", background: color, borderRadius: 999 }} />
                       </div>
                     </div>
-                    <div style={{ textAlign: "right", fontSize: 13, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums" }}>{b.pct}%</div>
+                    <div style={{ textAlign: "right", fontSize: 13, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums" }}>{b.pct == null ? "N/A" : `${b.pct}%`}</div>
                     <span aria-hidden="true" style={{ color: "var(--fg-faint)", fontSize: 14 }}>›</span>
                   </div>
                 );
@@ -302,18 +288,19 @@ export default function CompassDashboard() {
               <Link href="/app/notifications" style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)" }}>View All</Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
+              {ACTIONS.length === 0 && (
+                <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>No action items were derived from the currently available records.</p>
+              )}
               {ACTIONS.map((a, i) => {
-                const tone = a.severity === "urgent" ? "var(--danger)" : a.severity === "warning" ? "var(--warning)" : "var(--success)";
-                const pillBg = a.severity === "urgent" ? "rgba(239,68,68,0.18)" : a.severity === "warning" ? "rgba(251,191,36,0.18)" : "rgba(34,197,94,0.18)";
-                const icon = a.severity === "good" ? "✓" : "⚠";
+                const tone = a.severity === "urgent" ? "var(--danger)" : "var(--warning)";
+                const pillBg = a.severity === "urgent" ? "rgba(239,68,68,0.18)" : "rgba(251,191,36,0.18)";
                 const isLast = i === ACTIONS.length - 1;
                 return (
                   <div key={a.id} style={{ display: "grid", gridTemplateColumns: "22px 1fr auto", alignItems: "flex-start", gap: 10, padding: "11px 0", borderBottom: isLast ? "none" : "1px solid var(--border)" }}>
-                    <span aria-hidden="true" style={{ color: tone, fontSize: 16, fontWeight: 800, paddingTop: 1 }}>{icon}</span>
-                    <div style={{ fontSize: 13, color: "var(--fg)", lineHeight: 1.4 }} dangerouslySetInnerHTML={{ __html: a.text.replace(/^(\d+)/, "<strong>$1</strong>") }} />
+                    <span aria-hidden="true" style={{ color: tone, fontSize: 16, fontWeight: 800, paddingTop: 1 }}>⚠</span>
+                    <div style={{ fontSize: 13, color: "var(--fg)", lineHeight: 1.4 }}>{a.text}</div>
                     <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end", textAlign: "right" }}>
                       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", padding: "2px 8px", borderRadius: 4, color: tone, background: pillBg }}>{a.badge}</span>
-                      {a.due && <span style={{ fontSize: 10, color: "var(--fg-faint)", marginTop: 3 }}>{a.due}</span>}
                     </div>
                   </div>
                 );
@@ -322,45 +309,30 @@ export default function CompassDashboard() {
             <Link href="/app/notifications" style={{ display: "block", textAlign: "center", marginTop: 16, padding: "10px 14px", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, fontWeight: 700, color: "var(--fg-muted)" }}>View All Action Items</Link>
           </Card>
 
-          {/* CSA Scores (BASIC) — match reference exactly: 5 rows with
-              hardcoded BASIC acronym letters B/A/S/I/C, NOT first-letter
-              of the row name. The acronym is canonical FMCSA terminology
-              (BASIC = Behavior Analysis and Safety Improvement Category).
-              Reference: app.x3compass.com/dashboard.html line 167 ff. */}
+          {/* CSA Scores (BASIC) — verified latest synchronized snapshot only. */}
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
               <h3 style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1.4, textTransform: "uppercase", color: "var(--fg)", margin: 0 }}>CSA Scores (BASIC) <span style={{ color: "var(--fg-faint)" }}>ⓘ</span></h3>
               <Link href="/app/scorecards" style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)" }}>View Details</Link>
             </div>
-            <div style={{ fontSize: 10.5, color: "var(--fg-faint)", marginBottom: 12 }}>As of May 12, 2024</div>
+            <div style={{ fontSize: 10.5, color: "var(--fg-faint)", marginBottom: 12 }}>Latest synchronized snapshot</div>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {(() => {
-                // Canonical 5-row CSA BASIC table per reference. Letters
-                // form the acronym B-A-S-I-C, not name-initials. Order
-                // matches FMCSA dashboard convention.
-                const CSA_ROWS = [
-                  { letter: "B", name: "Unsafe Driving",        score: 42, rating: "Good" as const },
-                  { letter: "A", name: "Crash Indicator",       score: 35, rating: "Good" as const },
-                  { letter: "S", name: "HOS Compliance",        score: 58, rating: "Fair" as const },
-                  { letter: "I", name: "Vehicle Maintenance",   score: 65, rating: "Fair" as const },
-                  { letter: "C", name: "Controlled Substances", score: 38, rating: "Good" as const },
-                ];
-                return CSA_ROWS.map((c, i) => {
-                  const tone = c.rating === "Good" ? "var(--success)" : c.rating === "Fair" ? "var(--warning)" : "var(--danger)";
-                  const isLast = i === CSA_ROWS.length - 1;
-                  return (
-                    <div key={c.letter} style={{ display: "grid", gridTemplateColumns: "32px 1fr auto auto", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: isLast ? "none" : "1px solid var(--border)" }}>
-                      <div aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 6, background: "transparent", border: "2px solid var(--accent)", color: "var(--accent)", fontWeight: 800, fontSize: 14, display: "grid", placeItems: "center" }}>{c.letter}</div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>{c.name}</div>
-                        <div style={{ fontSize: 11, color: "var(--fg-faint)" }}>Percentile</div>
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: "var(--fg)", fontVariantNumeric: "tabular-nums" }}>{c.score}</div>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: tone, minWidth: 50, textAlign: "right" }}>{c.rating}</span>
+              {!api.csa_basics?.length && <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>No synchronized CSA snapshot is available.</p>}
+              {api.csa_basics?.map((basic, i) => {
+                const tone = basic.status === "ok" ? "var(--success)" : basic.status === "warn" ? "var(--warning)" : "var(--danger)";
+                const label = basic.status === "ok" ? "Below threshold" : basic.status === "warn" ? "Watch" : "At/above threshold";
+                return (
+                  <div key={basic.name} style={{ display: "grid", gridTemplateColumns: "32px 1fr auto auto", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i === api.csa_basics!.length - 1 ? "none" : "1px solid var(--border)" }}>
+                    <div aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 6, border: "2px solid var(--accent)", color: "var(--accent)", fontWeight: 800, fontSize: 13, display: "grid", placeItems: "center" }}>{i + 1}</div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>{basic.name}</div>
+                      <div style={{ fontSize: 11, color: "var(--fg-faint)" }}>Intervention threshold {basic.threshold}</div>
                     </div>
-                  );
-                });
-              })()}
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "var(--fg)", fontVariantNumeric: "tabular-nums" }}>{basic.msr}</div>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: tone, minWidth: 85, textAlign: "right" }}>{label}</span>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         </section>
@@ -370,31 +342,12 @@ export default function CompassDashboard() {
             ============================================================ */}
         <section className="x3-bottom-row" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1.4fr", gap: 16 }}>
 
-          {/* Compliance Health Trend — reference has a 90-Day / 30-Day /
-              7-Day select. Pure-presentation in mockup, but matching the
-              UI affordance even when wired to a single window is faithful. */}
+          {/* Trend history is not fabricated when historical snapshots are unavailable. */}
           <Card>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <h3 style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1.4, textTransform: "uppercase", color: "var(--fg)", margin: 0 }}>Compliance Health Trend <span style={{ color: "var(--fg-faint)" }}>ⓘ</span></h3>
-              <select
-                aria-label="Trend window"
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border)",
-                  color: "var(--fg-muted)",
-                  fontSize: 12,
-                  padding: "4px 8px",
-                  borderRadius: 6,
-                  fontFamily: "inherit",
-                }}
-                defaultValue="90 Days"
-              >
-                <option>90 Days</option>
-                <option>30 Days</option>
-                <option>7 Days</option>
-              </select>
+            <h3 style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1.4, textTransform: "uppercase", color: "var(--fg)", marginTop: 0 }}>Compliance Health Trend</h3>
+            <div style={{ minHeight: 180, display: "grid", placeItems: "center", color: "var(--fg-muted)", textAlign: "center", fontSize: 13 }}>
+              Historical tenant snapshots are not yet available. No estimated trend is displayed.
             </div>
-            <TrendChart values={[77, 78, 80, 79, 81, 82, 81, 83, 82, 84, 85, 86, 85, 87, FLEET.compliance_pct]} />
           </Card>
 
           {/* Open Alerts by Severity */}
@@ -410,42 +363,12 @@ export default function CompassDashboard() {
             </div>
           </Card>
 
-          {/* Expiring Items (Next 30 Days) — match reference labels +
-              counts. Reference: Medical Certificates 24, Drug Tests 18,
-              HOS/ELD 14, Driver Licenses 8, Vehicle Inspections 5,
-              Training Records 3. All cyan bars in reference (single
-              color), with the dropdown control. */}
+          {/* Expiring Items derived from current tenant records. */}
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <h3 style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1.4, textTransform: "uppercase", color: "var(--fg)", margin: 0 }}>Expiring Items <span style={{ color: "var(--fg-muted)", fontSize: 10 }}>(Next 30 Days)</span> <span style={{ color: "var(--fg-faint)" }}>ⓘ</span></h3>
-              <select
-                aria-label="Expiring window"
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border)",
-                  color: "var(--fg-muted)",
-                  fontSize: 12,
-                  padding: "4px 8px",
-                  borderRadius: 6,
-                  fontFamily: "inherit",
-                }}
-                defaultValue="Next 30 Days"
-              >
-                <option>Next 30 Days</option>
-                <option>Next 60 Days</option>
-                <option>Next 90 Days</option>
-              </select>
             </div>
-            <BarChart
-              data={[
-                { label: "Medical\nCertificates",  value: 24, color: "var(--accent)" },
-                { label: "Drug Test\nResults",     value: 18, color: "var(--accent)" },
-                { label: "HOS/ELD\nExemptions",    value: 14, color: "var(--accent)" },
-                { label: "Driver\nLicenses",       value: 8,  color: "var(--accent)" },
-                { label: "Vehicle\nInspections",   value: 5,  color: "var(--accent)" },
-                { label: "Training\nRecords",      value: 3,  color: "var(--accent)" },
-              ]}
-            />
+            {EXPIRING.length ? <BarChart data={EXPIRING} /> : <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>No expiration data is available.</p>}
           </Card>
         </section>
 

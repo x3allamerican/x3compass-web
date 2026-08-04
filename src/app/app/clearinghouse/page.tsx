@@ -104,7 +104,7 @@ export default function ClearinghousePage() {
         sb.from("compass_clearinghouse_consents").select("id,driver_id,consent_type,consent_requested_at,consent_deadline_at,consent_received_at").eq("carrier_id", carrier.id).is("consent_revoked_at", null),
         // Carrier's chosen C/TPA · drives the FMCSA Clearinghouse designation prompt below.
         // Joins compass_ctpas if migration 20260527c has been applied; safe NULL fallback otherwise.
-        sb.from("carriers").select("ctpa_mode, ctpa_custom_name, ctpa:compass_ctpas(legal_name,fmcsa_clearinghouse_name)").eq("id", carrier.id).maybeSingle(),
+        sb.from("compass_carriers").select("ctpa_mode, ctpa_custom_name, ctpa:compass_ctpas(legal_name,fmcsa_clearinghouse_name)").eq("id", carrier.id).maybeSingle(),
       ]);
       if (cancelled) return;
       // Resolve the carrier's C/TPA into a flat shape for the callout below.
@@ -129,10 +129,10 @@ export default function ClearinghousePage() {
     return () => { cancelled = true; };
   }, [carrier]);
 
-  const effQueries    = useMemo(() => withDemoFallback(queries,    DEMO_CLEARINGHOUSE_QUERIES),    [queries]);
-  const effViolations = useMemo(() => withDemoFallback(violations, DEMO_CLEARINGHOUSE_VIOLATIONS), [violations]);
-  const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS),   [consents]);
-  const isDemo = queries.length === 0;
+  const effQueries    = useMemo(() => withDemoFallback(queries,    DEMO_CLEARINGHOUSE_QUERIES,    !carrier), [queries, carrier]);
+  const effViolations = useMemo(() => withDemoFallback(violations, DEMO_CLEARINGHOUSE_VIOLATIONS, !carrier), [violations, carrier]);
+  const effConsents   = useMemo(() => withDemoFallback(consents,   DEMO_CLEARINGHOUSE_CONSENTS,   !carrier), [consents, carrier]);
+  const isDemo = !carrier && queries.length === 0;
 
   // Consent modal state — drives both "Resend" and "+ New pre-employment".
   const [consentModal, setConsentModal] = useState<null | {

@@ -13,8 +13,9 @@
  *   notification_rules: event_type, lead_time_days, channels text[], recipients text[], is_active
  *   notification_event_defaults: event_type, default_channel, fcra_category, description
  */
+import { correlationId, requireTenant, securityError, tenantJson, type SecurityEnv } from "../_shared/request-security";
 
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; }
+type Env = SecurityEnv;
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,
@@ -22,8 +23,6 @@ const SUPABASE_HEADERS = (sr: string) => ({
   Accept: "application/json",
   Prefer: "count=exact",
 });
-const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=30", "Access-Control-Allow-Origin": "*" } });
-
 async function pgSelect(url: string, sr: string, table: string, query: string): Promise<unknown[]> {
   try {
     const r = await fetch(`${url}/rest/v1/${table}?${query}`, { headers: SUPABASE_HEADERS(sr) });
@@ -60,10 +59,14 @@ function primaryChannel(r: LogRow): "email" | "sms" | "in_app" | "—" {
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const url = new URL(ctx.request.url);
-  const carrierId = url.searchParams.get("carrier_id");
-  if (!carrierId) return json({ ok: false, error: "Missing carrier_id" }, 400);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, url.searchParams.get("carrier_id")); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+  const carrierId = authority.carrierId;
   if (!ctx.env.SUPABASE_URL || !ctx.env.SUPABASE_SERVICE_ROLE) {
-    return json({ ok: false, demo: true, error: "Server missing Supabase env" }, 200);
+    return securityError(503, "service_unavailable", requestId);
   }
   const sb = ctx.env.SUPABASE_URL.replace(/\/$/, "");
   const sr = ctx.env.SUPABASE_SERVICE_ROLE;
@@ -149,7 +152,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     related_driver_id: r.related_driver_id,
   }));
 
-  return json({
+  return tenantJson(ctx.request, ctx.env, {
     ok: true,
     demo: logs30.length === 0 && rules.length === 0,
     kpis: {

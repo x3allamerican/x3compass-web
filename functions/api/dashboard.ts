@@ -5,13 +5,11 @@
  * from Supabase where possible, demo-shape preserved everywhere else.
  *
  * Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE
- * Auth: v1 open. Will gate on JWT when Supabase auth is wired.
+ * Auth: verified Supabase session plus server-resolved carrier membership.
  */
+import { correlationId, requireTenant, securityError, tenantJson, type SecurityEnv } from "../_shared/request-security";
 
-interface Env {
-  SUPABASE_URL?: string;
-  SUPABASE_SERVICE_ROLE?: string;
-}
+type Env = SecurityEnv;
 
 const SUPABASE_HEADERS = (sr: string) => ({
   apikey: sr,
@@ -19,16 +17,6 @@ const SUPABASE_HEADERS = (sr: string) => ({
   Accept: "application/json",
   Prefer: "count=exact",
 });
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "private, max-age=30",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
 
 async function pgSelect(
   url: string,
@@ -61,23 +49,23 @@ function fmtExpiresLabel(d: string | null): string {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+  const url = new URL(ctx.request.url);
+  const requestId = correlationId(ctx.request);
+  let authority;
+  try { authority = await requireTenant(ctx.request, ctx.env, url.searchParams.get("carrier_id")); }
+  catch { return securityError(503, "authorization_unavailable", requestId); }
+  if (!authority.ok) return securityError(authority.status, authority.code, requestId);
+
   const SUPABASE_URL = ctx.env.SUPABASE_URL;
   const SR = ctx.env.SUPABASE_SERVICE_ROLE;
 
   if (!SUPABASE_URL || !SR) {
-    return json({ ok: true, demo: true, reason: "env-missing" });
+    return securityError(503, "service_unavailable", requestId);
   }
 
-  const url = new URL(ctx.request.url);
-  let carrierId = url.searchParams.get("carrier_id");
+  const carrierId = authority.carrierId;
 
   try {
-    if (!carrierId) {
-      const { rows: cRows } = await pgSelect(SUPABASE_URL, SR, "compass_carriers", "select=id&order=created_at.desc&limit=1");
-      if (cRows.length === 0) return json({ ok: true, demo: true, reason: "no-carriers" });
-      carrierId = (cRows[0] as { id: string }).id;
-    }
-
     const sinceISO = new Date(Date.now() - 180 * 86_400_000).toISOString().slice(0,10);
     const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0,10);
     const [{ rows: carrierRows }, drivers, vehicles, dqDocs, csa, saferRows, inspections, accidents, daTests, hosLogs, training] = await Promise.all([
@@ -85,13 +73,13 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       pgSelect(SUPABASE_URL, SR, "compass_drivers", `select=id,first_name,last_name,cdl_expires_on,medical_card_expires_on,status,hire_date&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_vehicles", `select=id,license_plate,status,vehicle_type,next_dot_inspection_due&carrier_id=eq.${carrierId}`),
       pgSelect(SUPABASE_URL, SR, "compass_dq_documents", `select=id,driver_id,doc_type,expires_on&carrier_id=eq.${carrierId}&order=expires_on.asc.nullslast&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=*&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
-      pgSelect(SUPABASE_URL, SR, "compass_carrier_safer", `select=*&carrier_id=eq.${carrierId}`),
-      pgSelect(SUPABASE_URL, SR, "compass_inspections", `select=*&carrier_id=eq.${carrierId}&inspection_date=gte.${sinceISO}&order=inspection_date.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_accidents", `select=*&carrier_id=eq.${carrierId}&order=accident_date.desc&limit=100`),
-      pgSelect(SUPABASE_URL, SR, "compass_da_tests", `select=*&carrier_id=eq.${carrierId}&collected_on=gte.${sinceISO}&order=collected_on.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_hos_logs", `select=*&carrier_id=eq.${carrierId}&log_date=gte.${since30}&order=log_date.desc&limit=500`),
-      pgSelect(SUPABASE_URL, SR, "compass_training_records", `select=*&carrier_id=eq.${carrierId}&order=completed_on.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_csa_snapshots", `select=unsafe_driving,crash_indicator,hos_compliance,vehicle_maint,hazmat,driver_fitness,ctrl_substances&carrier_id=eq.${carrierId}&order=taken_at.desc&limit=1`),
+      pgSelect(SUPABASE_URL, SR, "compass_carrier_safer", `select=safety_rating,rating_date,rating_type,operating_authority,annual_miles,reported_power_units,reported_drivers,last_mcs150_filed,bipd_insurance_amount_cents,bipd_required_amount_cents,cargo_insurance_amount_cents,crashes_24mo_total,crashes_24mo_fatal,crashes_24mo_injury,driver_oos_rate_pct,driver_oos_national_pct,vehicle_oos_rate_pct,vehicle_oos_national_pct,last_synced_at&carrier_id=eq.${carrierId}`),
+      pgSelect(SUPABASE_URL, SR, "compass_inspections", `select=inspection_date,oos_driver,oos_vehicle,violation_count&carrier_id=eq.${carrierId}&inspection_date=gte.${sinceISO}&order=inspection_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_accidents", `select=id,accident_date,preventable,driver_id,description,cause_category&carrier_id=eq.${carrierId}&order=accident_date.desc&limit=100`),
+      pgSelect(SUPABASE_URL, SR, "compass_da_tests", `select=test_type,result,collected_on&carrier_id=eq.${carrierId}&collected_on=gte.${sinceISO}&order=collected_on.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_hos_logs", `select=total_drive_minutes,violations&carrier_id=eq.${carrierId}&log_date=gte.${since30}&order=log_date.desc&limit=500`),
+      pgSelect(SUPABASE_URL, SR, "compass_training_records", `select=expires_on,course_name,course_category,driver_id&carrier_id=eq.${carrierId}&order=completed_on.desc&limit=500`),
     ]);
 
     type CarrierRow = { name?: string; usdot_number?: string; mc_number?: string; safety_rating?: string };
@@ -127,7 +115,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     const dqOverdue = docRows.filter(d => d.expires_on && d.expires_on < today).length;
     const dqValid = docRows.length - dqOverdue;
     const dqTarget = driversOnRoster * 12; // 12 required docs per driver
-    const dqScorePct = dqTarget > 0 ? Math.round((dqValid / dqTarget) * 100) : 0;
+    const dqScorePct = dqTarget > 0 ? Math.min(100, Math.round((dqValid / dqTarget) * 100)) : 0;
 
     // Open alerts = anything overdue or expiring soon
     let openAlerts = 0, urgent = 0;
@@ -156,8 +144,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     // Compliance Overview bars
     // ─────────────────────────────────────────────────────────────────────
     // Per-domain compliance % — fraction of drivers with the relevant doc + not expired
-    function pctWithValidDoc(docTypes: string[]): number {
-      if (drvRows.length === 0) return 0;
+    function pctWithValidDoc(docTypes: string[]): number | null {
+      if (drvRows.length === 0) return null;
       let ok = 0;
       for (const d of drvRows) {
         const hasValid = docRows.some(doc =>
@@ -170,41 +158,62 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       return Math.round((ok / drvRows.length) * 100);
     }
     const cdlPct = pctWithValidDoc(["cdl_copy", "road_test_certificate"]);
-    const medPct = drvRows.length === 0 ? 0 : Math.round((drvRows.filter(d => d.medical_card_expires_on && d.medical_card_expires_on >= today).length / drvRows.length) * 100);
+    const medPct = drvRows.length === 0 ? null : Math.round((drvRows.filter(d => d.medical_card_expires_on && d.medical_card_expires_on >= today).length / drvRows.length) * 100);
     const daPct = pctWithValidDoc(["pre_employment_drug_test", "drug_test_result", "clearinghouse_full", "clearinghouse_query"]);
-    const trainingPct = pctWithValidDoc(["eldt_certificate", "eldt"]);
-    const vehMaintPct = vehRows.length === 0 ? 100 : Math.round((vehRows.filter(v => !v.next_dot_inspection_due || v.next_dot_inspection_due >= today).length / vehRows.length) * 100);
-    const hosPct = 90;  // No HOS data yet — keep demo
+    type TrainRow = { expires_on?: string; course_name?: string; course_category?: string; driver_id?: string };
+    type HosRow = { total_drive_minutes?: number; violations?: unknown[] };
+    const trainRows = training.rows as TrainRow[];
+    const hosRows = hosLogs.rows as HosRow[];
+    const driversWithCurrentTraining = new Set(
+      trainRows
+        .filter((row) => row.driver_id && (!row.expires_on || row.expires_on >= today))
+        .map((row) => row.driver_id),
+    ).size;
+    const trainingPct = drvRows.length === 0 ? null : Math.round((driversWithCurrentTraining / drvRows.length) * 100);
+    const vehMaintPct = vehRows.length === 0 ? null : Math.round((vehRows.filter(v => !v.next_dot_inspection_due || v.next_dot_inspection_due >= today).length / vehRows.length) * 100);
+    const hosPct = hosRows.length === 0
+      ? null
+      : Math.round((hosRows.filter((row) => !Array.isArray(row.violations) || row.violations.length === 0).length / hosRows.length) * 100);
 
+    const complianceBar = (label: string, pct: number | null) => ({
+      label,
+      pct,
+      color: pct == null ? "unknown" : pct >= 90 ? "green" : pct >= 75 ? "yellow" : "red",
+    });
     const complianceBars = [
-      { label: "Driver Qualification (CDL)", pct: cdlPct, color: cdlPct >= 90 ? "green" : cdlPct >= 75 ? "yellow" : "red" },
-      { label: "Medical Certificates",       pct: medPct, color: medPct >= 90 ? "green" : medPct >= 75 ? "yellow" : "red" },
-      { label: "HOS / ELD",                  pct: hosPct, color: "green" },
-      { label: "Drug & Alcohol",             pct: daPct, color: daPct >= 90 ? "green" : daPct >= 75 ? "yellow" : "red" },
-      { label: "Training Records",           pct: trainingPct, color: trainingPct >= 90 ? "green" : trainingPct >= 75 ? "yellow" : "red" },
-      { label: "Vehicle Maintenance",        pct: vehMaintPct, color: vehMaintPct >= 90 ? "green" : vehMaintPct >= 75 ? "yellow" : "red" },
+      complianceBar("Driver Qualification (CDL)", cdlPct),
+      complianceBar("Medical Certificates", medPct),
+      complianceBar("HOS / ELD", hosPct),
+      complianceBar("Drug & Alcohol", daPct),
+      complianceBar("Training Records", trainingPct),
+      complianceBar("Vehicle Maintenance", vehMaintPct),
     ];
-    const overallCompliancePct = Math.round(complianceBars.reduce((s, b) => s + b.pct, 0) / complianceBars.length);
+    const availableComplianceValues = complianceBars.flatMap((bar) => bar.pct == null ? [] : [bar.pct]);
+    const overallCompliancePct = availableComplianceValues.length
+      ? Math.round(availableComplianceValues.reduce((sum, value) => sum + value, 0) / availableComplianceValues.length)
+      : null;
 
     // ─────────────────────────────────────────────────────────────────────
     // CSA BASICS — from latest snapshot if present
     // ─────────────────────────────────────────────────────────────────────
     type CsaRow = { unsafe_driving?: number; crash_indicator?: number; hos_compliance?: number; vehicle_maint?: number; hazmat?: number; driver_fitness?: number; ctrl_substances?: number };
     const latestCsa = csa.rows[0] as CsaRow | undefined;
-    const csaBasic = (msr: number | undefined, threshold: number) => {
-      const v = msr ?? 0;
-      const status: "ok" | "warn" | "alert" = v >= threshold ? "alert" : v >= threshold * 0.75 ? "warn" : "ok";
-      return { msr: v, threshold, status };
+    const csaBasic = (name: string, msr: number | undefined, threshold: number) => {
+      if (typeof msr !== "number") return null;
+      const status: "ok" | "warn" | "alert" = msr >= threshold ? "alert" : msr >= threshold * 0.75 ? "warn" : "ok";
+      return { name, msr, threshold, status };
     };
-    const csaBasics = latestCsa ? [
-      { name: "Unsafe Driving",   ...csaBasic(latestCsa.unsafe_driving, 65) },
-      { name: "Crash Indicator",  ...csaBasic(latestCsa.crash_indicator, 65) },
-      { name: "HOS Compliance",   ...csaBasic(latestCsa.hos_compliance, 65) },
-      { name: "Vehicle Maint.",   ...csaBasic(latestCsa.vehicle_maint, 80) },
-      { name: "Hazmat",           ...csaBasic(latestCsa.hazmat, 80) },
-      { name: "Driver Fitness",   ...csaBasic(latestCsa.driver_fitness, 80) },
-      { name: "Ctrl. Substances", ...csaBasic(latestCsa.ctrl_substances, 80) },
-    ] : null;
+    const csaBasics = latestCsa
+      ? [
+          csaBasic("Unsafe Driving", latestCsa.unsafe_driving, 65),
+          csaBasic("Crash Indicator", latestCsa.crash_indicator, 65),
+          csaBasic("HOS Compliance", latestCsa.hos_compliance, 65),
+          csaBasic("Vehicle Maint.", latestCsa.vehicle_maint, 80),
+          csaBasic("Hazmat", latestCsa.hazmat, 80),
+          csaBasic("Driver Fitness", latestCsa.driver_fitness, 80),
+          csaBasic("Ctrl. Substances", latestCsa.ctrl_substances, 80),
+        ].filter((basic): basic is NonNullable<typeof basic> => basic != null)
+      : null;
 
     // ─────────────────────────────────────────────────────────────────────
     // Action Items — 8 cards (top 5 per category)
@@ -375,8 +384,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     });
 
     // ── HOS — last 30 days roll-up
-    type HosRow = { total_drive_minutes?: number; violations?: unknown[] };
-    const hosRows = hosLogs.rows as HosRow[];
     const totalLogs = hosRows.length;
     const totalDriveMins = hosRows.reduce((s, r) => s + (r.total_drive_minutes || 0), 0);
     const avgDriveMins = totalLogs > 0 ? Math.round(totalDriveMins / totalLogs) : 0;
@@ -406,8 +413,6 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       }
       return { "0_30": b0, "31_60": b1, "61_90": b2 };
     }
-    type TrainRow = { expires_on?: string; course_name?: string; course_category?: string; driver_id?: string };
-    const trainRows = training.rows as TrainRow[];
     const docExpirations = [
       { name: "CDL",      ...bucketDocs(d => (d as DrvRow).cdl_expires_on, drvRows) },
       { name: "MEC",      ...bucketDocs(d => (d as DrvRow).medical_card_expires_on, drvRows) },
@@ -483,7 +488,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       cta: { href: "/app/drug-alcohol", label: "Mark reported →" },
     };
 
-    return json({
+    return tenantJson(ctx.request, ctx.env, {
       ok: true,
       demo: false,
       carrier_id: carrierId,
@@ -553,7 +558,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         action_items_row2: { incidents_awaiting: incidentsAwaiting, eldt_incomplete: eldtIncomplete, training_expiring: trainingExpiring, clearinghouse_owed: clearinghouseOwed },
       },
     });
-  } catch (err) {
-    return json({ ok: false, demo: true, reason: `error: ${err instanceof Error ? err.message : String(err)}` });
+  } catch {
+    console.error("dashboard request failed", { correlation_id: requestId });
+    return securityError(500, "request_failed", requestId);
   }
 };

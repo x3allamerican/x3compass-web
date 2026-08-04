@@ -2,8 +2,8 @@
  * GET /api/uploads/get?k=<object-key> — relay R2 file to authenticated caller.
  * Verifies caller belongs to the carrier encoded in the object key.
  */
-import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
-interface Env { SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string; R2_ACCESS_KEY_ID?: string; R2_SECRET_ACCESS_KEY?: string; R2_BUCKET?: string; R2_ACCOUNT_ID?: string; }
+import { correlationId, requireTenant, securityError, type SecurityEnv } from "../../_shared/request-security";
+interface Env extends SecurityEnv { R2_ACCESS_KEY_ID?: string; R2_SECRET_ACCESS_KEY?: string; R2_BUCKET?: string; R2_ACCOUNT_ID?: string; }
 
 const enc = new TextEncoder();
 async function hmac(k: ArrayBuffer|string, d: string): Promise<ArrayBuffer> {
@@ -24,14 +24,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     const url = new URL(ctx.request.url);
     const key = url.searchParams.get("k");
     if (!key) return new Response("missing k", { status: 400 });
-    const token = bearerFromRequest(ctx.request) || url.searchParams.get("token") || "";
-    const user = token ? await verifySupabaseJwt(ctx.env, token) : null;
-    if (!user) return new Response("Unauthorized", { status: 401 });
-
     const m = key.match(/^carriers\/([^/]+)\//);
     if (!m) return new Response("invalid key", { status: 400 });
-    const rows = (await supaFetch(ctx.env).select("compass_carrier_users", `user_id=eq.${user.id}&carrier_id=eq.${m[1]}&select=carrier_id`)) as unknown[];
-    if (rows.length === 0) return new Response("forbidden", { status: 403 });
+    const requestId = correlationId(ctx.request);
+    const authority = await requireTenant(ctx.request, ctx.env, m[1]);
+    if (!authority.ok) return securityError(authority.status, authority.code, requestId);
 
     const host = `${ctx.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
     const url2 = `https://${host}/${ctx.env.R2_BUCKET}/${key.split("/").map(encodeURIComponent).join("/")}`;
@@ -49,8 +46,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     const auth = `AWS4-HMAC-SHA256 Credential=${ctx.env.R2_ACCESS_KEY_ID}/${dateStamp}/auto/s3/aws4_request, SignedHeaders=${signedHeaders}, Signature=${sig}`;
 
     return fetch(url2, { headers: { Host: host, "X-Amz-Content-SHA256": payloadHash, "X-Amz-Date": amzDate, Authorization: auth } });
-  } catch (err) {
-    console.error("[uploads/get] error:", err);
-    return new Response("Server error", { status: 500 });
+  } catch {
+    console.error("upload download failed");
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };

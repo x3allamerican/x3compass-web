@@ -11,34 +11,11 @@ export type CarrierRow = {
 
 type State = { user: User | null; carrier: CarrierRow | null; loading: boolean; error: string | null };
 
-/** Read the Supabase session synchronously from localStorage so the dashboard
- *  can render INSTANTLY on refresh instead of showing the spinner gate while
- *  Supabase round-trips to validate. If the cached session is invalid, the
- *  background refresh() will surface that and trigger the redirect. */
-function readCachedUser(): User | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem("sb-lsxtcluavinibdqlooil-auth-token");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // Supabase stores the session under various shapes; .user is the standard
-    // location, but some versions wrap under .currentSession.user.
-    const u = parsed?.user || parsed?.currentSession?.user || null;
-    if (!u || !u.id) return null;
-    return u as User;
-  } catch {
-    return null;
-  }
-}
-
 export function useUser() {
-  const cached = typeof window !== "undefined" ? readCachedUser() : null;
   const [state, setState] = useState<State>({
-    user: cached,
+    user: null,
     carrier: null,
-    // If we have a cached user, render the app shell IMMEDIATELY.
-    // The background refresh() will validate and update carrier info.
-    loading: cached ? false : true,
+    loading: true,
     error: null,
   });
 
@@ -64,7 +41,6 @@ export function useUser() {
       const msg = e instanceof Error ? e.message : String(e);
       // Surface to console for live debugging · production users see the
       // error string in the AppShell fallback (red text under the logo).
-      // eslint-disable-next-line no-console
       console.error("[useUser] refresh failed:", msg);
       setState({ user: null, carrier: null, loading: false, error: msg });
     }

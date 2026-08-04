@@ -6,10 +6,6 @@ export default function EmergencyResponsePage() {
     <HazmatSubPageShell
       activeId="hazmat-emergency-response"
       pageTitle="EMERGENCY RESPONSE"
-      eyebrow="X3 Compass · Hazmat Center · Emergency Response"
-      heading={<>ERG sheet · CHEMTREC · 24-hour contact · in reach.</>}
-      sub="Every hazmat shipment carries the §172.600 emergency response info in the cab. The ERG guide for the substance, the §172.604 phone number that's staffed 24/7, and the response sheet that survives the first 30 minutes."
-      regs="49 CFR §§ 172.600–606 · ERG 2024 edition"
       eduSurface="Emergency Response"
       eduSubtitle="49 CFR Subpart G · what has to be in the cab and what has to answer the phone"
       conciergeHref="/app/ask?context=hazmat-emergency"
@@ -62,7 +58,7 @@ export default function EmergencyResponsePage() {
       <section style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 22 }}>
         <h2 style={{ margin: "0 0 6px", fontSize: 22, color: "#F8FAFC" }}>The cab kit</h2>
         <p style={{ color: "#94A3B8", margin: "0 0 18px", fontSize: 14 }}>
-          Three things have to be in reach of the driver's seat:
+          Three things have to be in reach of the driver&apos;s seat:
         </p>
         <ul style={{ color: "#CBD5E1", fontSize: 14, lineHeight: 1.7, paddingLeft: 20, margin: 0 }}>
           <li>Current ERG (2024 edition)</li>

@@ -14,10 +14,6 @@ export default function SubstancesPage() {
     <HazmatSubPageShell
       activeId="hazmat-substances"
       pageTitle="SUBSTANCE LOOKUP"
-      eyebrow="X3 Compass · Hazmat Center · Substance Lookup"
-      heading={<>2,863 substances · the HMT in one search box.</>}
-      sub="Search the §172.101 Hazardous Materials Table by UN/NA number, proper shipping name, or packing group. Returns the same fields an inspector reads off the BOL — hazard class, division, packing group, label codes, special provisions, and packaging authorizations."
-      regs="49 CFR §§ 172.101 · 172.202 · 173 (Subparts B–E)"
       eduSurface="Substance Lookup"
       eduSubtitle="49 CFR § 172.101 · the Hazardous Materials Table that grades every BOL"
       conciergeHref="/app/ask?context=hazmat-substances"

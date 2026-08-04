@@ -13,6 +13,7 @@
  */
 import { bearerFromRequest, supaFetch, verifySupabaseJwt } from "../../_shared/supabase-admin";
 import { rateLimit } from "../../_shared/rate-limit";
+import { correlationId, isUuid, securityError } from "../../_shared/request-security";
 
 interface Env {
   SUPABASE_URL?: string; SUPABASE_SERVICE_ROLE?: string;
@@ -79,7 +80,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const carrierId = (body.carrier_id || "").trim();
     const email = (body.email || "").trim().toLowerCase();
     const role = (body.role || "viewer").toLowerCase();
-    if (!carrierId) return json({ ok: false, error: "carrier_id required" }, 400);
+    if (!isUuid(carrierId)) return json({ ok: false, error: "valid carrier_id required" }, 400);
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ ok: false, error: "Valid email required" }, 400);
     if (!["admin", "viewer", "owner"].includes(role)) return json({ ok: false, error: "Invalid role" }, 400);
     if (role === "owner") return json({ ok: false, error: "Owner role cannot be granted via invite" }, 400);
@@ -87,13 +88,14 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const supa = supaFetch(ctx.env);
 
     // Caller must be owner or admin on this carrier
-    const myRow = (await supa.select("compass_carrier_users", `user_id=eq.${user.id}&carrier_id=eq.${carrierId}&select=role`)) as Array<{ role: string }>;
+    const encodedCarrierId = encodeURIComponent(carrierId);
+    const myRow = (await supa.select("compass_carrier_users", `user_id=eq.${encodeURIComponent(user.id)}&carrier_id=eq.${encodedCarrierId}&select=role`)) as Array<{ role: string }>;
     if (myRow.length === 0 || !["owner", "admin"].includes(myRow[0].role)) {
       return json({ ok: false, error: "Forbidden — only owners or admins can invite" }, 403);
     }
 
     // Get carrier name for the email
-    const carrierRow = (await supa.select("compass_carriers", `id=eq.${carrierId}&select=name`)) as Array<{ name: string }>;
+    const carrierRow = (await supa.select("compass_carriers", `id=eq.${encodedCarrierId}&select=name`)) as Array<{ name: string }>;
     const carrierName = carrierRow[0]?.name || "your carrier";
 
     // Create/lookup user
@@ -101,7 +103,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     if (!found) return json({ ok: false, error: "Could not create or look up user" }, 502);
 
     // Already on this carrier?
-    const existing = (await supa.select("compass_carrier_users", `user_id=eq.${found.id}&carrier_id=eq.${carrierId}&select=id,role,accepted_at`)) as Array<{ id: string; role: string; accepted_at: string | null }>;
+    const existing = (await supa.select("compass_carrier_users", `user_id=eq.${encodeURIComponent(found.id)}&carrier_id=eq.${encodedCarrierId}&select=id,role,accepted_at`)) as Array<{ id: string; role: string; accepted_at: string | null }>;
     if (existing.length > 0) {
       return json({ ok: true, already_member: true, status: existing[0].accepted_at ? "active" : "pending" });
     }
@@ -119,7 +121,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     sendInviteEmail(ctx.env, email, carrierName, user.email || "").catch(() => {});
 
     return json({ ok: true, user_created: found.created, status: "pending" });
-  } catch (err) {
-    return json({ ok: false, error: err instanceof Error ? err.message : String(err) }, 500);
+  } catch {
+    return securityError(500, "request_failed", correlationId(ctx.request));
   }
 };
