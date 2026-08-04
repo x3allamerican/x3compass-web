@@ -6,8 +6,9 @@ import DataSourceCard from "@/components/DataSourceCard";
 import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
-import { DQ_REQUIREMENTS, DQ_REQUIREMENT_COUNT } from "@/lib/dqRequirements";
+import { DQ_REQUIREMENTS } from "@/lib/dqRequirements";
 import { loadDqDocuments, uploadDqDocument, type DqDocRow } from "@/lib/dqUpload";
+import { dqDocumentStatus, recomputeDqCompleteness } from "@/lib/dqCompleteness.mjs";
 
 type DocStatus = "complete" | "missing" | "expiring" | "expired";
 
@@ -323,8 +324,14 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
     return needle ? drivers.filter(d => `${d.first_name} ${d.last_name}`.toLowerCase().includes(needle)) : drivers;
   }, [drivers, q]);
 
-  const coverageFor = (driverId: string) =>
-    DQ_REQUIREMENTS.reduce((n, r) => n + (docs[`${driverId}::${r.key}`]?.status === "complete" ? 1 : 0), 0);
+  const today = new Date().toISOString().slice(0, 10);
+  const summaries = useMemo(() => Object.fromEntries(drivers.map((driver) => [driver.id, recomputeDqCompleteness({
+    driverId: driver.id,
+    requirements: DQ_REQUIREMENTS,
+    documents: docs,
+    today,
+  })])), [docs, drivers, today]);
+  const summaryFor = (driverId: string) => summaries[driverId];
 
   async function handleUpload(driverId: string, reqKey: string, file: File | undefined) {
     if (!file) return;
@@ -359,7 +366,7 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
   const initials = (d: RosterDriver) => `${(d.first_name||" ")[0]}${(d.last_name||" ")[0]}`.toUpperCase();
 
   return (
-    <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51 · 12-DOCUMENT FILE">
+    <AppShell title="DQ Files" crumbs="DQ FILES · 49 CFR § 391.51 · CFR CHECKLIST">
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
         <aside className="border-r border-[#1E3556] bg-[#0C1A30] min-h-[calc(100vh-64px)] py-5 px-3">
           <div className="text-[10px] tracking-[.14em] uppercase font-bold text-[#16C7FF]/60 px-2 mb-3">Drivers · {drivers.length}</div>
@@ -370,7 +377,7 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
                 <div className="w-8 h-8 rounded-full grid place-items-center font-extrabold text-[11px] text-black flex-shrink-0" style={{ background: "linear-gradient(135deg, #16C7FF, #8B5CF6)" }}>{initials(d)}</div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold text-white truncate">{d.last_name}, {d.first_name}</div>
-                  <div className="text-[10px] text-white/45 font-mono">{coverageFor(d.id)} / {DQ_REQUIREMENT_COUNT}</div>
+                  <div className="text-[10px] text-white/45 font-mono">{summaryFor(d.id).percent}% complete · {summaryFor(d.id).expiring30} expiring ≤30d</div>
                 </div>
               </button>
             ))}
@@ -386,8 +393,9 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
                 <div className="text-[12px] text-white/55 mt-0.5">{active.cdl_class ? `CDL-${active.cdl_class}` : "CDL"}{active.cdl_state ? ` · ${active.cdl_state.toUpperCase()}` : ""}</div>
               </div>
               <div>
-                <div className="text-[10px] tracking-wider uppercase text-white/45">Coverage</div>
-                <div className="text-[20px] font-black text-amber-300">{coverageFor(active.id)} / {DQ_REQUIREMENT_COUNT}</div>
+                <div className="text-[10px] tracking-wider uppercase text-white/45">Required-file coverage</div>
+                <div className="text-[20px] font-black text-amber-300">{summaryFor(active.id).complete} / {summaryFor(active.id).required} · {summaryFor(active.id).percent}%</div>
+                <div className="text-[10px] text-white/55">{summaryFor(active.id).expiring30} expiring ≤30d · {summaryFor(active.id).expired} expired</div>
               </div>
             </div>
           )}
@@ -400,13 +408,13 @@ function RealDqFiles({ carrierId }: { carrierId: string }) {
 
           <div>
             <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
-              <h3 className="text-[15px] font-extrabold text-white">The 12 documents · § 391.51</h3>
-              <span className="text-[11px] text-white/50">Click any slot to upload</span>
+              <h3 className="text-[15px] font-extrabold text-white">DQ checklist · § 391.51</h3>
+              <span className="text-[11px] text-white/50">11 core requirements · 1 conditional · click a slot to upload</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {active && DQ_REQUIREMENTS.map((r) => {
                 const doc = docs[`${active.id}::${r.key}`];
-                const status: DocStatus = (doc?.status as DocStatus) || "missing";
+                const status = dqDocumentStatus(doc, today) as DocStatus;
                 const st = STATUS_STYLE[status] || STATUS_STYLE.missing;
                 const busy = busyKey === `${active.id}::${r.key}`;
                 return (

@@ -20,8 +20,9 @@ test("D&A tiles and table share the real test-row collection", async () => {
 
 test("DQ coverage uses the same document map for roster and active driver", async () => {
   const source = await read("dq-files");
-  assert.match(source, /const coverageFor = \(driverId: string\) =>/);
-  assert.equal((source.match(/coverageFor\(/g) || []).length, 2);
+  assert.match(source, /const summaries = useMemo\(\(\) => Object\.fromEntries/);
+  assert.match(source, /recomputeDqCompleteness\(\{/);
+  assert.match(source, /const summaryFor = \(driverId: string\) => summaries\[driverId\]/);
 });
 
 test("MVR tiles and table share computed driverRows", async () => {
