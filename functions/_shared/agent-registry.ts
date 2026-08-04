@@ -579,15 +579,36 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
   if (!carrierId) return { status: "error", summary: "Missing inputs.carrier_id", log: log.text() };
 
   // Look up the carrier's USDOT so we can hit CarrierOk
-  const carrierRow = (await supa.select("compass_carriers", `select=id,name,usdot_number&id=eq.${carrierId}`)) as Array<{ id: string; name: string; usdot_number: string | null }>;
+  const carrierRow = (await supa.select("compass_carriers", `select=id,name,usdot_number,subscription_status&id=eq.${carrierId}`)) as Array<{ id: string; name: string; usdot_number: string | null; subscription_status: string | null }>;
   const carrier = carrierRow[0];
   if (!carrier) return { status: "error", summary: `Carrier ${carrierId} not found`, log: log.text() };
 
-  // ─── Path A: CarrierOk (real CSA / SMS data) ─────────────────────────
+  // ─── Path A: CarrierOk (real CSA / SMS data) — billable, gated ────────
+  // CarrierOk /v2/profile is pay-as-you-go, so the live pull only runs for
+  // ACTIVE (paying/trialing) carriers, and at most once per cadence window
+  // (default 30 days) unless inputs.force is set. Everyone else falls through
+  // to the free inspection approximation below.
   const env2 = env as Env & Record<string, unknown>;
   const { fetchCarrierOk, mapToSnapshot, carrierOkKey } = await import("./carrierok");
   const carrierOkPresent = !!carrierOkKey(env2);
-  if (carrierOkPresent && carrier.usdot_number) {
+  const status = (carrier.subscription_status || "").toLowerCase();
+  const isActive = status === "active" || status === "trialing";
+  const minDays = Number(env2.CARRIEROK_MIN_DAYS ?? 30) || 30;
+  const force = !!(inputs as { force?: boolean } | undefined)?.force;
+
+  if (carrierOkPresent && carrier.usdot_number && isActive) {
+    // Freshness guard: skip (and don't re-bill) if a CarrierOk snapshot
+    // already exists inside the cadence window.
+    let fresh = false;
+    if (!force) {
+      const cutoff = new Date(Date.now() - minDays * 86400_000).toISOString();
+      const recent = await supa.select("compass_csa_snapshots", `select=taken_at&carrier_id=eq.${carrierId}&source=eq.carrierok&taken_at=gte.${cutoff}&order=taken_at.desc&limit=1`) as Array<{ taken_at: string }>;
+      fresh = recent.length > 0;
+    }
+    if (fresh) {
+      log.info(`[csa-baseline] carrier ${carrier.name}: CarrierOk snapshot is fresh (<${minDays}d) — skipping paid pull`);
+      return { status: "ok", summary: `CarrierOk snapshot already fresh for ${carrier.name} (within ${minDays}d) — no paid pull`, log: log.text() };
+    }
     try {
       const payload = await fetchCarrierOk(env2, carrier.usdot_number);
       if (payload.ok && payload.profile) {
@@ -602,6 +623,8 @@ async function agentCsaBaseline(env: Env, inputs?: { carrier_id?: string }): Pro
     }
   } else if (!carrierOkPresent) {
     log.info("[csa-baseline] CarrierOk API key not set — using inspection approximation");
+  } else if (!isActive) {
+    log.info(`[csa-baseline] carrier ${carrier.name} not active (status=${status || "none"}) — skipping paid CarrierOk pull, using inspection approximation`);
   } else if (!carrier.usdot_number) {
     log.info(`[csa-baseline] carrier ${carrier.name} has no usdot_number on file — using inspection approximation`);
   }
