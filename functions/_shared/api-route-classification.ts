@@ -28,6 +28,7 @@ const AUTHENTICATED = new Set([
   "/api/carrier/set-ctpa",
   "/api/compliance-calendar",
   "/api/dashboard",
+  "/api/dataq/challenges",
   "/api/drivers/import",
   "/api/inspections/import",
   "/api/notifications",
