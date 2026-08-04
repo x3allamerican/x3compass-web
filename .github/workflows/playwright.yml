@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "20", cache: "npm" }
       - run: npm ci --no-audit --no-fund
+      - name: Source a11y and SEO gate
+        run: node --test tests/a11y-seo-source-gate.test.mjs
       - run: npx playwright install --with-deps chromium
       # If we just pushed to main, give Cloudflare ~45s to deploy before testing prod
       - name: wait for deploy
