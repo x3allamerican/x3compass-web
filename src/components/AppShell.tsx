@@ -28,6 +28,7 @@ const PUBLIC_SECTIONS: SectionDef[] = [
     { href: "/app/training",       label: "Training",        icon: "🎓" },
   ]},
   { title: "Compliance Trackers", items: [
+    { href: "/app/calendar",           label: "Compliance Calendar", icon: "🗓" },
     { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
     { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
     { href: "/app/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
