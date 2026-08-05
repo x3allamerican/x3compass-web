@@ -7,6 +7,7 @@ import { DriverImportModal } from "@/components/app/DriverImportModal";
 import { VendorConnectModal } from "@/components/app/VendorConnectModal";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
+import { buildDriverKpis } from "@/lib/driverKpis.mjs";
 
 type Driver = {
   id: string; carrier_id: string;
@@ -90,24 +91,10 @@ export default function DriversPage() {
   }, [effectiveDrivers, search, statusFilter, classFilter, hireFilter]);
 
 
-  // KPI counters for the top stat-card row
+  // KPI counters for the top stat-card row. This reduction is intentionally
+  // cheap and runs during render; date boundaries are explicit and testable.
   const today = new Date().toISOString().slice(0, 10);
-  const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
-  const monthStart = today.slice(0, 8) + "01";
-  const inactiveCutoff = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
-  const kpis = useMemo(() => {
-    let active = 0, pending = 0, newThisMonth = 0, inactiveTerminated90 = 0, cdlExp30 = 0, medExp30 = 0;
-    for (const d of effectiveDrivers) {
-      if (d.status === "active") active++;
-      if (d.status === "pending_hire") pending++;
-      const joinedOn = d.hire_date || d.created_at.slice(0, 10);
-      if (joinedOn >= monthStart && joinedOn <= today) newThisMonth++;
-      if (["inactive", "terminated"].includes(d.status) && d.termination_date && d.termination_date >= inactiveCutoff && d.termination_date <= today) inactiveTerminated90++;
-      if (d.cdl_expires_on && d.cdl_expires_on >= today && d.cdl_expires_on <= in30) cdlExp30++;
-      if (d.medical_card_expires_on && d.medical_card_expires_on >= today && d.medical_card_expires_on <= in30) medExp30++;
-    }
-    return { active, pending, newThisMonth, inactiveTerminated90, cdlExp30, medExp30 };
-  }, [effectiveDrivers, today, monthStart, inactiveCutoff, in30]);
+  const kpis = buildDriverKpis(effectiveDrivers, today);
 
   return (
     <AppShell title="Drivers"

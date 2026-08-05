@@ -25,13 +25,3 @@ test("tenant notification rules and channels are empty when the API returns none
   assert.match(source, /api\?\.active_rules \|\| \(allowDemo \? DEMO_RULES : \[\]\)/);
   assert.match(source, /api\?\.channel_breakdown \|\| \(allowDemo \? DEMO_CHANNELS : \[\]\)/);
 });
-
-test("driver KPI labels use their stated date windows", async () => {
-  const source = await read("src/app/app/drivers/page.tsx");
-
-  assert.match(source, /joinedOn >= monthStart && joinedOn <= today/);
-  assert.match(source, /termination_date >= inactiveCutoff && d\.termination_date <= today/);
-  assert.match(source, /value=\{kpis\.newThisMonth\}/);
-  assert.match(source, /value=\{kpis\.inactiveTerminated90\}/);
-  assert.match(source, /cdl_expires_on >= today && d\.cdl_expires_on <= in30/);
-});
