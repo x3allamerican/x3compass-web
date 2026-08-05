@@ -70,6 +70,15 @@ type OrderRow = {
   vendor_ref_id: string | null;
 };
 
+function isCompletedOrder(order: OrderRow): boolean {
+  return order.status === "completed" || ["clear", "eligible", "engaged"].includes((order.effective_status || "").toLowerCase());
+}
+
+function needsAdverseReview(order: OrderRow): boolean {
+  return [order.checkr_assessment, order.checkr_result, order.effective_status].some((value) => ["consider", "escalated"].includes((value || "").toLowerCase()))
+    || ["pre_adverse_action", "post_adverse_action"].includes(order.status);
+}
+
 function isAdverseAction(status: string): boolean {
   return status === "pre_adverse_action" || status === "post_adverse_action";
 }
@@ -182,9 +191,9 @@ export default function BackgroundChecksPage() {
   // KPIs
   const stats = useMemo(() => {
     const total = orders.length;
-    const completed = orders.filter(o => o.status === "completed").length;
+    const completed = orders.filter(isCompletedOrder).length;
     const inFlight = orders.filter(o => ["invited", "in_progress", "awaiting_driver"].includes(o.status)).length;
-    const consider = orders.filter(o => o.checkr_assessment === "consider" || o.checkr_result === "consider" || o.status === "pre_adverse_action" || o.status === "post_adverse_action").length;
+    const consider = orders.filter(needsAdverseReview).length;
     return { total, completed, inFlight, consider };
   }, [orders]);
 
