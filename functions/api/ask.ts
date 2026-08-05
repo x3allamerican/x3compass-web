@@ -126,6 +126,22 @@ async function logEval(env: Env, row: Record<string, unknown>) {
   }
 }
 
+async function fetchBrainContext(question: string): Promise<string> {
+  try {
+    const r = (await Promise.race([
+      fetch(`https://api.x3api.com/ask?q=${encodeURIComponent(question)}&k=8`),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 3000)),
+    ])) as Response;
+    if (!r.ok) return "";
+    const d = (await r.json()) as { sources?: Array<{ citation?: string; text?: string; title?: string }> };
+    const src = (d.sources || []).filter((x) => x.text || x.title).slice(0, 8);
+    if (!src.length) return "";
+    return src.map((x, i) => `[${i + 1}] (${x.citation || "n/a"}) ${(x.text || x.title || "").slice(0, 400)}`).join("\n");
+  } catch {
+    return "";
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const t0 = Date.now();
   let userId: string | null = null;
@@ -157,6 +173,12 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
     const model = body.model || "claude-sonnet-4-6";
 
+    // Ground the answer in the X3 brain (RAG). Fails open: if the gateway is slow/unavailable, answer ungrounded.
+    const brainCtx = await fetchBrainContext(userQuestion);
+    const system = brainCtx
+      ? `${SYSTEM_PROMPT}\n\nRELEVANT REGULATIONS RETRIEVED FROM THE X3 BRAIN (prefer these; cite the CFR sections shown, and do not invent others):\n${brainCtx}`
+      : SYSTEM_PROMPT;
+
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -164,7 +186,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ model, max_tokens: 2048, system: SYSTEM_PROMPT, messages }),
+      body: JSON.stringify({ model, max_tokens: 2048, system, messages }),
     });
 
     if (!r.ok) {
@@ -207,6 +229,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     return json({
       ok: true,
       content: text,
+      brain_grounded: brainCtx.length > 0,
       model: data.model,
       usage: data.usage,
       // Quality signals — the UI shows a warning chip when these surface
