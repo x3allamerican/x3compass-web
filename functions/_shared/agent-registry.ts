@@ -16,9 +16,9 @@ import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
 import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billing.mjs";
 import { mapSamsaraDailyLogs, nextCursor } from "../../src/lib/samsaraSync.mjs";
-import { mapTenStreet, upsertDrivers, markVendorSync } from "./vendor-mapper";
-import { syncScreeningVendor, hireRightConfig, disaConfig, type ScreeningVendorEnv } from "./screening-sync";
-import { syncEldVendor, verizonConfig, omnitracsConfig, trimbleConfig, type EldVendorEnv } from "./eld-hos-sync";
+import { mapTenStreet, mapDriverReach, upsertDrivers, markVendorSync } from "./vendor-mapper";
+import { syncScreeningVendor, hireRightConfig, disaConfig, sambaConfig, type ScreeningVendorEnv } from "./screening-sync";
+import { syncEldVendor, verizonConfig, omnitracsConfig, trimbleConfig, geotabConfig, type EldVendorEnv } from "./eld-hos-sync";
 import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
@@ -1242,7 +1242,7 @@ async function agentEldSync(env: Env): Promise<AgentResult> {
 
   // Additional ELD vendors (Verizon Connect, Omnitracs, Trimble) — per configured integration. Always runs.
   const eldEnv = env as unknown as EldVendorEnv;
-  const activeCfgs = ([["verizon_connect", verizonConfig], ["omnitracs", omnitracsConfig], ["trimble", trimbleConfig]] as const)
+  const activeCfgs = ([["verizon_connect", verizonConfig], ["omnitracs", omnitracsConfig], ["trimble", trimbleConfig], ["geotab", geotabConfig]] as const)
     .map(([v, b]) => [v, b(eldEnv)] as const).filter(([, c]) => !!c);
   async function runExtraVendors(): Promise<{ n: number; vendors: string[] }> {
     if (!activeCfgs.length) return { n: 0, vendors: [] };
@@ -1289,26 +1289,43 @@ async function agentEldSync(env: Env): Promise<AgentResult> {
 // ============================================================================
 async function agentDriverSync(env: Env): Promise<AgentResult> {
   const log = newLogger();
-  if (!env.TENSTREET_API_KEY || !env.TENSTREET_SUBDOMAIN) return { status: "skipped", summary: "No TenStreet org token configured", log: log.text() };
   const supa = supaFetch(env);
-  const integrations = await supa.select("compass_vendor_integrations", `select=carrier_id,subdomain,status&vendor=eq.tenstreet&status=in.(configured,connected)`) as Array<{ carrier_id: string; subdomain: string | null; status: string }>;
-  const targets = integrations.filter((i) => !i.subdomain || i.subdomain.includes(env.TENSTREET_SUBDOMAIN!));
-  if (!targets.length) return { status: "skipped", summary: "No carriers with a matching TenStreet subdomain configured", log: log.text() };
-  const r = await fetch(`https://${env.TENSTREET_SUBDOMAIN}.tenstreetapp.com/api/v1/applicants?status=submitted`, { headers: { Authorization: `Bearer ${env.TENSTREET_API_KEY}`, Accept: "application/json" } });
-  if (!r.ok) { log.info(`[driver-sync] tenstreet ${r.status}`); return { status: "error", summary: `TenStreet API ${r.status}`, log: log.text() }; }
-  const payload = await r.json() as { applicants?: unknown[] };
-  const applicants = Array.isArray(payload.applicants) ? payload.applicants : [];
-  const normalized = mapTenStreet(applicants as Parameters<typeof mapTenStreet>[0]);
-  log.info(`[driver-sync] tenstreet applicants=${applicants.length} normalized=${normalized.length} carriers=${targets.length}`);
-  let total = 0; let carriers = 0; const failed: string[] = [];
-  for (const t of targets) {
-    try {
-      const up = await upsertDrivers(env, t.carrier_id, normalized);
-      total += up.inserted + up.updated; carriers++;
-      await markVendorSync(env, t.carrier_id, "tenstreet", { success: up.errors.length === 0, count: up.inserted + up.updated, error: up.errors.length ? up.errors.slice(0, 3).map((e) => e.reason).join("; ") : undefined });
-    } catch { failed.push(t.carrier_id); }
+  const parts: string[] = []; let grand = 0; const fails: string[] = [];
+
+  // TenStreet (org token + subdomain scoped)
+  if (env.TENSTREET_API_KEY && env.TENSTREET_SUBDOMAIN) {
+    const ints = await supa.select("compass_vendor_integrations", `select=carrier_id,subdomain&vendor=eq.tenstreet&status=in.(configured,connected)`) as Array<{ carrier_id: string; subdomain: string | null }>;
+    const targets = ints.filter((i) => !i.subdomain || i.subdomain.includes(env.TENSTREET_SUBDOMAIN!));
+    if (targets.length) {
+      const r = await fetch(`https://${env.TENSTREET_SUBDOMAIN}.tenstreetapp.com/api/v1/applicants?status=submitted`, { headers: { Authorization: `Bearer ${env.TENSTREET_API_KEY}`, Accept: "application/json" } });
+      if (r.ok) {
+        const payload = await r.json() as { applicants?: unknown[] };
+        const normalized = mapTenStreet((Array.isArray(payload.applicants) ? payload.applicants : []) as Parameters<typeof mapTenStreet>[0]);
+        let n = 0; for (const t of targets) { try { const up = await upsertDrivers(env, t.carrier_id, normalized); n += up.inserted + up.updated; await markVendorSync(env, t.carrier_id, "tenstreet", { success: up.errors.length === 0, count: up.inserted + up.updated, error: up.errors.length ? up.errors.slice(0, 3).map((e) => e.reason).join("; ") : undefined }); } catch { fails.push(`tenstreet:${t.carrier_id}`); } }
+        grand += n; parts.push(`TenStreet ${n}`);
+      } else { fails.push(`tenstreet(${r.status})`); }
+    }
   }
-  return { status: failed.length ? "partial" : "ok", summary: `TenStreet: ${total} driver records across ${carriers} carrier(s)${failed.length ? ` · ${failed.length} failed` : ""}`, log: log.text() };
+
+  // DriverReach (per-carrier via integration)
+  const drEnv = env as unknown as { DRIVERREACH_API_KEY?: string; DRIVERREACH_API_BASE?: string };
+  if (drEnv.DRIVERREACH_API_KEY) {
+    const ints = await supa.select("compass_vendor_integrations", `select=carrier_id&vendor=eq.driverreach&status=in.(configured,connected)`) as Array<{ carrier_id: string }>;
+    if (ints.length) {
+      const base = (drEnv.DRIVERREACH_API_BASE || "https://api.driverreach.com").replace(/\/$/, "");
+      const r = await fetch(`${base}/v1/candidates?status=hired&limit=500`, { headers: { Authorization: `Bearer ${drEnv.DRIVERREACH_API_KEY}`, Accept: "application/json" } });
+      if (r.ok) {
+        const payload = await r.json() as { candidates?: unknown[]; data?: unknown[] };
+        const normalized = mapDriverReach(((payload.candidates || payload.data || []) as unknown[]) as Parameters<typeof mapDriverReach>[0]);
+        let n = 0; for (const t of ints) { try { const up = await upsertDrivers(env, t.carrier_id, normalized); n += up.inserted + up.updated; await markVendorSync(env, t.carrier_id, "driverreach", { success: up.errors.length === 0, count: up.inserted + up.updated }); } catch { fails.push(`driverreach:${t.carrier_id}`); } }
+        grand += n; parts.push(`DriverReach ${n}`);
+      } else { fails.push(`driverreach(${r.status})`); }
+    }
+  }
+
+  if (!parts.length && !fails.length) return { status: "skipped", summary: "No TenStreet/DriverReach integrations configured", log: log.text() };
+  log.info(`[driver-sync] ${parts.join(", ")} fails=${fails.length}`);
+  return { status: fails.length ? "partial" : "ok", summary: `Driver sync: ${grand} records${parts.length ? ` (${parts.join(", ")})` : ""}${fails.length ? ` · failed: ${fails.join(", ")}` : ""}`, log: log.text() };
 }
 
 // ============================================================================
@@ -1317,15 +1334,15 @@ async function agentDriverSync(env: Env): Promise<AgentResult> {
 // ============================================================================
 async function agentScreeningSync(env: Env): Promise<AgentResult> {
   const log = newLogger();
-  const haveHr = !!env.HIRERIGHT_API_KEY; const haveDisa = !!env.DISA_API_KEY;
-  if (!haveHr && !haveDisa) return { status: "skipped", summary: "No HireRight/DISA token configured", log: log.text() };
+  const haveHr = !!env.HIRERIGHT_API_KEY; const haveDisa = !!env.DISA_API_KEY; const haveSamba = !!(env as ScreeningVendorEnv).SAMBASAFETY_API_KEY;
+  if (!haveHr && !haveDisa && !haveSamba) return { status: "skipped", summary: "No HireRight/DISA/SambaSafety token configured", log: log.text() };
   const supa = supaFetch(env);
-  const vendors = [haveHr ? "hireright" : null, haveDisa ? "disa" : null].filter(Boolean) as string[];
+  const vendors = [haveHr ? "hireright" : null, haveDisa ? "disa" : null, haveSamba ? "sambasafety" : null].filter(Boolean) as string[];
   const integrations = await supa.select("compass_vendor_integrations", `select=carrier_id,vendor,status&vendor=in.(${vendors.join(",")})&status=in.(configured,connected)`) as Array<{ carrier_id: string; vendor: string; status: string }>;
   if (!integrations.length) return { status: "skipped", summary: "No carriers with HireRight/DISA configured", log: log.text() };
   let reconciled = 0; const failed: string[] = [];
   for (const it of integrations) {
-    const cfg = it.vendor === "hireright" ? hireRightConfig(env as ScreeningVendorEnv) : disaConfig(env as ScreeningVendorEnv);
+    const cfg = it.vendor === "hireright" ? hireRightConfig(env as ScreeningVendorEnv) : it.vendor === "sambasafety" ? sambaConfig(env as ScreeningVendorEnv) : disaConfig(env as ScreeningVendorEnv);
     if (!cfg) continue;
     const out = await syncScreeningVendor(env as ScreeningVendorEnv, it.carrier_id, cfg);
     if (out.ok) reconciled += (out.inserted || 0) + (out.updated || 0); else failed.push(`${it.vendor}(${out.error})`);

@@ -7,6 +7,7 @@ export interface EldVendorEnv extends EldSupaEnv {
   VERIZON_CONNECT_API_KEY?: string; VERIZON_CONNECT_API_BASE?: string;
   OMNITRACS_API_KEY?: string; OMNITRACS_API_BASE?: string;
   TRIMBLE_API_KEY?: string; TRIMBLE_API_BASE?: string;
+  GEOTAB_API_KEY?: string; GEOTAB_API_BASE?: string; GEOTAB_DATABASE?: string;
 }
 export interface EldHosRow { source_driver_id: string; log_date: string; total_drive_minutes: number | null; total_on_duty_minutes: number | null; eld_source: string; certified: boolean; }
 export type EldConfig = { vendor: string; url: string; headers: HeadersInit; extract: (p: unknown) => unknown[]; mapRow: (r: Record<string, unknown>) => EldHosRow | null };
@@ -82,4 +83,11 @@ export function trimbleConfig(env: EldVendorEnv): EldConfig | null {
   if (!env.TRIMBLE_API_KEY) return null;
   const base = (env.TRIMBLE_API_BASE || "https://api.trimblemaps.com").replace(/\/$/, "");
   return { vendor: "trimble", url: `${base}/eld/v1/hos/dailylogs?limit=500`, headers: { Authorization: `Bearer ${env.TRIMBLE_API_KEY}`, Accept: "application/json" }, extract: commonExtract, mapRow: commonMap("trimble") };
+}
+
+export function geotabConfig(env: EldVendorEnv): EldConfig | null {
+  if (!env.GEOTAB_API_KEY) return null;
+  const base = (env.GEOTAB_API_BASE || "https://my.geotab.com/apiv1").replace(/\/$/, "");
+  const db = env.GEOTAB_DATABASE ? `&database=${encodeURIComponent(env.GEOTAB_DATABASE)}` : "";
+  return { vendor: "geotab", url: `${base}/hos/dailylogs?limit=500${db}`, headers: { Authorization: `Bearer ${env.GEOTAB_API_KEY}`, Accept: "application/json" }, extract: commonExtract, mapRow: commonMap("geotab") };
 }

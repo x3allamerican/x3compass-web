@@ -57,6 +57,9 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     verizon_connect: !!(env as Record<string,unknown>).VERIZON_CONNECT_API_KEY,
     omnitracs: !!(env as Record<string,unknown>).OMNITRACS_API_KEY,
     trimble: !!(env as Record<string,unknown>).TRIMBLE_API_KEY,
+    geotab: !!(env as Record<string,unknown>).GEOTAB_API_KEY,
+    sambasafety: !!(env as Record<string,unknown>).SAMBASAFETY_API_KEY,
+    driverreach: !!(env as Record<string,unknown>).DRIVERREACH_API_KEY,
   };
 
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return securityError(503, "service_unavailable", requestId);

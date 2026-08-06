@@ -61,7 +61,7 @@ export async function syncScreeningVendor(env: ScreeningSupaEnv, carrierId: stri
 }
 
 const _str = (v: unknown) => (typeof v === "string" && v ? v : (typeof v === "number" ? String(v) : null));
-export interface ScreeningVendorEnv extends ScreeningSupaEnv { HIRERIGHT_API_KEY?: string; HIRERIGHT_API_BASE?: string; HIRERIGHT_ACCOUNT_ID?: string; DISA_API_KEY?: string; DISA_API_BASE?: string; }
+export interface ScreeningVendorEnv extends ScreeningSupaEnv { HIRERIGHT_API_KEY?: string; HIRERIGHT_API_BASE?: string; HIRERIGHT_ACCOUNT_ID?: string; DISA_API_KEY?: string; DISA_API_BASE?: string; SAMBASAFETY_API_KEY?: string; SAMBASAFETY_API_BASE?: string; }
 type PullConfig = { vendor: string; url: string; headers: HeadersInit; extract: (p: unknown) => unknown[]; mapRow: (r: Record<string, unknown>) => ScreeningRow | null };
 
 export function hireRightConfig(env: ScreeningVendorEnv): PullConfig | null {
@@ -85,5 +85,17 @@ export function disaConfig(env: ScreeningVendorEnv): PullConfig | null {
     headers: { Authorization: `Bearer ${env.DISA_API_KEY}`, Accept: "application/json" },
     extract: (p) => { const o = p as Record<string, unknown>; return (o?.results as unknown[]) || (o?.data as unknown[]) || (o?.records as unknown[]) || []; },
     mapRow: (r) => { const id = _str(r.id) || _str(r.resultId) || _str(r.orderId); return id ? { vendor_ref_id: id, service: `disa_${_str(r.type) || _str(r.testType) || "screening"}`, status: normStatus(r.status || r.result), ordered_at: _str(r.collectedAt) || _str(r.createdAt), completed_at: _str(r.resultDate) || _str(r.completedAt), raw: r } : null; },
+  };
+}
+
+export function sambaConfig(env: ScreeningVendorEnv): PullConfig | null {
+  if (!env.SAMBASAFETY_API_KEY) return null;
+  const base = (env.SAMBASAFETY_API_BASE || "https://api.sambasafety.io").replace(/\/$/, "");
+  return {
+    vendor: "sambasafety",
+    url: `${base}/v1/mvr/reports?status=completed&limit=500`,
+    headers: { Authorization: `Bearer ${env.SAMBASAFETY_API_KEY}`, Accept: "application/json" },
+    extract: (p) => { const o = p as Record<string, unknown>; return (o?.reports as unknown[]) || (o?.data as unknown[]) || (o?.results as unknown[]) || []; },
+    mapRow: (r) => { const id = _str(r.id) || _str(r.reportId) || _str(r.orderId); return id ? { vendor_ref_id: id, service: `sambasafety_${_str(r.type) || _str(r.product) || "mvr"}`, status: normStatus(r.status || r.result), ordered_at: _str(r.orderedAt) || _str(r.createdAt), completed_at: _str(r.completedAt) || _str(r.reportDate), raw: r } : null; },
   };
 }
