@@ -18,6 +18,7 @@ import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billin
 import { mapSamsaraDailyLogs, nextCursor } from "../../src/lib/samsaraSync.mjs";
 import { mapTenStreet, upsertDrivers, markVendorSync } from "./vendor-mapper";
 import { syncScreeningVendor, hireRightConfig, disaConfig, type ScreeningVendorEnv } from "./screening-sync";
+import { syncEldVendor, verizonConfig, omnitracsConfig, trimbleConfig, type EldVendorEnv } from "./eld-hos-sync";
 import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
@@ -1235,30 +1236,51 @@ async function agentFinanceWorkflow(env: FtEnv): Promise<AgentResult> {
 // ============================================================================
 async function agentEldSync(env: Env): Promise<AgentResult> {
   const log = newLogger();
-  if (!env.SAMSARA_API_TOKEN) return { status: "skipped", summary: "No SAMSARA_API_TOKEN configured", log: log.text() };
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return { status: "error", summary: "Supabase env missing", log: log.text() };
   const supa = supaFetch(env);
   const base = env.SUPABASE_URL.replace(/\/$/, ""); const sr = env.SUPABASE_SERVICE_ROLE;
+
+  // Additional ELD vendors (Verizon Connect, Omnitracs, Trimble) — per configured integration. Always runs.
+  const eldEnv = env as unknown as EldVendorEnv;
+  const activeCfgs = ([["verizon_connect", verizonConfig], ["omnitracs", omnitracsConfig], ["trimble", trimbleConfig]] as const)
+    .map(([v, b]) => [v, b(eldEnv)] as const).filter(([, c]) => !!c);
+  async function runExtraVendors(): Promise<{ n: number; vendors: string[] }> {
+    if (!activeCfgs.length) return { n: 0, vendors: [] };
+    const names = activeCfgs.map(([v]) => v);
+    const ints = await supa.select("compass_vendor_integrations", `select=carrier_id,vendor,status&vendor=in.(${names.join(",")})&status=in.(configured,connected)`) as Array<{ carrier_id: string; vendor: string }>;
+    let n = 0; const vendors: string[] = [];
+    for (const it of ints) {
+      const cfg = activeCfgs.find(([v]) => v === it.vendor)?.[1];
+      if (!cfg) continue;
+      const out = await syncEldVendor(eldEnv, it.carrier_id, cfg);
+      if (out.ok) { n += out.reconciled || 0; if (!vendors.includes(it.vendor)) vendors.push(it.vendor); }
+    }
+    return { n, vendors };
+  }
+  const extraTail = (extra: { n: number; vendors: string[] }) => extra.n ? ` · +${extra.n} from ${extra.vendors.join(", ")}` : (activeCfgs.length ? " · no other-vendor rows matched" : "");
+
+  // Samsara path (org token)
+  if (!env.SAMSARA_API_TOKEN) { const x = await runExtraVendors(); return { status: x.n || activeCfgs.length ? "ok" : "skipped", summary: x.n ? `ELD sync${extraTail(x)}` : "No SAMSARA_API_TOKEN and no other ELD vendors configured", log: log.text() }; }
   const drivers = await supa.select("compass_drivers", "select=id,carrier_id,source_id&source_vendor=eq.samsara&limit=50000") as Array<{ id: string; carrier_id: string; source_id: string }>;
-  if (!drivers.length) return { status: "skipped", summary: "No Samsara-linked drivers yet — connect Samsara + run driver sync first", log: log.text() };
+  if (!drivers.length) { const x = await runExtraVendors(); return { status: "ok", summary: `No Samsara-linked drivers yet${extraTail(x)}`, log: log.text() }; }
   const bySource = new Map(drivers.map((d) => [d.source_id, { driver_id: d.id, carrier_id: d.carrier_id }]));
-  const end = new Date().toISOString().slice(0, 10); const sd = new Date(`${end}T00:00:00Z`); sd.setUTCDate(sd.getUTCDate() - 8); const start = sd.toISOString().slice(0, 10);
+  const end = new Date().toISOString().slice(0, 10); const sd = new Date(`${end}T00:00:00Z`); sd.setUTCDate(sd.getUTCDate() - 8); const startDate = sd.toISOString().slice(0, 10);
   const rows: unknown[] = []; let after: string | null = null;
   for (let p = 0; p < 60; p++) {
-    const r = await fetch(`https://api.samsara.com/fleet/hos/daily-logs?startDate=${start}&endDate=${end}&limit=512${after ? `&after=${encodeURIComponent(after)}` : ""}`, { headers: { Authorization: `Bearer ${env.SAMSARA_API_TOKEN}`, Accept: "application/json" } });
-    if (!r.ok) { log.info(`[eld-sync] samsara ${r.status}`); return { status: "error", summary: `Samsara API ${r.status}`, log: log.text() }; }
+    const r = await fetch(`https://api.samsara.com/fleet/hos/daily-logs?startDate=${startDate}&endDate=${end}&limit=512${after ? `&after=${encodeURIComponent(after)}` : ""}`, { headers: { Authorization: `Bearer ${env.SAMSARA_API_TOKEN}`, Accept: "application/json" } });
+    if (!r.ok) { const x = await runExtraVendors(); return { status: "partial", summary: `Samsara API ${r.status}${extraTail(x)}`, log: log.text() }; }
     const pay = await r.json() as { data?: unknown[]; pagination?: { hasNextPage?: boolean; endCursor?: string } };
     if (Array.isArray(pay.data)) rows.push(...pay.data);
     after = nextCursor(pay); if (!after) break;
   }
   const mapped = mapSamsaraDailyLogs(rows) as Array<Record<string, unknown> & { source_driver_id: string }>;
   const records = mapped.flatMap((m) => { const link = bySource.get(m.source_driver_id); return link ? [{ ...m, driver_id: link.driver_id, carrier_id: link.carrier_id }] : []; });
-  log.info(`[eld-sync] samsara logs=${rows.length} matched=${records.length}/${mapped.length}`);
-  if (!records.length) return { status: "ok", summary: `Samsara returned ${rows.length} logs; 0 matched linked drivers`, log: log.text() };
-  const resp = await fetch(`${base}/rest/v1/compass_hos_logs?on_conflict=carrier_id,source_vendor,source_id`, { method: "POST", headers: { apikey: sr, Authorization: `Bearer ${sr}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(records) });
-  if (!resp.ok) { log.info(`[eld-sync] upsert ${resp.status}`); return { status: "error", summary: `HOS upsert ${resp.status}`, log: log.text() }; }
+  if (records.length) {
+    await fetch(`${base}/rest/v1/compass_hos_logs?on_conflict=carrier_id,source_vendor,source_id`, { method: "POST", headers: { apikey: sr, Authorization: `Bearer ${sr}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(records) });
+  }
+  const x = await runExtraVendors();
   const flagged = records.filter((r) => { const vs = (r as unknown as { violations?: unknown[] }).violations; return Array.isArray(vs) && vs.length > 0; }).length;
-  return { status: "ok", summary: `Synced ${records.length} Samsara HOS daily-logs · ${flagged} with §395.3 violations`, log: log.text() };
+  return { status: "ok", summary: `Synced ${records.length} Samsara HOS logs · ${flagged} w/ §395.3 violations${extraTail(x)}`, log: log.text() };
 }
 
 // ============================================================================

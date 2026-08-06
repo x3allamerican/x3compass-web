@@ -58,6 +58,21 @@ const VENDOR_META: Record<string, { label: string; description: string; supports
     description: "ELD + fleet management. Vehicle roster + status sync into compass_vehicles.",
     supports_sync: true,
   },
+  verizon_connect: {
+    label: "Verizon Connect",
+    description: "ELD + HOS + telematics. X3 pulls daily HOS logs and scores 49 CFR §395.3 violations automatically.",
+    supports_sync: true,
+  },
+  omnitracs: {
+    label: "Omnitracs (Solera)",
+    description: "ELD + HOS. X3 pulls daily HOS logs and scores §395.3 violations automatically.",
+    supports_sync: true,
+  },
+  trimble: {
+    label: "Trimble (PeopleNet)",
+    description: "ELD + HOS. X3 pulls daily HOS logs and scores §395.3 violations automatically.",
+    supports_sync: true,
+  },
   geotab: {
     label: "Geotab",
     description: "Telematics + fleet management. Vehicle data sync coming soon.",

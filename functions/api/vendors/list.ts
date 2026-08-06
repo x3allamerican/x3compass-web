@@ -54,6 +54,9 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const envFlags = {
     tenstreet: !!(env.TENSTREET_API_KEY && env.TENSTREET_SUBDOMAIN),
     samsara: !!env.SAMSARA_API_TOKEN,
+    verizon_connect: !!(env as Record<string,unknown>).VERIZON_CONNECT_API_KEY,
+    omnitracs: !!(env as Record<string,unknown>).OMNITRACS_API_KEY,
+    trimble: !!(env as Record<string,unknown>).TRIMBLE_API_KEY,
   };
 
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return securityError(503, "service_unavailable", requestId);
