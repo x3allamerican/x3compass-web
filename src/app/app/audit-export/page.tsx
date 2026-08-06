@@ -56,6 +56,13 @@ export default function AuditExportPage() {
   const [rows, setRows] = useState<E[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [initialScope, setInitialScope] = useState<string>("full");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sc = new URLSearchParams(window.location.search).get("scope");
+    const allowed = ["full", "dq_files_only", "drug_alcohol_only", "csa_only"];
+    if (sc && allowed.includes(sc)) { setInitialScope(sc); setShowAdd(true); }
+  }, []);
   const [quickBusy, setQuickBusy] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState("");
   const [pdfBusy, setPdfBusy] = useState<string | null>(null);
@@ -247,13 +254,13 @@ export default function AuditExportPage() {
         </div>
       </div>
 
-      {showAdd && <ExportFormModal carrier_id={carrier!.id} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
+      {showAdd && <ExportFormModal carrier_id={carrier!.id} initialScope={initialScope} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
     </AppShell>
   );
 }
 
-function ExportFormModal({ carrier_id, onClose, onSaved }: { carrier_id: string; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState<Partial<E>>({ scope: "full" });
+function ExportFormModal({ carrier_id, initialScope = "full", onClose, onSaved }: { carrier_id: string; initialScope?: string; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<E>>({ scope: initialScope });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

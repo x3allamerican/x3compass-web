@@ -30,10 +30,10 @@ export default function DAConciergePage() {
       crumbs="COMPLIANCE TRACKERS · X3-STAFF-MANAGED · 49 CFR PART 382"
       actions={
         <>
-          <button className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
+          <Link href="/app/ask" className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full text-[12px] font-semibold text-white border border-white/15 hover:bg-white/5">
             📞 Call your advisor
-          </button>
-          <Link href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#000000]"
+          </Link>
+          <Link href="/app/ask" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#000000]"
             style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
           >
             ★ Message Brad
