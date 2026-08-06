@@ -25,8 +25,13 @@ const VENDOR_META: Record<string, { label: string; description: string; supports
   },
   hireright: {
     label: "HireRight",
-    description: "MVR + background screening. We pre-fill driver IDs from your roster and pull results back automatically.",
-    supports_sync: false,
+    description: "MVR + background screening. X3 pulls completed reports back into your screening ledger automatically.",
+    supports_sync: true,
+  },
+  disa: {
+    label: "DISA",
+    description: "Drug & alcohol + background screening. X3 syncs completed results into your screening ledger automatically.",
+    supports_sync: true,
   },
   samba_safety: {
     label: "SambaSafety",

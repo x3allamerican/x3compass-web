@@ -53,6 +53,8 @@ const AUTHENTICATED = new Set([
   "/api/vendors/motive/sync",
   "/api/vendors/samsara/sync",
   "/api/vendors/tenstreet/sync",
+  "/api/vendors/disa/sync",
+  "/api/vendors/hireright/sync",
 ]);
 
 export function classifyApiRoute(pathname: string): ApiRouteClass {

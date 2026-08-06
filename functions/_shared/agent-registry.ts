@@ -17,6 +17,7 @@ import { sendEmail } from "./emails";
 import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billing.mjs";
 import { mapSamsaraDailyLogs, nextCursor } from "../../src/lib/samsaraSync.mjs";
 import { mapTenStreet, upsertDrivers, markVendorSync } from "./vendor-mapper";
+import { syncScreeningVendor, hireRightConfig, disaConfig, type ScreeningVendorEnv } from "./screening-sync";
 import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
@@ -26,6 +27,8 @@ interface Env extends AdminEnv {
   SAMSARA_API_TOKEN?: string;
   TENSTREET_API_KEY?: string;
   TENSTREET_SUBDOMAIN?: string;
+  HIRERIGHT_API_KEY?: string;
+  DISA_API_KEY?: string;
   STRIPE_SECRET_KEY?: string;
   ANTHROPIC_API_KEY?: string;
   RESEND_API_KEY?: string;
@@ -1286,12 +1289,36 @@ async function agentDriverSync(env: Env): Promise<AgentResult> {
   return { status: failed.length ? "partial" : "ok", summary: `TenStreet: ${total} driver records across ${carriers} carrier(s)${failed.length ? ` · ${failed.length} failed` : ""}`, log: log.text() };
 }
 
+// ============================================================================
+// agent-screening-sync (REAL) — pulls HireRight + DISA screening results into
+// vendor_orders for carriers with those integrations configured. Auto screening sync.
+// ============================================================================
+async function agentScreeningSync(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  const haveHr = !!env.HIRERIGHT_API_KEY; const haveDisa = !!env.DISA_API_KEY;
+  if (!haveHr && !haveDisa) return { status: "skipped", summary: "No HireRight/DISA token configured", log: log.text() };
+  const supa = supaFetch(env);
+  const vendors = [haveHr ? "hireright" : null, haveDisa ? "disa" : null].filter(Boolean) as string[];
+  const integrations = await supa.select("compass_vendor_integrations", `select=carrier_id,vendor,status&vendor=in.(${vendors.join(",")})&status=in.(configured,connected)`) as Array<{ carrier_id: string; vendor: string; status: string }>;
+  if (!integrations.length) return { status: "skipped", summary: "No carriers with HireRight/DISA configured", log: log.text() };
+  let reconciled = 0; const failed: string[] = [];
+  for (const it of integrations) {
+    const cfg = it.vendor === "hireright" ? hireRightConfig(env as ScreeningVendorEnv) : disaConfig(env as ScreeningVendorEnv);
+    if (!cfg) continue;
+    const out = await syncScreeningVendor(env as ScreeningVendorEnv, it.carrier_id, cfg);
+    if (out.ok) reconciled += (out.inserted || 0) + (out.updated || 0); else failed.push(`${it.vendor}(${out.error})`);
+  }
+  log.info(`[screening-sync] carriers=${integrations.length} reconciled=${reconciled} failed=${failed.length}`);
+  return { status: failed.length ? "partial" : "ok", summary: `Screening sync: ${reconciled} results reconciled across ${integrations.length} integration(s)${failed.length ? ` · failed: ${failed.join(", ")}` : ""}`, log: log.text() };
+}
+
 export async function runAgent(name: string, env: Env, inputs?: Record<string, unknown>): Promise<AgentResult> {
   try {
     switch (name) {
       case "agent-keepalive":                return await agentKeepalive(env);
       case "agent-eld-sync":                 return await agentEldSync(env);
       case "agent-driver-sync":              return await agentDriverSync(env);
+      case "agent-screening-sync":           return await agentScreeningSync(env);
       case "agent-portfolio-brief":          return await agentPortfolioBrief(env);
       case "agent-billing-watchdog":         return await agentBillingWatchdog(env);
       case "agent-financial-aggregator":     return await agentFinancialAggregator(env);
