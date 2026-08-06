@@ -1,14 +1,6 @@
-driver_id,log_date,drive_min,on_duty_min,hours_70_8,violations,eld_source,certified
-# Replace driver_id with the compass_drivers.id UUID for each driver in your fleet.
-# log_date  · YYYY-MM-DD format · one row per driver per day
-# drive_min · total drive time in minutes (0-1440)
-# on_duty_min · total on-duty time in minutes including drive (0-1440)
-# hours_70_8 · running 70-hr/8-day total · optional decimal (e.g., 58.5)
-# violations · semicolon-separated · format: cfr:label:severity (severity = warning | violation)
-#              example: §395.3(a)(1):11-hr drive limit exceeded by 35m:violation;§395.3(c):Approaching cycle limit:warning
-# eld_source · motive | samsara | geotab | keeptruckin | eroad | garmin · leave blank for manual paper RODS
-# certified  · true | false · whether driver has e-signed this day's log
-00000000-0000-0000-0000-000000000001,2026-05-26,540,720,49.8,,samsara,true
-00000000-0000-0000-0000-000000000001,2026-05-27,695,845,68.4,§395.3(a)(1):11-hr drive limit exceeded by 35m:violation;§395.3(c):Approaching 70-hr/8-day · 1.6h headroom:warning,motive,false
-00000000-0000-0000-0000-000000000002,2026-05-27,640,820,58.1,,motive,false
-00000000-0000-0000-0000-000000000003,2026-05-26,480,630,41.2,§395.3(a)(3)(ii):30-min break missed after 8.4 cumulative drive hrs:violation,geotab,true
+driver_id,log_date,drive_min,on_duty_min,hours_70_8,cycle,break_min,eld_source,certified
+# driver_id = the compass_drivers.id UUID (or use driver_first_name + driver_last_name columns instead)
+# log_date = YYYY-MM-DD, one row per driver per day. cycle = 70_8 or 60_7. Times in minutes.
+# X3 computes violations automatically — leave nothing to guess.
+00000000-0000-0000-0000-000000000000,2026-08-01,540,660,52,70_8,30,Samsara,true
+00000000-0000-0000-0000-000000000000,2026-08-02,700,780,58,70_8,0,Samsara,true

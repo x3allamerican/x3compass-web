@@ -38,6 +38,7 @@ import { TenantTable, fmtDate } from "@/components/app/TenantTable";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
 import { useDrivers, driverLabel } from "@/components/app/useDrivers";
+import { HOSImportModal } from "@/components/app/HOSImportModal";
 import { DEMO_HOS_LOGS, withDemoFallback, type DemoHosLog } from "@/lib/demoFallback";
 
 type Violation = { cfr: string; label: string; severity: "warning" | "violation" };
@@ -82,6 +83,8 @@ export default function HosPage() {
   const drivers = useDrivers(carrier?.id);
   const [realRows, setRealRows] = useState<H[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!carrier) return;
@@ -95,7 +98,7 @@ export default function HosPage() {
         setRealRows((data as H[]) || []);
         setLoading(false);
       });
-  }, [carrier]);
+  }, [carrier, reloadKey]);
 
   // Demo-mode fallback: when no real rows ingested, populate from canned set.
   const rows: (H | DemoHosLog)[] = useMemo(
@@ -140,6 +143,15 @@ export default function HosPage() {
       crumbs="HOS / ELD · 49 CFR PART 395"
       title="Hours of Service"
       actions={
+        <div className="flex items-center gap-2">
+          {carrier && (
+            <button
+              onClick={() => setShowImport(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
+            >
+              ⬆ Import logs
+            </button>
+          )}
           <Link
             href="/app/settings"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--bg)]"
@@ -147,6 +159,7 @@ export default function HosPage() {
           >
             🔌 Connect ELD →
           </Link>
+        </div>
       }
     >
       <div className="p-6 space-y-6">
@@ -312,14 +325,23 @@ export default function HosPage() {
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5" style={{ boxShadow: "var(--card-shadow)" }}>
             <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">⬆ Manual log upload</div>
             <p className="text-[var(--fg-muted)] text-[12.5px] leading-relaxed mb-3">
-              The repository includes the validated CSV field specification for a future tenant-scoped importer. No upload is offered until that authenticated endpoint exists.
+              Upload a daily HOS log CSV and X3 computes 11-hour, 14-hour, 30-minute-break and 70-hour/8-day violations for every driver-day automatically (49 CFR § 395.3). Re-importing a day overwrites it.
             </p>
             <div className="flex gap-2">
+              <button
+                onClick={() => setShowImport(true)}
+                disabled={!carrier}
+                className="px-3.5 py-2 rounded-lg text-[12px] font-extrabold text-[var(--bg)] disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
+              >
+                ⬆ Import HOS logs
+              </button>
               <a
                 href="/templates/hos-log-import.csv"
+                download
                 className="px-3.5 py-2 rounded-lg text-[12px] font-bold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
               >
-                View CSV specification
+                Download template
               </a>
             </div>
           </div>
@@ -364,7 +386,10 @@ export default function HosPage() {
         </section>
       </div>
 
-    </AppShell>
+          {showImport && carrier && (
+        <HOSImportModal carrierId={carrier.id} onClose={() => setShowImport(false)} onImported={() => setReloadKey((k) => k + 1)} />
+      )}
+      </AppShell>
   );
 }
 
