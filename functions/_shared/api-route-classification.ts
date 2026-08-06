@@ -1,6 +1,7 @@
 export type ApiRouteClass = "public-or-signed" | "authenticated-user" | "admin" | "unclassified";
 
 const PUBLIC_OR_SIGNED = new Set([
+  "/api/agents/heartbeat",
   "/api/ask-demo",
   "/api/errors",
   "/api/health",
