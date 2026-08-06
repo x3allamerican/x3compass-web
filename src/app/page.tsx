@@ -224,7 +224,7 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
+              <Link href="https://app.x3compass.com/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
                 Open the live dashboard →
               </Link>
               <div className="mt-3 text-[12px] text-[var(--fg-faint)]">Free trial · no card required · see your real fleet on this screen in under 10 minutes</div>
@@ -270,7 +270,7 @@ export default function Home() {
             </div>
             <div className="text-[13px] text-[var(--fg-muted)]">
               The full library unlocks inside Compass —{" "}
-              <Link href="/signup" className="text-[var(--accent)] font-bold">Start your 7-day free trial →</Link>
+              <Link href="https://app.x3compass.com/signup" className="text-[var(--accent)] font-bold">Start your 7-day free trial →</Link>
             </div>
           </div>
         </section>
@@ -431,7 +431,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/app" className="block text-center px-4 py-3 rounded-full font-bold text-[14px] text-[var(--bg)]" style={ctaCyan}>
+                <Link href="https://app.x3compass.com/app" className="block text-center px-4 py-3 rounded-full font-bold text-[14px] text-[var(--bg)]" style={ctaCyan}>
                   Take the 15-min audit
                 </Link>
               </div>
@@ -506,7 +506,7 @@ export default function Home() {
                   Placard Wizard, 100 hazmat-only skills, segregation engine, ERG lookup, Hazmat endorsement. In every plan, at every fleet size — most competitors bill this separately.
                 </p>
               </div>
-              <Link href="/signup" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-[13px] text-[var(--bg)] whitespace-nowrap" style={ctaCyan}>
+              <Link href="https://app.x3compass.com/signup" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-[13px] text-[var(--bg)] whitespace-nowrap" style={ctaCyan}>
                 ★ Start free trial →
               </Link>
             </div>
@@ -615,7 +615,7 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
+              <Link href="https://app.x3compass.com/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[15px] text-[var(--bg)]" style={ctaCyan}>
                 ★ Start free trial →
               </Link>
             </div>

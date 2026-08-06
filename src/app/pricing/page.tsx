@@ -59,7 +59,7 @@ export default function PricingPage() {
             </div>
             <div className="text-[13px] text-[var(--fg)] font-bold mb-1">{PLAN.tagline}</div>
             <div className="text-[13px] text-[var(--fg-muted)] mb-5">{PLAN.billing} · {usd(MONTHLY_MINIMUM)}/mo minimum</div>
-            <Link href="/signup" className="block text-center w-full py-3 rounded-lg font-extrabold text-[13px] text-[var(--bg)] mb-6" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
+            <Link href="https://app.x3compass.com/signup" className="block text-center w-full py-3 rounded-lg font-extrabold text-[13px] text-[var(--bg)] mb-6" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
               Start {PLAN.trialDays}-day free trial
             </Link>
             <ul className="space-y-2">
@@ -194,7 +194,7 @@ export default function PricingPage() {
         </div>
 
         <div className="text-center">
-          <Link href="/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 28px rgba(2, 6, 12, 0.45)" }}>Start your free trial →</Link>
+          <Link href="https://app.x3compass.com/signup" className="inline-block px-6 py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 12px 28px rgba(2, 6, 12, 0.45)" }}>Start your free trial →</Link>
         </div>
       </div>
     </SiteShell>

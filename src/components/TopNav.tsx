@@ -55,7 +55,7 @@ export default function TopNav() {
             <Link href="/" className={linkClass("/")}>Home</Link>
             <Link href="/#services" className={linkClass("/#services")}>Services</Link>
             {loggedIn && (
-              <Link href="/app" className={linkClass("/app")}>App</Link>
+              <Link href="https://app.x3compass.com/app" className={linkClass("/app")}>App</Link>
             )}
             <Link href="/#skills" className={linkClass("/#skills")}>Skills</Link>
             <Link href="/#pricing" className={linkClass("/#pricing")}>Pricing</Link>
@@ -74,7 +74,7 @@ export default function TopNav() {
           {isAppShell ? null : loggedIn ? (
             <>
               <Link
-                href="/app"
+                href="https://app.x3compass.com/app"
                 className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-[var(--bg)]"
                 style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 4px 12px rgba(2, 6, 12, 0.45)" }}
               >
@@ -90,13 +90,13 @@ export default function TopNav() {
           ) : (
             <>
               <Link
-                href="/signin"
+                href="https://app.x3compass.com/signin"
                 className="text-[15px] sm:text-[17px] font-semibold text-[var(--fg-muted)] hover:text-[var(--fg)]"
               >
                 Sign in
               </Link>
               <Link
-                href="/signup"
+                href="https://app.x3compass.com/signup"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-[15px] font-bold text-[var(--bg)]"
                 style={{
                   background: "linear-gradient(135deg, var(--accent), var(--accent-2))",

@@ -46,7 +46,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
                   </a>
                 </li>
                 <li><Link href="/partners" className="hover:text-white">Partner Program</Link></li>
-                <li><Link href="/signin" className="hover:text-white">Sign In</Link></li>
+                <li><Link href="https://app.x3compass.com/signin" className="hover:text-white">Sign In</Link></li>
                 <li><a href="mailto:joshua@x3fleetsafety.com" className="hover:text-white">Contact</a></li>
               </ul>
             </div>
