@@ -18,7 +18,7 @@ export default function DashboardPreview() {
           <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
         </div>
         <div className="flex-1 mx-3 px-3 py-1 rounded-md bg-[var(--bg)] border border-[var(--border)] text-[10px] text-[var(--fg-faint)] font-mono truncate">
-          app.x3compass.com/dashboard
+          app.x3compass.com
         </div>
       </div>
 
