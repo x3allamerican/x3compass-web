@@ -989,7 +989,11 @@ async function agentControlManager(env: FtEnv): Promise<AgentResult> {
 
   // 3. Journal balance integrity check for current period
   const period = new Date().toISOString().slice(0, 7);
-  const lines = await supa.select("compass_journal_lines", `select=debit_cents,credit_cents,entry_id&entry_id=in.(select id from compass_journal_entries where period=${period})&limit=5000`) as Array<{ debit_cents: number; credit_cents: number }>;
+  const _periodEntries = await supa.select("compass_journal_entries", `select=id&period=eq.${period}&limit=5000`) as Array<{ id: string }>;
+  const _periodEntryIds = _periodEntries.map((e) => e.id);
+  const lines = _periodEntryIds.length
+    ? await supa.select("compass_journal_lines", `select=debit_cents,credit_cents,entry_id&entry_id=in.(${_periodEntryIds.join(",")})&limit=5000`) as Array<{ debit_cents: number; credit_cents: number }>
+    : [] as Array<{ debit_cents: number; credit_cents: number }>;
   const totalDr = lines.reduce((a, b) => a + Number(b.debit_cents || 0), 0);
   const totalCr = lines.reduce((a, b) => a + Number(b.credit_cents || 0), 0);
   const balanced = totalDr === totalCr;
