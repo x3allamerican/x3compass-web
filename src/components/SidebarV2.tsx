@@ -117,6 +117,18 @@ const NAV: Item[] = [
     { href: "/app/integrations?vendor=fleetrabbit", label: "FleetRabbit",   icon: "🐰", dot: "amber" },
   ]},
 
+  { kind: "group", title: "Product Suite", icon: "\uD83E\uDDED", defaultOpen: false, pill: { label: "10", color: "cyan" }, items: [
+    { href: "/app/sop",            label: "SOP",            icon: "\uD83D\uDCDD", dot: "cyan" },
+    { href: "/app/verify",         label: "Verify",         icon: "\uD83D\uDD2C", dot: "violet" },
+    { href: "/app/preventability", label: "Preventability", icon: "\uD83E\uDDE9", dot: "rose" },
+    { href: "/app/new-entrant",    label: "New Entrant",    icon: "\uD83D\uDEA6", dot: "emerald" },
+    { href: "/app/carriercheck",   label: "CarrierCheck",   icon: "\uD83D\uDD0E", dot: "amber" },
+    { href: "/app/insurability",   label: "Insurability",   icon: "\uD83D\uDEE1", dot: "cyan" },
+    { href: "/app/legal",          label: "Legal",          icon: "\u2696", dot: "slate" },
+    { href: "/app/environmental",  label: "Environmental",  icon: "\uD83C\uDF31", dot: "emerald" },
+    { href: "/app/clean-truck",    label: "Clean Truck",    icon: "\uD83D\uDE9B", dot: "cyan" },
+    { href: "/app/workforce",      label: "Workforce",      icon: "\uD83D\uDC65", dot: "violet" },
+  ] },
   { kind: "leaf", href: "/app/ask", label: "Ask Compass", icon: "∞", pill: { label: "AI", color: "violet" } },
 
   // Hazmat Center · collapsible dropdown with all 10 sub-tools (per Joshua, task #263).
