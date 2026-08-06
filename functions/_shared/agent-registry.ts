@@ -16,6 +16,7 @@ import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
 import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billing.mjs";
 import { mapSamsaraDailyLogs, nextCursor } from "../../src/lib/samsaraSync.mjs";
+import { mapTenStreet, upsertDrivers, markVendorSync } from "./vendor-mapper";
 import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
@@ -23,6 +24,8 @@ export type AgentResult = { status: AgentStatus; summary: string; log?: string }
 
 interface Env extends AdminEnv {
   SAMSARA_API_TOKEN?: string;
+  TENSTREET_API_KEY?: string;
+  TENSTREET_SUBDOMAIN?: string;
   STRIPE_SECRET_KEY?: string;
   ANTHROPIC_API_KEY?: string;
   RESEND_API_KEY?: string;
@@ -1255,11 +1258,40 @@ async function agentEldSync(env: Env): Promise<AgentResult> {
   return { status: "ok", summary: `Synced ${records.length} Samsara HOS daily-logs · ${flagged} with §395.3 violations`, log: log.text() };
 }
 
+// ============================================================================
+// agent-driver-sync (REAL) — pulls TenStreet applicants into compass_drivers
+// for carriers whose TenStreet account (subdomain) is configured. Auto ATS sync.
+// ============================================================================
+async function agentDriverSync(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.TENSTREET_API_KEY || !env.TENSTREET_SUBDOMAIN) return { status: "skipped", summary: "No TenStreet org token configured", log: log.text() };
+  const supa = supaFetch(env);
+  const integrations = await supa.select("compass_vendor_integrations", `select=carrier_id,subdomain,status&vendor=eq.tenstreet&status=in.(configured,connected)`) as Array<{ carrier_id: string; subdomain: string | null; status: string }>;
+  const targets = integrations.filter((i) => !i.subdomain || i.subdomain.includes(env.TENSTREET_SUBDOMAIN!));
+  if (!targets.length) return { status: "skipped", summary: "No carriers with a matching TenStreet subdomain configured", log: log.text() };
+  const r = await fetch(`https://${env.TENSTREET_SUBDOMAIN}.tenstreetapp.com/api/v1/applicants?status=submitted`, { headers: { Authorization: `Bearer ${env.TENSTREET_API_KEY}`, Accept: "application/json" } });
+  if (!r.ok) { log.info(`[driver-sync] tenstreet ${r.status}`); return { status: "error", summary: `TenStreet API ${r.status}`, log: log.text() }; }
+  const payload = await r.json() as { applicants?: unknown[] };
+  const applicants = Array.isArray(payload.applicants) ? payload.applicants : [];
+  const normalized = mapTenStreet(applicants as Parameters<typeof mapTenStreet>[0]);
+  log.info(`[driver-sync] tenstreet applicants=${applicants.length} normalized=${normalized.length} carriers=${targets.length}`);
+  let total = 0; let carriers = 0; const failed: string[] = [];
+  for (const t of targets) {
+    try {
+      const up = await upsertDrivers(env, t.carrier_id, normalized);
+      total += up.inserted + up.updated; carriers++;
+      await markVendorSync(env, t.carrier_id, "tenstreet", { success: up.errors.length === 0, count: up.inserted + up.updated, error: up.errors.length ? up.errors.slice(0, 3).map((e) => e.reason).join("; ") : undefined });
+    } catch { failed.push(t.carrier_id); }
+  }
+  return { status: failed.length ? "partial" : "ok", summary: `TenStreet: ${total} driver records across ${carriers} carrier(s)${failed.length ? ` · ${failed.length} failed` : ""}`, log: log.text() };
+}
+
 export async function runAgent(name: string, env: Env, inputs?: Record<string, unknown>): Promise<AgentResult> {
   try {
     switch (name) {
       case "agent-keepalive":                return await agentKeepalive(env);
       case "agent-eld-sync":                 return await agentEldSync(env);
+      case "agent-driver-sync":              return await agentDriverSync(env);
       case "agent-portfolio-brief":          return await agentPortfolioBrief(env);
       case "agent-billing-watchdog":         return await agentBillingWatchdog(env);
       case "agent-financial-aggregator":     return await agentFinancialAggregator(env);
