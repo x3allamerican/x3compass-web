@@ -15,12 +15,14 @@ import { monthlyCents } from "./pricing";
 import { supaFetch } from "./supabase-admin";
 import { sendEmail } from "./emails";
 import { MVR_MONTHLY_RETAIL_CENTS, MVR_MONTHLY_VENDOR_CENTS } from "./mvr-billing.mjs";
+import { mapSamsaraDailyLogs, nextCursor } from "../../src/lib/samsaraSync.mjs";
 import { buildExpirationDigest, renderExpirationDigestHtml, renderExpirationDigestText } from "./expiration-sweep.mjs";
 
 export type AgentStatus = "ok" | "partial" | "error" | "skipped" | "running";
 export type AgentResult = { status: AgentStatus; summary: string; log?: string };
 
 interface Env extends AdminEnv {
+  SAMSARA_API_TOKEN?: string;
   STRIPE_SECRET_KEY?: string;
   ANTHROPIC_API_KEY?: string;
   RESEND_API_KEY?: string;
@@ -1221,10 +1223,43 @@ async function agentFinanceWorkflow(env: FtEnv): Promise<AgentResult> {
 }
 
 
+// ============================================================================
+// agent-eld-sync (REAL) — pulls Samsara HOS daily-logs into compass_hos_logs,
+// §395.3-scored, for every carrier with Samsara-linked drivers. Fully automatic.
+// ============================================================================
+async function agentEldSync(env: Env): Promise<AgentResult> {
+  const log = newLogger();
+  if (!env.SAMSARA_API_TOKEN) return { status: "skipped", summary: "No SAMSARA_API_TOKEN configured", log: log.text() };
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE) return { status: "error", summary: "Supabase env missing", log: log.text() };
+  const supa = supaFetch(env);
+  const base = env.SUPABASE_URL.replace(/\/$/, ""); const sr = env.SUPABASE_SERVICE_ROLE;
+  const drivers = await supa.select("compass_drivers", "select=id,carrier_id,source_id&source_vendor=eq.samsara&limit=50000") as Array<{ id: string; carrier_id: string; source_id: string }>;
+  if (!drivers.length) return { status: "skipped", summary: "No Samsara-linked drivers yet — connect Samsara + run driver sync first", log: log.text() };
+  const bySource = new Map(drivers.map((d) => [d.source_id, { driver_id: d.id, carrier_id: d.carrier_id }]));
+  const end = new Date().toISOString().slice(0, 10); const sd = new Date(`${end}T00:00:00Z`); sd.setUTCDate(sd.getUTCDate() - 8); const start = sd.toISOString().slice(0, 10);
+  const rows: unknown[] = []; let after: string | null = null;
+  for (let p = 0; p < 60; p++) {
+    const r = await fetch(`https://api.samsara.com/fleet/hos/daily-logs?startDate=${start}&endDate=${end}&limit=512${after ? `&after=${encodeURIComponent(after)}` : ""}`, { headers: { Authorization: `Bearer ${env.SAMSARA_API_TOKEN}`, Accept: "application/json" } });
+    if (!r.ok) { log.info(`[eld-sync] samsara ${r.status}`); return { status: "error", summary: `Samsara API ${r.status}`, log: log.text() }; }
+    const pay = await r.json() as { data?: unknown[]; pagination?: { hasNextPage?: boolean; endCursor?: string } };
+    if (Array.isArray(pay.data)) rows.push(...pay.data);
+    after = nextCursor(pay); if (!after) break;
+  }
+  const mapped = mapSamsaraDailyLogs(rows) as Array<Record<string, unknown> & { source_driver_id: string }>;
+  const records = mapped.flatMap((m) => { const link = bySource.get(m.source_driver_id); return link ? [{ ...m, driver_id: link.driver_id, carrier_id: link.carrier_id }] : []; });
+  log.info(`[eld-sync] samsara logs=${rows.length} matched=${records.length}/${mapped.length}`);
+  if (!records.length) return { status: "ok", summary: `Samsara returned ${rows.length} logs; 0 matched linked drivers`, log: log.text() };
+  const resp = await fetch(`${base}/rest/v1/compass_hos_logs?on_conflict=carrier_id,source_vendor,source_id`, { method: "POST", headers: { apikey: sr, Authorization: `Bearer ${sr}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(records) });
+  if (!resp.ok) { log.info(`[eld-sync] upsert ${resp.status}`); return { status: "error", summary: `HOS upsert ${resp.status}`, log: log.text() }; }
+  const flagged = records.filter((r) => { const vs = (r as unknown as { violations?: unknown[] }).violations; return Array.isArray(vs) && vs.length > 0; }).length;
+  return { status: "ok", summary: `Synced ${records.length} Samsara HOS daily-logs · ${flagged} with §395.3 violations`, log: log.text() };
+}
+
 export async function runAgent(name: string, env: Env, inputs?: Record<string, unknown>): Promise<AgentResult> {
   try {
     switch (name) {
       case "agent-keepalive":                return await agentKeepalive(env);
+      case "agent-eld-sync":                 return await agentEldSync(env);
       case "agent-portfolio-brief":          return await agentPortfolioBrief(env);
       case "agent-billing-watchdog":         return await agentBillingWatchdog(env);
       case "agent-financial-aggregator":     return await agentFinancialAggregator(env);

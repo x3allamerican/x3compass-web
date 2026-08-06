@@ -85,6 +85,19 @@ export default function HosPage() {
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  async function syncNow() {
+    if (!carrier || syncing) return;
+    setSyncing(true); setSyncMsg(null);
+    try {
+      const token = (await getSupabase().auth.getSession()).data.session?.access_token;
+      const r = await fetch("/api/vendors/samsara/sync", { method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ carrier_id: carrier.id }) });
+      const b = await r.json().catch(() => ({}));
+      if (r.ok && b.ok) { setSyncMsg(`Synced ${b.hos?.reconciled ?? 0} HOS logs from Samsara.`); setReloadKey((k) => k + 1); }
+      else setSyncMsg(b.error || (b.configured === false ? "Samsara not connected yet — add it in Integrations." : `Sync failed (${r.status}).`));
+    } catch (e) { setSyncMsg(e instanceof Error ? e.message : "Sync failed"); } finally { setSyncing(false); }
+  }
 
   useEffect(() => {
     if (!carrier) return;
@@ -145,12 +158,21 @@ export default function HosPage() {
       actions={
         <div className="flex items-center gap-2">
           {carrier && (
+            <>
+            <button
+              onClick={syncNow}
+              disabled={syncing}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)] disabled:opacity-50"
+            >
+              {syncing ? "Syncing…" : "🔄 Sync from ELD"}
+            </button>
             <button
               onClick={() => setShowImport(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--fg)] border border-[var(--border)] hover:border-[var(--accent)]"
             >
               ⬆ Import logs
             </button>
+            </>
           )}
           <Link
             href="/app/settings"
@@ -221,11 +243,13 @@ export default function HosPage() {
           <section className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
             <div className="text-[16px] font-extrabold text-[var(--fg)]">No HOS data imported yet</div>
             <p className="mx-auto mt-2 max-w-xl text-[12.5px] text-[var(--fg-muted)]">
-              Connect your ELD or use the documented CSV template. Automated HOS sync is not enabled yet, so X3 will not claim a connection until a verified importer writes to <code>compass_hos_logs</code>.
+              Connect Samsara or Motive and X3 pulls your drivers' daily HOS logs automatically every few hours — each driver-day scored for 11-hour, 14-hour, 30-minute-break and 70/8 violations (§395.3). No ELD? Upload the CSV template instead.
             </p>
             <div className="mt-4 flex justify-center gap-2">
               <Link href="/app/settings#eld" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-[12px] font-extrabold text-[var(--bg)]">Connect your ELD →</Link>
+              <button onClick={syncNow} disabled={syncing || !carrier} className="rounded-lg border border-[var(--border)] px-4 py-2 text-[12px] font-bold text-[var(--fg)] disabled:opacity-50">{syncing ? "Syncing…" : "Sync now"}</button>
               <a href="/templates/hos-log-import.csv" className="rounded-lg border border-[var(--border)] px-4 py-2 text-[12px] font-bold text-[var(--fg)]">CSV specification</a>
+              {syncMsg && <span className="text-[11px] text-[var(--accent)] font-bold self-center">{syncMsg}</span>}
             </div>
           </section>
         )}
@@ -294,7 +318,7 @@ export default function HosPage() {
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5" style={{ boxShadow: "var(--card-shadow)" }}>
             <div className="text-[10px] tracking-[.16em] uppercase text-[var(--accent)] font-extrabold mb-2">🔌 Connect an ELD provider</div>
             <p className="text-[var(--fg-muted)] text-[12.5px] leading-relaxed mb-3">
-              Compass reads verified rows from <code>compass_hos_logs</code>. Automated HOS sync is not enabled yet; Motive and Samsara currently synchronize vehicle records only.
+              Compass reads verified rows from <code>compass_hos_logs</code>. Samsara and Motive synchronize drivers, vehicles AND HOS daily-logs automatically (the <code>agent-eld-sync</code> job); every synced day is §395.3-scored on arrival.
             </p>
             <div className="flex flex-wrap gap-1.5 mb-4">
               {ELD_VENDORS.map((v) => (

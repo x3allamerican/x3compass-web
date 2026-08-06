@@ -1,3 +1,4 @@
+import { computeHosViolations } from "./hosViolations.mjs";
 const text = (value, max=200) => typeof value === "string" && value.trim() ? value.trim().slice(0,max) : null;
 const number = (value) => Number.isFinite(Number(value)) ? Number(value) : null;
 
@@ -24,6 +25,15 @@ export function mapSamsaraDailyLogs(rows) {
     const durations = row?.dutyStatusDurations && typeof row.dutyStatusDurations === "object" ? row.dutyStatusDurations : {};
     const driveMs = number(durations.driveDurationMs); const onDutyMs = number(durations.onDutyDurationMs);
     const meters = number(row?.distanceTraveledMeters);
-    return [{ source_vendor:"samsara", source_id:`${driverId}:${date}`, source_driver_id:driverId, log_date:date, total_drive_minutes:driveMs == null ? null : Math.round(driveMs/60000), total_on_duty_minutes:onDutyMs == null ? null : Math.round(onDutyMs/60000), distance_miles:meters == null ? null : Math.round((meters/1609.344)*100)/100, eld_source:"samsara", certified:Boolean(text(row?.logCertifiedAtTime,40)), violations:Array.isArray(row?.violations) ? row.violations : [] }];
+    return [{ source_vendor:"samsara", source_id:`${driverId}:${date}`, source_driver_id:driverId, log_date:date, total_drive_minutes:driveMs == null ? null : Math.round(driveMs/60000), total_on_duty_minutes:onDutyMs == null ? null : Math.round(onDutyMs/60000), distance_miles:meters == null ? null : Math.round((meters/1609.344)*100)/100, eld_source:"samsara", certified:Boolean(text(row?.logCertifiedAtTime,40)), violations:hosViol(driveMs, onDutyMs, row) }];
   });
+}
+
+function hosViol(driveMs, onDutyMs, row) {
+  const computed = computeHosViolations({
+    drive_min: driveMs == null ? 0 : Math.round(driveMs / 60000),
+    on_duty_min: onDutyMs == null ? 0 : Math.round(onDutyMs / 60000),
+  }).violations;
+  const vendor = Array.isArray(row?.violations) ? row.violations : [];
+  return [...computed, ...vendor.filter((v) => v && v.source !== "x3")];
 }
