@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/lib/useUser";
 import { getSupabase } from "@/lib/supabase";
+import { IftaReturnModal } from "@/components/app/IftaReturnModal";
 import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 
@@ -236,6 +237,8 @@ const money = (c: number | null) => (c == null ? "—" : `$${(c / 100).toLocaleS
 function RealIfta({ carrierId }: { carrierId: string }) {
   const [rows, setRows] = useState<IftaRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLog, setShowLog] = useState(false);
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     let live = true;
     getSupabase().from("compass_ifta_returns")
@@ -243,7 +246,7 @@ function RealIfta({ carrierId }: { carrierId: string }) {
       .eq("carrier_id", carrierId).order("due_date", { ascending: false })
       .then(({ data }) => { if (!live) return; setRows((data as IftaRow[]) || []); setLoading(false); });
     return () => { live = false; };
-  }, [carrierId]);
+  }, [carrierId, reload]);
   const stats = useMemo(() => ({
     total: rows.length,
     filed: rows.filter(r => r.status === "Filed").length,
@@ -252,14 +255,14 @@ function RealIfta({ carrierId }: { carrierId: string }) {
   }), [rows]);
   if (loading) return <AppShell title="IFTA Concierge"><div className="p-8 text-white/60 text-[13px]">Loading returns…</div></AppShell>;
   if (rows.length === 0) return (
-    <AppShell title="IFTA Concierge"><div className="p-8 max-w-2xl"><div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
+    <AppShell title="IFTA Concierge" actions={<button onClick={() => setShowLog(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Record a return</button>}>{showLog && <IftaReturnModal carrierId={carrierId} onClose={() => setShowLog(false)} onSaved={() => { setShowLog(false); setReload((r) => r + 1); }} />}<div className="p-8 max-w-2xl"><div className="rounded-xl border border-dashed border-[#1E3556] bg-[#0C1A30] px-6 py-14 text-center">
       <div className="text-3xl mb-3" aria-hidden>🧾</div><div className="text-[15px] font-extrabold text-white">No IFTA returns yet</div>
       <p className="mt-1.5 mx-auto max-w-md text-[13px] text-white/60">As fuel and mileage data flows in, each quarterly IFTA return is prepped here for your review before you file.</p>
     </div></div></AppShell>
   );
   const PILL: Record<ReturnStatus, string> = { "Filed": "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30", "Ready to submit": "bg-[#16C7FF]/15 text-[#16C7FF] border border-[#16C7FF]/30", "Awaiting data": "bg-amber-500/15 text-amber-300 border border-amber-500/30", "Overdue": "bg-rose-500/15 text-rose-300 border border-rose-500/30" };
   return (
-    <AppShell title="IFTA Concierge"><div className="p-6 space-y-6">
+    <AppShell title="IFTA Concierge" actions={<button onClick={() => setShowLog(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Record a return</button>}>{showLog && <IftaReturnModal carrierId={carrierId} onClose={() => setShowLog(false)} onSaved={() => { setShowLog(false); setReload((r) => r + 1); }} />}<div className="p-6 space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[["Returns", stats.total], ["Filed", stats.filed], ["Awaiting/ready", stats.awaiting], ["Overdue", stats.overdue]].map(([l, v]) => (
           <div key={String(l)} className="rounded-xl border border-[#1E3556] bg-[#0C1A30] p-4"><div className="text-[10px] uppercase tracking-wider text-white/45">{l}</div><div className="text-[24px] font-black text-white tabular-nums">{v as number}</div></div>
