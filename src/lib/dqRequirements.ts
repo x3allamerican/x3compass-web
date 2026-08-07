@@ -1,7 +1,7 @@
 /**
  * Canonical Driver Qualification File checklist — 49 CFR § 391.51.
  * The 12 documents every DQ file must contain, each mapped to its governing
- * citation. This is the regulatory backbone the /app/dq-files page renders and
+ * citation. This is the regulatory backbone the /dq-files page renders and
  * the completeness score is computed against. Sourced from 49 CFR (the same
  * FMCSA text carried in the X3 corpus/genome), NOT tenant data.
  *

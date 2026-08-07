@@ -24,11 +24,11 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 /* Ask AI Concierge button — opens the in-page chat overlay
- * (ConciergeModal) instead of navigating to /app/ask. Modal
+ * (ConciergeModal) instead of navigating to /ask. Modal
  * is mounted by the page shell and listens for this event. */
 function ConciergeButton({ conciergeHref }: { conciergeHref: string }) {
   // Derive a context tag from the conciergeHref query string, e.g.
-  // /app/ask?context=hazmat-placards → "hazmat-placards"
+  // /ask?context=hazmat-placards → "hazmat-placards"
   let context: string | undefined;
   try {
     const url = new URL(conciergeHref, "https://x3compass.com");
@@ -112,11 +112,11 @@ const TONE_STRIPE: Record<AudienceTone, string> = {
   emerald: "linear-gradient(90deg, #34D399, #10B981)",
 };
 
-export default function EducationHubCard({ surface, subtitle, conciergeHref = "/app/ask", audiences }: Props) {
+export default function EducationHubCard({ surface, subtitle, conciergeHref = "/ask", audiences }: Props) {
   /* Compact two-pill bar — Education Hub + Ask AI Concierge.
    *  Both open as centered modals (EducationHubModal + ConciergeModal,
    *  mounted globally by AppShell). Replaces the previous big inline
-   *  card so every /app/* page reclaims ~400px of vertical space. */
+   *  card so every /* page reclaims ~400px of vertical space. */
   function openEduHub() {
     window.dispatchEvent(
       new CustomEvent("x3:open-education-hub", {

@@ -1,6 +1,6 @@
 /**
  * demoData.ts · fallback dashboard data shown when /api/dashboard returns no real data.
- * Used by src/app/app/page.tsx as the static demo state for the Compliance Command Center.
+ * Used by src/app/page.tsx as the static demo state for the Compliance Command Center.
  *
  * Shape mirrors the ApiData type expected by the dashboard page.
  */
@@ -112,7 +112,7 @@ export const ACTION_ITEMS: Record<string, ActionCard> = {
       { who: "Sarah Lopez",  meta: "Expires Mar 28",  status: "16 DAYS",  statusKind: "warn"    },
       { who: "James Patel",  meta: "Expires Apr 04",  status: "23 DAYS",  statusKind: "warn"    },
     ],
-    cta: { href: "/app/drivers", label: "Open Drivers →" },
+    cta: { href: "/drivers", label: "Open Drivers →" },
   },
   mvr: {
     title: "Schedule annual MVRs",
@@ -121,7 +121,7 @@ export const ACTION_ITEMS: Record<string, ActionCard> = {
       { who: "Carlos Reyes", meta: "Last MVR Apr 2025", status: "OVERDUE", statusKind: "overdue" },
       { who: "Tina Brooks",  meta: "Due in 11 days",    status: "11 DAYS", statusKind: "warn"    },
     ],
-    cta: { href: "/app/mvr", label: "Open MVR Tracker →" },
+    cta: { href: "/mvr", label: "Open MVR Tracker →" },
   },
   dq: {
     title: "Complete pending DQ files",
@@ -130,7 +130,7 @@ export const ACTION_ITEMS: Record<string, ActionCard> = {
       { who: "John Smith",  meta: "Missing PSP",       status: "ACTION",  statusKind: "warn" },
       { who: "Lee Johnson", meta: "Missing road test", status: "ACTION",  statusKind: "warn" },
     ],
-    cta: { href: "/app/dq-files", label: "Open DQ Files →" },
+    cta: { href: "/dq-files", label: "Open DQ Files →" },
   },
   vehicle: {
     title: "Address open vehicle defects",
@@ -138,6 +138,6 @@ export const ACTION_ITEMS: Record<string, ActionCard> = {
     items: [
       { who: "Unit 217 (Volvo VNL)", meta: "Brake light DVIR", status: "OPEN", statusKind: "warn" },
     ],
-    cta: { href: "/app/vehicles", label: "Open Vehicles →" },
+    cta: { href: "/vehicles", label: "Open Vehicles →" },
   },
 };

@@ -8,7 +8,7 @@
 
      1. ProcomDisclosureModal · shown BEFORE the carrier locks
         in Procom · affirmative ack required
-     2. ProcomProgramReferenceCard · shown on /app/drug-alcohol
+     2. ProcomProgramReferenceCard · shown on /drug-alcohol
         AFTER enrollment · persistent reference
 
    When Martin sends an updated email, bump VERSION_TAG · the
@@ -88,7 +88,7 @@ export const PROCOM_ENROLLMENT_STEPS: { n: number; title: string; detail: string
   {
     n: 8,
     title: "FMCSA Clearinghouse · designation YOU complete",
-    detail: "You must designate PROCOM (no LLC), 1805 Fortino Blvd, Pueblo, CO 81008 as your C/TPA at clearinghouse.fmcsa.dot.gov. Procom cannot complete this on your behalf. X3 Compass walks you through the designation at /app/clearinghouse. FMCSA support: 202-366-4000.",
+    detail: "You must designate PROCOM (no LLC), 1805 Fortino Blvd, Pueblo, CO 81008 as your C/TPA at clearinghouse.fmcsa.dot.gov. Procom cannot complete this on your behalf. X3 Compass walks you through the designation at /clearinghouse. FMCSA support: 202-366-4000.",
   },
 ];
 

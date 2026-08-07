@@ -1,7 +1,7 @@
 /* ============================================================
    X3 Compass · DEMO DATA FALLBACK
    ------------------------------------------------------------
-   When a /app/* page queries Supabase and gets back an empty
+   When a /* page queries Supabase and gets back an empty
    array (no rows yet for this carrier), we want to fill the
    page with realistic-looking demo rows so it never looks
    "broken/empty" to a first-time visitor or to Joshua doing
@@ -17,7 +17,7 @@
    continue to work unchanged.
    ============================================================ */
 
-/* ----------- /app/drivers ----------- */
+/* ----------- /drivers ----------- */
 
 export type DemoDriver = {
   id: string;
@@ -64,7 +64,7 @@ export const DEMO_DRIVERS: DemoDriver[] = [
   { id: "d-014", carrier_id: "demo", first_name: "Samir",   middle_name: null, last_name: "Patel",      email: "samir.p@apex-demo.com",        phone: "713-555-0922", cdl_state: "TX", cdl_number: "TX21822903", cdl_class: "B", cdl_expires_on: inDays(310), hire_date: "2022-12-05", termination_date: null, status: "inactive",      medical_card_expires_on: inDays(85),  last_mvr_pulled_on: daysAgo(150), last_drug_test_on: daysAgo(280), bg_check_status: "clear",   created_at: daysAgo(530) },
 ];
 
-/* ----------- /app/vehicles ----------- */
+/* ----------- /vehicles ----------- */
 
 export type DemoVehicle = {
   id: string;
@@ -96,7 +96,7 @@ export const DEMO_VEHICLES: DemoVehicle[] = [
   { id: "v-010", carrier_id: "demo", unit_number: "TR-204", vin: "1DW1A53216T118042", make: "Great Dane",   model: "Champion",  year: 2022, plate_state: "TX", plate_number: "WX9-2204", type: "trailer", status: "active",      annual_inspection_on: daysAgo(95),  next_pm_due_on: inDays(180), created_at: daysAgo(630) },
 ];
 
-/* ----------- /app/dq-files ----------- */
+/* ----------- /dq-files ----------- */
 
 export type DemoDQFile = {
   id: string;
@@ -120,7 +120,7 @@ export const DEMO_DQ_FILES: DemoDQFile[] = [
   { id: "dq-008", driver_id: "d-010", driver_name: "Beaumont, Trent",    required_count: 12, completed_count: 12, missing_items: [],                                                  last_audit_on: daysAgo(70),  status: "current" },
 ];
 
-/* ----------- /app/inspections ----------- */
+/* ----------- /inspections ----------- */
 
 export type DemoInspection = {
   id: string;
@@ -147,7 +147,7 @@ export const DEMO_INSPECTIONS: DemoInspection[] = [
   { id: "i-007", inspection_date: daysAgo(108), driver_name: "Patel, Samir",      vehicle_unit: "T-104 / TR-203", level: "Level I",  state: "TX", location: "Amarillo IH-40",         result: "clean",       violations: 0, oos_violations: 0, citation: false, notes: "Annual inspection sticker verified" },
 ];
 
-/* ----------- /app/clearinghouse ----------- */
+/* ----------- /clearinghouse ----------- */
 
 export type DemoClearinghouseQuery = {
   id: string;
@@ -207,7 +207,7 @@ export const DEMO_CLEARINGHOUSE_CONSENTS: DemoClearinghouseConsent[] = [
   { id: "chc-003", driver_id: "d-004", driver_name: "Walsh, Anders",   consent_type: "pre_employment",  consent_requested_at: daysAgo(42),                                      consent_deadline_at: null,                                              consent_received_at: daysAgo(41), status: "received" },
 ];
 
-/* ----------- /app/hos ----------- */
+/* ----------- /hos ----------- */
 
 export type DemoHosLog = {
   id: string;

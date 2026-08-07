@@ -67,100 +67,100 @@ const PILL_CLS: Record<Dot, string> = {
 };
 
 const NAV: Item[] = [
-  { kind: "leaf", href: "/app", label: "Dashboard", icon: "▦" },
+  { kind: "leaf", href: "/", label: "Dashboard", icon: "▦" },
 
   { kind: "group", title: "Driver Brain", icon: "👤", defaultOpen: true, items: [
-    { href: "/app/drivers",         label: "Drivers",          icon: "👤", dot: "emerald" },
-    { href: "/app/dq-files",        label: "DQ Files",         icon: "📁", dot: "cyan" },
-    { href: "/app/mvr",             label: "MVR Tracker",      icon: "🪪", dot: "emerald" },
-    { href: "/app/drug-alcohol",    label: "Drug & Alcohol",   icon: "🧪", dot: "violet" },
-    { href: "/app/da-concierge",    label: "D&A Concierge",    icon: "🧬", dot: "violet" },
-    { href: "/app/clearinghouse",   label: "Clearinghouse",    icon: "⚖", dot: "amber" },
-    { href: "/app/training",        label: "Training",         icon: "🎓", dot: "cyan" },
-    { href: "/app/background-checks", label: "Background Tracker", icon: "🛡", dot: "amber" },
-    { href: "/app/driver-invites",  label: "Driver Invites",   icon: "✉", dot: "slate" },
+    { href: "/drivers",         label: "Drivers",          icon: "👤", dot: "emerald" },
+    { href: "/dq-files",        label: "DQ Files",         icon: "📁", dot: "cyan" },
+    { href: "/mvr",             label: "MVR Tracker",      icon: "🪪", dot: "emerald" },
+    { href: "/drug-alcohol",    label: "Drug & Alcohol",   icon: "🧪", dot: "violet" },
+    { href: "/da-concierge",    label: "D&A Concierge",    icon: "🧬", dot: "violet" },
+    { href: "/clearinghouse",   label: "Clearinghouse",    icon: "⚖", dot: "amber" },
+    { href: "/training",        label: "Training",         icon: "🎓", dot: "cyan" },
+    { href: "/background-checks", label: "Background Tracker", icon: "🛡", dot: "amber" },
+    { href: "/driver-invites",  label: "Driver Invites",   icon: "✉", dot: "slate" },
   ]},
 
   { kind: "group", title: "Vehicle Brain", icon: "🚛", items: [
-    { href: "/app/vehicles",    label: "Vehicles",    icon: "🚛", dot: "cyan" },
-    { href: "/app/inspections", label: "Inspections", icon: "🔎", dot: "amber" },
-    { href: "/app/accidents",   label: "Accidents",   icon: "🚨", dot: "rose" },
+    { href: "/vehicles",    label: "Vehicles",    icon: "🚛", dot: "cyan" },
+    { href: "/inspections", label: "Inspections", icon: "🔎", dot: "amber" },
+    { href: "/accidents",   label: "Accidents",   icon: "🚨", dot: "rose" },
   ]},
 
   { kind: "group", title: "Ops Brain", icon: "⚙", items: [
-    { href: "/app/calendar",    label: "Compliance Calendar", icon: "🗓", dot: "cyan" },
-    { href: "/app/hos",         label: "Hours of Service", icon: "⏱", dot: "cyan" },
-    { href: "/app/ifta",        label: "IFTA Concierge",   icon: "⛽", dot: "emerald" },
-    { href: "/app/scorecards",  label: "Safety Scorecards", icon: "🏆", dot: "violet" },
-    { href: "/app/csa",         label: "CSA Scores",       icon: "📊", dot: "amber" },
+    { href: "/calendar",    label: "Compliance Calendar", icon: "🗓", dot: "cyan" },
+    { href: "/hos",         label: "Hours of Service", icon: "⏱", dot: "cyan" },
+    { href: "/ifta",        label: "IFTA Concierge",   icon: "⛽", dot: "emerald" },
+    { href: "/scorecards",  label: "Safety Scorecards", icon: "🏆", dot: "violet" },
+    { href: "/csa",         label: "CSA Scores",       icon: "📊", dot: "amber" },
   ]},
 
   { kind: "group", title: "Audit & Reports", icon: "📋", items: [
-    { href: "/app/audit-export",    label: "Audit Export",   icon: "📄", dot: "emerald" },
-    { href: "/app/audit-log",       label: "Audit Log",      icon: "📜", dot: "slate" },
-    { href: "/app/notifications",   label: "Notifications",  icon: "🔔", dot: "amber" },
-    { href: "/app/document-lookup", label: "Document Lookup", icon: "🔍", dot: "slate" },
-    { href: "/app/forms",           label: "Forms",          icon: "📋", dot: "cyan" },
+    { href: "/audit-export",    label: "Audit Export",   icon: "📄", dot: "emerald" },
+    { href: "/audit-log",       label: "Audit Log",      icon: "📜", dot: "slate" },
+    { href: "/notifications",   label: "Notifications",  icon: "🔔", dot: "amber" },
+    { href: "/document-lookup", label: "Document Lookup", icon: "🔍", dot: "slate" },
+    { href: "/forms",           label: "Forms",          icon: "📋", dot: "cyan" },
   ]},
 
   { kind: "group", title: "Finance", icon: "💰", pill: { label: "9 AI", color: "emerald" }, items: [
-    { href: "/app/finance",       label: "Finance Dashboard", icon: "💵", dot: "emerald" },
-    { href: "/app/finance-team",  label: "AI Finance Team",   icon: "🤖", dot: "violet" },
-    { href: "/app/marketing",     label: "Marketing",         icon: "📣", dot: "cyan" },
-    { href: "/app/prospects",     label: "FMCSA Prospects",   icon: "🎯", dot: "amber" },
+    { href: "/finance",       label: "Finance Dashboard", icon: "💵", dot: "emerald" },
+    { href: "/finance-team",  label: "AI Finance Team",   icon: "🤖", dot: "violet" },
+    { href: "/marketing",     label: "Marketing",         icon: "📣", dot: "cyan" },
+    { href: "/prospects",     label: "FMCSA Prospects",   icon: "🎯", dot: "amber" },
   ]},
 
   { kind: "group", title: "Integrations", icon: "🔌", items: [
-    { href: "/app/integrations",                label: "All Integrations", icon: "🔌", dot: "slate" },
-    { href: "/app/integrations?vendor=checkr",   label: "Checkr",          icon: "🛡", dot: "emerald" },
-    { href: "/app/integrations?vendor=samsara",  label: "Samsara",         icon: "📡", dot: "cyan" },
-    { href: "/app/integrations?vendor=fleetrabbit", label: "FleetRabbit",   icon: "🐰", dot: "amber" },
+    { href: "/integrations",                label: "All Integrations", icon: "🔌", dot: "slate" },
+    { href: "/integrations?vendor=checkr",   label: "Checkr",          icon: "🛡", dot: "emerald" },
+    { href: "/integrations?vendor=samsara",  label: "Samsara",         icon: "📡", dot: "cyan" },
+    { href: "/integrations?vendor=fleetrabbit", label: "FleetRabbit",   icon: "🐰", dot: "amber" },
   ]},
 
   { kind: "group", title: "Product Suite", icon: "\uD83E\uDDED", defaultOpen: false, pill: { label: "10", color: "cyan" }, items: [
-    { href: "/app/sop",            label: "SOP",            icon: "\uD83D\uDCDD", dot: "cyan" },
-    { href: "/app/verify",         label: "Verify",         icon: "\uD83D\uDD2C", dot: "violet" },
-    { href: "/app/preventability", label: "Preventability", icon: "\uD83E\uDDE9", dot: "rose" },
-    { href: "/app/new-entrant",    label: "New Entrant",    icon: "\uD83D\uDEA6", dot: "emerald" },
-    { href: "/app/carriercheck",   label: "CarrierCheck",   icon: "\uD83D\uDD0E", dot: "amber" },
-    { href: "/app/insurability",   label: "Insurability",   icon: "\uD83D\uDEE1", dot: "cyan" },
-    { href: "/app/legal",          label: "Legal",          icon: "\u2696", dot: "slate" },
-    { href: "/app/environmental",  label: "Environmental",  icon: "\uD83C\uDF31", dot: "emerald" },
-    { href: "/app/clean-truck",    label: "Clean Truck",    icon: "\uD83D\uDE9B", dot: "cyan" },
-    { href: "/app/workforce",      label: "Workforce",      icon: "\uD83D\uDC65", dot: "violet" },
+    { href: "/sop",            label: "SOP",            icon: "\uD83D\uDCDD", dot: "cyan" },
+    { href: "/verify",         label: "Verify",         icon: "\uD83D\uDD2C", dot: "violet" },
+    { href: "/preventability", label: "Preventability", icon: "\uD83E\uDDE9", dot: "rose" },
+    { href: "/new-entrant",    label: "New Entrant",    icon: "\uD83D\uDEA6", dot: "emerald" },
+    { href: "/carriercheck",   label: "CarrierCheck",   icon: "\uD83D\uDD0E", dot: "amber" },
+    { href: "/insurability",   label: "Insurability",   icon: "\uD83D\uDEE1", dot: "cyan" },
+    { href: "/legal",          label: "Legal",          icon: "\u2696", dot: "slate" },
+    { href: "/environmental",  label: "Environmental",  icon: "\uD83C\uDF31", dot: "emerald" },
+    { href: "/clean-truck",    label: "Clean Truck",    icon: "\uD83D\uDE9B", dot: "cyan" },
+    { href: "/workforce",      label: "Workforce",      icon: "\uD83D\uDC65", dot: "violet" },
   ] },
-  { kind: "leaf", href: "/app/ask", label: "Ask Compass", icon: "∞", pill: { label: "AI", color: "violet" } },
+  { kind: "leaf", href: "/ask", label: "Ask Compass", icon: "∞", pill: { label: "AI", color: "violet" } },
 
   // Hazmat Center · collapsible dropdown with all 10 sub-tools (per Joshua, task #263).
-  // Top-level "Hazmat Center" link routes to /app/hazmat (the in-app Bugatti dashboard),
+  // Top-level "Hazmat Center" link routes to /hazmat (the in-app Bugatti dashboard),
   // NOT /hazmat (the public marketing page).
   { kind: "group", title: "Hazmat Center", icon: "⚠", items: [
-    { href: "/app/hazmat",                     label: "Overview",            dot: "amber" },
-    { href: "/app/hazmat/placard-wizard",      label: "Placard Wizard",      dot: "amber" },
-    { href: "/app/hazmat/substances",          label: "Substance Lookup",    dot: "cyan"  },
-    { href: "/app/hazmat/lithium",             label: "Lithium Decision",    dot: "amber" },
-    { href: "/app/hazmat/exemptions",          label: "Exemption Checker",   dot: "emerald" },
-    { href: "/app/hazmat/audit",               label: "Audit Readiness",     dot: "emerald" },
-    { href: "/app/hazmat/training",            label: "Training Tracker",    dot: "cyan" },
-    { href: "/app/hazmat/shipping-papers",     label: "Shipping Papers",     dot: "cyan" },
-    { href: "/app/hazmat/emergency-response",  label: "Emergency Response",  dot: "rose" },
-    { href: "/app/hazmat/security-plan",       label: "Security Plan",       dot: "violet" },
+    { href: "/hazmat",                     label: "Overview",            dot: "amber" },
+    { href: "/hazmat/placard-wizard",      label: "Placard Wizard",      dot: "amber" },
+    { href: "/hazmat/substances",          label: "Substance Lookup",    dot: "cyan"  },
+    { href: "/hazmat/lithium",             label: "Lithium Decision",    dot: "amber" },
+    { href: "/hazmat/exemptions",          label: "Exemption Checker",   dot: "emerald" },
+    { href: "/hazmat/audit",               label: "Audit Readiness",     dot: "emerald" },
+    { href: "/hazmat/training",            label: "Training Tracker",    dot: "cyan" },
+    { href: "/hazmat/shipping-papers",     label: "Shipping Papers",     dot: "cyan" },
+    { href: "/hazmat/emergency-response",  label: "Emergency Response",  dot: "rose" },
+    { href: "/hazmat/security-plan",       label: "Security Plan",       dot: "violet" },
   ]},
 
-  { kind: "leaf", href: "/app/import", label: "Bulk Import", icon: "⤴" },
+  { kind: "leaf", href: "/import", label: "Bulk Import", icon: "⤴" },
 
   { kind: "group", title: "Settings", icon: "⚙", items: [
-    { href: "/app/settings",         label: "Profile",  icon: "👤", dot: "slate" },
-    { href: "/app/settings/team",    label: "Team",     icon: "👥", dot: "cyan" },
-    { href: "/app/settings/billing", label: "Billing",  icon: "💳", dot: "emerald" },
+    { href: "/settings",         label: "Profile",  icon: "👤", dot: "slate" },
+    { href: "/settings/team",    label: "Team",     icon: "👥", dot: "cyan" },
+    { href: "/settings/billing", label: "Billing",  icon: "💳", dot: "emerald" },
   ]},
 ];
 
 const SUPER_ADMIN_GROUP: Group = {
   kind: "group", title: "X3 Admin", icon: "⚡", items: [
-    { href: "/app/control-center",  label: "Control Center", icon: "🎛", dot: "amber" },
-    { href: "/app/admin/partners",  label: "Partners",       icon: "🤝", dot: "violet" },
-    { href: "/app/admin/checkr-smoke", label: "Checkr Smoke", icon: "💨", dot: "cyan" },
+    { href: "/control-center",  label: "Control Center", icon: "🎛", dot: "amber" },
+    { href: "/admin/partners",  label: "Partners",       icon: "🤝", dot: "violet" },
+    { href: "/admin/checkr-smoke", label: "Checkr Smoke", icon: "💨", dot: "cyan" },
   ],
 };
 
@@ -168,7 +168,7 @@ function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   const cleanHref = href.split("?")[0];
   if (pathname === cleanHref) return true;
-  return cleanHref !== "/app" && pathname.startsWith(cleanHref);
+  return cleanHref !== "/" && pathname.startsWith(cleanHref);
 }
 
 export default function SidebarV2({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {

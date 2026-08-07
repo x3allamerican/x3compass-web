@@ -7,7 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 function SignInInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const returnTo = params?.get("return_to") || "/app";
+  const returnTo = params?.get("return_to") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ function SignInInner() {
     try {
       const { error } = await getSupabase().auth.signInWithPassword({ email, password });
       if (error) throw error;
-      router.push(returnTo.startsWith("/") ? returnTo : "/app");
+      router.push(returnTo.startsWith("/") ? returnTo : "/");
     } catch (err) { setError(err instanceof Error ? err.message : "Sign-in failed"); }
     finally { setLoading(false); }
   }

@@ -19,7 +19,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         </p>
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => reset()} className="px-5 py-2.5 rounded-lg font-extrabold text-[13px] text-black" style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}>Try again</button>
-          <Link href="/app" className="px-5 py-2.5 rounded-lg font-bold text-[13px] text-white border border-white/20 hover:bg-white/5">Go to dashboard</Link>
+          <Link href="/" className="px-5 py-2.5 rounded-lg font-bold text-[13px] text-white border border-white/20 hover:bg-white/5">Go to dashboard</Link>
         </div>
         {error?.digest && <p className="mt-6 text-[11px] text-white/30">Reference: {error.digest}</p>}
       </div>

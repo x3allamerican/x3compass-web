@@ -39,7 +39,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="text-white text-[12px] font-bold tracking-widest uppercase mb-3">Resources</h4>
               <ul className="space-y-2 text-[14px]">
-                <li><Link href="/app/ask" className="hover:text-white">AI Concierge</Link></li>
+                <li><Link href="/ask" className="hover:text-white">AI Concierge</Link></li>
                 <li>
                   <a href="https://github.com/x3fleetsafety/skills" target="_blank" rel="noopener" className="hover:text-white">
                     Skills on GitHub

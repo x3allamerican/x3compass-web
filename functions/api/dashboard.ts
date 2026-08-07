@@ -235,7 +235,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           status: fmtOverduePill(d.expires_on || null),
           statusKind: "overdue" as const,
         })),
-        cta: { href: "/app/dq-files", label: "Open DQ files →" },
+        cta: { href: "/dq-files", label: "Open DQ files →" },
       },
       cdl_expirations: {
         title: "CDL Expirations",
@@ -246,7 +246,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           status: fmtOverduePill(d.cdl_expires_on || null),
           statusKind: "overdue" as const,
         })),
-        cta: { href: "/app/drivers", label: "Open drivers →" },
+        cta: { href: "/drivers", label: "Open drivers →" },
       },
       medical_certs: {
         title: "Medical Certificates",
@@ -257,7 +257,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           status: fmtOverduePill(d.medical_card_expires_on || null),
           statusKind: "overdue" as const,
         })),
-        cta: { href: "/app/dq-files", label: "Upload new cert →" },
+        cta: { href: "/dq-files", label: "Upload new cert →" },
       },
       preventive_maint: {
         title: "Preventive Maintenance",
@@ -268,7 +268,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           status: fmtOverduePill(v.next_dot_inspection_due || null),
           statusKind: "overdue" as const,
         })),
-        cta: { href: "/app/vehicles", label: "Open vehicles →" },
+        cta: { href: "/vehicles", label: "Open vehicles →" },
       },
     };
 
@@ -444,7 +444,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           statusKind: "warn" as const,
         };
       }),
-      cta: { href: "/app/accidents", label: "Open register →" },
+      cta: { href: "/accidents", label: "Open register →" },
     };
 
     const driversMissingEldt = drvRows.filter(d => !trainRows.some(t => t.driver_id === d.id && (t.course_name === "ELDT BTW" || t.course_name === "ELDT Theory")));
@@ -457,7 +457,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         status: "LOG ELDT",
         statusKind: "warn" as const,
       })),
-      cta: { href: "/app/training", label: "Open training log →" },
+      cta: { href: "/training", label: "Open training log →" },
     };
 
     const expiredTraining = trainRows.filter(t => t.expires_on && t.expires_on < today).slice(0, 5);
@@ -470,7 +470,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
         const days = Math.floor((Date.now() - new Date(t.expires_on || today).getTime()) / 86_400_000);
         return { who: t.course_name || "Course", meta: `${drvName} · ${t.expires_on ? new Date(t.expires_on).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}`, status: `${days}d OVERDUE`, statusKind: "overdue" as const };
       }),
-      cta: { href: "/app/training", label: "Open training log →" },
+      cta: { href: "/training", label: "Open training log →" },
     };
 
     const positiveDaTests = daRows.filter(r => r.result === "positive" || r.result === "refusal").slice(0, 5);
@@ -485,7 +485,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
           statusKind: "warn" as const,
         };
       }),
-      cta: { href: "/app/drug-alcohol", label: "Mark reported →" },
+      cta: { href: "/drug-alcohol", label: "Mark reported →" },
     };
 
     return tenantJson(ctx.request, ctx.env, {

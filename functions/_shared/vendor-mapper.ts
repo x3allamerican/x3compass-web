@@ -350,7 +350,7 @@ const VEHICLE_CSV_ALIASES: Record<string, keyof NormalizedVehicle | "ignore"> = 
   last_dot_inspection_on: "last_dot_inspection_on",
   next_dot_inspection_due: "next_dot_inspection_due",
 
-  // Common shorthand from the project's /app/import template
+  // Common shorthand from the project's /import template
   unit_number: "ignore",  // we key on VIN; unit numbers vary by fleet convention
   gvwr: "gvwr_lbs",
   annual_inspection_date: "last_dot_inspection_on",

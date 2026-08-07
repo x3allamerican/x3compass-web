@@ -132,7 +132,7 @@ export default function AppTopbar({
 
       {/* RIGHT · bell + user widget (pinned to right edge) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 14, flexShrink: 0 }}>
-        <Link href="/app/notifications"
+        <Link href="/notifications"
           aria-label={`Notifications${notificationCount ? `, ${notificationCount} unread` : ""}`}
           style={{
             position: "relative", width: 36, height: 36, borderRadius: 999, border: "none",

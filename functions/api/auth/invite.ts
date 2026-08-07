@@ -60,7 +60,7 @@ async function sendInviteEmail(env: Env, to: string, carrierName: string, invite
       to,
       subject: `${inviterEmail} added you to ${carrierName} on X3 Compass`,
       html: `<p>You've been invited to <strong>${carrierName}</strong> on X3 Compass — the AI-powered FMCSA compliance platform.</p>
-<p><a href="${site}/app/signin?invite=1" style="display:inline-block;padding:10px 18px;background:#22D3EE;color:#0B1220;font-weight:800;text-decoration:none;border-radius:8px">Accept invite & sign in →</a></p>
+<p><a href="${site}/signin?invite=1" style="display:inline-block;padding:10px 18px;background:#22D3EE;color:#0B1220;font-weight:800;text-decoration:none;border-radius:8px">Accept invite & sign in →</a></p>
 <p style="color:#64748B;font-size:12px">If you don't recognize this, you can safely ignore this email.</p>`,
     }),
   }).catch(() => {});

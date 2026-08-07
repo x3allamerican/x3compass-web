@@ -46,7 +46,7 @@ export default function StubPage({
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              <Link href="/app/ask" className="px-4 py-2 rounded-full text-[13px] font-bold text-[#000000]"
+              <Link href="/ask" className="px-4 py-2 rounded-full text-[13px] font-bold text-[#000000]"
                 style={{ background: "linear-gradient(135deg, #16C7FF, #16C7FF)" }}
               >
                 ★ Ask Compass about {title} →
@@ -66,7 +66,7 @@ export default function StubPage({
             <div className="text-white font-bold text-[14px] mb-1">This page is in active build</div>
             <div className="text-[13px] text-white/70">
               The brain is live and answering questions on{" "}
-              <Link href="/app/ask" className="text-[#16C7FF] font-bold hover:underline">Ask Compass</Link>.
+              <Link href="/ask" className="text-[#16C7FF] font-bold hover:underline">Ask Compass</Link>.
               The dedicated screen · table view, detail drawers, CSV/manual/API import · ships next sprint.
             </div>
           </div>

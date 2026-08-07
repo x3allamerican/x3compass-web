@@ -1,0 +1,192 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useUser } from "@/lib/useUser";
+import { apiFetch } from "@/lib/api";
+import { getSupabase } from "@/lib/supabase";
+import { SkeletonShell } from "@/components/Skeleton";
+import { DriverImportModal } from "@/components/app/DriverImportModal";
+import { monthlyFor, effectiveRate, usd } from "@/lib/pricing";
+
+type Step = 1 | 2 | 3;
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const { user, carrier, loading, refresh } = useUser();
+  const [step, setStep] = useState<Step>(1);
+  const [carrierName, setCarrierName] = useState("");
+  const [usdot, setUsdot] = useState("");
+  const [powerUnits, setPowerUnits] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [driverFirst, setDriverFirst] = useState("");
+  const [driverLast, setDriverLast] = useState("");
+  const [driverEmail, setDriverEmail] = useState("");
+  const [driverCdlState, setDriverCdlState] = useState("");
+  const [driverCdlNumber, setDriverCdlNumber] = useState("");
+  const [drivers, setDrivers] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showDriverImport, setShowDriverImport] = useState(false);
+
+  useEffect(() => { if (!loading && !user) router.replace("/signin?return_to=/onboarding"); }, [user, loading, router]);
+  useEffect(() => { if (carrier) { setCarrierName(carrier.name); setUsdot(carrier.usdot_number || ""); } }, [carrier]);
+
+  if (loading || !user) return <div className="min-h-screen bg-[var(--bg)] p-6"><SkeletonShell kpis={3} rows={4} /></div>;
+
+  async function saveCarrier() {
+    setBusy(true); setError(null);
+    try {
+      if (!carrier) throw new Error("No carrier · refresh and try again");
+      const sb = getSupabase();
+      const { error } = await sb.from("compass_carriers").update({
+        name: carrierName.trim(),
+        usdot_number: usdot.trim() || null,
+        power_units_count: powerUnits ? Number(powerUnits) : null,
+        city: city.trim() || null, state: state.trim() || null,
+      }).eq("id", carrier.id);
+      if (error) throw error;
+      await refresh(); setStep(2);
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+  async function saveDriver() {
+    setBusy(true); setError(null);
+    try {
+      if (!carrier) throw new Error("No carrier");
+      if (!driverFirst.trim() && !driverLast.trim()) { setStep(3); return; }
+      const sb = getSupabase();
+      const { error } = await sb.from("compass_drivers").insert({
+        carrier_id: carrier.id, first_name: driverFirst.trim(), last_name: driverLast.trim() || "—",
+        email: driverEmail.trim() || null, cdl_state: driverCdlState.trim() || null, cdl_number: driverCdlNumber.trim() || null,
+        status: "pending_hire",
+      });
+      if (error) throw error;
+      setStep(3);
+    } catch (err) { setError(err instanceof Error ? err.message : "Save failed"); }
+    finally { setBusy(false); }
+  }
+  async function startCheckout() {
+    setBusy(true); setError(null);
+    try {
+      const data = await apiFetch<{ ok: boolean; url?: string; error?: string }>("/api/stripe/create-checkout-session", {
+        method: "POST", body: JSON.stringify({ drivers }),
+      });
+      if (!data.ok || !data.url) throw new Error(data.error || "Checkout failed");
+      window.location.href = data.url;
+    } catch (err) { setError(err instanceof Error ? err.message : "Checkout failed"); }
+    finally { setBusy(false); }
+  }
+  function skipToApp() { router.push("/"); }
+
+  return (
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold mb-2">Welcome to X3 Compass</h1>
+          <p className="text-[var(--fg-muted)]">Three quick steps and you&apos;re live.</p>
+        </div>
+        <div className="flex justify-center gap-2 mb-10">
+          {[1,2,3].map((n) => (<div key={n} className={`h-1.5 w-20 rounded-full ${step >= n ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`} />))}
+        </div>
+        <div className="rounded-2xl p-9 border border-[var(--border)]" style={{ background: "linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%)" }}>
+          {step === 1 && (<>
+            <h2 className="text-xl font-extrabold mb-4">1 · Confirm your company info</h2>
+            <div className="space-y-4">
+              <Field label="Company name"><input className="x3-input" value={carrierName} onChange={(e) => setCarrierName(e.target.value)} /></Field>
+              <Field label="USDOT number"><input className="x3-input" value={usdot} onChange={(e) => setUsdot(e.target.value)} placeholder="1234567" /></Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Power units"><input className="x3-input" type="number" value={powerUnits} onChange={(e) => setPowerUnits(e.target.value)} placeholder="5" /></Field>
+                <Field label="State"><input className="x3-input" value={state} onChange={(e) => setState(e.target.value)} placeholder="TX" maxLength={2} /></Field>
+              </div>
+              <Field label="City"><input className="x3-input" value={city} onChange={(e) => setCity(e.target.value)} /></Field>
+              {error && <Err msg={error} />}
+              <button disabled={busy || !carrierName} onClick={saveCarrier} className="x3-btn-primary">{busy ? "Saving…" : "Continue →"}</button>
+            </div>
+          </>)}
+          {step === 2 && (<>
+            <h2 className="text-xl font-extrabold mb-1">2 · Import your drivers</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-5">Start with your real roster so Compass can build accurate DQ, MVR, training, and expiration views. Nothing is prefilled with demo drivers.</p>
+            <button
+              disabled={!carrier}
+              onClick={() => setShowDriverImport(true)}
+              className="x3-btn-primary mb-6"
+            >
+              Import driver roster →
+            </button>
+            <div className="flex items-center gap-3 mb-5" aria-hidden="true">
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-[10px] tracking-[.14em] uppercase text-[var(--fg-faint)] font-bold">Or add one driver manually</span>
+              <div className="h-px flex-1 bg-[var(--border)]" />
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="First"><input className="x3-input" value={driverFirst} onChange={(e) => setDriverFirst(e.target.value)} /></Field>
+                <Field label="Last"><input className="x3-input" value={driverLast} onChange={(e) => setDriverLast(e.target.value)} /></Field>
+              </div>
+              <Field label="Email"><input type="email" className="x3-input" value={driverEmail} onChange={(e) => setDriverEmail(e.target.value)} /></Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="CDL state"><input className="x3-input" value={driverCdlState} onChange={(e) => setDriverCdlState(e.target.value)} maxLength={2} placeholder="TX" /></Field>
+                <Field label="CDL number"><input className="x3-input" value={driverCdlNumber} onChange={(e) => setDriverCdlNumber(e.target.value)} /></Field>
+              </div>
+              {error && <Err msg={error} />}
+              <div className="flex gap-3">
+                <button disabled={busy} onClick={() => setStep(3)} className="x3-btn-secondary">Skip for now</button>
+                <button disabled={busy} onClick={saveDriver} className="x3-btn-primary flex-1">{busy ? "Saving…" : "Add driver →"}</button>
+              </div>
+            </div>
+          </>)}
+          {step === 3 && (<>
+            <h2 className="text-xl font-extrabold mb-1">3 · Your plan</h2>
+            <p className="text-[12px] text-[var(--fg-muted)] mb-6">7-day free trial active. Card optional today.</p>
+            <div className="rounded-lg border border-[var(--accent)] bg-[var(--surface-3)] p-5 mb-6">
+              <div className="flex items-baseline justify-between mb-1">
+                <div className="font-extrabold text-base">X3 Compass</div>
+                <div><span className="font-extrabold text-lg">{usd(effectiveRate(drivers))}</span><span className="text-[12px] text-[var(--fg-muted)]">/driver/mo</span></div>
+              </div>
+              <div className="text-[12px] text-[var(--fg-muted)]">Every X3 product included · graduated per-driver ($50 → $25 as you grow) · $100/mo minimum.</div>
+            </div>
+            <div className="space-y-3 mb-6">
+              <Field label="Number of drivers"><input className="x3-input" type="number" min={1} value={drivers} onChange={(e) => setDrivers(Math.max(1, Number(e.target.value)))} /></Field>
+              <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                <div className="text-sm font-bold">Estimated monthly</div>
+                <div className="text-lg font-extrabold">{usd(monthlyFor(drivers))}<span className="text-[11px] font-normal text-[var(--fg-muted)]">/mo</span></div>
+              </div>
+            </div>
+            {error && <Err msg={error} />}
+            <div className="flex gap-3">
+              <button onClick={skipToApp} className="x3-btn-secondary">Stay on trial</button>
+              <button disabled={busy} onClick={startCheckout} className="x3-btn-primary flex-1">{busy ? "Opening checkout…" : "Continue to billing →"}</button>
+            </div>
+          </>)}
+        </div>
+        <p className="text-center mt-6 text-[12px] text-[var(--fg-faint)]">Want to talk first? <Link href="/faq" className="text-[var(--accent)]">FAQ →</Link></p>
+      </div>
+      {showDriverImport && carrier && (
+        <DriverImportModal
+          carrierId={carrier.id}
+          onClose={() => setShowDriverImport(false)}
+          onImported={() => {
+            setShowDriverImport(false);
+            setStep(3);
+          }}
+        />
+      )}
+      <style jsx global>{`
+        .x3-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-size: 14px; }
+        .x3-input:focus { outline: none; border-color: #16C7FF; }
+        .x3-btn-primary { width: 100%; padding: 12px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; color: var(--accent-fg); background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 0; cursor: pointer; }
+        .x3-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .x3-btn-secondary { padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; color: white; background: transparent; border: 1px solid #1E3556; cursor: pointer; }
+      `}</style>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (<div><label className="text-[11px] tracking-[.14em] uppercase text-[var(--fg-muted)] font-bold mb-1.5 block">{label}</label>{children}</div>);
+}
+function Err({ msg }: { msg: string }) {
+  return <div className="text-[12px] text-red-700 dark:text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-2">{msg}</div>;
+}

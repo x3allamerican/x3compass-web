@@ -23,12 +23,12 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   if (!DOMAINS.has(to)) return json({ ok: false, error: "unknown product" }, 400);
   const ident = await verifySupabaseJwt(ctx.env, bearerFromRequest(ctx.request));
   if (!ident) return json({ ok: false, error: "unauthorized" }, 401);
-  if (!ctx.env.ACCTS) return json({ ok: false, error: "sso_unavailable", url: `https://${to}/app` }, 200);
+  if (!ctx.env.ACCTS) return json({ ok: false, error: "sso_unavailable", url: `https://${to}/` }, 200);
   const ticket = hex(32); const now = Date.now(); const exp = now + 120000; // 2-min one-time
   try {
     await ctx.env.ACCTS.prepare("INSERT INTO sso_tickets (ticket,email,dot,target,expires_at,consumed,created_at) VALUES (?,?,?,?,?,0,?)")
       .bind(ticket, String(ident.email || "").toLowerCase(), "", to, exp, now).run();
-  } catch { return json({ ok: false, error: "mint_failed", url: `https://${to}/app` }, 200); }
+  } catch { return json({ ok: false, error: "mint_failed", url: `https://${to}/` }, 200); }
   return json({ ok: true, url: `https://${to}/api/sso?ticket=${ticket}` });
 };
 

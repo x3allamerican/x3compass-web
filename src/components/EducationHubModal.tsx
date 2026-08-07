@@ -68,7 +68,7 @@ export default function EducationHubModal() {
     setOpen(false);
     let context: string | undefined;
     try {
-      const url = new URL(data.conciergeHref || "/app/ask", "https://x3compass.com");
+      const url = new URL(data.conciergeHref || "/ask", "https://x3compass.com");
       context = url.searchParams.get("context") || undefined;
     } catch { /* no-op */ }
     setTimeout(() => {

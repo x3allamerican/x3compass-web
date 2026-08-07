@@ -26,16 +26,16 @@ function shell(title: string, body: string, siteUrl: string): string {
 
 export function welcomeEmail(carrierName: string, userName: string | null, siteUrl: string) {
   const greeting = userName ? `Welcome, ${userName}` : "Welcome to X3 Compass";
-  const body = `<h1>${greeting} 👋</h1><p>Your 7-day trial of X3 Compass starts now for <strong>${carrierName}</strong>. No credit card required.</p><p>In the next 5 minutes you can:</p><ul><li>Add your first driver</li><li>Ask the AI Safety Director any FMCSA question</li><li>Order a Checkr background check</li></ul><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/app">Open my dashboard →</a></p><p>Reply to this email with any questions — a real person reads them.</p><p>— Joshua, X3 Compass</p>`;
-  return { subject: "Welcome to X3 Compass — your 7-day trial just started", html: shell("Welcome", body, siteUrl), text: `Welcome to X3 Compass! Open: ${siteUrl}/app` };
+  const body = `<h1>${greeting} 👋</h1><p>Your 7-day trial of X3 Compass starts now for <strong>${carrierName}</strong>. No credit card required.</p><p>In the next 5 minutes you can:</p><ul><li>Add your first driver</li><li>Ask the AI Safety Director any FMCSA question</li><li>Order a Checkr background check</li></ul><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/">Open my dashboard →</a></p><p>Reply to this email with any questions — a real person reads them.</p><p>— Joshua, X3 Compass</p>`;
+  return { subject: "Welcome to X3 Compass — your 7-day trial just started", html: shell("Welcome", body, siteUrl), text: `Welcome to X3 Compass! Open: ${siteUrl}/` };
 }
 
 export function trialEndingEmail(carrierName: string, daysLeft: number, siteUrl: string) {
-  const body = `<h1>Your X3 Compass trial ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}</h1><p>Your trial for <strong>${carrierName}</strong> ends soon. Add a payment method to keep your access.</p><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/app/settings/billing">Add payment method →</a></p>`;
-  return { subject: daysLeft <= 1 ? "Your trial ends tomorrow" : `Your trial ends in ${daysLeft} days`, html: shell("Trial ending", body, siteUrl), text: `Trial ends in ${daysLeft} days. Update: ${siteUrl}/app/settings/billing` };
+  const body = `<h1>Your X3 Compass trial ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}</h1><p>Your trial for <strong>${carrierName}</strong> ends soon. Add a payment method to keep your access.</p><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/settings/billing">Add payment method →</a></p>`;
+  return { subject: daysLeft <= 1 ? "Your trial ends tomorrow" : `Your trial ends in ${daysLeft} days`, html: shell("Trial ending", body, siteUrl), text: `Trial ends in ${daysLeft} days. Update: ${siteUrl}/settings/billing` };
 }
 
 export function paymentFailedEmail(carrierName: string, siteUrl: string) {
-  const body = `<h1>Payment failed — let&apos;s fix it</h1><p>We couldn&apos;t charge your card for <strong>${carrierName}</strong>.</p><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/app/settings/billing">Update payment method →</a></p>`;
-  return { subject: "Payment failed — update your card to keep X3 Compass", html: shell("Payment failed", body, siteUrl), text: `Payment failed for ${carrierName}. Update: ${siteUrl}/app/settings/billing` };
+  const body = `<h1>Payment failed — let&apos;s fix it</h1><p>We couldn&apos;t charge your card for <strong>${carrierName}</strong>.</p><p style="margin:24px 0;"><a class="btn" href="${siteUrl}/settings/billing">Update payment method →</a></p>`;
+  return { subject: "Payment failed — update your card to keep X3 Compass", html: shell("Payment failed", body, siteUrl), text: `Payment failed for ${carrierName}. Update: ${siteUrl}/settings/billing` };
 }

@@ -63,7 +63,7 @@ export function TenantTable<T extends { id: string }>({
   );
 }
 
-// Vibrant theme-aware pills · matches the StatusPill pattern used on /app/inspections.
+// Vibrant theme-aware pills · matches the StatusPill pattern used on /inspections.
 // Light mode: solid {color}-700 bg + white text + {color}-800 border (high contrast, vibrant)
 // Dark mode:  {color}-500/45 bg + {color}-50 text + {color}-300/80 border (saturated, glow-y)
 const BADGE_CLASSES: Record<"cyan" | "green" | "amber" | "red" | "gray" | "violet", string> = {

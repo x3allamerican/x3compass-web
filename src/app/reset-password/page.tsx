@@ -15,7 +15,7 @@ export default function ResetPasswordPage() {
       if (password.length < 8) throw new Error("At least 8 characters");
       const { error } = await getSupabase().auth.updateUser({ password });
       if (error) throw error;
-      router.push("/app");
+      router.push("/");
     } catch (err) { setError(err instanceof Error ? err.message : "Reset failed"); }
     finally { setLoading(false); }
   }

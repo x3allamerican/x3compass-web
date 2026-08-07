@@ -7,7 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 function SignUpInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const returnTo = params?.get("return_to") || "/app/onboarding";
+  const returnTo = params?.get("return_to") || "/onboarding";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [carrierName, setCarrierName] = useState("");
@@ -38,7 +38,7 @@ function SignUpInner() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
         body: JSON.stringify({ carrier_name: carrierName, usdot_number: usdot }),
       });
-      router.push(returnTo.startsWith("/") ? returnTo : "/app/onboarding");
+      router.push(returnTo.startsWith("/") ? returnTo : "/onboarding");
     } catch (err) { setError(err instanceof Error ? err.message : "Sign-up failed"); }
     finally { setLoading(false); }
   }

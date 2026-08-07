@@ -830,7 +830,7 @@ export default function AuditPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[14px] text-white border border-white/25 hover:bg-white/5 transition-colors">
                   Download PDF
                 </button>
-                <Link href="/app/ask"
+                <Link href="/ask"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[14px] text-white border border-white/25 hover:bg-white/5 transition-colors">
                   Ask Compass
                 </Link>

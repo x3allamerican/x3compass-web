@@ -18,49 +18,49 @@ type NavItem = { href: string; label: string; icon: string };
 type SectionDef = { title: string; superAdminOnly?: boolean; items: NavItem[] };
 const PUBLIC_SECTIONS: SectionDef[] = [
   { title: "Main", items: [
-    { href: "/app",                label: "Dashboard",       icon: "▦" },
-    { href: "/app/drivers",        label: "Drivers",         icon: "👤" },
-    { href: "/app/vehicles",       label: "Vehicles",        icon: "🚛" },
-    { href: "/app/dq-files",       label: "DQ Files",        icon: "📁" },
-    { href: "/app/accidents",      label: "Accidents",       icon: "🚨" },
-    { href: "/app/inspections",    label: "Inspections",     icon: "🔎" },
-    { href: "/app/drug-alcohol",   label: "Drug & Alcohol",  icon: "🧪" },
-    { href: "/app/hos",            label: "HOS / ELD",       icon: "⏱" },
-    { href: "/app/training",       label: "Training",        icon: "🎓" },
+    { href: "/",                label: "Dashboard",       icon: "▦" },
+    { href: "/drivers",        label: "Drivers",         icon: "👤" },
+    { href: "/vehicles",       label: "Vehicles",        icon: "🚛" },
+    { href: "/dq-files",       label: "DQ Files",        icon: "📁" },
+    { href: "/accidents",      label: "Accidents",       icon: "🚨" },
+    { href: "/inspections",    label: "Inspections",     icon: "🔎" },
+    { href: "/drug-alcohol",   label: "Drug & Alcohol",  icon: "🧪" },
+    { href: "/hos",            label: "HOS / ELD",       icon: "⏱" },
+    { href: "/training",       label: "Training",        icon: "🎓" },
   ]},
   { title: "Compliance Trackers", items: [
-    { href: "/app/calendar",           label: "Compliance Calendar", icon: "🗓" },
-    { href: "/app/mvr",                label: "MVR Tracker",        icon: "🪪" },
-    { href: "/app/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
-    { href: "/app/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
-    { href: "/app/background-checks",  label: "Background Tracker", icon: "🛡" },
-    { href: "/app/ifta",               label: "IFTA Concierge",     icon: "⛽" },
+    { href: "/calendar",           label: "Compliance Calendar", icon: "🗓" },
+    { href: "/mvr",                label: "MVR Tracker",        icon: "🪪" },
+    { href: "/da-concierge",       label: "D&A Concierge",      icon: "🧬" },
+    { href: "/clearinghouse",      label: "Clearinghouse",      icon: "⚖" },
+    { href: "/background-checks",  label: "Background Tracker", icon: "🛡" },
+    { href: "/ifta",               label: "IFTA Concierge",     icon: "⛽" },
   ]},
   { title: "Advanced", items: [
-    { href: "/app/scorecards",      label: "Safety Scorecards", icon: "🏆" },
-    { href: "/app/csa",             label: "CSA Scores",        icon: "📊" },
-    { href: "/app/document-lookup", label: "Document Lookup",   icon: "🔍" },
-    { href: "/app/ask",             label: "Ask Compass",       icon: "∞" },
-    { href: "/app/hazmat",          label: "Hazmat Center",     icon: "⚠️" },
-    { href: "/app/audit-export",    label: "Audit Export",      icon: "📄" },
+    { href: "/scorecards",      label: "Safety Scorecards", icon: "🏆" },
+    { href: "/csa",             label: "CSA Scores",        icon: "📊" },
+    { href: "/document-lookup", label: "Document Lookup",   icon: "🔍" },
+    { href: "/ask",             label: "Ask Compass",       icon: "∞" },
+    { href: "/hazmat",          label: "Hazmat Center",     icon: "⚠️" },
+    { href: "/audit-export",    label: "Audit Export",      icon: "📄" },
   ]},
   { title: "Client Admin", items: [
-    { href: "/app/settings",       label: "Settings",       icon: "⚙" },
-    { href: "/app/driver-invites", label: "Driver Invites", icon: "✉" },
-    { href: "/app/forms",          label: "Forms",          icon: "📋" },
-    { href: "/app/import",         label: "Bulk Import",    icon: "⤴" },
+    { href: "/settings",       label: "Settings",       icon: "⚙" },
+    { href: "/driver-invites", label: "Driver Invites", icon: "✉" },
+    { href: "/forms",          label: "Forms",          icon: "📋" },
+    { href: "/import",         label: "Bulk Import",    icon: "⤴" },
   ]},
 ];
 // X3 Admin section · only rendered for super-admins. Mirrors app.x3fleetsafety.com/admin.
 const SUPER_ADMIN_SECTION: SectionDef = { title: "X3 Admin", superAdminOnly: true, items: [
-  { href: "/app/control-center", label: "Control Center",  icon: "🎛" },
-  { href: "/app/finance-team",   label: "AI Finance Team", icon: "💰" },
-  { href: "/app/finance",        label: "Finance",         icon: "💵" },
-  { href: "/app/marketing",      label: "Marketing",       icon: "📣" },
-  { href: "/app/notifications",  label: "Notifications",   icon: "🔔" },
-  { href: "/app/audit-log",      label: "Audit Log",       icon: "📜" },
-  { href: "/app/prospects",      label: "FMCSA Prospects", icon: "🎯" },
-  { href: "/app/integrations",   label: "Integrations",    icon: "🔌" },
+  { href: "/control-center", label: "Control Center",  icon: "🎛" },
+  { href: "/finance-team",   label: "AI Finance Team", icon: "💰" },
+  { href: "/finance",        label: "Finance",         icon: "💵" },
+  { href: "/marketing",      label: "Marketing",       icon: "📣" },
+  { href: "/notifications",  label: "Notifications",   icon: "🔔" },
+  { href: "/audit-log",      label: "Audit Log",       icon: "📜" },
+  { href: "/prospects",      label: "FMCSA Prospects", icon: "🎯" },
+  { href: "/integrations",   label: "Integrations",    icon: "🔌" },
 ]};
 
 // Next.js 16 static-export requires components using useSearchParams() to be
@@ -106,7 +106,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
   void searchParams;
 
   // FORCE DARK MODE inside the app shell. The static Manus design is always
-  // dark (true black + cyan). Light mode on /app/* renders washed-out gray
+  // dark (true black + cyan). Light mode on /* renders washed-out gray
   // which Joshua flagged as off-brand. The marketing site keeps the toggle.
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -122,9 +122,9 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
   }, []);
 
   // Persist sidebar scroll position across page navigations.
-  // The sidebar re-mounts on every /app/* route change because AppShell is rendered
+  // The sidebar re-mounts on every /* route change because AppShell is rendered
   // per-page (not yet a shared layout). sessionStorage gives us scroll-position
-  // continuity until we lift AppShell into app/app/layout.tsx.
+  // continuity until we lift AppShell into app/layout.tsx.
   useEffect(() => {
     const aside = asideRef.current;
     if (!aside) return;
@@ -202,9 +202,9 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
       {/* TOP-LEFT BOX · X3 Compass logo. STICKY so the whole top row stays
           locked while content scrolls. Same minHeight as the AppTopbar on the
           right so the two cells stay flush. Joshua: top row is now locked
-          across every /app/* surface; no per-page logo overrides allowed. */}
+          across every /* surface; no per-page logo overrides allowed. */}
       <Link
-        href="/app"
+        href="/"
         aria-label="X3 Compass · Home"
         className="x3-logo-box"
         style={{
@@ -266,7 +266,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
       {carrier?.subscription_status === "past_due" && (
         <div style={{ gridColumn: "1 / -1" }} className="bg-orange-900/40 border-b border-orange-700/30 px-6 py-2 text-[12px] text-orange-100 flex items-center justify-between">
           <span>⚠ Last payment failed. Update your card to keep access.</span>
-          <Link href="/app/settings/billing" className="text-orange-700 dark:text-orange-300 font-bold hover:underline">Update card →</Link>
+          <Link href="/settings/billing" className="text-orange-700 dark:text-orange-300 font-bold hover:underline">Update card →</Link>
         </div>
       )}
 
@@ -285,7 +285,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
                 <div className={`px-3 pt-1 pb-2 text-[10px] tracking-[.16em] uppercase font-extrabold max-md:hidden ${sec.title === "X3 Admin" ? "text-[#FACC15]" : "text-[var(--accent)]/90"}`}>{sec.title}</div>
                 <div className="space-y-1">
                   {sec.items.map((it) => {
-                    const active = pathname === it.href || (it.href !== "/app" && pathname?.startsWith(it.href));
+                    const active = pathname === it.href || (it.href !== "/" && pathname?.startsWith(it.href));
                     return (
                       <Link key={it.href} href={it.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-semibold transition-colors ${active ? "bg-[var(--accent)]/15 text-[var(--fg)] border-l-2 border-[var(--accent)] pl-[10px]" : "text-[var(--fg-muted)] hover:bg-white/10 hover:text-[var(--fg)]"}`}>
                         <span className="text-[17px] w-6 text-center">{it.icon}</span>
@@ -339,7 +339,7 @@ function AppShellInner({ children, title, crumbs, actions }: AppShellProps) {
           the app permitted to keep a cyan halo. Joshua: "AI Concierge as
           star of the show." Every other cyan-glow shadow site got swapped
           to the tinted-bg shadow per ANTI_SLOP rule #2. */}
-      <Link href="/app/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(22, 199, 255, 0.15), 0 12px 32px rgba(22, 199, 255, 0.40)" }} aria-label="Ask Compass">∞</Link>
+      <Link href="/ask" className="fixed bottom-6 right-6 w-14 h-14 rounded-full grid place-items-center font-black text-[22px] z-40 text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))", boxShadow: "0 0 0 4px rgba(22, 199, 255, 0.15), 0 12px 32px rgba(22, 199, 255, 0.40)" }} aria-label="Ask Compass">∞</Link>
       {/* Site-wide in-page overlays — any page can open either by dispatching
        *  the x3:open-education-hub / x3:open-concierge events. The
        *  EducationHubCard's two pills already wire both events. */}

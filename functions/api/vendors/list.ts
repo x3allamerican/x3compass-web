@@ -2,7 +2,7 @@
  * GET /api/vendors/list?carrier_id=<uuid>
  *
  * Returns the list of vendor integrations for a carrier, with current status.
- * Used by the Drivers page (and eventually the dedicated /app/integrations page)
+ * Used by the Drivers page (and eventually the dedicated /integrations page)
  * to render the "Sync vendor" dropdown.
  *
  * If env is missing, returns a curated default list so the UI still has

@@ -141,7 +141,7 @@ async function agentPortfolioBrief(env: Env): Promise<AgentResult> {
   const activeCarriers = carriers.filter((c) => c.subscription_status === "active" || c.subscription_status === "trialing").length;
   const activeDrivers  = drivers.filter((d) => d.status === "active" || d.status === null).length;
   log.info(`[portfolio-brief] carriers=${activeCarriers}/${carriers.length} drivers=${activeDrivers}/${drivers.length} vehicles=${vehicles.length} dq_due_30d=${dq.length}`);
-  const html = `<h1>Daily Portfolio Brief</h1><p><strong>${activeCarriers}</strong> active carriers · <strong>${activeDrivers}</strong> active drivers · <strong>${vehicles.length}</strong> vehicles · <strong>${dq.length}</strong> DQ docs due 30d</p><p><a href="https://x3compass.com/app">Open Compass dashboard →</a></p>`;
+  const html = `<h1>Daily Portfolio Brief</h1><p><strong>${activeCarriers}</strong> active carriers · <strong>${activeDrivers}</strong> active drivers · <strong>${vehicles.length}</strong> vehicles · <strong>${dq.length}</strong> DQ docs due 30d</p><p><a href="https://x3compass.com/">Open Compass dashboard →</a></p>`;
   const sent = await sendEmail(env, { to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com", subject: `X3 Compass · ${activeCarriers} carriers · ${dq.length} DQ docs due`, html, text: `${activeCarriers} carriers · ${activeDrivers} drivers · ${vehicles.length} vehicles · ${dq.length} DQ docs due 30d` });
   return { status: sent.ok ? "ok" : "partial", summary: `${activeCarriers} carriers · ${activeDrivers} drivers · ${dq.length} DQ docs · email ${sent.ok ? "sent" : "failed: " + sent.error}`, log: log.text() };
 }
@@ -195,7 +195,7 @@ async function agentFinancialDunning(env: Env): Promise<AgentResult> {
     const r = await sendEmail(env, {
       to: inv.customer_email,
       subject: `Reminder · Invoice ${inv.number} is overdue`,
-      html: `<h1>Payment reminder</h1><p>Your invoice <strong>${inv.number}</strong> for <strong>$${(inv.amount_due / 100).toFixed(2)}</strong> is past due.</p><p><a class="btn" href="https://x3compass.com/app/settings/billing">Update billing →</a></p>`,
+      html: `<h1>Payment reminder</h1><p>Your invoice <strong>${inv.number}</strong> for <strong>$${(inv.amount_due / 100).toFixed(2)}</strong> is past due.</p><p><a class="btn" href="https://x3compass.com/settings/billing">Update billing →</a></p>`,
     });
     if (r.ok) chased++;
     log[r.ok ? "info" : "warn"](`[financial-dunning] ${inv.customer_email} ${inv.number}: ${r.ok ? "sent" : r.error}`);
@@ -216,7 +216,7 @@ async function agentFinancialMonthlyClose(env: Env): Promise<AgentResult> {
   const charges = await stripeGet(env, `/v1/charges?created[gte]=${start}&created[lt]=${end}&limit=100`) as { data: Array<{ amount: number; status: string }> };
   const monthRevCents = charges.data.filter((c) => c.status === "succeeded").reduce((a, b) => a + b.amount, 0);
   const monthLabel = priorMonth.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-  const sent = await sendEmail(env, { to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com", subject: `📒 Month-end close · ${monthLabel}`, html: `<h1>${monthLabel} close packet</h1><p><strong>$${(monthRevCents / 100).toFixed(2)}</strong> in Stripe revenue across ${charges.data.length} charges.</p><p>Open <a href="https://x3compass.com/app/finance">Finance Tracker</a>.</p>` });
+  const sent = await sendEmail(env, { to: env.EMAIL_FROM_SUPPORT || "joshua@x3compass.com", subject: `📒 Month-end close · ${monthLabel}`, html: `<h1>${monthLabel} close packet</h1><p><strong>$${(monthRevCents / 100).toFixed(2)}</strong> in Stripe revenue across ${charges.data.length} charges.</p><p>Open <a href="https://x3compass.com/finance">Finance Tracker</a>.</p>` });
   return { status: sent.ok ? "ok" : "partial", summary: `${monthLabel}: $${(monthRevCents / 100).toFixed(2)} · ${charges.data.length} charges · close packet ${sent.ok ? "emailed" : "failed"}`, log: log.text() };
 }
 
@@ -410,7 +410,7 @@ async function agentMonthlyClientReport(env: Env): Promise<AgentResult> {
     const horizon30 = new Date(Date.now() + 30 * 86400_000).toISOString().slice(0, 10);
     const expiring  = await supa.select("compass_dq_documents",  `select=id,doc_type,expires_on,driver_id&carrier_id=eq.${c.id}&expires_on=lte.${horizon30}`) as Array<{ doc_type: string; expires_on: string }>;
     const activeDrv = drivers.filter((d) => d.status === "active" || d.status === null).length;
-    const html = `<h1>${c.name} · Monthly Compliance Report</h1><p>DOT #${c.usdot_number || "—"} · ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p><h2>At a glance</h2><ul><li><strong>${activeDrv}</strong> active drivers (of ${drivers.length} total)</li><li><strong>${vehicles.length}</strong> vehicles</li><li><strong>${expiring.length}</strong> DQ documents expire in the next 30 days</li></ul>${expiring.length > 0 ? `<h2>Action needed</h2><ul>${expiring.slice(0, 10).map((e) => `<li>${e.doc_type} · expires ${e.expires_on}</li>`).join("")}</ul>` : "<p>✅ No documents expiring in the next 30 days. Great work.</p>"}<p><a href="https://x3compass.com/app">Open your X3 Compass dashboard →</a></p>`;
+    const html = `<h1>${c.name} · Monthly Compliance Report</h1><p>DOT #${c.usdot_number || "—"} · ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p><h2>At a glance</h2><ul><li><strong>${activeDrv}</strong> active drivers (of ${drivers.length} total)</li><li><strong>${vehicles.length}</strong> vehicles</li><li><strong>${expiring.length}</strong> DQ documents expire in the next 30 days</li></ul>${expiring.length > 0 ? `<h2>Action needed</h2><ul>${expiring.slice(0, 10).map((e) => `<li>${e.doc_type} · expires ${e.expires_on}</li>`).join("")}</ul>` : "<p>✅ No documents expiring in the next 30 days. Great work.</p>"}<p><a href="https://x3compass.com/">Open your X3 Compass dashboard →</a></p>`;
     const r = await sendEmail(env, { to: c.primary_contact_email, subject: `${c.name} · Monthly Compliance Report`, html });
     if (r.ok) sent++;
     log[r.ok ? "info" : "warn"](`[monthly-client-report] ${c.name}: ${r.ok ? "sent" : r.error}`);
@@ -500,7 +500,7 @@ async function agentCsaSnapshotReminder(env: Env): Promise<AgentResult> {
   let sent = 0;
   for (const c of carriers) {
     if (!c.primary_contact_email) continue;
-    const r = await sendEmail(env, { to: c.primary_contact_email, subject: `${c.name} · Monthly CSA snapshot ready`, html: `<h1>${c.name} CSA snapshot</h1><p>Your monthly CSA / SMS snapshot is ready in <a href="https://x3compass.com/app/csa">X3 Compass</a>. Review your BASIC percentiles and any new intervention thresholds.</p>` });
+    const r = await sendEmail(env, { to: c.primary_contact_email, subject: `${c.name} · Monthly CSA snapshot ready`, html: `<h1>${c.name} CSA snapshot</h1><p>Your monthly CSA / SMS snapshot is ready in <a href="https://x3compass.com/csa">X3 Compass</a>. Review your BASIC percentiles and any new intervention thresholds.</p>` });
     if (r.ok) sent++;
   }
   return { status: "ok", summary: `${carriers.length} carriers · ${sent} CSA reminders sent`, log: log.text() };
@@ -805,7 +805,7 @@ async function agentOnboardingConcierge(env: Env, inputs?: { carrier_id?: string
   for (const t of tasks) { try { await supa.insert("compass_onboarding_tasks", { carrier_id: carrierId, ...t }); queued++; } catch (e) { log.warn(`[onboarding] ${t.task_key}: ${e}`); } }
 
   if (carrier.primary_contact_email) {
-    await sendEmail(env, { to: carrier.primary_contact_email, subject: `Welcome to X3 Compass — your first-week checklist`, html: `<h1>Welcome to X3 Compass, ${carrier.name}!</h1><p>I've queued your first-week setup checklist:</p><ol>${tasks.map((t) => `<li>${t.title}</li>`).join("")}</ol><p>Open <a href="https://x3compass.com/app/onboarding">your onboarding dashboard →</a> to start.</p><p>Reply to this email any time — I read every one.</p><p>— Joshua, founder, X3 Compass</p>` });
+    await sendEmail(env, { to: carrier.primary_contact_email, subject: `Welcome to X3 Compass — your first-week checklist`, html: `<h1>Welcome to X3 Compass, ${carrier.name}!</h1><p>I've queued your first-week setup checklist:</p><ol>${tasks.map((t) => `<li>${t.title}</li>`).join("")}</ol><p>Open <a href="https://x3compass.com/onboarding">your onboarding dashboard →</a> to start.</p><p>Reply to this email any time — I read every one.</p><p>— Joshua, founder, X3 Compass</p>` });
   }
   return { status: "ok", summary: `Carrier ${carrier.name}: ${queued}/${tasks.length} onboarding tasks queued${carrier.primary_contact_email ? " · welcome email sent" : " · no email on file"}`, log: log.text() };
 }
@@ -914,7 +914,7 @@ async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
         const r = await sendEmail(env, {
           to: carrierFull[0].primary_contact_email,
           subject: `Action needed: ${carrierFull[0].name} payment — day ${daysPast}`,
-          html: `<h1>Hi ${carrierFull[0].name},</h1><p>${msg}</p><p><a href="https://x3compass.com/app/settings/billing">Update payment method →</a></p>`,
+          html: `<h1>Hi ${carrierFull[0].name},</h1><p>${msg}</p><p><a href="https://x3compass.com/settings/billing">Update payment method →</a></p>`,
         });
         if (r.ok) dunningSent++;
       } catch (_e) { /* per-carrier failure shouldn't block the agent */ }
@@ -931,7 +931,7 @@ async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
     const subj = daysTo === 3 ? "Your X3 Compass trial ends in 3 days"
                : daysTo === 1 ? "Your X3 Compass trial ends tomorrow"
                :                "Last chance — your trial ends today";
-    const r = await sendEmail(env, { to: c.primary_contact_email, subject: subj, html: `<h1>Hi ${c.name},</h1><p>${subj}. Add your card now to keep your drivers and DQ files in Compass.</p><p><a href="https://x3compass.com/app/settings/billing">Add payment →</a></p>` });
+    const r = await sendEmail(env, { to: c.primary_contact_email, subject: subj, html: `<h1>Hi ${c.name},</h1><p>${subj}. Add your card now to keep your drivers and DQ files in Compass.</p><p><a href="https://x3compass.com/settings/billing">Add payment →</a></p>` });
     if (r.ok) trialNudges++;
   }
 
@@ -1070,7 +1070,7 @@ async function agentReportingManager(env: FtEnv): Promise<AgentResult> {
 <tr><td><strong>Net Income</strong></td><td align="right"><strong>${fmt(netIncome)}</strong></td></tr>
 </table>
 <p>${entryIds.length} journal entries posted this period.</p>
-<p><a href="https://x3compass.com/app/finance">Open Finance →</a></p>`,
+<p><a href="https://x3compass.com/finance">Open Finance →</a></p>`,
     });
   }
 

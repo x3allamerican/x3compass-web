@@ -317,7 +317,7 @@ export default function ConciergeModal() {
         data = raw ? JSON.parse(raw) : {};
       } catch {
         throw new Error(
-          `Compass returned HTTP ${res.status} (not JSON). The Ask Compass API may not be deployed on this domain. Try /app/ask directly, or reload.`
+          `Compass returned HTTP ${res.status} (not JSON). The Ask Compass API may not be deployed on this domain. Try /ask directly, or reload.`
         );
       }
       if (!res.ok || !data.ok || !data.content) {

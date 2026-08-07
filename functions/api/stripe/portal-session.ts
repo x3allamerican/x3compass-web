@@ -24,7 +24,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const r = await fetch("https://api.stripe.com/v1/billing_portal/sessions", {
       method: "POST",
       headers: { Authorization: `Bearer ${ctx.env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ customer, return_url: `${site}/app/settings/billing` }).toString(),
+      body: new URLSearchParams({ customer, return_url: `${site}/settings/billing` }).toString(),
     });
     if (!r.ok) return securityError(502, "upstream_failed", correlationId(ctx.request));
     const sess = (await r.json()) as { url?: string };

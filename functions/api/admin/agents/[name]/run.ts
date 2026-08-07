@@ -9,7 +9,7 @@
  *  5. Updates the row with the final status + duration + summary
  *  6. Updates compass_agents.last_run_at / last_result
  *
- * The "Run now" button in /app/control-center hits this. The GitHub Actions
+ * The "Run now" button in /control-center hits this. The GitHub Actions
  * cron dispatcher also hits this (with X-X3-Internal-Secret) for scheduled runs.
  */
 import { requireSuperAdmin, unauthorized, ok, serverError, type AdminEnv } from "../../../../_shared/admin-auth";

@@ -151,7 +151,7 @@ export default function PageGuide(config: PageGuideConfig) {
                   {config.askCompassLinks.map((l, i) => (
                     <a
                       key={i}
-                      href={`/app/ask?q=${encodeURIComponent(l.query)}`}
+                      href={`/ask?q=${encodeURIComponent(l.query)}`}
                       className="block text-[12px] text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-white/5 rounded px-2 py-1.5 leading-snug transition-colors"
                     >
                       <span className="text-[var(--accent)] font-bold">→</span> {l.label}

@@ -1,366 +1,382 @@
-import Link from "next/link";
-import SiteShell from "@/components/SiteShell";
-import Related from "@/components/Related";
-import PlacardWizardLive from "@/components/PlacardWizardLive";
-
-import "./hazmat.css";
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "X3 Compass Hazmat Center · The hazmat compliance brain",
-  description:
-    "Hazmat compliance, codified. One missed placard is a $25,000 fine. We make sure that's not you. Included in every X3 Compass plan at no extra cost. Built on 100 open-source hazmat skills covering 49 CFR 171-180, PHMSA, TSA, IATA, IMDG.",
-  openGraph: {
-    title: "X3 Compass Hazmat Center",
-    description:
-      "Hazmat compliance brain — placards, shipping papers, ERG, segregation, training, cargo tank specs, route restrictions. Included in every plan.",
-    type: "website",
-  },
-};
-
 /* ============================================================
-   Mirrors /site/centers/hazmat.html · canonical reference.
-   Amber/flame visual identity. 8 sections in this order:
-     1. Hero
-     2. Fines banner
-     3. Placards demo strip + stat tiles
-     4. Free-tool CTA (Placard Wizard inline)
-     5. 12 hazmat brains
-     6. Real scenarios · what goes wrong
-     7. Corpus credibility · 100 open-source skills
-     8. Pricing card · included in every plan
-     9. FAQ
-    10. Final CTA
+   X3 COMPASS · HAZMAT CENTER (in-app)
+   ------------------------------------------------------------
+   SERVER COMPONENT · prerenders statically (output: "export").
+   Mirrors app.x3compass.com/hazmat-center.html 1:1, using the
+   verbatim static CSS at /public/hazmat-center.css for parity.
+
+   The only interactive island is <HazmatPlacardDemo />, a
+   small client component for the live UN→placard demo.
+
+   Sections (in order):
+     1. Hero v3 · placard wall + tanker photo + instrument cluster
+     2. Credibility strip · 4 stats
+     3. Stakes · "PHMSA doesn't negotiate." · 3 cards
+     4. Demo · "Try it before you talk to anyone."
+     5. Flagship trio · Placard Wizard / Concierge / Audit Vault
+     6. Included · "Seven more tools. Same $99." · 7-card grid
+     7. Proof · Marcus Halloran quote
+     8. FAQ · 5 questions
+     9. Final CTA
    ============================================================ */
 
-const TWELVE_BRAINS = [
-  { tag: "01 · PLACARDS", title: "Placard Verifier", body: "Driver photographs all 4 sides before departure. AI verifies: placard present, correct class for the load, ID number panel readable, condition acceptable. Fails the check → driver gets specific fix instructions before rolling." },
-  { tag: "02 · PAPERWORK", title: "Shipping Paper Validator", body: "Upload the BOL. AI checks every required element per 49 CFR 172.200 — UN number, proper shipping name, hazard class, packing group, total quantity, emergency response telephone. Missing field → flagged before driver leaves the dock." },
-  { tag: "03 · LOOKUP", title: "ERG Instant Lookup", body: "Type a UN number. Get the Emergency Response Guide page with isolation distances, protection distances, fire response, spill response, first aid. 3,500+ UN numbers. Driver-app friendly for roadside use." },
-  { tag: "04 · COMPATIBILITY", title: "Segregation Checker", body: "Add 2+ materials to the load. Instantly see if they're compatible per 49 CFR 177.848. Class 3 + Class 5.1 oxidizer = blocked with explanation. Saves the load from becoming a roadside violation." },
-  { tag: "05 · CREDENTIALS", title: "H Endorsement + TSA Tracker", body: "Every hazmat driver tracked: CDL H endorsement expiration, TSA Hazmat Threat Assessment renewal (5-year cycle), state-specific re-tests. Reminders at 90/60/30/14 days. Lapse → driver auto-removed from hazmat dispatch." },
-  { tag: "06 · TRAINING", title: "HM-126 Training Manager", body: "49 CFR 172.700 requires hazmat training every 3 years. Per driver: initial date, recurring date, certificate file, training topics. Auto-reminder 90 days before lapse. Audit-ready records." },
-  { tag: "07 · REGISTRATION", title: "PHMSA Registration Tracker", body: "Annual hazmat registration (July 1 – June 30 cycle). Compass tracks your tier, fee paid, certificate, renewal deadline. Auto-renew reminders. Certificate downloads to your driver app for in-vehicle compliance." },
-  { tag: "08 · TANKS", title: "Cargo Tank Scheduler", body: "Per tank: spec (DOT-406/407/412/MC-330/331), inspection cycle (annual visual, 1-5 year hydrostatic), certifications. Compass schedules tests, generates reminder, holds vehicle from dispatch if test lapsed." },
-  { tag: "09 · ROUTES", title: "Hazmat Route Planner", body: "Avoids tunnels (Holland, Lincoln, Big Dig), follows state-designated routes (CA, NY, NJ, IL), handles Class 7 highway-route-controlled radioactive. Driver app shows compliant turn-by-turn. State permits surfaced." },
-  { tag: "10 · SECURITY", title: "Hazmat Security Plan", body: "For carriers transporting security-sensitive hazmat (per 49 CFR 172.800): personnel security, unauthorized access prevention, en-route security, training. Annual review reminders. Compass-drafted template." },
-  { tag: "11 · INCIDENTS", title: "Form 5800.1 Incident Assistant", body: "Hazmat incident happens? Compass walks the driver through the immediate-notification call (1-800-424-8802), then drafts Form 5800.1 within the 30-day window. Auto-pulls load + driver + carrier details." },
-  { tag: "12 · DEFENSE", title: "Hazmat DataQ Scanner", body: "Hazmat violations have higher CSA weight + bigger fines. Compass scans every roadside hazmat inspection for contestable patterns — wrong placard code, improperly assigned subsidiary hazard, expired-but-actually-current cargo tank certs. Drafts DataQ challenges." },
+import HazmatAppShell from "./HazmatAppShell";
+// HazmatPlacardDemo + the inline /placard-render.js script were causing
+// the Overview page to freeze on scroll (sub-pages, which don't use them,
+// work fine). Stripped from Overview while we debug. The full Placard
+// Wizard lives at /hazmat/placard-wizard and isn't affected.
+// import HazmatPlacardDemo from "./HazmatPlacardDemo";
+import EducationHubCard from "@/components/EducationHubCard";
+
+const PLACARD_WALL = [
+  "class-3.svg", "class-2.1.svg", "class-8.svg",
+  "class-6.1.svg", "class-7.svg", "class-5.1.svg", "class-1.1.svg",
 ];
 
-const SCENARIOS = [
-  { strong: "Driver leaves dock with 3 placards instead of 4.", detail: "Level 1 inspection on I-80. Single placarding violation = $5,300 fine, vehicle OOS, missed delivery, customer relationship damaged.", fix: "Compass: photo-verifies all 4 sides before driver leaves dock." },
-  { strong: "Shipping paper missing the emergency response telephone number.", detail: "Roadside inspector finds the gap. $1,500-$8,000 violation. Carrier OOS until corrected.", fix: "Compass: validates shipping paper before vehicle leaves shipper." },
-  { strong: "Class 3 flammable liquid loaded next to Class 5.1 oxidizer in the same trailer.", detail: "Segregation violation per 49 CFR 177.848. Inspector finds at scale. Fine + load returned for re-loading + cargo damage.", fix: "Compass: blocks the load assignment before dispatch." },
-  { strong: "Driver's HM-126 training expired 2 weeks ago.", detail: "Audit catches it. Carrier cited for transporting hazmat without trained driver. Driver disqualified pending training.", fix: "Compass: auto-removed driver from hazmat dispatch 14 days before lapse." },
-  { strong: "Cargo tank annual inspection 31 days overdue.", detail: "Roadside inspector finds in DOT records. Vehicle OOS. Tank cannot move until inspected + certified. Driver stranded.", fix: "Compass: held the unit from dispatch starting at the lapse date." },
-  { strong: "Driver enters Holland Tunnel with hazmat load.", detail: "PANYNJ catches at tunnel approach. Fine + reroute mandate. Delivery now 2 hours late.", fix: "Compass: turn-by-turn rejected Holland Tunnel route, suggested compliant alternative." },
-];
-
-const PRICE_FEATURES = [
-  "Placard verifier",
-  "Shipping paper validator",
-  "ERG instant lookup (3,500+ UN#)",
-  "Segregation checker",
-  "H endorsement tracker",
-  "TSA Threat Assessment tracker",
-  "HM-126 training manager",
-  "PHMSA registration tracker",
-  "Cargo tank scheduler",
-  "Hazmat route planner",
-  "Security plan generator",
-  "Form 5800.1 incident assistant",
-  "Hazmat DataQ scanner",
-  "52-week hazmat safety meetings",
-];
-
-const FAQS = [
-  { q: "Do I need a hazmat endorsement to add Hazmat Center?", a: "You don't — but your drivers do, if you transport placard-required hazmat. Hazmat Center actually helps you track which drivers have valid H endorsements + TSA Threat Assessments, so you don't dispatch them on hazmat loads when expired." },
-  { q: "What if I only haul hazmat occasionally?", a: "Hazmat Center auto-pauses if no hazmat loads are logged for 60 days. You're not charged when you're not using it. When you book a hazmat load again, it reactivates." },
-  { q: "Is this legal advice?", a: "No. Hazmat Center is operational compliance guidance — like having a senior hazmat compliance person on your team. For court / criminal / litigation, we'll tell you to call a transportation attorney. Every regulatory answer cites 49 CFR so you can verify." },
-  { q: "How accurate is the AI?", a: "Every answer is grounded on the 100-skill open-source hazmat corpus (Apache 2.0, public on GitHub). Every CFR citation is verifiable. We use Claude (Anthropic) — among the most accurate AI models — and the corpus is reviewed by senior FMCSA + PHMSA compliance veterans." },
-  { q: "What about IATA (air) and IMDG (ocean) hazmat?", a: "Hazmat Center includes IATA DGR and IMDG Code coverage. If you ship hazmat multimodally (truck to air to ocean), Compass handles the harmonization. Note: IATA-certified air-shipment personnel are still required by law for air; Compass supports but doesn't replace them." },
-  { q: "Can I cancel anytime?", a: "Yes. Self-serve cancel. No friction. 30-day money-back guarantee on top." },
-  { q: "What about Canada cross-border (TDG)?", a: "TDG (Canada's hazmat regs) is covered. We handle the harmonization with US 49 CFR. Coming Q1: Cross-Border Center as a separate add-on for full Canada + Mexico operations." },
-  { q: "Does this work for the smallest carriers (1-5 trucks)?", a: "Yes. Hazmat Center is included in every plan regardless of fleet size. A 1-truck owner-op hauling hazmat gets the same coverage as a 50-truck fleet, at no extra cost." },
-];
-
-const HERO_BULLETS = [
-  "49 CFR cited every answer",
-  "All 9 hazard classes covered",
-  "PHMSA registration tracking",
-  "TSA H endorsement tracking",
-  "Cargo tank scheduler",
-  "ERG lookup + segregation",
-];
-
-export default function Hazmat() {
+export default function HazmatCenterPage() {
   return (
-    <SiteShell>
-      <div className="hm-page">
-        {/* ─── HERO ─── */}
-        <section className="hm-hero">
-          <div className="hm-pill">
-            <span style={{ fontSize: 18 }}>⚠️</span> 49 CFR 171-180 · PHMSA · TSA · IATA · IMDG · Apache 2.0 corpus
-          </div>
-          <h1>
-            One missed placard.<br />
-            <s style={{ color: "rgba(252,165,165,0.6)", textDecorationColor: "rgba(252,165,165,0.4)" }}>$25,000 fine.</s>
-            <br />
-            <span className="hm-gradient-text">We make sure that&apos;s not you.</span>
+    <HazmatAppShell activeId="hazmat-center" pageTitle="HAZMAT CENTER">
+      {/* placard-render.js script removed along with HazmatPlacardDemo —
+          the live demo is the only thing that needed window.renderPlacardSvg. */}
+
+      {/* ============== HERO v3 ============== */}
+      <section className="hz-hero-v3" aria-labelledby="hero-h1">
+          {/* Placard wall removed — 7 SVGs sitting above-the-fold combined
+              with the rest of the page's paint cost was tipping over Mac
+              mini-class GPUs on scroll. Wire it back behind a feature flag
+              once the page is profiled. */}
+
+          <div className="hz-hero-v2-eyebrow">X3 COMPASS · HAZMAT CENTER · $99/MO</div>
+          <h1 id="hero-h1">
+            One bad placard ends <em>your authority.</em>
           </h1>
-          <p className="hm-hero-lede">
-            The hazmat compliance brain for motor carriers hauling regulated freight. Every placard verified. Every shipping paper validated. Every UN number indexed. Every CFR section cited.
+          <p className="hz-hero-v2-sub">
+            Every 49 CFR Parts 171&ndash;180 obligation &mdash; classified, documented, audit-ready &mdash; for hazmat carriers running 1 to 100 power units. 14-day trial. No sales call.
           </p>
-          <p className="hm-hero-sub">
-            Built on{" "}
-            <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" style={{ color: "var(--hm-amber)" }}>
-              <strong>100 open-source hazmat skills</strong>
-            </a>{" "}
-            — Apache 2.0, fully public, auditable.
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 32, flexWrap: "wrap" }}>
-            <Link href="#apply" className="hm-cta-large">See what&apos;s included →</Link>
-            <Link href="#features" className="hm-ghost">See features</Link>
-          </div>
-          <div className="hm-hero-bullets">
-            {HERO_BULLETS.map((b) => (
-              <div key={b}>
-                <span style={{ color: "var(--hm-amber)" }}>✓</span> {b}
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* ─── FINES BANNER ─── */}
-        <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 60px" }}>
-          <div className="hm-fine-banner">
-            <div>
-              <div className="hm-fine-num">$89,678</div>
-              <div className="hm-fine-label">Maximum civil fine per knowing violation</div>
-              <div className="hm-fine-cite">49 USC §5123</div>
+          <div className="hz-hero-cluster">
+            <div className="hz-hero-cluster-item">
+              <div className="hz-hero-cluster-num">2,863</div>
+              <div className="hz-hero-cluster-label">UN Substances</div>
             </div>
-            <div>
-              <div className="hm-fine-num">$209,249</div>
-              <div className="hm-fine-label">Maximum if death, injury, or major release</div>
-              <div className="hm-fine-cite">49 USC §5123(a)(2)</div>
+            <div className="hz-hero-cluster-item">
+              <div className="hz-hero-cluster-num">52</div>
+              <div className="hz-hero-cluster-label">DOT Placards</div>
             </div>
-            <div>
-              <div className="hm-fine-num">5 yrs</div>
-              <div className="hm-fine-label">Prison + $500K individual penalty for willful</div>
-              <div className="hm-fine-cite">49 USC §5124</div>
+            <div className="hz-hero-cluster-item">
+              <div className="hz-hero-cluster-num">7d</div>
+              <div className="hz-hero-cluster-label">Last Reg Sync</div>
             </div>
           </div>
-          <p style={{ textAlign: "center", marginTop: 24, color: "var(--hm-mist)", fontSize: 14 }}>
-            These are real, federally-codified fines. Hazmat compliance is the highest-stakes corner of motor-carrier regulation. Hazmat Center is included in your plan.
-          </p>
-        </section>
 
-        {/* ─── PLACARDS DEMO STRIP ─── */}
-        <section className="hm-section-band">
-          <div className="hm-section-inner" style={{ textAlign: "center" }}>
-            <div className="hm-eyebrow">WHAT WE HANDLE</div>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", margin: "0 0 16px", color: "var(--hm-paper)", fontWeight: 900, letterSpacing: "-0.02em" }}>
-              All 9 hazard classes. <span className="hm-gradient-text">All 4 modes.</span>
-            </h2>
-            <p style={{ color: "var(--hm-fog)", maxWidth: 680, margin: "0 auto 48px", fontSize: 16, lineHeight: 1.55 }}>
-              Compass Hazmat Center covers the full regulatory surface — highway, rail, air, ocean. Every class. Every division. Every CFR section.
-            </p>
-            <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 8 }}>
-              {[
-                { cls: "1", label: "1\nEXPL" },
-                { cls: "2", label: "2\nGAS" },
-                { cls: "3", label: "3\nFLAM" },
-                { cls: "2", label: "4\nSOLD" },
-                { cls: "2", label: "5\nOXID" },
-                { cls: "6", label: "6\nPOIS" },
-                { cls: "7", label: "7\nRAD" },
-                { cls: "8", label: "8\nCORR" },
-                { cls: "9", label: "9\nMISC" },
-              ].map((p, i) => (
-                <div key={i} className={`hm-placard hm-placard-class-${p.cls}`}>
-                  <div className="hm-placard-inner" style={{ whiteSpace: "pre-line" }}>
-                    {p.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: 48, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, maxWidth: 900, marginLeft: "auto", marginRight: "auto" }}>
-              <div className="hm-stat-tile">
-                <div className="hm-stat-num">100+</div>
-                <div className="hm-stat-label">Open-source hazmat skills</div>
-              </div>
-              <div className="hm-stat-tile">
-                <div className="hm-stat-num">49 CFR</div>
-                <div className="hm-stat-label">Parts 171-180 fully indexed</div>
-              </div>
-              <div className="hm-stat-tile">
-                <div className="hm-stat-num">3,500+</div>
-                <div className="hm-stat-label">UN numbers in the database</div>
-              </div>
-              <div className="hm-stat-tile">
-                <div className="hm-stat-num">99.9%</div>
-                <div className="hm-stat-label">Citation accuracy on regulatory answers</div>
-              </div>
-            </div>
+          <div className="hz-hero-v2-ctas">
+            <a
+              className="hz-cta-primary"
+              href="/settings?tab=billing&addon=hazmat"
+              style={{ textDecoration: "none", display: "inline-block" }}
+            >
+              Start 14-Day Trial
+            </a>
+            <a className="hz-cta-secondary" href="#hz-demo">
+              Try the Placard Wizard <span aria-hidden="true">↓</span>
+            </a>
           </div>
-        </section>
 
-        {/* ─── FREE TOOL CTA · INLINE PLACARD WIZARD ─── */}
-        <section style={{ padding: "60px 24px 40px" }}>
-          <div className="hm-free-tool">
-            <div>
-              <div className="hm-free-tool-tag">FREE TOOL · NO SIGNUP</div>
-              <h3>
-                Try the <span className="hm-gradient-text">Placard Wizard</span> right now.
-              </h3>
-              <p>Enter your material + weight. Get the exact placards you need, with placement diagram and CFR citation. 4-step wizard. No card.</p>
-            </div>
-            <Link href="#wizard" className="hm-cta-large" style={{ whiteSpace: "nowrap" }}>
-              Open Wizard →
-            </Link>
-          </div>
-          <div id="wizard" style={{ maxWidth: 1100, margin: "40px auto 0" }}>
-            <PlacardWizardLive />
-          </div>
-        </section>
-
-        {/* ─── 12 FEATURES ─── */}
-        <section id="features" className="hm-section" style={{ textAlign: "center" }}>
-          <div className="hm-eyebrow">WHAT&apos;S INSIDE</div>
-          <h2>
-            Twelve hazmat brains. <span className="hm-gradient-text">One subscription.</span>
-          </h2>
-          <p className="hm-section-sub">Add to any Compass tier. Auto-activates when your fleet logs its first hazmat load.</p>
-          <div className="hm-twelve" style={{ textAlign: "left" }}>
-            {TWELVE_BRAINS.map((b) => (
-              <div key={b.tag} className="hm-feature">
-                <div className="hm-feature-tag">{b.tag}</div>
-                <h3>{b.title}</h3>
-                <p>{b.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── REAL SCENARIOS ─── */}
-        <section className="hm-section" style={{ textAlign: "center" }}>
-          <div className="hm-eyebrow">REAL SCENARIOS</div>
-          <h2>What goes wrong without it.</h2>
-          <p className="hm-section-sub">The hazmat violations that ruin a Friday — and how Compass catches them first.</p>
-          <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "left" }}>
-            {SCENARIOS.map((s, i) => (
-              <div key={i} className="hm-warning-row">
-                <div className="hm-warning-icon">⚠️</div>
-                <div className="hm-warning-content">
-                  <strong>{s.strong}</strong>
-                  <br />
-                  {s.detail} <em>{s.fix}</em>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── CORPUS CREDIBILITY ─── */}
-        <section className="hm-section">
-          <div className="hm-corpus-card">
-            <div className="hm-corpus-badge">
-              <div className="hm-corpus-num">100</div>
-              <div className="hm-corpus-label">Open-source<br />hazmat skills</div>
-            </div>
-            <div>
-              <div className="hm-corpus-eyebrow">Apache 2.0 · Public on GitHub · Built BEFORE the product</div>
-              <h3>The hazmat corpus is published before the product ships.</h3>
-              <p>
-                X3 publishes 100 open-source compliance skills per vertical <em>before</em> launching the product on top. Hazmat is the first vertical Center. The <strong>100-skill corpus</strong> is public on GitHub right now — read every CFR citation, audit every regulatory claim, contribute corrections. The product reasons over this corpus.
-              </p>
-              <div className="hm-corpus-bullets">
-                <span style={{ color: "var(--hm-amber)" }}>✓</span> 49 CFR Parts 171-180 (PHMSA hazmat regulations)<br />
-                <span style={{ color: "var(--hm-amber)" }}>✓</span> 49 CFR Part 397 (motor carrier safety, hazmat-specific)<br />
-                <span style={{ color: "var(--hm-amber)" }}>✓</span> TSA, IATA DGR, IMDG Code, TDG (Canada cross-border)<br />
-                <span style={{ color: "var(--hm-amber)" }}>✓</span> All 9 hazard classes + every division
-              </div>
-              <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" className="hm-cta" style={{ marginTop: 20 }}>
-                View 100 hazmat skills on GitHub →
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── PRICING ─── */}
-        <section id="apply" className="hm-section" style={{ textAlign: "center" }}>
-          <div className="hm-eyebrow">INCLUDED IN EVERY PLAN</div>
-          <h2 style={{ marginBottom: 40 }}>
-            Hazmat Center · <span className="hm-gradient-text">included</span>
-          </h2>
-          <div className="hm-price-card">
-            <div className="hm-price-eyebrow">Compass Hazmat Center</div>
-            <div className="hm-price-num">
-              $0<small> extra</small>
-            </div>
-            <div className="hm-price-sub">Included in every Compass plan · Auto-activates when your fleet logs its first hazmat load</div>
-            <div className="hm-price-features">
-              {PRICE_FEATURES.map((f) => (
-                <div key={f}>
-                  <span style={{ color: "var(--hm-amber)" }}>✓</span> {f}
-                </div>
-              ))}
-            </div>
-            <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large" style={{ display: "block", width: "100%", textAlign: "center" }}>
-              Start your free trial →
-            </Link>
-            <div className="hm-price-disclaimer">No add-on fee · Included at every fleet size · Cancel the plan any time · 30-day money-back</div>
-          </div>
-          <div style={{ textAlign: "center", marginTop: 48 }}>
-            <Link href="/app/dashboard?demo=hazmat" className="hm-ghost">
-              Try Hazmat Center demo →
-            </Link>
-          </div>
-        </section>
-
-        {/* ─── FAQ ─── */}
-        <section className="hm-section" style={{ textAlign: "center" }}>
-          <div className="hm-eyebrow">QUESTIONS</div>
-          <h2>Common questions about Hazmat Center.</h2>
-          <p className="hm-section-sub">Common-sense answers without the legal hedge. Every CFR is verifiable.</p>
-          <div className="hm-faq-grid">
-            {FAQS.map((f) => (
-              <details key={f.q}>
-                <summary>{f.q}</summary>
-                <p>{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── FINAL CTA ─── */}
-        <section className="hm-final-cta">
-          <h2>
-            Hazmat is the most heavily regulated freight in trucking.
-            <br />
-            <span className="hm-gradient-text">Don&apos;t operate blind.</span>
-          </h2>
-          <p>Included in every plan. Cancel anytime. No card for the trial.</p>
-          <div className="hm-final-cta-buttons">
-            <Link href="/app/signup?tier=pro&center=hazmat" className="hm-cta-large">
-              Start your free trial →
-            </Link>
-            <a href="https://github.com/x3fleetsafety/hazmat-skills" target="_blank" rel="noreferrer" className="hm-ghost">
-              Read 100 hazmat skills
+          <figure className="hz-placard-photo" aria-label="DOT DANGEROUS placard mounted on a truck trailer">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/photos/placard-hero.jpg"
+              alt="A DOT DANGEROUS placard mounted on a US truck trailer — required marking for mixed-load hazmat shipments under 49 CFR § 172.504"
+              loading="eager"
+              width={1000}
+              height={800}
+            />
+          </figure>
+          <div className="hz-placard-photo-tag" aria-hidden="true">
+            <a href="https://commons.wikimedia.org/wiki/File:Late_1970s_%27Dangerous%27_truck-trailer_placard.jpg" target="_blank" rel="noopener noreferrer nofollow">
+              Photo &middot; CC0
             </a>
           </div>
         </section>
 
-        <Related
-          items={[
-            { href: "/case-studies/sample", title: "Sample audit walkthrough", desc: "See where hazmat preparation lands in a 6-day compliance review." },
-            { href: "/skills", title: "All 300 skills", desc: "100+ hazmat-only skills mapped to 49 CFR Parts 100-180." },
-            { href: "/pricing", title: "Pricing + ROI", desc: "Graduated per-driver pricing. Hazmat included at no extra cost." },
+        {/* ============== CREDIBILITY STRIP ============== */}
+        <section className="hz-cred-strip" aria-label="What's covered">
+          <div className="hz-cred-item">
+            <span className="hz-cred-label">Regulatory Scope</span>
+            <span className="hz-cred-val">49 CFR §§ 171&ndash;180</span>
+          </div>
+          <div className="hz-cred-item">
+            <span className="hz-cred-label">HMT Coverage</span>
+            <span className="hz-cred-val">2,863 substances</span>
+          </div>
+          <div className="hz-cred-item">
+            <span className="hz-cred-label">Placard Library</span>
+            <span className="hz-cred-val">52 real DOT placards</span>
+          </div>
+          <div className="hz-cred-item">
+            <span className="hz-cred-label">Update Cadence</span>
+            <span className="hz-cred-val">Federal Register · weekly</span>
+          </div>
+        </section>
+
+        {/* ============== STAKES ============== */}
+        <section aria-labelledby="stakes-h">
+          <div className="hz-section-head">
+            <h2 id="stakes-h">PHMSA doesn&apos;t negotiate.</h2>
+            <p>A roadside inspector with one finding can write a violation that costs more than your tractor.</p>
+          </div>
+          <div className="hz-stakes-grid">
+            <div className="hz-stakes-card">
+              <div className="hz-stakes-icon" aria-hidden="true">💸</div>
+              <div className="hz-stakes-title">Per-Day Civil Penalty</div>
+              <div className="hz-stakes-stat">$96,624</div>
+              <div className="hz-stakes-body">Maximum civil penalty per knowing violation under 49 USC §5123. Death or serious injury raises it to $225,455. Each day continues as a separate offense.</div>
+            </div>
+            <div className="hz-stakes-card">
+              <div className="hz-stakes-icon" aria-hidden="true">🛑</div>
+              <div className="hz-stakes-title">Out-of-Service Order</div>
+              <div className="hz-stakes-stat">100%</div>
+              <div className="hz-stakes-body">A single §397.5 attendance violation or wrong placard under §172.504 puts the unit OOS at the scale. The driver waits. The load doesn&apos;t move. The shipper finds another carrier.</div>
+            </div>
+            <div className="hz-stakes-card">
+              <div className="hz-stakes-icon" aria-hidden="true">📉</div>
+              <div className="hz-stakes-title">SMS Hazmat BASIC Hit</div>
+              <div className="hz-stakes-stat">10×</div>
+              <div className="hz-stakes-body">Hazmat violations carry the highest CSA severity weights. Three placarding errors in 24 months trigger an FMCSA Compliance Review &mdash; the kind that ends in a Conditional rating.</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============== DEMO section · routes to the full Wizard ============== */}
+        {/* HazmatPlacardDemo (live UN→placard widget) was stripped while we
+            debug the Overview freeze. Visitors land on the full Placard
+            Wizard page instead, which works fine and is what the demo CTA
+            led to anyway. */}
+        <section className="hz-demo" id="hz-demo" aria-labelledby="demo-h">
+          <div className="hz-demo-head">
+            <div>
+              <h2 id="demo-h">Try it before you talk to anyone.</h2>
+              <p>Enter a UN number. Get the §172.504 placard, the §172.202 shipping paper entries, and the §177.848 segregation table &mdash; in under 10 seconds.</p>
+            </div>
+            <span className="hz-demo-live-tag">LIVE</span>
+          </div>
+          <div className="hz-demo-footer" style={{ textAlign: "center", padding: "20px 0" }}>
+            <a className="hz-cta-primary" href="/hazmat/placard-wizard" style={{ textDecoration: "none", display: "inline-block" }}>
+              Open the Placard Wizard →
+            </a>
+          </div>
+        </section>
+
+        {/* ============== FLAGSHIP TRIO ============== */}
+        <section aria-labelledby="flagship-h">
+          <div className="hz-section-head">
+            <h2 id="flagship-h">Three tools you&apos;ll use every day.</h2>
+            <p>The rest of the catalog matters &mdash; but these are the ones that make the difference at the scale and during the audit.</p>
+          </div>
+          <div className="hz-flagship-grid">
+            <a className="hz-flagship" href="/hazmat/placard-wizard">
+              <div className="hz-flagship-icon" aria-hidden="true">🪧</div>
+              <h3>Placard Wizard</h3>
+              <p className="hz-flagship-val">UN number in. Correct placards and shipping paper entries out. Ten seconds.</p>
+              <span className="hz-flagship-cite">49 CFR §§ 172.504, 172.202, 172.301</span>
+              <span className="hz-flagship-cta">See it run</span>
+            </a>
+            <a className="hz-flagship" href="/ask?context=hazmat">
+              <div className="hz-flagship-icon" aria-hidden="true">🧠</div>
+              <h3>AI Hazmat Concierge</h3>
+              <p className="hz-flagship-val">Ask a CFR question in plain English, get the cite and the answer. No competitor has this.</p>
+              <span className="hz-flagship-cite">49 CFR Parts 171&ndash;180 · HMR §171.8 definitions</span>
+              <span className="hz-flagship-cta">Ask a question</span>
+            </a>
+            <a className="hz-flagship" href="/hazmat/audit">
+              <div className="hz-flagship-icon" aria-hidden="true">✅</div>
+              <h3>Audit Readiness Vault</h3>
+              <p className="hz-flagship-val">Every shipment, training record, and security plan &mdash; indexed for the inspector.</p>
+              <span className="hz-flagship-cite">49 CFR §§ 172.201(e), 172.704(d), 172.802</span>
+              <span className="hz-flagship-cta">See the audit view</span>
+            </a>
+          </div>
+        </section>
+
+        {/* ============== EDUCATION HUB · 49 CFR Parts 171–180 ============== */}
+        <EducationHubCard
+          surface="Hazmat Center"
+          subtitle="49 CFR Parts 171–180 · the rules every hazmat carrier lives under"
+          conciergeHref="/ask?context=hazmat&q=Walk%20me%20through%20what%20a%20hazmat%20carrier%20must%20do%20under%2049%20CFR%20Parts%20171%E2%80%93180"
+          audiences={[
+            {
+              label: "For Drivers",
+              subtitle: "HAZMAT-ENDORSED CDL HOLDERS",
+              body:
+                "If you carry an H endorsement and you move anything classified in §172.101 — flammable liquids, lithium batteries, corrosives, gases, even some lithium-powered tools — every shipping paper, placard, and emergency response document is on you, on the road, in real time.",
+              bullets: [
+                "TSA security threat assessment before the H endorsement (49 CFR Part 1572)",
+                "Hazmat training every 3 years · general, function-specific, security, in-depth security if Table 1 substance (§172.704)",
+                "Pre-trip: verify shipping papers match the load and the placards match the papers (§172.201, §172.504)",
+                "Emergency response info within reach in the cab — Subpart G (§172.600–604)",
+              ],
+              cta: "Open driver hazmat guide →",
+              href: "/hazmat/training",
+              tone: "cyan",
+              icon: "🚛",
+            },
+            {
+              label: "For Employers",
+              subtitle: "MOTOR CARRIERS SHIPPING HAZMAT",
+              body:
+                "You're the offeror or carrier under §171.8 — meaning PHMSA can fine you up to $96,624 per knowing violation per day (49 USC §5123). The Hazmat Center is the audit-ready record that proves you classified, packaged, marked, placarded, and trained the way the regulations say.",
+              bullets: [
+                "PHMSA registration if you offer or transport in placardable quantities (§107.601–620)",
+                "Hazmat security plan if you move Table 1 substances (§172.800–802)",
+                "Audit-ready file: training records, shipping papers, incident reports for 3 years (§172.201(e), §172.704(d))",
+                "DOT incident report DOT-F-5800.1 within 30 days for any hazmat release (§171.16)",
+              ],
+              cta: "Open employer playbook →",
+              href: "/hazmat/audit",
+              tone: "amber",
+            },
+            {
+              label: "For Compliance Officers",
+              subtitle: "SAFETY DIRECTORS / DESIGNATED EMPLOYER REPS",
+              body:
+                "You build the program. The Hazmat Center surfaces the four audit areas inspectors actually score — classification accuracy, shipping paper sequence, placard correctness, and training currency — and lets you remediate driver-by-driver before the next FMCSA Compliance Review.",
+              bullets: [
+                "Classification + UN/NA assignment audit — does §172.101 HMT line up with what's on the BOL?",
+                "Shipping paper sequence audit — proper shipping name, hazard class, UN/NA, packing group, in §172.202(a) order",
+                "Placard correctness audit — §172.504 table 1 vs table 2 vs DANGEROUS aggregation rules",
+                "Training currency audit — §172.704 recurrent every 3 years, documented per employee",
+              ],
+              cta: "Open audit checklist →",
+              href: "/hazmat/audit",
+              tone: "violet",
+            },
           ]}
         />
-      </div>
-    </SiteShell>
+
+        {/* ============== INCLUDED · 7 MORE TOOLS ============== */}
+        <section aria-labelledby="included-h">
+          <div className="hz-section-head">
+            <h2 id="included-h">Seven more tools. Same $99.</h2>
+            <p>No usage tiers, no per-seat fees, no upcharges for the things you actually need at 4 a.m. on a Tuesday.</p>
+          </div>
+          <div className="hz-included-grid">
+            <a className="hz-included-item" href="/hazmat/substances">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Substance Lookup</div>
+                <div className="hz-included-icon" aria-hidden="true">🔎</div>
+              </div>
+              <div className="hz-included-desc">Search 2,863 entries in the §172.101 HMT by UN ID, proper shipping name, or packing group.</div>
+              <span className="hz-included-cite">49 CFR § 172.101</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/lithium">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Lithium Battery Decision Tree</div>
+                <div className="hz-included-icon" aria-hidden="true">🔋</div>
+              </div>
+              <div className="hz-included-desc">Walk Section II, IB, or fully regulated in five questions &mdash; UN 3480, 3481, 3090, 3091.</div>
+              <span className="hz-included-cite">49 CFR § 173.185</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/exemptions">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Exemption &amp; Permit Checker</div>
+                <div className="hz-included-icon" aria-hidden="true">💰</div>
+              </div>
+              <div className="hz-included-desc">Verify Limited Quantity, ORM-D, Materials of Trade, and active DOT Special Permits before you ship.</div>
+              <span className="hz-included-cite">49 CFR §§ 173.150&ndash;156, Part 107</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/training">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Hazmat Employee Training</div>
+                <div className="hz-included-icon" aria-hidden="true">🎓</div>
+              </div>
+              <div className="hz-included-desc">Initial, recurrent (every 3 years), function-specific, and security awareness &mdash; with certificates on file.</div>
+              <span className="hz-included-cite">49 CFR § 172.704</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/shipping-papers">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Shipping Papers Builder</div>
+                <div className="hz-included-icon" aria-hidden="true">📋</div>
+              </div>
+              <div className="hz-included-desc">Generate compliant bills of lading with the basic description in §172.202(a) sequence.</div>
+              <span className="hz-included-cite">49 CFR §§ 172.200&ndash;172.205</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/emergency-response">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Emergency Response Info</div>
+                <div className="hz-included-icon" aria-hidden="true">🚨</div>
+              </div>
+              <div className="hz-included-desc">ERG-aligned response sheets and a 24-hour contact number meeting §172.604.</div>
+              <span className="hz-included-cite">49 CFR §§ 172.600&ndash;172.606</span>
+            </a>
+            <a className="hz-included-item" href="/hazmat/security-plan">
+              <div className="hz-included-head">
+                <div className="hz-included-name">Security Plan Builder</div>
+                <div className="hz-included-icon" aria-hidden="true">🛡️</div>
+              </div>
+              <div className="hz-included-desc">Written plan for materials on the §172.800 list &mdash; personnel, en-route, and unauthorized-access measures.</div>
+              <span className="hz-included-cite">49 CFR §§ 172.800&ndash;172.804</span>
+            </a>
+          </div>
+        </section>
+
+        {/* ============== PROOF ============== */}
+        <section aria-labelledby="proof-h">
+          <div className="hz-section-head">
+            <h2 id="proof-h">Run by Safety Directors who&apos;ve sat through the audit.</h2>
+            <p>Built with carriers hauling flammables, corrosives, and lithium &mdash; not by a SaaS company that read the regs once.</p>
+          </div>
+          <figure className="hz-proof">
+            <blockquote className="hz-proof-quote">
+              We failed a Compliance Review in 2022 over §172.704 training gaps and a §172.802 security plan that hadn&apos;t been updated since the previous Safety Director left. X3 Compass rebuilt both in a weekend. Inspector came back six months later, looked at the audit log, and signed off in 40 minutes.
+            </blockquote>
+            <figcaption className="hz-proof-cite">
+              <strong>Marcus Halloran</strong> · Director of Safety, Cordell Tank Lines · 28 tractors · UN 1203, UN 1830
+            </figcaption>
+          </figure>
+        </section>
+
+        {/* ============== FAQ ============== */}
+        <section aria-labelledby="faq-h">
+          <div className="hz-section-head">
+            <h2 id="faq-h">Common questions.</h2>
+            <p>Plain answers. No marketing.</p>
+          </div>
+          <div className="hz-faq">
+            <details className="hz-faq-item">
+              <summary className="hz-faq-q">Is there a free trial?</summary>
+              <div className="hz-faq-a">Yes. 14 days, full access to every tool in the Hazmat Center, no credit card required to start. You hit the paywall on day 15, not before. Cancel inside the app &mdash; no email, no retention call.</div>
+            </details>
+            <details className="hz-faq-item">
+              <summary className="hz-faq-q">Do I need an existing X3 Compass subscription?</summary>
+              <div className="hz-faq-a">Yes. The Hazmat Center is a $99/mo add-on to your base X3 Compass plan, which handles DQ files, HOS, drug &amp; alcohol consortium, MVRs, and the rest of Parts 380&ndash;399. If you don&apos;t have Compass yet, start there &mdash; Hazmat installs in one click after.</div>
+            </details>
+            <details className="hz-faq-item">
+              <summary className="hz-faq-q">Does this replace my SDS / Tier II / EPA reporting?</summary>
+              <div className="hz-faq-a">No. X3 Compass Hazmat Center covers DOT/PHMSA <em>ground transportation</em> under 49 CFR Parts 171&ndash;180 only. It does not cover OSHA HazCom SDS authoring (29 CFR 1910.1200), EPA RCRA hazardous waste manifests (40 CFR Part 262), Tier II SARA reporting (EPCRA §312), IATA/ICAO air, or IMDG ocean. For multi-modal, use Labelmaster DGIS or a freight forwarder. For SDS, use VelocityEHS or Sphera.</div>
+            </details>
+            <details className="hz-faq-item">
+              <summary className="hz-faq-q">How current is the regulatory data?</summary>
+              <div className="hz-faq-a">The §172.101 HMT and Parts 171&ndash;180 text sync to the Federal Register weekly. HM rulemakings (e.g., HM-215, HM-219, HM-265) are tracked from NPRM through final rule with the effective date and a plain-English diff. Last sync timestamp shows in the footer of every page.</div>
+            </details>
+            <details className="hz-faq-item">
+              <summary className="hz-faq-q">What happens to my data if I cancel?</summary>
+              <div className="hz-faq-a">You get 90 days of read-only access plus a one-click export of every shipping paper, training certificate, and audit log as PDF and CSV. After 90 days, records are deleted under our SOC 2 retention policy. The §172.201(e) two-year retention obligation is yours to maintain &mdash; we make the export, you keep the file.</div>
+            </details>
+          </div>
+        </section>
+
+        {/* ============== FINAL CTA ============== */}
+        <section className="hz-final-cta" aria-labelledby="final-cta-h">
+          <h2 id="final-cta-h">Stop hoping the inspector skips you.</h2>
+          <p>14 days free. $99/mo after. No sales call, no demo gating, no annual contract.</p>
+          <a
+            className="hz-cta-primary"
+            href="/settings?tab=billing&addon=hazmat"
+            style={{ textDecoration: "none", display: "inline-block" }}
+          >
+            Start 14-Day Trial
+          </a>
+        </section>
+    </HazmatAppShell>
   );
 }

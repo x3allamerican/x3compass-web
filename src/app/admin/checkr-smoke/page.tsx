@@ -119,7 +119,7 @@ export default function CheckrSmokePage() {
           <div className="text-5xl mb-3">🔒</div>
           <h1 className="text-2xl font-bold mb-2 text-[var(--fg)]">Restricted</h1>
           <p className="text-[var(--fg-muted)] mb-4">Super-admin only.</p>
-          <Link href="/app" className="text-[var(--accent)] hover:underline font-bold">← Back to dashboard</Link>
+          <Link href="/" className="text-[var(--accent)] hover:underline font-bold">← Back to dashboard</Link>
         </div>
       </AppShell>
     );
@@ -160,9 +160,9 @@ export default function CheckrSmokePage() {
           <div className="x3-card p-12 text-center">
             <div className="text-4xl mb-2">🤷</div>
             <div className="font-bold text-[var(--fg)] mb-1">No matching Checkr order yet.</div>
-            <div className="text-[12px] text-[var(--fg-muted)]">{data?.message || "Submit an invitation from /app/background-checks to start a flow."}</div>
+            <div className="text-[12px] text-[var(--fg-muted)]">{data?.message || "Submit an invitation from /background-checks to start a flow."}</div>
             <div className="mt-4">
-              <Link href="/app/background-checks" className="text-[var(--accent)] hover:underline font-bold text-[13px]">→ Send an invitation</Link>
+              <Link href="/background-checks" className="text-[var(--accent)] hover:underline font-bold text-[13px]">→ Send an invitation</Link>
             </div>
           </div>
         ) : (
@@ -259,7 +259,7 @@ export default function CheckrSmokePage() {
             </div>
 
             <div className="x3-card p-4 text-[11px] text-[var(--fg-muted)]">
-              <strong className="text-[var(--fg)]">How to test:</strong> Go to <Link href="/app/background-checks" className="text-[var(--accent)] hover:underline">/app/background-checks</Link> → submit a new invitation (use Checkr staging test data) → return here. The Checkr Apply flow will emit invitation.created instantly; the candidate has to walk through consent + form before invitation.completed fires; report.created fires when Checkr opens the file; report.completed when results are ready (usually 30-60s in staging).
+              <strong className="text-[var(--fg)]">How to test:</strong> Go to <Link href="/background-checks" className="text-[var(--accent)] hover:underline">/background-checks</Link> → submit a new invitation (use Checkr staging test data) → return here. The Checkr Apply flow will emit invitation.created instantly; the candidate has to walk through consent + form before invitation.completed fires; report.created fires when Checkr opens the file; report.completed when results are ready (usually 30-60s in staging).
             </div>
           </>
         )}

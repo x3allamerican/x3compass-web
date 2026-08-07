@@ -44,8 +44,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     const carrier = rows[0].compass_carriers;
 
     const site = ctx.env.NEXT_PUBLIC_SITE_URL || new URL(ctx.request.url).origin;
-    const successPath = body.success_path || "/app/settings/billing?checkout=success";
-    const cancelPath = body.cancel_path || "/app/settings/billing?checkout=cancel";
+    const successPath = body.success_path || "/settings/billing?checkout=success";
+    const cancelPath = body.cancel_path || "/settings/billing?checkout=cancel";
 
     const params = new URLSearchParams();
     params.set("mode", "subscription");

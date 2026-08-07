@@ -23,7 +23,7 @@ export function mvrChangeAlert({ carrierName, result, violationsCount, reportId,
   const safeReport = reportId ? `<p><strong>Provider report:</strong> ${escapeHtml(reportId)}</p>` : "";
   return {
     subject: `${carrierName || "Your fleet"} · MVR change detected`,
-    html: `<h1>MVR change detected</h1><p>X3 Compass received a continuous MVR update for <strong>${safeCarrier}</strong>.</p><p><strong>Result:</strong> ${safeResult}<br><strong>Records:</strong> ${escapeHtml(detail)}</p>${safeReport}<p><a href="${base}/app/mvr">Review the MVR workspace →</a></p><p>This alert is decision support. Review the source report before taking action.</p>`,
-    text: `MVR change detected for ${carrierName || "your fleet"}. Result: ${result || "updated"}. ${detail} Review: ${base}/app/mvr`,
+    html: `<h1>MVR change detected</h1><p>X3 Compass received a continuous MVR update for <strong>${safeCarrier}</strong>.</p><p><strong>Result:</strong> ${safeResult}<br><strong>Records:</strong> ${escapeHtml(detail)}</p>${safeReport}<p><a href="${base}/mvr">Review the MVR workspace →</a></p><p>This alert is decision support. Review the source report before taking action.</p>`,
+    text: `MVR change detected for ${carrierName || "your fleet"}. Result: ${result || "updated"}. ${detail} Review: ${base}/mvr`,
   };
 }
