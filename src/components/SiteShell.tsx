@@ -45,7 +45,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
                     Skills on GitHub
                   </a>
                 </li>
-                <li><Link href="/partners" className="hover:text-white">Partner Program</Link></li>
+                <li><Link href="https://x3compass.com/partners" className="hover:text-white">Partner Program</Link></li>
                 <li><Link href="https://app.x3compass.com/signin" className="hover:text-white">Sign In</Link></li>
                 <li><a href="mailto:joshua@x3fleetsafety.com" className="hover:text-white">Contact</a></li>
               </ul>
@@ -54,11 +54,11 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
               <h4 className="text-white text-[12px] font-bold tracking-widest uppercase mb-3">Legal</h4>
               <ul className="space-y-2 text-[14px]">
                 <li><Link href="/legal" className="hover:text-white">Legal Index</Link></li>
-                <li><Link href="/terms" className="hover:text-white">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="hover:text-white">Privacy Policy</Link></li>
-                <li><Link href="/cookies" className="hover:text-white">Cookie Policy</Link></li>
-                <li><Link href="/accessibility" className="hover:text-white">Accessibility</Link></li>
-                <li><Link href="/your-privacy-choices" className="hover:text-white">Your Privacy Choices</Link></li>
+                <li><Link href="https://x3compass.com/terms" className="hover:text-white">Terms of Service</Link></li>
+                <li><Link href="https://x3compass.com/privacy" className="hover:text-white">Privacy Policy</Link></li>
+                <li><Link href="https://x3compass.com/cookies" className="hover:text-white">Cookie Policy</Link></li>
+                <li><Link href="https://x3compass.com/accessibility" className="hover:text-white">Accessibility</Link></li>
+                <li><Link href="https://x3compass.com/your-privacy-choices" className="hover:text-white">Your Privacy Choices</Link></li>
               </ul>
             </div>
           </div>

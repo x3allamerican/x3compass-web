@@ -20,7 +20,9 @@ const out = path.join(root, "out");
 if (!existsSync(out)) { console.error("apply-family-shell: out/ missing — run next build first"); process.exit(1); }
 if (!existsSync(src)) { console.error("apply-family-shell: family/ missing"); process.exit(1); }
 
-await cp(src, out, { recursive: true, force: true });
+// Dashboard-only build: keep the shared family ASSETS (logo, css, concierge) but do NOT
+// overwrite the exported homepage — the root is the dashboard, not the marketing shell.
+await cp(src, out, { recursive: true, force: true, filter: (from) => path.basename(from) !== "index.html" });
 
 const check = ["index.html", "img/logo.png", "assets/x3c.css", "assets/x3concierge.js"];
 let bad = 0;
@@ -31,4 +33,4 @@ for (const f of check) {
   console.log(`  ok  ${f.padEnd(28)} ${size} bytes`);
 }
 if (bad) process.exit(1);
-console.log("apply-family-shell: homepage now on the X3 family shell");
+console.log("apply-family-shell: family assets copied; dashboard homepage preserved");

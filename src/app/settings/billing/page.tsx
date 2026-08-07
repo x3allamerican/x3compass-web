@@ -57,7 +57,7 @@ function BillingInner() {
             <div className="text-[12px] text-[var(--fg-muted)]">Update card · cancel · view invoices</div>
             {portalLoading && <div className="text-[11px] text-[var(--accent)] mt-3">Opening Stripe portal…</div>}
           </button>
-          <Link href="/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] block">
+          <Link href="https://x3compass.com/pricing" className="rounded-2xl p-6 bg-[var(--surface-3)] border border-[var(--border)] hover:border-[var(--accent)] block">
             <div className="text-xl font-extrabold mb-1">View pricing details</div>
             <div className="text-[12px] text-[var(--fg-muted)]">One graduated per-driver plan · every X3 product included</div>
           </Link>

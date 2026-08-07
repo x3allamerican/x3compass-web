@@ -195,7 +195,7 @@ async function agentFinancialDunning(env: Env): Promise<AgentResult> {
     const r = await sendEmail(env, {
       to: inv.customer_email,
       subject: `Reminder · Invoice ${inv.number} is overdue`,
-      html: `<h1>Payment reminder</h1><p>Your invoice <strong>${inv.number}</strong> for <strong>$${(inv.amount_due / 100).toFixed(2)}</strong> is past due.</p><p><a class="btn" href="https://x3compass.com/settings/billing">Update billing →</a></p>`,
+      html: `<h1>Payment reminder</h1><p>Your invoice <strong>${inv.number}</strong> for <strong>$${(inv.amount_due / 100).toFixed(2)}</strong> is past due.</p><p><a class="btn" href="https://app.x3compass.com/settings/billing">Update billing →</a></p>`,
     });
     if (r.ok) chased++;
     log[r.ok ? "info" : "warn"](`[financial-dunning] ${inv.customer_email} ${inv.number}: ${r.ok ? "sent" : r.error}`);
@@ -805,7 +805,7 @@ async function agentOnboardingConcierge(env: Env, inputs?: { carrier_id?: string
   for (const t of tasks) { try { await supa.insert("compass_onboarding_tasks", { carrier_id: carrierId, ...t }); queued++; } catch (e) { log.warn(`[onboarding] ${t.task_key}: ${e}`); } }
 
   if (carrier.primary_contact_email) {
-    await sendEmail(env, { to: carrier.primary_contact_email, subject: `Welcome to X3 Compass — your first-week checklist`, html: `<h1>Welcome to X3 Compass, ${carrier.name}!</h1><p>I've queued your first-week setup checklist:</p><ol>${tasks.map((t) => `<li>${t.title}</li>`).join("")}</ol><p>Open <a href="https://x3compass.com/onboarding">your onboarding dashboard →</a> to start.</p><p>Reply to this email any time — I read every one.</p><p>— Joshua, founder, X3 Compass</p>` });
+    await sendEmail(env, { to: carrier.primary_contact_email, subject: `Welcome to X3 Compass — your first-week checklist`, html: `<h1>Welcome to X3 Compass, ${carrier.name}!</h1><p>I've queued your first-week setup checklist:</p><ol>${tasks.map((t) => `<li>${t.title}</li>`).join("")}</ol><p>Open <a href="https://app.x3compass.com/onboarding">your onboarding dashboard →</a> to start.</p><p>Reply to this email any time — I read every one.</p><p>— Joshua, founder, X3 Compass</p>` });
   }
   return { status: "ok", summary: `Carrier ${carrier.name}: ${queued}/${tasks.length} onboarding tasks queued${carrier.primary_contact_email ? " · welcome email sent" : " · no email on file"}`, log: log.text() };
 }
@@ -914,7 +914,7 @@ async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
         const r = await sendEmail(env, {
           to: carrierFull[0].primary_contact_email,
           subject: `Action needed: ${carrierFull[0].name} payment — day ${daysPast}`,
-          html: `<h1>Hi ${carrierFull[0].name},</h1><p>${msg}</p><p><a href="https://x3compass.com/settings/billing">Update payment method →</a></p>`,
+          html: `<h1>Hi ${carrierFull[0].name},</h1><p>${msg}</p><p><a href="https://app.x3compass.com/settings/billing">Update payment method →</a></p>`,
         });
         if (r.ok) dunningSent++;
       } catch (_e) { /* per-carrier failure shouldn't block the agent */ }
@@ -931,7 +931,7 @@ async function agentRevenueManager(env: FtEnv): Promise<AgentResult> {
     const subj = daysTo === 3 ? "Your X3 Compass trial ends in 3 days"
                : daysTo === 1 ? "Your X3 Compass trial ends tomorrow"
                :                "Last chance — your trial ends today";
-    const r = await sendEmail(env, { to: c.primary_contact_email, subject: subj, html: `<h1>Hi ${c.name},</h1><p>${subj}. Add your card now to keep your drivers and DQ files in Compass.</p><p><a href="https://x3compass.com/settings/billing">Add payment →</a></p>` });
+    const r = await sendEmail(env, { to: c.primary_contact_email, subject: subj, html: `<h1>Hi ${c.name},</h1><p>${subj}. Add your card now to keep your drivers and DQ files in Compass.</p><p><a href="https://app.x3compass.com/settings/billing">Add payment →</a></p>` });
     if (r.ok) trialNudges++;
   }
 

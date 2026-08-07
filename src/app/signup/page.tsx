@@ -87,7 +87,7 @@ function SignUpInner() {
                 <button type="submit" disabled={loading} className="w-full py-3 rounded-lg font-extrabold text-[14px] text-[var(--bg)] disabled:opacity-60" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>
                   {loading ? "Creating account…" : "Start free trial →"}
                 </button>
-                <p className="text-[11px] text-[var(--fg-faint)] text-center">By signing up you agree to our <Link href="/faq" className="text-[var(--accent)] hover:underline">Terms</Link>.</p>
+                <p className="text-[11px] text-[var(--fg-faint)] text-center">By signing up you agree to our <Link href="https://x3compass.com/faq" className="text-[var(--accent)] hover:underline">Terms</Link>.</p>
               </form>
               <div className="mt-8 pt-6 border-t border-[var(--border)] text-center">
                 <p className="text-[12px] text-[var(--fg-muted)]">Already have an account? <Link href="/signin" className="text-[var(--accent)] font-bold">Sign in →</Link></p>

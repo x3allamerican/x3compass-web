@@ -374,7 +374,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap pt-2">
-                <a href="/pricing" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--accent)] border border-[var(--border)] hover:border-[var(--accent)]">View pricing details</a>
+                <a href="https://x3compass.com/pricing" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--accent)] border border-[var(--border)] hover:border-[var(--accent)]">View pricing details</a>
                 <a href="mailto:joshua@x3compass.com?subject=Billing%20question" className="px-3 py-1.5 rounded-lg text-[12px] font-bold text-[var(--fg-muted)] hover:text-[var(--fg)] border border-[var(--border)]">Contact billing</a>
               </div>
             </Block>
@@ -416,7 +416,7 @@ export default function SettingsPage() {
               </div>
               {!form.stripe_customer_id && (
                 <p className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 border border-amber-500/40 rounded-lg px-3 py-2 mt-2">
-                  No Stripe customer linked yet. Subscribe first via <a className="text-[var(--accent)] underline" href="/pricing">/pricing</a>.
+                  No Stripe customer linked yet. Subscribe first via <a className="text-[var(--accent)] underline" href="https://x3compass.com/pricing">/pricing</a>.
                 </p>
               )}
             </Block>

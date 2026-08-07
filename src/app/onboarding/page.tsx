@@ -161,7 +161,7 @@ export default function OnboardingPage() {
             </div>
           </>)}
         </div>
-        <p className="text-center mt-6 text-[12px] text-[var(--fg-faint)]">Want to talk first? <Link href="/faq" className="text-[var(--accent)]">FAQ →</Link></p>
+        <p className="text-center mt-6 text-[12px] text-[var(--fg-faint)]">Want to talk first? <Link href="https://x3compass.com/faq" className="text-[var(--accent)]">FAQ →</Link></p>
       </div>
       {showDriverImport && carrier && (
         <DriverImportModal

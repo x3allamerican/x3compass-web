@@ -509,7 +509,7 @@ export default function BackgroundChecksPage() {
 
         {/* FCRA reminder */}
         <div className="x3-card p-4 text-[12px] text-[var(--fg-muted)] leading-relaxed">
-          <strong className="text-[var(--fg)]">FCRA reminder:</strong> Before ordering a consumer report, provide the candidate a clear/conspicuous disclosure + obtain written authorization. The Checkr embed handles both. Follow pre-adverse + post-adverse procedures on &quot;consider&quot; results (5-business-day window before final adverse action). See <Link href="/faq" className="text-[var(--accent)] hover:underline">FAQ</Link> and 15 U.S.C. § 1681b.
+          <strong className="text-[var(--fg)]">FCRA reminder:</strong> Before ordering a consumer report, provide the candidate a clear/conspicuous disclosure + obtain written authorization. The Checkr embed handles both. Follow pre-adverse + post-adverse procedures on &quot;consider&quot; results (5-business-day window before final adverse action). See <Link href="https://x3compass.com/faq" className="text-[var(--accent)] hover:underline">FAQ</Link> and 15 U.S.C. § 1681b.
         </div>
       </div>
     </AppShell>

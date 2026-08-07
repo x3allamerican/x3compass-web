@@ -89,7 +89,7 @@ export default function AskCompassPage() {
             <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a FMCSA / DOT question…" disabled={busy} className="flex-1 bg-transparent px-3 py-2 text-[var(--fg)] outline-none text-sm" />
             <button type="submit" disabled={busy || !input.trim()} className="px-4 py-2 rounded-lg font-extrabold text-[13px] text-[var(--bg)] disabled:opacity-50" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>Send →</button>
           </div>
-          <p className="text-[10px] text-[var(--fg-faint)] mt-2 text-center">Answers cite the CFR. For audit-grade interpretation, verify with a transportation attorney. <Link href="/skills" className="text-[var(--accent)] underline">Browse skills catalog →</Link></p>
+          <p className="text-[10px] text-[var(--fg-faint)] mt-2 text-center">Answers cite the CFR. For audit-grade interpretation, verify with a transportation attorney. <Link href="https://x3compass.com/skills" className="text-[var(--accent)] underline">Browse skills catalog →</Link></p>
         </form>
       </div>
     </AppShell>

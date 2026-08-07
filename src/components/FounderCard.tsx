@@ -25,7 +25,7 @@ export default function FounderCard() {
             afford the same compliance posture as a 500-truck enterprise.
           </p>
           <div className="flex gap-3 text-[12px] font-bold">
-            <Link href="/trust" className="text-[var(--accent)] hover:underline">Read the trust page →</Link>
+            <Link href="https://x3compass.com/trust" className="text-[var(--accent)] hover:underline">Read the trust page →</Link>
             <a href="mailto:joshua@x3compass.com" className="text-[var(--accent)] hover:underline">joshua@x3compass.com</a>
           </div>
         </div>
