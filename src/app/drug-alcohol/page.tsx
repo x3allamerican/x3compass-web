@@ -8,6 +8,7 @@ import PageGuide from "@/components/PageGuide";
 import DataSourceCard from "@/components/DataSourceCard";
 import CTPAPickerCard, { type Ctpa } from "@/components/CTPAPickerCard";
 import { ClearinghouseStatusPanel } from "@/components/app/ClearinghouseStatusPanel";
+import { DATestModal } from "@/components/app/DATestModal";
 
 type TestType = "Pre-employment" | "Random" | "Post-accident" | "Reasonable suspicion" | "Return-to-duty" | "Follow-up";
 type TestResult = "Negative" | "Negative-dilute" | "Positive" | "Refusal" | "Pending";
@@ -326,6 +327,8 @@ type DaTestRow = { id: string; driver_name: string | null; test_date: string; te
 function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
   const [rows, setRows] = useState<DaTestRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLog, setShowLog] = useState(false);
+  const [reload, setReload] = useState(0);
   const [ctpaInitial, setCtpaInitial] = useState<ComponentProps<typeof CTPAPickerCard>["initial"]>(undefined);
   useEffect(() => {
     let live = true;
@@ -356,7 +359,7 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
       setRows(mapped); setLoading(false);
     })();
     return () => { live = false; };
-  }, [carrierId]);
+  }, [carrierId, reload]);
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -385,7 +388,10 @@ function RealDrugAlcohol({ carrierId }: { carrierId: string }) {
   }
 
   return (
-    <AppShell title="Drug & Alcohol Testing">
+    <AppShell title="Drug & Alcohol Testing" actions={
+      <button onClick={() => setShowLog(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-extrabold text-[var(--bg)]" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}>+ Log a test</button>
+    }>
+      {showLog && <DATestModal carrierId={carrierId} onClose={() => setShowLog(false)} onSaved={() => { setShowLog(false); setReload((r) => r + 1); }} />}
       <div className="p-6 pb-0"><CTPAPickerCard carrierId={carrierId} initial={ctpaInitial} /></div>
       <div className="p-6 space-y-6">
         <ClearinghouseStatusPanel />
