@@ -25,7 +25,10 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, urllib.request, urllib.error, time, os
-          BASE = "https://x3compass-web.pages.dev"
+          # Probe the canonical production hostname. The Pages preview hostname
+          # is not the public routing contract and can have different edge/WAF
+          # behavior (including stale route objects).
+          BASE = "https://x3compass.com"
           MONITOR_SECRET = os.environ.get("MONITOR_SECRET", "")
           if not MONITOR_SECRET:
               raise RuntimeError("MONITOR_SECRET repository/org secret is required for synthetic monitoring")
