@@ -4,7 +4,7 @@ import { test } from "node:test";
 
 const root = new URL("../", import.meta.url);
 const route = await readFile(new URL("functions/api/inspections/parse.ts", root), "utf8");
-const page = await readFile(new URL("src/app/app/inspections/page.tsx", root), "utf8");
+const page = await readFile(new URL("src/app/inspections/page.tsx", root), "utf8");
 const migration = await readFile(new URL("supabase/migrations/20260804_inspection_intake.sql", root), "utf8");
 
 test("parse endpoint is tenant guarded and fails into manual review", () => {

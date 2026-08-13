@@ -1,7 +1,17 @@
-# Baseline fingerprints from the redacted 2026-08-02 full-history sweep.
-# Existing findings are documented in docs/security; every new fingerprint fails CI.
+# Baseline fingerprints from the redacted 2026-08-13 full-history triage.
+# Each entry is exact commit:file:rule scoped. New fingerprints still fail CI.
+# The three env references and local placeholder below contain no credential
+# value. The Supabase JWT was the public anon key, is absent from current
+# source, and is retained only as a historical public-key finding.
 833feea770e3b993d9a32a0d1d7ac0019169ff1e:public/hazmat/hz-supabase.js:jwt:9
 f3901515c3cee4933df3e0084900cecd0db59685:functions/functions-stash/api/admin/dispatch.ts:generic-api-key:41
 f3901515c3cee4933df3e0084900cecd0db59685:public/hazmat/hz-supabase.js:jwt:9
 2f26a8874bae296c4e8d676365014fb512aff9e5:functions/api/admin/dispatch.ts:generic-api-key:37
 251a9ab0547f5dc016cdf474ea31365126e1e760:.github/workflows/vendor-health.yml:curl-auth-user:45
+888a2370427e49c17b1ecfdef9608043c06f88b8:workers/agent-dispatcher-cron/src/index.js:generic-api-key:8
+db0aac94c48f3959cd78754b9282100b742cd760:services/weasyprint/README.md:curl-auth-header:47
+18abd732b69bf97c63645eb47bdf7135ce90092d:public/hazmat/hz-supabase.js:jwt:9
+35455949f0ddf13651d042557455f8787dad015b:functions/api/admin/dispatch.ts:generic-api-key:41
+6580c532a8c670877e80465fd5e8c19774b0da7f:.github/workflows/vendor-health.yml:curl-auth-user:46
+6580c532a8c670877e80465fd5e8c19774b0da7f:functions/api/admin/dispatch.ts:generic-api-key:37
+6580c532a8c670877e80465fd5e8c19774b0da7f:workers/agent-dispatcher-cron/src/index.js:generic-api-key:8

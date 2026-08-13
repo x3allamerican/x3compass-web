@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (route) => readFile(new URL(`../src/app/app/${route}/page.tsx`, import.meta.url), "utf8");
+const read = (route) => readFile(new URL(`../src/app/${route}/page.tsx`, import.meta.url), "utf8");
 
 test("background tiles reduce the same order rows as the table", async () => {
   const source = await read("background-checks");
-  assert.match(source, /const completed = orders\.filter\(isCompletedOrder\)\.length/);
-  assert.match(source, /const consider = orders\.filter\(needsAdverseReview\)\.length/);
+  assert.match(source, /const completed = orders\.filter\(o => o\.status === "completed"\)\.length/);
+  assert.match(source, /const consider = orders\.filter\(o => o\.checkr_assessment === "consider"/);
   assert.match(source, /filtered\.length\} of \{orders\.length/);
 });
 

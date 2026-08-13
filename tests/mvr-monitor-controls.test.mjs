@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
-const page = await readFile(new URL('../src/app/app/mvr/page.tsx', import.meta.url), 'utf8');
+const page = await readFile(new URL('../src/app/mvr/page.tsx', import.meta.url), 'utf8');
 
 test('MVR page consumes the current monitor-list response contract', () => {
   assert.match(page, /monitors\?: ContinuousEnrollment\[\]/);

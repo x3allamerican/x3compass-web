@@ -6,9 +6,9 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("operational dashboards never substitute demo rows for empty API data", async () => {
   const [marketing, prospects, integrations] = await Promise.all([
-    read("src/app/app/marketing/page.tsx"),
-    read("src/app/app/prospects/page.tsx"),
-    read("src/app/app/integrations/page.tsx"),
+    read("src/app/marketing/page.tsx"),
+    read("src/app/prospects/page.tsx"),
+    read("src/app/integrations/page.tsx"),
   ]);
 
   assert.match(marketing, /const LEADS = api\?\.recent_leads \|\| \[\]/);
@@ -19,7 +19,7 @@ test("operational dashboards never substitute demo rows for empty API data", asy
 });
 
 test("tenant notification rules and channels are empty when the API returns none", async () => {
-  const source = await read("src/app/app/notifications/page.tsx");
+  const source = await read("src/app/notifications/page.tsx");
 
   assert.match(source, /active_rules: 0, critical_rules: 0/);
   assert.match(source, /api\?\.active_rules \|\| \(allowDemo \? DEMO_RULES : \[\]\)/);
@@ -27,7 +27,7 @@ test("tenant notification rules and channels are empty when the API returns none
 });
 
 test("driver KPI labels use their stated date windows", async () => {
-  const source = await read("src/app/app/drivers/page.tsx");
+  const source = await read("src/app/drivers/page.tsx");
 
   assert.match(source, /joinedOn >= monthStart && joinedOn <= today/);
   assert.match(source, /termination_date >= inactiveCutoff && d\.termination_date <= today/);

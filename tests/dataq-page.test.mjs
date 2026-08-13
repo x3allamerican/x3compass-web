@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const page = new URL("../src/app/app/inspections/page.tsx", import.meta.url);
+const page = new URL("../src/app/inspections/page.tsx", import.meta.url);
 const panel = new URL("../src/components/app/DataqChallengePanel.tsx", import.meta.url);
 const apiDoc = new URL("../docs/api/dataq-challenges.md", import.meta.url);
 

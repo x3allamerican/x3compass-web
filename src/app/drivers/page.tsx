@@ -95,9 +95,9 @@ export default function DriversPage() {
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const monthStart = today.slice(0, 8) + "01";
   const inactiveCutoff = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
-  const kpis = useMemo(() => {
+  const kpis = (() => {
     let active = 0, pending = 0, newThisMonth = 0, inactiveTerminated90 = 0, cdlExp30 = 0, medExp30 = 0;
-    for (const d of effectiveDrivers) {
+    for (const d of drivers) {
       if (d.status === "active") active++;
       if (d.status === "pending_hire") pending++;
       const joinedOn = d.hire_date || d.created_at.slice(0, 10);
@@ -107,7 +107,7 @@ export default function DriversPage() {
       if (d.medical_card_expires_on && d.medical_card_expires_on >= today && d.medical_card_expires_on <= in30) medExp30++;
     }
     return { active, pending, newThisMonth, inactiveTerminated90, cdlExp30, medExp30 };
-  }, [effectiveDrivers, today, monthStart, inactiveCutoff, in30]);
+  })();
 
   return (
     <AppShell title="Drivers"

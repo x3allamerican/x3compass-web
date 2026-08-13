@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("new-carrier onboarding makes driver roster import the primary second step", async () => {
-  const source = await read("src/app/app/onboarding/page.tsx");
+  const source = await read("src/app/onboarding/page.tsx");
 
   assert.match(source, /import\s+\{\s*DriverImportModal\s*\}/);
   assert.match(source, /2 · Import your drivers/);
@@ -14,7 +14,7 @@ test("new-carrier onboarding makes driver roster import the primary second step"
 });
 
 test("successful onboarding import advances without inventing demo rows", async () => {
-  const source = await read("src/app/app/onboarding/page.tsx");
+  const source = await read("src/app/onboarding/page.tsx");
 
   assert.match(source, /<DriverImportModal/);
   assert.match(source, /onImported=\{\(\) => \{\s*setShowDriverImport\(false\);\s*setStep\(3\);/s);
@@ -22,7 +22,7 @@ test("successful onboarding import advances without inventing demo rows", async 
 });
 
 test("manual single-driver entry remains available as a secondary path", async () => {
-  const source = await read("src/app/app/onboarding/page.tsx");
+  const source = await read("src/app/onboarding/page.tsx");
 
   assert.match(source, /Or add one driver manually/);
   assert.match(source, /Add driver →/);

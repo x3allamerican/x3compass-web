@@ -9,7 +9,7 @@ test("client identity is not trusted from raw local storage", async () => {
 });
 
 test("control center uses the validated super-admin hook", async () => {
-  const source = await readFile("src/app/app/control-center/page.tsx", "utf8");
+  const source = await readFile("src/app/control-center/page.tsx", "utf8");
   expect(source).toContain('import { useIsSuperAdmin } from "@/lib/superAdmin"');
   expect(source).toContain("const isSuperAdmin = useIsSuperAdmin()");
   expect(source).not.toContain("const SUPER_ADMIN_EMAILS");

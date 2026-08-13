@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const page = new URL("../src/app/app/drug-alcohol/page.tsx", import.meta.url);
+const page = new URL("../src/app/drug-alcohol/page.tsx", import.meta.url);
 const panel = new URL("../src/components/app/ClearinghouseStatusPanel.tsx", import.meta.url);
 const docs = new URL("../docs/api/clearinghouse-status.md", import.meta.url);
 

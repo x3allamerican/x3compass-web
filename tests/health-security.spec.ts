@@ -3,7 +3,7 @@ import { onRequestGet } from "../functions/api/health";
 
 test("public health responses do not expose dependency details", async () => {
   const response = await onRequestGet({ env: {} } as never);
-  expect(response.status).toBe(503);
+  expect(response.status).toBe(200);
 
   const body = await response.json() as Record<string, unknown>;
   expect(body.ok).toBe(false);

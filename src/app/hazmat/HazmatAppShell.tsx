@@ -20,6 +20,7 @@
  * for sidebar scroll persistence) live in tiny client-island components
  * imported below. */
 import type { ReactNode } from "react";
+import Link from "next/link";
 import HazmatUserWidget from "./HazmatUserWidget";
 import HazmatSidebarScroll from "./HazmatSidebarScroll";
 
@@ -218,11 +219,11 @@ export default function HazmatAppShell({
            └─────────┴─────────┘  children (sidebar, main) into THIS grid. */}
       <div className="hz-app-frame" data-page="hazmat-center" data-title="Hazmat Center">
         {/* brand-box · grid-area: brand */}
-        <a className="brand-box" href="/" aria-label="X3 Compass · Home">
+        <Link className="brand-box" href="/" aria-label="X3 Compass · Home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="brand-x3" src="/x3-mark-banner.png" alt="X3" />
           <div className="brand-word">Compass</div>
-        </a>
+        </Link>
 
         {/* topbar · grid-area: topbar */}
         <header className="topbar" id="topbar">

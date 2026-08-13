@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const page = new URL("../src/app/app/audit-export/page.tsx", import.meta.url);
+const page = new URL("../src/app/audit-export/page.tsx", import.meta.url);
 
 test("audit export page offers authenticated native PDF downloads", () => {
   const source = readFileSync(page, "utf8");

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const pagePath = new URL("../src/app/app/background-checks/page.tsx", import.meta.url);
+const pagePath = new URL("../src/app/background-checks/page.tsx", import.meta.url);
 
 test("background-check list reads and surfaces the persisted Checkr lifecycle", async () => {
   const source = await readFile(pagePath, "utf8");
