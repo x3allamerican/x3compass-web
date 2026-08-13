@@ -55,7 +55,9 @@ jobs:
           npx playwright test tests/journeys.spec.ts tests/a11y.spec.ts --reporter=json > test-results/results.json 2> /tmp/pw.log || echo "PROBE_FAILED=1" >> "$GITHUB_ENV"
           tail -20 /tmp/pw.log
         env:
-          PW_BASE_URL: https://x3compass-web.pages.dev
+          # Probe the canonical production app deployment. The pages.dev
+          # alias is not the routing contract and is edge-challenged/stale.
+          PW_BASE_URL: https://app.x3compass.com
           CI: 1
 
       - name: surface per-test timings (bottleneck attribution)
