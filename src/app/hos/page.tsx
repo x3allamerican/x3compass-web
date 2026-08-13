@@ -243,7 +243,7 @@ export default function HosPage() {
           <section className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
             <div className="text-[16px] font-extrabold text-[var(--fg)]">No HOS data imported yet</div>
             <p className="mx-auto mt-2 max-w-xl text-[12.5px] text-[var(--fg-muted)]">
-              Connect Samsara or Motive and X3 pulls your drivers' daily HOS logs automatically every few hours — each driver-day scored for 11-hour, 14-hour, 30-minute-break and 70/8 violations (§395.3). No ELD? Upload the CSV template instead.
+              Connect Samsara or Motive and X3 pulls your drivers&apos; daily HOS logs automatically every few hours — each driver-day scored for 11-hour, 14-hour, 30-minute-break and 70/8 violations (§395.3). No ELD? Upload the CSV template instead.
             </p>
             <div className="mt-4 flex justify-center gap-2">
               <Link href="/settings#eld" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-[12px] font-extrabold text-[var(--bg)]">Connect your ELD →</Link>

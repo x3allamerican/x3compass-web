@@ -5,9 +5,8 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("pricing and delivery-mode copy comes from the canonical pricing module", async () => {
-  const [pricing, home, layout] = await Promise.all([
+  const [pricing, layout] = await Promise.all([
     read("src/lib/pricing.ts"),
-    read("src/app/page.tsx"),
     read("src/app/layout.tsx"),
   ]);
 
