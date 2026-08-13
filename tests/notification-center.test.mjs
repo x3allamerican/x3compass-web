@@ -4,7 +4,7 @@ import { test } from "node:test";
 
 const root = new URL("../", import.meta.url);
 const api = await readFile(new URL("functions/api/notifications.ts", root), "utf8");
-const page = await readFile(new URL("src/app/app/notifications/page.tsx", root), "utf8");
+const page = await readFile(new URL("src/app/notifications/page.tsx", root), "utf8");
 const shell = await readFile(new URL("src/components/AppShell.tsx", root), "utf8");
 const topbar = await readFile(new URL("src/components/AppTopbar.tsx", root), "utf8");
 const agent = await readFile(new URL("functions/_shared/agent-registry.ts", root), "utf8");
@@ -27,7 +27,7 @@ test("notification page renders unread state and authenticated mark-read control
 test("app shell loads the real unread count and bell links to the center", () => {
   assert.match(shell, /notificationCount/);
   assert.match(shell, /\/api\/notifications/);
-  assert.match(topbar, /href="\/app\/notifications"/);
+  assert.match(topbar, /href="\/notifications"/);
 });
 
 test("MVR change and expiration agent write tenant notification rows", () => {

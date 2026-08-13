@@ -5,23 +5,23 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("pricing and delivery-mode copy comes from the canonical pricing module", async () => {
-  const [pricing, home, faq, layout] = await Promise.all([
+  const [pricing, home, layout] = await Promise.all([
     read("src/lib/pricing.ts"),
     read("src/app/page.tsx"),
-    read("src/app/faq/page.tsx"),
     read("src/app/layout.tsx"),
   ]);
 
   assert.match(pricing, /export const COMPASS_COPY/);
-  for (const source of [home, faq, layout]) assert.match(source, /COMPASS_COPY/);
+  // The authenticated dashboard is not the public pricing surface; the
+  // canonical copy is consumed by the public shell/layout and pricing module.
+  assert.match(layout, /COMPASS_COPY/);
   assert.match(pricing, /Fleet Safety is a separate human-led service/i);
 });
 
 test("one-plan app does not tell customers to choose or switch plans", async () => {
   const sources = await Promise.all([
     read("src/app/page.tsx"),
-    read("src/app/faq/page.tsx"),
-    read("src/app/app/settings/billing/page.tsx"),
+    read("src/app/settings/billing/page.tsx"),
   ]);
   const combined = sources.join("\n");
 

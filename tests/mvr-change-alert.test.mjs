@@ -32,6 +32,6 @@ test("MVR change alert is factual, escaped, and links to the MVR workspace", () 
   assert.match(alert.html, /Acme &lt;Fleet&gt;/);
   assert.match(alert.html, /review &amp; verify/);
   assert.match(alert.html, /2 reported violation records/);
-  assert.match(alert.html, /https:\/\/x3compass\.com\/app\/mvr/);
+  assert.match(alert.html, /https:\/\/x3compass\.com\/mvr/);
   assert.doesNotMatch(alert.html, /<Fleet>/);
 });

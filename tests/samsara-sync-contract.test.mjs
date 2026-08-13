@@ -4,7 +4,7 @@ import { test } from "node:test";
 const root = new URL("../", import.meta.url);
 const route = await readFile(new URL("functions/api/vendors/samsara/sync.ts", root), "utf8");
 const migration = await readFile(new URL("supabase/migrations/20260804_samsara_sync_depth.sql", root), "utf8");
-const settings = await readFile(new URL("src/app/app/settings/page.tsx", root), "utf8");
+const settings = await readFile(new URL("src/app/settings/page.tsx", root), "utf8");
 
 test("sync remains tenant guarded, cursor paginated, and reconciles all three domains", () => {
   assert.match(route, /requireTenant/);

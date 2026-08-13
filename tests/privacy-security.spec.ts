@@ -60,7 +60,7 @@ test("tenant dashboard fetches only explicitly required database fields", () => 
 });
 
 test("authenticated dashboard never presents demo compliance as tenant data", () => {
-  const page = readFileSync(join(process.cwd(), "src/app/app/page.tsx"), "utf8");
+  const page = readFileSync(join(process.cwd(), "src/app/page.tsx"), "utf8");
   const api = readFileSync(join(process.cwd(), "functions/api/dashboard.ts"), "utf8");
 
   for (const fabricatedSignal of [
@@ -78,7 +78,7 @@ test("authenticated dashboard never presents demo compliance as tenant data", ()
 });
 
 test("authenticated driver roster never substitutes demo people", () => {
-  const source = readFileSync(join(process.cwd(), "src/app/app/drivers/page.tsx"), "utf8");
+  const source = readFileSync(join(process.cwd(), "src/app/drivers/page.tsx"), "utf8");
 
   expect(source).not.toContain("DEMO_DRIVERS");
   expect(source).not.toContain("withDemoFallback");
@@ -86,7 +86,7 @@ test("authenticated driver roster never substitutes demo people", () => {
 
 test("client-side tenant mutations include carrier scope", () => {
   const files = ["vehicles", "inspections", "accidents", "mvr"].map((name) =>
-    readFileSync(join(process.cwd(), `src/app/app/${name}/page.tsx`), "utf8"),
+    readFileSync(join(process.cwd(), `src/app/${name}/page.tsx`), "utf8"),
   );
 
   for (const source of files) {

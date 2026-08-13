@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const page = new URL("../src/app/app/accidents/page.tsx", import.meta.url);
+const page = new URL("../src/app/accidents/page.tsx", import.meta.url);
 const migration = new URL("../supabase/migrations/20260804_accident_register_fields.sql", import.meta.url);
 
 test("accident page loads the authenticated register and exposes retention/evidence filters", () => {
