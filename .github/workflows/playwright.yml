@@ -30,7 +30,12 @@ jobs:
       - name: wait for deploy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: sleep 45
-      - run: npx playwright test
+      # The deployed browser suite is a post-deploy/main gate. Pull requests
+      # do not have a stable Cloudflare preview URL, so probing the canonical
+      # site here tests an older deployment instead of the proposed commit.
+      - name: Run deployed browser suite
+        if: github.event_name != 'pull_request'
+        run: npx playwright test
         env:
           PW_BASE_URL: https://x3compass-web.pages.dev
       - if: always()

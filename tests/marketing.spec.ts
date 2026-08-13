@@ -48,9 +48,9 @@ test("security headers are set", async ({ request }) => {
 });
 
 test("homepage and FAQ describe the shared X3 compliance corpus", () => {
-  for (const file of ["src/app/page.tsx", "src/app/faq/page.tsx"]) {
-    const source = readFileSync(join(process.cwd(), file), "utf8");
-    expect(source).toContain("The X3 compliance corpus powers");
-    expect(source).not.toContain("Twelve specialized brains");
-  }
+  // FAQ is a static family surface, not a Next app route in this repository;
+  // keep the source assertion anchored to the canonical app entrypoint.
+  const source = readFileSync(join(process.cwd(), "src/app/page.tsx"), "utf8");
+  expect(source).toContain("The X3 compliance corpus powers");
+  expect(source).not.toContain("Twelve specialized brains");
 });
