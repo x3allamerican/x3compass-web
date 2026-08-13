@@ -106,7 +106,7 @@ jobs:
           retention-days: 7
 
       - name: file incident if probes failed
-        if: env.PROBE_FAILED == '1' && github.event_name != 'push'
+        if: always() && env.PROBE_FAILED == '1' && github.event_name != 'push'
         uses: actions/github-script@v7
         with:
           script: |
@@ -154,7 +154,7 @@ jobs:
             }
 
       - name: close stale issues if all probes green
-        if: env.PROBE_FAILED != '1'
+        if: always() && env.PROBE_FAILED != '1'
         uses: actions/github-script@v7
         with:
           script: |
@@ -173,3 +173,9 @@ jobs:
                 labels: [...i.labels.map(l=>l.name), 'auto-resolved'],
               });
             }
+
+      # Keep evidence and incident handling above, but do not let
+      # continue-on-error turn a broken journey into a green workflow.
+      - name: fail when journey probes fail
+        if: env.PROBE_FAILED == '1'
+        run: exit 1
