@@ -2,7 +2,9 @@
  * GET /api/health
  *
  * Health check endpoint that verifies all critical dependencies are reachable.
- * Returns 200 if everything is operational, 503 if any dependency is down.
+ * Returns 200 whenever the Worker is alive. Dependency state is reported in
+ * the redacted JSON status so uptime monitors do not turn an upstream outage
+ * into a false origin outage; dependency-specific alerts remain actionable.
  *
  * Use this for:
  *  - Uptime monitoring (UptimeRobot, BetterUptime, Cloudflare Healthchecks)
@@ -53,5 +55,5 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     ok: all_ok,
     status: all_ok ? "operational" : "degraded",
     checked_at: new Date().toISOString(),
-  }, all_ok ? 200 : 503);
+  }, 200);
 };
