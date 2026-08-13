@@ -48,7 +48,12 @@ jobs:
           ]
           def hit(method, url, body):
               data = body.encode() if body and not body.startswith("ok=") else None
-              headers = {"X-Monitor-Secret": MONITOR_SECRET} if MONITOR_SECRET else {}
+              headers = {
+                  "X-Monitor-Secret": MONITOR_SECRET,
+                  "User-Agent": "X3CompassUptime/1.0 (+https://x3compass.com)",
+              } if MONITOR_SECRET else {
+                  "User-Agent": "X3CompassUptime/1.0 (+https://x3compass.com)",
+              }
               if data:
                   headers["Content-Type"] = "application/json"
               req = urllib.request.Request(url, data=data, headers=headers, method=method)
