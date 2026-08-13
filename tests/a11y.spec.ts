@@ -24,6 +24,10 @@ const PAGES = ["/", "/pricing/", "/hazmat/", "/trust/", "/security/", "/blog/", 
 for (const path of PAGES) {
   test(`accessibility — ${path} has zero critical violations`, async ({ page }) => {
     await page.goto(`${PROD}${path}`);
+    // The unauthenticated dashboard shell can redirect / to /signin after
+    // client session hydration. Wait for that navigation to settle before
+    // handing the document to axe, otherwise its evaluation races teardown.
+    await page.waitForLoadState("networkidle");
     const results = await new AxeBuilder({ page })
       // No .include() — analyze the whole page. Restricting to landmarks
       // breaks when a page doesn't render one of them (which is its own
