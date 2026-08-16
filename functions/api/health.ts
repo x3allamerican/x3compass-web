@@ -40,7 +40,10 @@ async function pingStripe(env: Env): Promise<{ ok: boolean; ms: number; err?: st
   if (!env.STRIPE_SECRET_KEY) return { ok: false, ms: 0, err: "STRIPE_SECRET_KEY not set" };
   const t0 = Date.now();
   try {
-    const r = await fetch("https://api.stripe.com/v1/account", {
+    // Restricted read-only keys may not access /v1/account. Products are
+    // readable with the same least-privilege key and still prove Stripe is
+    // reachable and authenticated.
+    const r = await fetch("https://api.stripe.com/v1/products?limit=1", {
       headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
       signal: AbortSignal.timeout(5000),
     });
@@ -51,9 +54,13 @@ async function pingStripe(env: Env): Promise<{ ok: boolean; ms: number; err?: st
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const [supa, stripe] = await Promise.all([pingSupabase(ctx.env), pingStripe(ctx.env)]);
   const all_ok = supa.ok && stripe.ok;
-  return json({
+  const response: Record<string, unknown> = {
     ok: all_ok,
     status: all_ok ? "operational" : "degraded",
     checked_at: new Date().toISOString(),
-  }, 200);
+  };
+  if (ctx.request && new URL(ctx.request.url).searchParams.get("detail") === "1") {
+    response.services = { supabase: supa, stripe };
+  }
+  return json(response, 200);
 };
